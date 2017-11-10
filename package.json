@@ -1,38 +1,74 @@
 {
-    "name": "vscode-maven",
-    "displayName": "vscode-maven",
-    "description": "vscode maven extension",
-    "version": "0.0.1",
-    "publisher": "yanzh",
-    "engines": {
-        "vscode": "^1.18.0"
-    },
-    "categories": [
-        "Other"
+  "name": "vscode-maven",
+  "displayName": "vscode-maven",
+  "description": "vscode maven extension",
+  "version": "0.0.1",
+  "publisher": "yanzh",
+  "engines": {
+    "vscode": "^1.18.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mavenProjects.refresh",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      }
     ],
-    "activationEvents": [
-        "onCommand:extension.sayHello"
-    ],
-    "main": "./out/extension",
-    "contributes": {
-        "commands": [
-            {
-                "command": "extension.sayHello",
-                "title": "Hello World"
-            }
-        ]
+    "views": {
+      "explorer": [
+        {
+          "id": "mavenProjects",
+          "name": "Maven Projects"
+        }
+      ]
     },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "menus": {
+      "view/title": [
+        {
+          "command": "mavenProjects.refresh",
+          "when": "view == mavenProjects",
+          "group": "navigation"
+        }
+      ]
     },
-    "devDependencies": {
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.6",
-        "@types/node": "^7.0.43",
-        "@types/mocha": "^2.2.42"
-    }
+    "configuration": [
+      {
+        "title": "Maven Projects",
+        "properties": {
+          "mavenProjects.showExplorer": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "typescript": "^2.6.1",
+    "vscode": "^1.1.6",
+    "@types/node": "^7.0.43",
+    "@types/mocha": "^2.2.42"
+  },
+  "dependencies": {
+    "readdirp": "^2.1.0",
+    "xml-parser": "^1.2.1"
+  }
 }
