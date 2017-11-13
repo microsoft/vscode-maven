@@ -7,7 +7,7 @@ Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide 
 0. multi-module projects supported.
 0. common goals can be executed via Right-Click, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
 
-\!\[Screenshot\]\(images/Capture.PNG\)
+![Screenshot](images/Capture.PNG)
 
 ## Requirements
 
