@@ -8,8 +8,14 @@
     "vscode": "^1.18.0"
   },
   "categories": [
+    "Languages",
     "Other"
   ],
+  "homepage": "https://github.com/Eskibear/vscode-maven/blob/master/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Eskibear/vscode-maven.git"
+  },
   "activationEvents": [
     "workspaceContains:pom.xml",
     "onCommand:mavenProjects.refresh"
