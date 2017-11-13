@@ -23,6 +23,10 @@
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
         }
+      },
+      {
+        "command": "mavenGoal.exec",
+        "title": "Execute"
       }
     ],
     "views": {
@@ -39,6 +43,13 @@
           "command": "mavenProjects.refresh",
           "when": "view == mavenProjects",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "mavenGoal.exec",
+          "when": "view == mavenProjects && viewItem == goal",
+          "group": "goal@0"
         }
       ]
     },
@@ -69,6 +80,7 @@
   },
   "dependencies": {
     "readdirp": "^2.1.0",
-    "xml-parser": "^1.2.1"
+    "xml-parser": "^1.2.1",
+    "xml2js": "^0.4.19"
   }
 }
