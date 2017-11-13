@@ -4,7 +4,10 @@ import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
 import { TreeItem, TreeItemCollapsibleState } from "vscode";
 import { Utils } from "./utils";
 
-export class MavenProjectsTreeDataProvider implements  vscode.TreeDataProvider<vscode.TreeItem> {
+export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+    public _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem> = new vscode.EventEmitter<vscode.TreeItem>();
+    public readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem> = this._onDidChangeTreeData.event;
+
     constructor(protected context: vscode.ExtensionContext) {
     }
 
@@ -12,31 +15,17 @@ export class MavenProjectsTreeDataProvider implements  vscode.TreeDataProvider<v
         return element;
     }
 
-    public getChildren(node?: vscode.TreeItem) : Thenable<vscode.TreeItem[]> {
+    public getChildren(node?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
         const element = node as MavenProjectTreeItem;
         if (element == undefined) {
-            // const projects: MavenProjectTreeItem[] = [];
-            // const pomXmlFilePaths: string[] = Utils.getPomXmlFilePaths();
-            // pomXmlFilePaths.forEach(pomXmlFilePath => {
-            //     const item = Utils.getDefaultProjects(pomXmlFilePath);
-            //     projects.push(item);
-            // }); 
+            const ret = [];
             const item = Utils.getProject("pom.xml");
-            item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
-            return Promise.resolve([item]);
+            if (item) {
+                item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
+                ret.push(item);
+            }
+            return Promise.resolve(ret);
         }
-        // else if (element.contextValue == 'mavenProjects') {
-        //     // aggregate pom
-        //     const items = [];
-        //     ['Lifecycle', 'Dependencies'].forEach(name => {
-        //         const item = new MavenProjectTreeItem(name, element.pomXmlFilePath, name);
-        //         items.push(item);
-        //     });
-        //     const projects = element as MavenProjectTreeItem;
-        //     const projectNames = projects.params as Array<string>;
-        //     projectNames.forEach((name) => items.push(new TreeItem(name)));
-        //     return Promise.resolve(items);
-        // }
         else if (element.contextValue == 'mavenProject') {
             const items = [];
             // sub modules
@@ -74,5 +63,8 @@ export class MavenProjectsTreeDataProvider implements  vscode.TreeDataProvider<v
             // TODO
             return Promise.resolve(items);
         }
+    }
+    public refreshTree(): void {
+        this._onDidChangeTreeData.fire();
     }
 }

@@ -15,7 +15,7 @@ export class Utils {
         this.terminals[terminal].show();
         this.terminals[terminal].sendText(command, addNewLine);
     }
-
+    // unused.
     public static getPomXmlFilePaths(): string[] {
         const filename: string = 'pom.xml';
         const ret = [];
@@ -33,17 +33,17 @@ export class Utils {
             execSync(`mvn help:effective-pom -f "${pomXmlFilePath}" -Doutput="${pomXmlFilePath}.effective"`);
             const xml = fs.readFileSync(`${pomXmlFilePath}.effective`, 'utf8');
             let obj = null;
-            xml2js.parseString(xml, {explicitArray:false}, (err, res)=> {obj = res; console.log(obj)});
+            xml2js.parseString(xml, { explicitArray: false }, (err, res) => { obj = res; });
             if (obj && obj.project && obj.project.name) {
                 return new MavenProjectTreeItem(obj.project.name, pomXmlFilePath);
-            } 
+            }
             if (obj && obj.projects && obj.projects.project) {
                 const projectNames = [];
-                obj.projects.project.forEach( (project) => {
+                obj.projects.project.forEach((project) => {
                     projectNames.push(project.name);
                 });
                 return new MavenProjectTreeItem(pomXmlFilePath, pomXmlFilePath, 'mavenProjects', projectNames);
-                
+
             }
         }
         return null;
@@ -54,9 +54,11 @@ export class Utils {
         if (fs.existsSync(pomXmlFilePath)) {
             const xml = fs.readFileSync(pomXmlFilePath, 'utf8');
             let pomObject = null;
-            xml2js.parseString(xml, {explicitArray:false}, (err, res)=> {pomObject = res; console.log(pomObject)});
-            if (pomObject && pomObject.project && pomObject.project.name) {
-                return new MavenProjectTreeItem(pomObject.project.name, pomXmlFilePath, "mavenProject", pomObject)
+            xml2js.parseString(xml, { explicitArray: false }, (err, res) => { pomObject = res; });
+            if (pomObject && pomObject.project) {
+                const { name, artifactId, groupId, version } = pomObject.project;
+                return new MavenProjectTreeItem(name || `${groupId}:${artifactId}:${version}`,
+                    pomXmlFilePath, "mavenProject", pomObject)
             }
         }
         return null;

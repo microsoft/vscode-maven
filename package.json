@@ -3,7 +3,7 @@
   "displayName": "vscode-maven",
   "description": "vscode maven extension",
   "version": "0.0.1",
-  "publisher": "yanzh",
+  "publisher": "eskibear",
   "engines": {
     "vscode": "^1.18.0"
   },
@@ -11,7 +11,8 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "workspaceContains:pom.xml",
+    "onCommand:mavenProjects.refresh"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -80,7 +81,6 @@
   },
   "dependencies": {
     "readdirp": "^2.1.0",
-    "xml-parser": "^1.2.1",
     "xml2js": "^0.4.19"
   }
 }

@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
     let commandMavenProjectsRefresh = vscode.commands.registerCommand('mavenProjects.refresh', () => {
-        vscode.window.showInformationMessage('Hello World!');
+        mavenProjectsTreeDataProvider.refreshTree();
     });
     let commandMavenGoalExecute= vscode.commands.registerCommand('mavenGoal.exec', (goalItem) => {
         const item = goalItem as MavenProjectTreeItem;
