@@ -4,8 +4,9 @@ This is the README for extension "vscode-maven".
 
 ## Features
 Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide project structures in sidebar.
-0. multi-module projects supported.
-0. common goals can be executed via Right-Click, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
+
+1. multi-module projects supported.
+1. common goals can be executed via Right-Click, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
 
 ![Screenshot](images/Capture.PNG)
 
