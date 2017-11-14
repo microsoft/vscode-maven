@@ -1,8 +1,9 @@
 {
   "name": "vscode-maven",
-  "displayName": "vscode-maven",
-  "description": "vscode maven extension",
+  "displayName": "Maven Projects Explorer",
+  "description": "Browse maven projects in sidebar, execute goals.",
   "version": "0.0.1",
+  "icon": "resources/logo.png",
   "publisher": "eskibear",
   "engines": {
     "vscode": "^1.18.0"
