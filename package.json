@@ -1,8 +1,8 @@
 {
   "name": "vscode-maven",
-  "displayName": "Maven Projects Explorer",
+  "displayName": "Maven Project Explorer",
   "description": "Browse maven projects in sidebar, execute goals.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "icon": "resources/logo.png",
   "publisher": "eskibear",
   "engines": {
@@ -35,6 +35,46 @@
       {
         "command": "mavenGoal.exec",
         "title": "Execute"
+      },
+      {
+        "command": "mavenGoal.clean",
+        "title": "clean"
+      },
+      {
+        "command": "mavenGoal.validate",
+        "title": "validate"
+      },
+      {
+        "command": "mavenGoal.compile",
+        "title": "compile"
+      },
+      {
+        "command": "mavenGoal.test",
+        "title": "test"
+      },
+      {
+        "command": "mavenGoal.package",
+        "title": "package"
+      },
+      {
+        "command": "mavenGoal.verify",
+        "title": "verify"
+      },
+      {
+        "command": "mavenGoal.install",
+        "title": "install"
+      },
+      {
+        "command": "mavenGoal.site",
+        "title": "site"
+      },
+      {
+        "command": "mavenGoal.deploy",
+        "title": "deploy"
+      },
+      {
+        "command": "mavenProject.effectivePom",
+        "title": "Effective POM"
       }
     ],
     "views": {
@@ -58,6 +98,56 @@
           "command": "mavenGoal.exec",
           "when": "view == mavenProjects && viewItem == goal",
           "group": "goal@0"
+        },
+        {
+          "command": "mavenGoal.clean",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenGoal.validate",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenGoal.compile",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenGoal.test",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenGoal.package",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenGoal.verify",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenGoal.install",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenGoal.site",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenGoal.deploy",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "lifecycle@0"
+        },
+        {
+          "command": "mavenProject.effectivePom",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "effective@0"
         }
       ]
     },
@@ -87,6 +177,7 @@
     "@types/mocha": "^2.2.42"
   },
   "dependencies": {
+    "md5": "^2.2.1",
     "readdirp": "^2.1.0",
     "xml2js": "^0.4.19"
   }
