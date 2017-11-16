@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven Project Explorer",
   "description": "Browse maven projects in sidebar, execute goals.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "icon": "resources/logo.png",
   "publisher": "eskibear",
   "engines": {

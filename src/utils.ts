@@ -49,8 +49,8 @@ export class Utils {
         return null;
     }
 
-    public static getProject(pomXmlRelativePath: string): MavenProjectTreeItem {
-        const pomXmlFilePath = path.resolve(vscode.workspace.rootPath, pomXmlRelativePath);
+    public static getProject(basePath: string, pomXmlRelativePath: string): MavenProjectTreeItem {
+        const pomXmlFilePath = path.resolve(basePath, pomXmlRelativePath);
         if (fs.existsSync(pomXmlFilePath)) {
             const xml = fs.readFileSync(pomXmlFilePath, 'utf8');
             let pomObject = null;
