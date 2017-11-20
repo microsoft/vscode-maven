@@ -24,7 +24,7 @@ export class Utils {
             if (f) {
                 ret.push(f);
             }
-        })
+        });
         return ret;
     }
 
@@ -58,10 +58,21 @@ export class Utils {
             if (pomObject && pomObject.project) {
                 const { name, artifactId, groupId, version } = pomObject.project;
                 return new MavenProjectTreeItem(name || `${groupId}:${artifactId}:${version}`,
-                    pomXmlFilePath, "mavenProject", pomObject)
+                    pomXmlFilePath, "mavenProject", pomObject);
             }
         }
         return null;
     }
 
+    public static withLRUItemAhead<T>(array: T[], LRUItem: T): T[] {
+        const ret = [];
+        array.forEach(elem => {
+            if (elem !== LRUItem) {
+                ret.push(elem);
+            }
+        });
+        ret.reverse();
+        ret.push(LRUItem);
+        return ret.reverse();
+    }
 }
