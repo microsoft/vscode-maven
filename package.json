@@ -75,6 +75,10 @@
       {
         "command": "mavenProject.effectivePom",
         "title": "Effective POM"
+      },
+      {
+        "command": "mavenProject.openPom",
+        "title": "Open POM file"
       }
     ],
     "views": {
@@ -102,52 +106,57 @@
         {
           "command": "mavenGoal.clean",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "1-lifecycle@0"
         },
         {
           "command": "mavenGoal.validate",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@1"
+          "group": "1-lifecycle@1"
         },
         {
           "command": "mavenGoal.compile",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@2"
+          "group": "1-lifecycle@2"
         },
         {
           "command": "mavenGoal.test",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@3"
+          "group": "1-lifecycle@3"
         },
         {
           "command": "mavenGoal.package",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@4"
+          "group": "1-lifecycle@4"
         },
         {
           "command": "mavenGoal.verify",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@5"
+          "group": "1-lifecycle@5"
         },
         {
           "command": "mavenGoal.install",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@6"
+          "group": "1-lifecycle@6"
         },
         {
           "command": "mavenGoal.site",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@7"
+          "group": "1-lifecycle@7"
         },
         {
           "command": "mavenGoal.deploy",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@8"
+          "group": "1-lifecycle@8"
+        },
+        {
+          "command": "mavenProject.openPom",
+          "when": "view == mavenProjects && viewItem == mavenProject",
+          "group": "0-pom@0"
         },
         {
           "command": "mavenProject.effectivePom",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "effective@9"
+          "group": "0-pom@1"
         }
       ]
     },

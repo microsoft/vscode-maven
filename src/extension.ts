@@ -29,8 +29,8 @@ export function activate(context: vscode.ExtensionContext) {
         Utils.runInTerminal(`mvn ${item.label} -f "${item.pomXmlFilePath}"`);
     });
 
-    let commandMavenProjectEffectivePom = vscode.commands.registerCommand('mavenProject.effectivePom', (goalItem) => {
-        const item = goalItem as MavenProjectTreeItem;
+    let commandMavenProjectEffectivePom = vscode.commands.registerCommand('mavenProject.effectivePom', (projectItem) => {
+        const item = projectItem as MavenProjectTreeItem;
         const tmpdir = process.env["TMP"] || process.env["TEMP"] || "/tmp";
         const filepath = path.join(tmpdir, md5(item.pomXmlFilePath), 'effective-pom.xml');
         let p = new Promise((resolve, reject) => {
@@ -55,6 +55,13 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.setStatusBarMessage("Generating effective pom ... ", p);
     });
 
+    let commandMavenProjectOpenPom = vscode.commands.registerCommand('mavenProject.openPom', (projectItem) => {
+        const item = projectItem as MavenProjectTreeItem;
+        if (fs.existsSync(item.pomXmlFilePath)) {
+            vscode.window.showTextDocument(vscode.Uri.file(item.pomXmlFilePath), { preview: false });
+        }
+    });
+
     ['clean', 'validate', 'compile', 'test', 'package', 'verify', 'install', 'site', 'deploy'].forEach(goal => {
         let commandMavenGoal = vscode.commands.registerCommand(`mavenGoal.${goal}`, (goalItem) => {
             const item = goalItem as MavenProjectTreeItem;
@@ -66,6 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(commandMavenProjectsRefresh);
     context.subscriptions.push(commandMavenGoalExecute);
     context.subscriptions.push(commandMavenProjectEffectivePom);
+    context.subscriptions.push(commandMavenProjectOpenPom);
 }
 
 // this method is called when your extension is deactivated
