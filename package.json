@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven Project Explorer",
   "description": "Browse maven projects in sidebar, execute goals.",
-  "version": "0.0.4",
+  "version": "0.0.5-SNAPSHOT",
   "icon": "resources/logo.png",
   "publisher": "eskibear",
   "engines": {
@@ -12,7 +12,7 @@
     "Languages",
     "Other"
   ],
-  "homepage": "https://github.com/Eskibear/vscode-maven/blob/master/README.md",
+  "homepage": "https://github.com/Eskibear/vscode-maven/blob/develop/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Eskibear/vscode-maven.git"
@@ -107,47 +107,47 @@
         {
           "command": "mavenGoal.validate",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "lifecycle@1"
         },
         {
           "command": "mavenGoal.compile",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "lifecycle@2"
         },
         {
           "command": "mavenGoal.test",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "lifecycle@3"
         },
         {
           "command": "mavenGoal.package",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "lifecycle@4"
         },
         {
           "command": "mavenGoal.verify",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "lifecycle@5"
         },
         {
           "command": "mavenGoal.install",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "lifecycle@6"
         },
         {
           "command": "mavenGoal.site",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "lifecycle@7"
         },
         {
           "command": "mavenGoal.deploy",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "lifecycle@0"
+          "group": "lifecycle@8"
         },
         {
           "command": "mavenProject.effectivePom",
           "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "effective@0"
+          "group": "effective@9"
         }
       ]
     },

@@ -3,6 +3,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from "path";
+import * as fs from "fs";
 import * as md5 from "md5";
 import { MavenProjectsTreeDataProvider } from './mavenProjectsTreeDataProvider';
 import { Utils } from './utils';
@@ -27,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
         const item = goalItem as MavenProjectTreeItem;
         Utils.runInTerminal(`mvn ${item.label} -f "${item.pomXmlFilePath}"`);
     });
-   
+
     let commandMavenProjectEffectivePom = vscode.commands.registerCommand('mavenProject.effectivePom', (goalItem) => {
         const item = goalItem as MavenProjectTreeItem;
         const tmpdir = process.env["TMP"] || process.env["TEMP"] || "/tmp";
@@ -42,8 +43,11 @@ export function activate(context: vscode.ExtensionContext) {
                 resolve(true);
             });
         }).then(ret => {
-            if (ret) {
-                vscode.window.showTextDocument(vscode.Uri.file(filepath));
+            if (ret && fs.existsSync(filepath)) {
+                const pomxml = fs.readFileSync(filepath).toString();
+                vscode.workspace.openTextDocument({ language: 'xml', content: pomxml }).then(document => {
+                    vscode.window.showTextDocument(document);
+                });
             } else {
                 vscode.window.showErrorMessage("Error occurred in generating effective pom.");
             }
