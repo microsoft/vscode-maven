@@ -6,11 +6,13 @@ This is the README for VSCode extension "Maven Project Explorer".
 Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide project structures in sidebar.
 
 * multi-module projects supported.
-* common goals can be executed via Right-Click, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
+* common/custom goals can be executed via Right-Click, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
 * support generating effective pom.
 * support VSCode multi-root workspace.
 
 ![Screenshot](images/screen.gif)
+
+![Screenshot](images/customGoal.gif)
 
 ## Requirements
 

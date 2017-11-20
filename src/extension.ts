@@ -10,11 +10,13 @@ import { Utils } from './utils';
 import { MavenProjectTreeItem } from './mavenProjectTreeItem';
 import { execSync, exec, spawn } from 'child_process';
 
+const ENTRY_NEW_GOALS: string = "New ...";
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "vscode-maven" is now active!');
-
+    const cmdHistory = {};
     const mavenProjectsTreeDataProvider = new MavenProjectsTreeDataProvider(context);
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
@@ -51,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
             } else {
                 vscode.window.showErrorMessage("Error occurred in generating effective pom.");
             }
-        })
+        });
         vscode.window.setStatusBarMessage("Generating effective pom ... ", p);
     });
 
@@ -60,6 +62,27 @@ export function activate(context: vscode.ExtensionContext) {
         if (fs.existsSync(item.pomXmlFilePath)) {
             vscode.window.showTextDocument(vscode.Uri.file(item.pomXmlFilePath), { preview: false });
         }
+    });
+
+    let commandMavenCustomGoal = vscode.commands.registerCommand("mavenGoal.custom", (goalItem) => {
+        const item = goalItem as MavenProjectTreeItem;
+        const cmdlist: string[] = cmdHistory[md5(item.pomXmlFilePath)] || [ENTRY_NEW_GOALS];
+        vscode.window.showQuickPick(cmdlist).then(selected => {
+            if (selected) {
+                if (selected === ENTRY_NEW_GOALS) {
+                    vscode.window.showInputBox().then((cmd) => {
+                        if (cmd && cmd.trim()) {
+                            cmd = cmd.trim();
+                            cmdHistory[md5(item.pomXmlFilePath)] = Utils.withLRUItemAhead(cmdlist, cmd);
+                            Utils.runInTerminal(`mvn ${cmd} -f "${item.pomXmlFilePath}"`);
+                        }
+                    });
+                } else {
+                    cmdHistory[md5(item.pomXmlFilePath)] = Utils.withLRUItemAhead(cmdlist, selected);
+                    Utils.runInTerminal(`mvn ${selected} -f "${item.pomXmlFilePath}"`);
+                }
+            }
+        });
     });
 
     ['clean', 'validate', 'compile', 'test', 'package', 'verify', 'install', 'site', 'deploy'].forEach(goal => {

@@ -17,7 +17,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
 
     public getChildren(node?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
         const element = node as MavenProjectTreeItem;
-        if (element == undefined) {
+        if (element === undefined) {
             const ret = [];
             vscode.workspace.workspaceFolders.forEach(wf => {
                 const basepath = wf.uri.fsPath;
@@ -29,7 +29,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             });
             return Promise.resolve(ret);
         }
-        else if (element.contextValue == 'mavenProject') {
+        else if (element.contextValue === 'mavenProject') {
             const items = [];
             // sub modules
             const pomObj = element.params;
@@ -46,12 +46,12 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             });
             return Promise.resolve(items);
         }
-        else if (element.contextValue == 'Modules') {
-            const items = Array.from(element.params, (mod) => Utils.getProject(path.dirname(element.pomXmlFilePath),  `${mod}/pom.xml`));
+        else if (element.contextValue === 'Modules') {
+            const items = Array.from(element.params, (mod) => Utils.getProject(path.dirname(element.pomXmlFilePath), `${mod}/pom.xml`));
             items.forEach(item => item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg")));
             return Promise.resolve(items);
         }
-        else if (element.contextValue == 'Lifecycle') {
+        else if (element.contextValue === 'Lifecycle') {
             const items = [];
             ['clean', 'validate', 'compile', 'test', 'package', 'verify', 'install', 'site', 'deploy'].forEach(goal => {
                 const item = new MavenProjectTreeItem(goal, element.pomXmlFilePath, 'goal');
@@ -61,7 +61,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             });
             return Promise.resolve(items);
         }
-        else if (element.contextValue == 'Dependencies') {
+        else if (element.contextValue === 'Dependencies') {
             const items = [];
             // TODO
             return Promise.resolve(items);
