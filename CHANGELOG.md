@@ -4,10 +4,16 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ## [Unreleased]
+
+### 0.0.6 
 - Run command in dedicated terminals for each maven project.
+- Can persist/edit custom goals.
+
+### 0.0.5 
+- Support custom goals.
 
 ### 0.0.4 
-- Support multi-root
+- Support multi-root.
 
 ### 0.0.3
 - Support generating effective-pom.
