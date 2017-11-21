@@ -1,9 +1,12 @@
 import * as vscode from "vscode";
 import { execSync } from 'child_process';
 import * as fs from 'fs';
+import * as os from 'os';
+import * as md5 from "md5";
 import * as path from 'path';
 import * as xml2js from 'xml2js';
 import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
+
 
 export class Utils {
     private static terminals: { [id: string]: vscode.Terminal } = {};
@@ -58,7 +61,7 @@ export class Utils {
             if (pomObject && pomObject.project) {
                 const { name, artifactId, groupId, version } = pomObject.project;
                 return new MavenProjectTreeItem(name || `${groupId}:${artifactId}:${version}`,
-                    pomXmlFilePath, "mavenProject", {projectName: name, pom: pomObject});
+                    pomXmlFilePath, "mavenProject", { projectName: name, pom: pomObject });
             }
         }
         return null;
@@ -74,5 +77,30 @@ export class Utils {
         ret.reverse();
         ret.push(LRUItem);
         return ret.reverse();
+    }
+
+    public static loadCmdHistory(key: string): string[] {
+        const filepath = path.join(os.tmpdir(), "vscode-maven", key, 'commandHistory.txt');
+        if (fs.existsSync(filepath)) {
+            const content = fs.readFileSync(filepath).toString().trim();
+            if (content) {
+                return content.split('\n');
+            }
+        }
+        return [];
+    }
+
+    public static saveCmdHistory(key: string, cmdlist: string[]): void {
+        const filepath = path.join(os.tmpdir(), "vscode-maven", key, 'commandHistory.txt');
+        Utils.mkdirp(path.dirname(filepath));
+        fs.writeFileSync(filepath, cmdlist.join('\n'));
+    }
+
+    private static mkdirp(filepath) {
+        if (fs.existsSync(filepath)) {
+            return;
+        }
+        Utils.mkdirp(path.dirname(filepath));
+        fs.mkdirSync(filepath);
     }
 }
