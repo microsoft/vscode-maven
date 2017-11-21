@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
     let commandMavenGoalExecute = vscode.commands.registerCommand('mavenGoal.exec', (goalItem) => {
         const item = goalItem as MavenProjectTreeItem;
-        Utils.runInTerminal(`mvn ${item.label} -f "${item.pomXmlFilePath}"`);
+        Utils.runInTerminal(`mvn ${item.label} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
     });
 
     let commandMavenProjectEffectivePom = vscode.commands.registerCommand('mavenProject.effectivePom', (projectItem) => {
@@ -74,12 +74,12 @@ export function activate(context: vscode.ExtensionContext) {
                         if (cmd && cmd.trim()) {
                             cmd = cmd.trim();
                             cmdHistory[md5(item.pomXmlFilePath)] = Utils.withLRUItemAhead(cmdlist, cmd);
-                            Utils.runInTerminal(`mvn ${cmd} -f "${item.pomXmlFilePath}"`);
+                            Utils.runInTerminal(`mvn ${cmd} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
                         }
                     });
                 } else {
                     cmdHistory[md5(item.pomXmlFilePath)] = Utils.withLRUItemAhead(cmdlist, selected);
-                    Utils.runInTerminal(`mvn ${selected} -f "${item.pomXmlFilePath}"`);
+                    Utils.runInTerminal(`mvn ${selected} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
                 }
             }
         });
@@ -88,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
     ['clean', 'validate', 'compile', 'test', 'package', 'verify', 'install', 'site', 'deploy'].forEach(goal => {
         let commandMavenGoal = vscode.commands.registerCommand(`mavenGoal.${goal}`, (goalItem) => {
             const item = goalItem as MavenProjectTreeItem;
-            Utils.runInTerminal(`mvn ${goal} -f "${item.pomXmlFilePath}"`);
+            Utils.runInTerminal(`mvn ${goal} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
         });
         context.subscriptions.push(commandMavenGoal);
     });

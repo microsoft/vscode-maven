@@ -58,7 +58,7 @@ export class Utils {
             if (pomObject && pomObject.project) {
                 const { name, artifactId, groupId, version } = pomObject.project;
                 return new MavenProjectTreeItem(name || `${groupId}:${artifactId}:${version}`,
-                    pomXmlFilePath, "mavenProject", pomObject);
+                    pomXmlFilePath, "mavenProject", {projectName: name, pom: pomObject});
             }
         }
         return null;

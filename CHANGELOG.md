@@ -4,6 +4,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ## [Unreleased]
+- Run command in dedicated terminals for each maven project.
 
 ### 0.0.4 
 - Support multi-root
