@@ -32,29 +32,29 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
         else if (element.contextValue === 'mavenProject') {
             const items = [];
             // sub modules
-            const pomObj = element.params;
+            const pomObj = element.params.pom;
             if (pomObj.project && pomObj.project.modules && pomObj.project.modules.module && pomObj.project.modules.module.length) {
-                const item = new MavenProjectTreeItem("Modules", element.pomXmlFilePath, "Modules", pomObj.project.modules.module);
+                const item = new MavenProjectTreeItem("Modules", element.pomXmlFilePath, "Modules", {...element.params, modules: pomObj.project.modules.module});
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(item);
             }
             // others
             ['Lifecycle' /*, 'Dependencies' */].forEach(name => {
-                const item = new MavenProjectTreeItem(name, element.pomXmlFilePath, name);
+                const item = new MavenProjectTreeItem(name, element.pomXmlFilePath, name, element.params);
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(item);
             });
             return Promise.resolve(items);
         }
         else if (element.contextValue === 'Modules') {
-            const items = Array.from(element.params, (mod) => Utils.getProject(path.dirname(element.pomXmlFilePath), `${mod}/pom.xml`));
+            const items = Array.from(element.params.modules, (mod) => Utils.getProject(path.dirname(element.pomXmlFilePath), `${mod}/pom.xml`));
             items.forEach(item => item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg")));
             return Promise.resolve(items);
         }
         else if (element.contextValue === 'Lifecycle') {
             const items = [];
             ['clean', 'validate', 'compile', 'test', 'package', 'verify', 'install', 'site', 'deploy'].forEach(goal => {
-                const item = new MavenProjectTreeItem(goal, element.pomXmlFilePath, 'goal');
+                const item = new MavenProjectTreeItem(goal, element.pomXmlFilePath, 'goal', element.params);
                 item.collapsibleState = 0;
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "goal.svg"));
                 items.push(item);

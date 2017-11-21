@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven Project Explorer",
   "description": "Browse maven projects in sidebar, execute goals.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "icon": "resources/logo.png",
   "publisher": "eskibear",
   "engines": {
@@ -12,7 +12,7 @@
     "Languages",
     "Other"
   ],
-  "homepage": "https://github.com/Eskibear/vscode-maven/blob/v0.0.5/README.md",
+  "homepage": "https://github.com/Eskibear/vscode-maven/blob/v0.0.6/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Eskibear/vscode-maven.git"

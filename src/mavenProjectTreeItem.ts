@@ -9,7 +9,7 @@ export class MavenProjectTreeItem extends vscode.TreeItem {
         super(label, TreeItemCollapsibleState.Collapsed);
         this.pomXmlFilePath = pomXmlFilePath;
         this.contextValue = contextValue || 'folder';
-        this.params = params || null;
+        this.params = params || {};
     }
 
 }
