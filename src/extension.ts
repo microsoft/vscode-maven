@@ -74,7 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showInputBox().then((cmd) => {
                         if (cmd && cmd.trim()) {
                             cmd = cmd.trim();
-                            Utils.saveCmdHistory(md5(item.pomXmlFilePath), Utils.withLRUItemAhead(cmdlist, cmd).concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]));
+                            Utils.saveCmdHistory(md5(item.pomXmlFilePath), Utils.withLRUItemAhead(cmdlist, cmd));
                             Utils.runInTerminal(`mvn ${cmd} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
                         }
                     });
@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showTextDocument(vscode.Uri.file(historicalFilePath));
                 }
                 else {
-                    Utils.saveCmdHistory(md5(item.pomXmlFilePath), Utils.withLRUItemAhead(cmdlist, selected).concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]));
+                    Utils.saveCmdHistory(md5(item.pomXmlFilePath), Utils.withLRUItemAhead(cmdlist, selected));
                     Utils.runInTerminal(`mvn ${selected} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
                 }
             }
