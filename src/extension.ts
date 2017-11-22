@@ -87,6 +87,27 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    let commandMavenArchetypeGenerate = vscode.commands.registerCommand("mavenArchetype.generate", () => {
+        vscode.window.showWorkspaceFolderPick().then(ret => { console.log(ret); });
+        const archetypeList = Utils.getArchetypeList();
+        vscode.window.showQuickPick(archetypeList, { matchOnDescription: true }).then(selected => {
+            if (selected) {
+                const { artifactId, groupId } = selected;
+                vscode.window.showQuickPick(selected.versions).then(version => {
+                    if (version) {
+                        Utils.runInTerminal(`mvn archetype:generate -DarchetypeArtifactId=${artifactId} -DarchetypeGroupId=${groupId} -DarchetypeVersion=${version}`, true, 'Maven');
+                    }
+                });
+            }
+        });
+    });
+
+    let commandMavenArchetypeUpdateCache = vscode.commands.registerCommand("mavenArchetype.updateCache", () => {
+        vscode.window.showInputBox({ value: "http://repo.maven.apache.org/maven2/archetype-catalog.xml" }).then(url => {
+            vscode.window.setStatusBarMessage("Updating archetype catalog ... ", Utils.updateArchetypeCache(url));
+        });
+    });
+
     ['clean', 'validate', 'compile', 'test', 'package', 'verify', 'install', 'site', 'deploy'].forEach(goal => {
         let commandMavenGoal = vscode.commands.registerCommand(`mavenGoal.${goal}`, (goalItem) => {
             const item = goalItem as MavenProjectTreeItem;
@@ -99,6 +120,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(commandMavenGoalExecute);
     context.subscriptions.push(commandMavenProjectEffectivePom);
     context.subscriptions.push(commandMavenProjectOpenPom);
+    context.subscriptions.push(commandMavenArchetypeGenerate);
+    context.subscriptions.push(commandMavenArchetypeUpdateCache);
 }
 
 // this method is called when your extension is deactivated

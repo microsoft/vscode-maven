@@ -1,11 +1,14 @@
 import * as vscode from "vscode";
 import { execSync } from 'child_process';
 import * as fs from 'fs';
+import * as http from 'http';
 import * as os from 'os';
 import * as md5 from "md5";
 import * as path from 'path';
 import * as xml2js from 'xml2js';
 import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
+import { MavenArchetype } from "./mavenArchetype";
+import { existsSync } from "fs";
 
 
 
@@ -103,6 +106,50 @@ export class Utils {
 
     public static getCommandHistoryCachePath(pomXmlFilePath: string): string {
         return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), 'commandHistory.txt');
+    }
+
+    static getArchetypeList(): MavenArchetype[] {
+        const localArchetypeXmlFilePath = this.getLocalArchetypeCatalogFilePath();
+        if (existsSync(localArchetypeXmlFilePath)) {
+            const xml = fs.readFileSync(localArchetypeXmlFilePath, 'utf8');
+            let catalog = null;
+            xml2js.parseString(xml, { explicitArray: false }, (err, res) => { catalog = res; });
+            if (catalog && catalog['archetype-catalog'] && catalog['archetype-catalog'].archetypes) {
+                let dict: { [key: string]: MavenArchetype } = {};
+                catalog['archetype-catalog'].archetypes.archetype.forEach(archetype => {
+                    const identifier = `${archetype.groupId}:${archetype.artifactId}`;
+                    if (!dict[identifier]) {
+                        dict[identifier] = new MavenArchetype(archetype.artifactId, archetype.groupId, archetype.description);
+                    }
+                    if (dict[identifier].versions.indexOf(archetype.version) < 0) {
+                        dict[identifier].versions.push(archetype.version);
+                    }
+                });
+                return Object.keys(dict).map(k => dict[k]);
+            }
+        }
+        return [];
+    }
+    public static getLocalArchetypeCatalogFilePath(): string {
+        return path.join(os.homedir(), ".m2", "repository", "archetype-catalog.xml");
+    }
+
+    public static updateArchetypeCache(url: string): Promise<void> {
+        const filepath = this.getLocalArchetypeCatalogFilePath();
+        this.mkdirp(path.dirname(filepath));
+        const file = fs.createWriteStream(filepath);
+        let ret = new Promise<void>((resolve, reject) => {
+            const request = http.get(url, (response) => {
+                response.pipe(file);
+                response.on("end", () => {
+                    resolve();
+                });
+            });
+            request.on("error", e => {
+                reject();
+            });
+        });
+        return ret;
     }
 
     private static mkdirp(filepath) {

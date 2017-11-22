@@ -98,6 +98,16 @@
         "command": "mavenProject.openPom",
         "title": "Open POM file",
         "category": "Maven"
+      },
+      {
+        "command": "mavenArchetype.generate",
+        "title": "Generate from Maven Archetype",
+        "category": "Maven"
+      },
+      {
+        "command": "mavenArchetype.updateCache",
+        "title": "Update Maven Archetype Catalog",
+        "category": "Maven"
       }
     ],
     "views": {
@@ -111,7 +121,10 @@
     "menus": {
       "explorer/context": [
         {
-            "command": "mavenArchetype.generate"
+          "command": "mavenArchetype.generate"
+        },
+        {
+          "command": "mavenArchetype.updateCache"
         },
         {
           "command": "mavenProject.effectivePom",
