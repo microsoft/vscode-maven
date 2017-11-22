@@ -19,7 +19,8 @@
   },
   "activationEvents": [
     "workspaceContains:pom.xml",
-    "onCommand:mavenProjects.refresh"
+    "onCommand:mavenProjects.refresh",
+    "onView:mavenProjects"
   ],
   "main": "./out/extension",
   "contributes": {

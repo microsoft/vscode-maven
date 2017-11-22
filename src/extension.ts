@@ -4,8 +4,6 @@
 import * as vscode from 'vscode';
 import * as path from "path";
 import * as fs from "fs";
-import * as os from 'os';
-import * as md5 from "md5";
 import { MavenProjectsTreeDataProvider } from './mavenProjectsTreeDataProvider';
 import { Utils } from './utils';
 import { MavenProjectTreeItem } from './mavenProjectTreeItem';
@@ -34,8 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     let commandMavenProjectEffectivePom = vscode.commands.registerCommand('mavenProject.effectivePom', (projectItem) => {
         const item = projectItem as MavenProjectTreeItem;
-        const tmpdir = os.tmpdir();
-        const filepath = path.join(tmpdir, "vscode-maven", md5(item.pomXmlFilePath), 'effective-pom.xml');
+        const filepath = Utils.getEffectivePomOutputPath(item.pomXmlFilePath);
         let p = new Promise((resolve, reject) => {
             exec(`mvn help:effective-pom -f "${item.pomXmlFilePath}" -Doutput="${filepath}"`, (error, stdout, stderr) => {
                 if (error || stderr) {
@@ -67,23 +64,23 @@ export function activate(context: vscode.ExtensionContext) {
 
     let commandMavenCustomGoal = vscode.commands.registerCommand("mavenGoal.custom", (goalItem) => {
         const item = goalItem as MavenProjectTreeItem;
-        const cmdlist: string[] = Utils.loadCmdHistory(md5(item.pomXmlFilePath));
+        const cmdlist: string[] = Utils.loadCmdHistory(item.pomXmlFilePath);
         vscode.window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST])).then(selected => {
             if (selected) {
                 if (selected === ENTRY_NEW_GOALS) {
                     vscode.window.showInputBox().then((cmd) => {
                         if (cmd && cmd.trim()) {
                             cmd = cmd.trim();
-                            Utils.saveCmdHistory(md5(item.pomXmlFilePath), Utils.withLRUItemAhead(cmdlist, cmd));
+                            Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, cmd));
                             Utils.runInTerminal(`mvn ${cmd} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
                         }
                     });
                 } else if (selected === ENTRY_OPEN_HIST) {
-                    const historicalFilePath = path.join(os.tmpdir(), "vscode-maven", md5(item.pomXmlFilePath), 'commandHistory.txt');;
+                    const historicalFilePath = Utils.getCommandHistoryCachePath(item.pomXmlFilePath);
                     vscode.window.showTextDocument(vscode.Uri.file(historicalFilePath));
                 }
                 else {
-                    Utils.saveCmdHistory(md5(item.pomXmlFilePath), Utils.withLRUItemAhead(cmdlist, selected));
+                    Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, selected));
                     Utils.runInTerminal(`mvn ${selected} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
                 }
             }

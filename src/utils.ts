@@ -8,6 +8,7 @@ import * as xml2js from 'xml2js';
 import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
 
 
+
 export class Utils {
     private static terminals: { [id: string]: vscode.Terminal } = {};
 
@@ -79,8 +80,8 @@ export class Utils {
         return ret.reverse();
     }
 
-    public static loadCmdHistory(key: string): string[] {
-        const filepath = path.join(os.tmpdir(), "vscode-maven", key, 'commandHistory.txt');
+    public static loadCmdHistory(pomXmlFilePath: string): string[] {
+        const filepath = this.getCommandHistoryCachePath(pomXmlFilePath);
         if (fs.existsSync(filepath)) {
             const content = fs.readFileSync(filepath).toString().trim();
             if (content) {
@@ -90,17 +91,25 @@ export class Utils {
         return [];
     }
 
-    public static saveCmdHistory(key: string, cmdlist: string[]): void {
-        const filepath = path.join(os.tmpdir(), "vscode-maven", key, 'commandHistory.txt');
+    public static saveCmdHistory(pomXmlFilePath: string, cmdlist: string[]): void {
+        const filepath = this.getCommandHistoryCachePath(pomXmlFilePath);
         Utils.mkdirp(path.dirname(filepath));
         fs.writeFileSync(filepath, cmdlist.join('\n'));
+    }
+
+    public static getEffectivePomOutputPath(pomXmlFilePath: string): string {
+        return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), 'effective-pom.xml');
+    }
+
+    public static getCommandHistoryCachePath(pomXmlFilePath: string): string {
+        return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), 'commandHistory.txt');
     }
 
     private static mkdirp(filepath) {
         if (fs.existsSync(filepath)) {
             return;
         }
-        Utils.mkdirp(path.dirname(filepath));
+        this.mkdirp(path.dirname(filepath));
         fs.mkdirSync(filepath);
     }
 }
