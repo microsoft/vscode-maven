@@ -30,11 +30,11 @@ export function activate(context: vscode.ExtensionContext) {
         Utils.runInTerminal(`mvn ${item.label} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
     });
 
-    let commandMavenProjectEffectivePom = vscode.commands.registerCommand('mavenProject.effectivePom', (projectItem) => {
-        const item = projectItem as MavenProjectTreeItem;
-        const filepath = Utils.getEffectivePomOutputPath(item.pomXmlFilePath);
+    let commandMavenProjectEffectivePom = vscode.commands.registerCommand('mavenProject.effectivePom', (item) => {
+        const pomXmlFilePath = item.fsPath || item.pomXmlFilePath;
+        const filepath = Utils.getEffectivePomOutputPath(pomXmlFilePath);
         let p = new Promise((resolve, reject) => {
-            exec(`mvn help:effective-pom -f "${item.pomXmlFilePath}" -Doutput="${filepath}"`, (error, stdout, stderr) => {
+            exec(`mvn help:effective-pom -f "${pomXmlFilePath}" -Doutput="${filepath}"`, (error, stdout, stderr) => {
                 if (error || stderr) {
                     console.error(error);
                     console.error(stderr);

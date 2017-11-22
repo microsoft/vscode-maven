@@ -28,6 +28,7 @@
       {
         "command": "mavenProjects.refresh",
         "title": "Refresh",
+        "category": "Maven",
         "icon": {
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
@@ -35,55 +36,68 @@
       },
       {
         "command": "mavenGoal.exec",
-        "title": "Execute"
+        "title": "Execute",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.clean",
-        "title": "clean"
+        "title": "clean",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.validate",
-        "title": "validate"
+        "title": "validate",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.compile",
-        "title": "compile"
+        "title": "compile",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.test",
-        "title": "test"
+        "title": "test",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.package",
-        "title": "package"
+        "title": "package",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.verify",
-        "title": "verify"
+        "title": "verify",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.install",
-        "title": "install"
+        "title": "install",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.site",
-        "title": "site"
+        "title": "site",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.deploy",
-        "title": "deploy"
+        "title": "deploy",
+        "category": "Maven"
       },
       {
         "command": "mavenGoal.custom",
-        "title": "custom goals ... "
+        "title": "custom goals ... ",
+        "category": "Maven"
       },
       {
         "command": "mavenProject.effectivePom",
-        "title": "Effective POM"
+        "title": "Effective POM",
+        "category": "Maven"
       },
       {
         "command": "mavenProject.openPom",
-        "title": "Open POM file"
+        "title": "Open POM file",
+        "category": "Maven"
       }
     ],
     "views": {
@@ -95,6 +109,15 @@
       ]
     },
     "menus": {
+      "explorer/context": [
+        {
+            "command": "mavenArchetype.generate"
+        },
+        {
+          "command": "mavenProject.effectivePom",
+          "when": "resourceFilename == pom.xml"
+        }
+      ],
       "view/title": [
         {
           "command": "mavenProjects.refresh",
