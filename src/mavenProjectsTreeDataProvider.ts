@@ -19,14 +19,16 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
         const element = node as MavenProjectTreeItem;
         if (element === undefined) {
             const ret = [];
-            vscode.workspace.workspaceFolders.forEach(wf => {
-                const basepath = wf.uri.fsPath;
-                const item = Utils.getProject(basepath, "pom.xml");
-                if (item) {
-                    item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
-                    ret.push(item);
-                }
-            });
+            if (vscode.workspace.workspaceFolders) {
+                vscode.workspace.workspaceFolders.forEach(wf => {
+                    const basepath = wf.uri.fsPath;
+                    const item = Utils.getProject(basepath, "pom.xml");
+                    if (item) {
+                        item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
+                        ret.push(item);
+                    }
+                });
+            }
             return Promise.resolve(ret);
         }
         else if (element.contextValue === 'mavenProject') {

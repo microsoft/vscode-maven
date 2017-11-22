@@ -1,13 +1,24 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- [Change Log](#change-log)
+    - [Unreleased](#unreleased)
+    - [Released](#released)
+        - [0.1.0](#010)
+        - [0.0.6](#006)
+        - [0.0.5](#005)
+        - [0.0.4](#004)
+        - [0.0.3](#003)
+        - [0.0.2](#002)
+        - [0.0.1](#001)
 
 ## Unreleased
-- Add context menu on `pom.xml`.
-- Support maven archetype generate.
 
 ## Released
+
+### 0.1.0
+- Change Logo.
+- Add context menu on `pom.xml`.
+- Support maven archetype generate.
 
 ### 0.0.6 
 - Run command in dedicated terminals for each maven project.

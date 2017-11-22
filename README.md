@@ -10,12 +10,24 @@ Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide 
 * support generating effective pom.
 * support VSCode multi-root workspace.
 
+## Usage
+* Basic
+
 ![Screenshot](images/screen.gif)
 
+* Custom goals 
+
 ![Screenshot](images/customGoal.gif)
+
+* Archetype
+
+![Screenshot](images/archetype.gif)
+
 
 ## Requirements
 
 Maven installed and PATH added, i.e., `mvn` command can be executed directly in the terminal.
 
 ## Release Notes
+
+Refer to [CHANGELOG](CHANGELOG.md)
