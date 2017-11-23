@@ -17,10 +17,8 @@ before_install:
 install:
 - npm install -g vsce
 - npm install -g typescript
-- npm install -g gulp
 - npm install
 
 script:
-- gulp tslint
+- npm run tslint
 - vsce package
-- npm test --silent
