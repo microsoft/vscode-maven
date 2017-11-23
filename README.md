@@ -1,8 +1,11 @@
 # README
 
+[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/eskibear.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=eskibear.vscode-maven) [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/eskibear.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=eskibear.vscode-maven) [![Rating](https://vsmarketplacebadge.apphb.com/rating-short/eskibear.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=eskibear.vscode-maven) [![Build Status](https://travis-ci.org/Eskibear/vscode-maven.svg)](https://travis-ci.org/Eskibear/vscode-maven)
+
 This is the README for VSCode extension "Maven Project Explorer".
 
 ## Features
+
 Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide project structures in sidebar.
 
 * multi-module projects supported.
@@ -11,18 +14,18 @@ Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide 
 * support VSCode multi-root workspace.
 
 ## Usage
+
 * Basic
 
 ![Screenshot](images/screen.gif)
 
-* Custom goals 
+* Custom goals
 
 ![Screenshot](images/customGoal.gif)
 
 * Archetype
 
 ![Screenshot](images/archetype.gif)
-
 
 ## Requirements
 
