@@ -1,13 +1,13 @@
-'use strict';
+"use strict";
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import * as path from "path";
+import { exec, execSync, spawn } from "child_process";
 import * as fs from "fs";
-import { MavenProjectsTreeDataProvider } from './mavenProjectsTreeDataProvider';
-import { Utils } from './utils';
-import { MavenProjectTreeItem } from './mavenProjectTreeItem';
-import { execSync, exec, spawn } from 'child_process';
+import * as path from "path";
+import * as vscode from "vscode";
+import { MavenProjectsTreeDataProvider } from "./mavenProjectsTreeDataProvider";
+import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
+import { Utils } from "./utils";
 
 const ENTRY_NEW_GOALS: string = "New ...";
 const ENTRY_OPEN_HIST: string = "View all historical commands";
@@ -15,37 +15,34 @@ const ENTRY_OPEN_HIST: string = "View all historical commands";
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Congratulations, your extension "vscode-maven" is now active!');
     const mavenProjectsTreeDataProvider = new MavenProjectsTreeDataProvider(context);
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
-    let commandMavenProjectsRefresh = vscode.commands.registerCommand('mavenProjects.refresh', () => {
+    const commandMavenProjectsRefresh = vscode.commands.registerCommand("mavenProjects.refresh", () => {
         mavenProjectsTreeDataProvider.refreshTree();
     });
-    let commandMavenGoalExecute = vscode.commands.registerCommand('mavenGoal.exec', (goalItem) => {
+    const commandMavenGoalExecute = vscode.commands.registerCommand("mavenGoal.exec", (goalItem) => {
         const item = goalItem as MavenProjectTreeItem;
         Utils.runInTerminal(`mvn ${item.label} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
     });
 
-    let commandMavenProjectEffectivePom = vscode.commands.registerCommand('mavenProject.effectivePom', (item) => {
+    const commandMavenProjectEffectivePom = vscode.commands.registerCommand("mavenProject.effectivePom", (item) => {
         const pomXmlFilePath = item.fsPath || item.pomXmlFilePath;
         const filepath = Utils.getEffectivePomOutputPath(pomXmlFilePath);
-        let p = new Promise((resolve, reject) => {
+        const p = new Promise((resolve, reject) => {
             exec(`mvn help:effective-pom -f "${pomXmlFilePath}" -Doutput="${filepath}"`, (error, stdout, stderr) => {
                 if (error || stderr) {
-                    console.error(error);
-                    console.error(stderr);
                     return resolve(false);
                 }
                 resolve(true);
             });
-        }).then(ret => {
+        }).then((ret) => {
             if (ret && fs.existsSync(filepath)) {
                 const pomxml = fs.readFileSync(filepath).toString();
-                vscode.workspace.openTextDocument({ language: 'xml', content: pomxml }).then(document => {
+                vscode.workspace.openTextDocument({ language: "xml", content: pomxml }).then((document) => {
                     vscode.window.showTextDocument(document);
                 });
             } else {
@@ -55,61 +52,63 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.setStatusBarMessage("Generating effective pom ... ", p);
     });
 
-    let commandMavenProjectOpenPom = vscode.commands.registerCommand('mavenProject.openPom', (projectItem) => {
+    const commandMavenProjectOpenPom = vscode.commands.registerCommand("mavenProject.openPom", (projectItem) => {
         const item = projectItem as MavenProjectTreeItem;
         if (fs.existsSync(item.pomXmlFilePath)) {
             vscode.window.showTextDocument(vscode.Uri.file(item.pomXmlFilePath), { preview: false });
         }
     });
 
-    let commandMavenCustomGoal = vscode.commands.registerCommand("mavenGoal.custom", (goalItem) => {
+    const commandMavenCustomGoal = vscode.commands.registerCommand("mavenGoal.custom", (goalItem) => {
         const item = goalItem as MavenProjectTreeItem;
         const cmdlist: string[] = Utils.loadCmdHistory(item.pomXmlFilePath);
-        vscode.window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST])).then(selected => {
+        vscode.window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST])).then((selected) => {
             if (selected) {
                 if (selected === ENTRY_NEW_GOALS) {
                     vscode.window.showInputBox().then((cmd) => {
                         if (cmd && cmd.trim()) {
                             cmd = cmd.trim();
                             Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, cmd));
-                            Utils.runInTerminal(`mvn ${cmd} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
+                            Utils.runInTerminal(`mvn ${cmd} -f "${item.pomXmlFilePath}"`, true,
+                                `Maven-${item.params.projectName}`);
                         }
                     });
                 } else if (selected === ENTRY_OPEN_HIST) {
                     const historicalFilePath = Utils.getCommandHistoryCachePath(item.pomXmlFilePath);
                     vscode.window.showTextDocument(vscode.Uri.file(historicalFilePath));
-                }
-                else {
+                } else {
                     Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, selected));
-                    Utils.runInTerminal(`mvn ${selected} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
+                    Utils.runInTerminal(`mvn ${selected} -f "${item.pomXmlFilePath}"`, true,
+                        `Maven-${item.params.projectName}`);
                 }
             }
         });
     });
 
-    let commandMavenArchetypeGenerate = vscode.commands.registerCommand("mavenArchetype.generate", () => {
-        vscode.window.showWorkspaceFolderPick().then(ret => { console.log(ret); });
+    const commandMavenArchetypeGenerate = vscode.commands.registerCommand("mavenArchetype.generate", () => {
         const archetypeList = Utils.getArchetypeList();
-        vscode.window.showQuickPick(archetypeList, { matchOnDescription: true }).then(selected => {
+        vscode.window.showQuickPick(archetypeList, { matchOnDescription: true }).then((selected) => {
             if (selected) {
                 const { artifactId, groupId } = selected;
-                vscode.window.showQuickPick(selected.versions).then(version => {
+                vscode.window.showQuickPick(selected.versions).then((version) => {
                     if (version) {
-                        Utils.runInTerminal(`mvn archetype:generate -DarchetypeArtifactId=${artifactId} -DarchetypeGroupId=${groupId} -DarchetypeVersion=${version}`, true, 'Maven');
+                        const cmd = `mvn archetype:generate -DarchetypeArtifactId=${artifactId} -DarchetypeGroupId=${groupId} -DarchetypeVersion=${version}`;
+                        Utils.runInTerminal(cmd, true, "Maven");
                     }
                 });
             }
         });
     });
 
-    let commandMavenArchetypeUpdateCache = vscode.commands.registerCommand("mavenArchetype.updateCache", () => {
-        vscode.window.showInputBox({ value: "http://repo.maven.apache.org/maven2/archetype-catalog.xml" }).then(url => {
+    const commandMavenArchetypeUpdateCache = vscode.commands.registerCommand("mavenArchetype.updateCache", () => {
+        const defaultCatalogUrl = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
+        vscode.window.showInputBox({ value: defaultCatalogUrl }).then((url) => {
             vscode.window.setStatusBarMessage("Updating archetype catalog ... ", Utils.updateArchetypeCache(url));
         });
     });
 
-    ['clean', 'validate', 'compile', 'test', 'package', 'verify', 'install', 'site', 'deploy'].forEach(goal => {
-        let commandMavenGoal = vscode.commands.registerCommand(`mavenGoal.${goal}`, (goalItem) => {
+    ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal) => {
+        const commandMavenGoal = vscode.commands.registerCommand(`mavenGoal.${goal}`, (goalItem) => {
             const item = goalItem as MavenProjectTreeItem;
             Utils.runInTerminal(`mvn ${goal} -f "${item.pomXmlFilePath}"`, true, `Maven-${item.params.projectName}`);
         });
@@ -124,6 +123,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(commandMavenArchetypeUpdateCache);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {
+    // this method is called when your extension is deactivated
 }

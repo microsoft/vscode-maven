@@ -1,11 +1,20 @@
 {
+	"extends": "tslint:recommended",
 	"rules": {
+		"variable-name": [
+            true,
+            "ban-keywords",
+            "check-format",
+            "allow-pascal-case",
+            "allow-leading-underscore"
+		],
 		"no-unused-expression": true,
 		"no-duplicate-variable": true,
 		"curly": true,
 		"class-name": true,
 		"semicolon": true,
-		"triple-equals": true
+		"triple-equals": true,
+		"max-line-length": false
 	},
 	"defaultSeverity": "warning"
 }

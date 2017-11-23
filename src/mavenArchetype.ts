@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import { QuickPickItem } from "vscode";
 export class MavenArchetype implements QuickPickItem {
-    label: string;
-    description: string;
-    artifactId: string;
-    groupId: string;
-    versions: string[];
+    public label: string;
+    public description: string;
+    public artifactId: string;
+    public groupId: string;
+    public versions: string[];
     constructor(aid: string, gid: string, desc?: string) {
         this.artifactId = aid;
         this.groupId = gid;

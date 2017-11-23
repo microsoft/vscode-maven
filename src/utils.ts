@@ -1,19 +1,16 @@
-import * as vscode from "vscode";
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as http from 'http';
-import * as os from 'os';
-import * as md5 from "md5";
-import * as path from 'path';
-import * as xml2js from 'xml2js';
-import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
-import { MavenArchetype } from "./mavenArchetype";
+import { execSync } from "child_process";
+import * as fs from "fs";
 import { existsSync } from "fs";
-
-
+import * as http from "http";
+import * as md5 from "md5";
+import * as os from "os";
+import * as path from "path";
+import * as vscode from "vscode";
+import * as xml2js from "xml2js";
+import { MavenArchetype } from "./mavenArchetype";
+import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
 
 export class Utils {
-    private static terminals: { [id: string]: vscode.Terminal } = {};
 
     public static runInTerminal(command: string, addNewLine: boolean = true, terminal: string = "Maven"): void {
         if (this.terminals[terminal] === undefined) {
@@ -24,10 +21,10 @@ export class Utils {
     }
     // unused.
     public static getPomXmlFilePaths(): string[] {
-        const filename: string = 'pom.xml';
+        const filename: string = "pom.xml";
         const ret = [];
         const stdout = execSync(`find '${vscode.workspace.rootPath}' -name '${filename}'`);
-        stdout.toString().split('\n').forEach(f => {
+        stdout.toString().split("\n").forEach((f) => {
             if (f) {
                 ret.push(f);
             }
@@ -38,7 +35,7 @@ export class Utils {
     public static getProject(basePath: string, pomXmlRelativePath: string): MavenProjectTreeItem {
         const pomXmlFilePath = path.resolve(basePath, pomXmlRelativePath);
         if (fs.existsSync(pomXmlFilePath)) {
-            const xml = fs.readFileSync(pomXmlFilePath, 'utf8');
+            const xml = fs.readFileSync(pomXmlFilePath, "utf8");
             let pomObject = null;
             xml2js.parseString(xml, { explicitArray: false }, (err, res) => { pomObject = res; });
             if (pomObject && pomObject.project) {
@@ -52,7 +49,7 @@ export class Utils {
 
     public static withLRUItemAhead<T>(array: T[], LRUItem: T): T[] {
         const ret = [];
-        array.forEach(elem => {
+        array.forEach((elem) => {
             if (elem !== LRUItem) {
                 ret.push(elem);
             }
@@ -67,7 +64,7 @@ export class Utils {
         if (fs.existsSync(filepath)) {
             const content = fs.readFileSync(filepath).toString().trim();
             if (content) {
-                return content.split('\n');
+                return content.split("\n");
             }
         }
         return [];
@@ -76,26 +73,26 @@ export class Utils {
     public static saveCmdHistory(pomXmlFilePath: string, cmdlist: string[]): void {
         const filepath = this.getCommandHistoryCachePath(pomXmlFilePath);
         Utils.mkdirp(path.dirname(filepath));
-        fs.writeFileSync(filepath, cmdlist.join('\n'));
+        fs.writeFileSync(filepath, cmdlist.join("\n"));
     }
 
     public static getEffectivePomOutputPath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), 'effective-pom.xml');
+        return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), "effective-pom.xml");
     }
 
     public static getCommandHistoryCachePath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), 'commandHistory.txt');
+        return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), "commandHistory.txt");
     }
 
-    static getArchetypeList(): MavenArchetype[] {
+    public static getArchetypeList(): MavenArchetype[] {
         const localArchetypeXmlFilePath = this.getLocalArchetypeCatalogFilePath();
         if (existsSync(localArchetypeXmlFilePath)) {
-            const xml = fs.readFileSync(localArchetypeXmlFilePath, 'utf8');
+            const xml = fs.readFileSync(localArchetypeXmlFilePath, "utf8");
             let catalog = null;
             xml2js.parseString(xml, { explicitArray: false }, (err, res) => { catalog = res; });
-            if (catalog && catalog['archetype-catalog'] && catalog['archetype-catalog'].archetypes) {
-                let dict: { [key: string]: MavenArchetype } = {};
-                catalog['archetype-catalog'].archetypes.archetype.forEach(archetype => {
+            if (catalog && catalog["archetype-catalog"] && catalog["archetype-catalog"].archetypes) {
+                const dict: { [key: string]: MavenArchetype } = {};
+                catalog["archetype-catalog"].archetypes.archetype.forEach((archetype) => {
                     const identifier = `${archetype.groupId}:${archetype.artifactId}`;
                     if (!dict[identifier]) {
                         dict[identifier] = new MavenArchetype(archetype.artifactId, archetype.groupId, archetype.description);
@@ -104,7 +101,7 @@ export class Utils {
                         dict[identifier].versions.push(archetype.version);
                     }
                 });
-                return Object.keys(dict).map(k => dict[k]);
+                return Object.keys(dict).map((k) => dict[k]);
             }
         }
         return [];
@@ -117,19 +114,21 @@ export class Utils {
         const filepath = this.getLocalArchetypeCatalogFilePath();
         this.mkdirp(path.dirname(filepath));
         const file = fs.createWriteStream(filepath);
-        let ret = new Promise<void>((resolve, reject) => {
+        const ret = new Promise<void>((resolve, reject) => {
             const request = http.get(url, (response) => {
                 response.pipe(file);
                 response.on("end", () => {
                     resolve();
                 });
             });
-            request.on("error", e => {
+            request.on("error", (e) => {
                 reject();
             });
         });
         return ret;
     }
+
+    private static terminals: { [id: string]: vscode.Terminal } = {};
 
     private static mkdirp(filepath) {
         if (fs.existsSync(filepath)) {
