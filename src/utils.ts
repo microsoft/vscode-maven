@@ -35,27 +35,6 @@ export class Utils {
         return ret;
     }
 
-    public static getProjects(pomXmlFilePath: string): MavenProjectTreeItem {
-        if (fs.existsSync(pomXmlFilePath)) {
-            execSync(`mvn help:effective-pom -f "${pomXmlFilePath}" -Doutput="${pomXmlFilePath}.effective"`);
-            const xml = fs.readFileSync(`${pomXmlFilePath}.effective`, 'utf8');
-            let obj = null;
-            xml2js.parseString(xml, { explicitArray: false }, (err, res) => { obj = res; });
-            if (obj && obj.project && obj.project.name) {
-                return new MavenProjectTreeItem(obj.project.name, pomXmlFilePath);
-            }
-            if (obj && obj.projects && obj.projects.project) {
-                const projectNames = [];
-                obj.projects.project.forEach((project) => {
-                    projectNames.push(project.name);
-                });
-                return new MavenProjectTreeItem(pomXmlFilePath, pomXmlFilePath, 'mavenProjects', projectNames);
-
-            }
-        }
-        return null;
-    }
-
     public static getProject(basePath: string, pomXmlRelativePath: string): MavenProjectTreeItem {
         const pomXmlFilePath = path.resolve(basePath, pomXmlRelativePath);
         if (fs.existsSync(pomXmlFilePath)) {

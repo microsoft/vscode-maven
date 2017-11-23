@@ -35,8 +35,9 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             const items = [];
             // sub modules
             const pomObj = element.params.pom;
-            if (pomObj.project && pomObj.project.modules && pomObj.project.modules.module && pomObj.project.modules.module.length) {
-                const item = new MavenProjectTreeItem("Modules", element.pomXmlFilePath, "Modules", {...element.params, modules: pomObj.project.modules.module});
+            if (pomObj.project && pomObj.project.modules && pomObj.project.modules.module) {
+                const pomModule = pomObj.project.modules.module;
+                const item = new MavenProjectTreeItem("Modules", element.pomXmlFilePath, "Modules", { ...element.params, modules: Array.isArray(pomModule) ? pomModule : [pomModule] });
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(item);
             }
@@ -49,7 +50,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             return Promise.resolve(items);
         }
         else if (element.contextValue === 'Modules') {
-            const items = Array.from(element.params.modules, (mod) => Utils.getProject(path.dirname(element.pomXmlFilePath), `${mod}/pom.xml`));
+            const items = Array.from(element.params.modules, (mod) => Utils.getProject(path.dirname(element.pomXmlFilePath), `${mod}/pom.xml`)).filter(x => x);
             items.forEach(item => item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg")));
             return Promise.resolve(items);
         }
