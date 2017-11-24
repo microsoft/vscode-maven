@@ -13,8 +13,7 @@
 		"curly": true,
 		"class-name": true,
 		"semicolon": true,
-		"triple-equals": true,
-		"max-line-length": false
+		"triple-equals": true
 	},
 	"defaultSeverity": "warning"
 }

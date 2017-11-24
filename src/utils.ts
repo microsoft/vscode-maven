@@ -1,37 +1,18 @@
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import * as fs from "fs";
 import { existsSync } from "fs";
 import * as http from "http";
 import * as md5 from "md5";
 import * as os from "os";
 import * as path from "path";
-import * as vscode from "vscode";
 import * as xml2js from "xml2js";
 import { MavenArchetype } from "./mavenArchetype";
 import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
 
 export class Utils {
-
-    public static runInTerminal(command: string, addNewLine: boolean = true, terminal: string = "Maven"): void {
-        if (this.terminals[terminal] === undefined) {
-            this.terminals[terminal] = vscode.window.createTerminal(terminal);
-        }
-        this.terminals[terminal].show();
-        this.terminals[terminal].sendText(command, addNewLine);
+    public static exec(cmd: string, callback?) {
+        return exec(cmd, callback);
     }
-    // unused.
-    public static getPomXmlFilePaths(): string[] {
-        const filename: string = "pom.xml";
-        const ret = [];
-        const stdout = execSync(`find '${vscode.workspace.rootPath}' -name '${filename}'`);
-        stdout.toString().split("\n").forEach((f) => {
-            if (f) {
-                ret.push(f);
-            }
-        });
-        return ret;
-    }
-
     public static getProject(basePath: string, pomXmlRelativePath: string): MavenProjectTreeItem {
         const pomXmlFilePath = path.resolve(basePath, pomXmlRelativePath);
         if (fs.existsSync(pomXmlFilePath)) {
@@ -95,7 +76,8 @@ export class Utils {
                 catalog["archetype-catalog"].archetypes.archetype.forEach((archetype) => {
                     const identifier = `${archetype.groupId}:${archetype.artifactId}`;
                     if (!dict[identifier]) {
-                        dict[identifier] = new MavenArchetype(archetype.artifactId, archetype.groupId, archetype.description);
+                        dict[identifier] =
+                            new MavenArchetype(archetype.artifactId, archetype.groupId, archetype.description);
                     }
                     if (dict[identifier].versions.indexOf(archetype.version) < 0) {
                         dict[identifier].versions.push(archetype.version);
@@ -128,7 +110,23 @@ export class Utils {
         return ret;
     }
 
-    private static terminals: { [id: string]: vscode.Terminal } = {};
+    public static readFileIfExists(filepath: string): string {
+        if (filepath && fs.existsSync(filepath)) {
+            return fs.readFileSync(filepath).toString();
+        }
+        return null;
+    }
+
+    public static nearestDirPath(filepath: string): string {
+        if (fs.existsSync(filepath)) {
+            const stat = fs.lstatSync(filepath);
+            if (stat.isDirectory()) {
+                return filepath;
+            } else if (stat.isFile) {
+                return path.dirname(filepath);
+            }
+        }
+    }
 
     private static mkdirp(filepath) {
         if (fs.existsSync(filepath)) {
