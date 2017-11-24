@@ -22,9 +22,9 @@ export class VSCodeUI {
         };
         const result = await vscode.window.showOpenDialog(Object.assign(options, customOptions));
         if (result && result.length) {
-            return result[0];
+            return Promise.resolve(result[0]);
         } else {
-            return null;
+            return Promise.resolve(null);
         }
     }
 
