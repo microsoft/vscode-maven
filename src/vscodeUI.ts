@@ -26,6 +26,8 @@ export class VSCodeUI {
                 return `cd "${cwd}"`; // PowerShell
             } else if (windowsShell && windowsShell.indexOf("cmd.exe") > -1) {
                 return `cd /d "${cwd}"`; // CMD
+            } else {
+                return `cd "${cwd}"`; // Unknown, try using common one.
             }
         } else {
             return `cd "${cwd}"`;
