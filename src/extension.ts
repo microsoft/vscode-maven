@@ -73,9 +73,9 @@ async function generateFromArchetype(entry) {
         const version = await vscode.window.showQuickPick(versions);
         if (version) {
             const cmd = ["mvn archetype:generate",
-                `-DarchetypeArtifactId=${artifactId}`,
-                `-DarchetypeGroupId=${groupId}`,
-                `-DarchetypeVersion=${version}`].join(" ");
+                `-DarchetypeArtifactId="${artifactId}"`,
+                `-DarchetypeGroupId="${groupId}"`,
+                `-DarchetypeVersion="${version}"`].join(" ");
             if (cwd) {
                 VSCodeUI.runInTerminal(`cd "${cwd}"`, true, "Maven");
             }
