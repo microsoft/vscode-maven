@@ -29,13 +29,7 @@ export class Utils {
     }
 
     public static withLRUItemAhead<T>(array: T[], LRUItem: T): T[] {
-        const ret = [];
-        array.forEach((elem) => {
-            if (elem !== LRUItem) {
-                ret.push(elem);
-            }
-        });
-        ret.reverse();
+        const ret = array.filter((elem) => elem !== LRUItem).reverse();
         ret.push(LRUItem);
         return ret.reverse();
     }
