@@ -3,6 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.1.2](#012)
         - [0.1.1](#011)
         - [0.1.0](#010)
         - [0.0.6](#006)
@@ -15,6 +16,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## Unreleased
 
 ## Released
+### 0.1.2
+- Can select folder to generate project from archetype.
+
 ### 0.1.1
 - Fix bug for single module project.
 
