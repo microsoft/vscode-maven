@@ -6,7 +6,7 @@ import { Utils } from "./utils";
 import { VSCodeUI } from "./vscodeUI";
 
 const ENTRY_NEW_GOALS: string = "New ...";
-const ENTRY_OPEN_HIST: string = "View all historical commands";
+const ENTRY_OPEN_HIST: string = "Edit ...";
 
 export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 
@@ -83,8 +83,8 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
 
     public executeGoal(item: MavenProjectTreeItem): void {
         const cmd = `mvn ${item.label} -f "${item.pomXmlFilePath}"`;
-        const terminal = `Maven-${item.params.projectName}`;
-        VSCodeUI.runInTerminal(cmd, true, terminal);
+        const name = `Maven-${item.params.projectName}`;
+        VSCodeUI.runInTerminal(cmd, { name });
     }
 
     public async effectivePom(item: MavenProjectTreeItem | any): Promise<void> {
@@ -112,22 +112,24 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
 
     public async customGoal(item: MavenProjectTreeItem): Promise<void> {
         const cmdlist: string[] = Utils.loadCmdHistory(item.pomXmlFilePath);
-        const selectedGoal = await vscode.window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]));
+        const selectedGoal = await vscode.window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
+            placeHolder: "Select the custom command ... ",
+        });
         if (selectedGoal === ENTRY_NEW_GOALS) {
-            const inputGoals = await vscode.window.showInputBox();
+            const inputGoals = await vscode.window.showInputBox({placeHolder: "e.g. clean package -DskipTests"});
             const trimedGoals = inputGoals && inputGoals.trim();
             if (trimedGoals) {
                 Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
-                VSCodeUI.runInTerminal(`mvn ${trimedGoals} -f "${item.pomXmlFilePath}"`, true,
-                    `Maven-${item.params.projectName}`);
+                VSCodeUI.runInTerminal(`mvn ${trimedGoals} -f "${item.pomXmlFilePath}"`,
+                    { name: `Maven-${item.params.projectName}` });
             }
         } else if (selectedGoal === ENTRY_OPEN_HIST) {
             const historicalFilePath = Utils.getCommandHistoryCachePath(item.pomXmlFilePath);
             vscode.window.showTextDocument(vscode.Uri.file(historicalFilePath));
         } else if (selectedGoal) {
             Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
-            VSCodeUI.runInTerminal(`mvn ${selectedGoal} -f "${item.pomXmlFilePath}"`, true,
-                `Maven-${item.params.projectName}`);
+            VSCodeUI.runInTerminal(`mvn ${selectedGoal} -f "${item.pomXmlFilePath}"`,
+                { name: `Maven-${item.params.projectName}` });
         }
     }
 }

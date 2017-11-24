@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal) => {
         const commandMavenGoal = vscode.commands.registerCommand(`mavenGoal.${goal}`, (item) => {
             const cmd = `mvn ${goal} -f "${item.pomXmlFilePath}"`;
-            VSCodeUI.runInTerminal(cmd, true, `Maven-${item.params.projectName}`);
+            VSCodeUI.runInTerminal(cmd, { name: `Maven-${item.params.projectName}` });
         });
         context.subscriptions.push(commandMavenGoal);
     });
@@ -67,19 +67,17 @@ async function generateFromArchetype(entry) {
         cwd = Utils.nearestDirPath(entry.fsPath);
     }
     const archetypeList = Utils.getArchetypeList();
-    const selectedArchetype = await vscode.window.showQuickPick(archetypeList, { matchOnDescription: true });
+    const selectedArchetype = await vscode.window.showQuickPick(archetypeList,
+        { matchOnDescription: true, placeHolder: "Select archetype with <groupId>:<artifactId> ..." });
     if (selectedArchetype) {
         const { artifactId, groupId, versions } = selectedArchetype;
-        const version = await vscode.window.showQuickPick(versions);
+        const version = await vscode.window.showQuickPick(versions, {placeHolder: "Select version ..."});
         if (version) {
             const cmd = ["mvn archetype:generate",
                 `-DarchetypeArtifactId="${artifactId}"`,
                 `-DarchetypeGroupId="${groupId}"`,
                 `-DarchetypeVersion="${version}"`].join(" ");
-            if (cwd) {
-                VSCodeUI.runInTerminal(`cd "${cwd}"`, true, "Maven");
-            }
-            VSCodeUI.runInTerminal(cmd, true, "Maven");
+            VSCodeUI.runInTerminal(cmd, { cwd, name: "Maven-Archetype" });
         }
     }
 }

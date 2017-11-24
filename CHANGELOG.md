@@ -14,6 +14,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
+- Support different integrated terminals in Windows, namely `Git Bash`, `CMD`, `PowerShell`.
 
 ## Released
 ### 0.1.2
