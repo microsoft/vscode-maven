@@ -12,8 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal) => {
         const commandMavenGoal = vscode.commands.registerCommand(`mavenGoal.${goal}`, (item) => {
-            const cmd = `mvn ${goal} -f "${item.pomXmlFilePath}"`;
-            VSCodeUI.runInTerminal(cmd, { name: `Maven-${item.params.projectName}` });
+            mavenProjectsTreeDataProvider.executeGoal(item, goal);
         });
         context.subscriptions.push(commandMavenGoal);
     });

@@ -81,9 +81,9 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
         this._onDidChangeTreeData.fire();
     }
 
-    public executeGoal(item: MavenProjectTreeItem): void {
-        const cmd = `mvn ${item.label} -f "${item.pomXmlFilePath}"`;
-        const name = `Maven-${item.params.projectName}`;
+    public executeGoal(item: MavenProjectTreeItem, goal?: string): void {
+        const cmd = `mvn ${goal || item.label} -f "${item.pomXmlFilePath}"`;
+        const name = `Maven-${item.params.artifactId}`;
         VSCodeUI.runInTerminal(cmd, { name });
     }
 
@@ -121,7 +121,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             if (trimedGoals) {
                 Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
                 VSCodeUI.runInTerminal(`mvn ${trimedGoals} -f "${item.pomXmlFilePath}"`,
-                    { name: `Maven-${item.params.projectName}` });
+                    { name: `Maven-${item.params.artifactId}` });
             }
         } else if (selectedGoal === ENTRY_OPEN_HIST) {
             const historicalFilePath = Utils.getCommandHistoryCachePath(item.pomXmlFilePath);
@@ -129,7 +129,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
         } else if (selectedGoal) {
             Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
             VSCodeUI.runInTerminal(`mvn ${selectedGoal} -f "${item.pomXmlFilePath}"`,
-                { name: `Maven-${item.params.projectName}` });
+                { name: `Maven-${item.params.artifactId}` });
         }
     }
 }

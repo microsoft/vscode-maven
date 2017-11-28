@@ -20,9 +20,9 @@ export class Utils {
             let pomObject = null;
             xml2js.parseString(xml, { explicitArray: false }, (err, res) => { pomObject = res; });
             if (pomObject && pomObject.project) {
-                const { name, artifactId, groupId, version } = pomObject.project;
-                return new MavenProjectTreeItem(name || `${groupId}:${artifactId}:${version}`,
-                    pomXmlFilePath, "mavenProject", { projectName: name, pom: pomObject });
+                const { artifactId } = pomObject.project;
+                return new MavenProjectTreeItem(artifactId,
+                    pomXmlFilePath, "mavenProject", { artifactId, pom: pomObject });
             }
         }
         return null;
