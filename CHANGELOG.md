@@ -3,6 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.2.0](#020)
         - [0.1.4](#014)
         - [0.1.3](#013)
         - [0.1.2](#012)
@@ -18,6 +19,10 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## Unreleased
 
 ## Released
+### 0.2.0
+- add `maven.projects.pinnedPomPaths` entry in Workspace Settings.
+- Can manually import `pom.xml` not located in root folder (right-click on `pom.xml`).
+
 ### 0.1.4
 - Use artifactId as name of Node in side bar.(To fix display issues like unparsed `$` signs)
 
