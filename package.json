@@ -126,18 +126,22 @@
     "menus": {
       "explorer/context": [
         {
-          "command": "maven.archetype.generate"
+          "command": "maven.archetype.generate",
+          "group": "maven@3"
         },
         {
-          "command": "maven.archetype.updateCache"
+          "command": "maven.archetype.updateCache",
+          "group": "maven@4"
         },
         {
           "command": "maven.project.effectivePom",
-          "when": "resourceFilename == pom.xml"
+          "when": "resourceFilename == pom.xml",
+          "group": "maven@1"
         },
         {
           "command": "maven.project.pinProject",
-          "when": "resourceFilename == pom.xml"
+          "when": "resourceFilename == pom.xml",
+          "group": "maven@0"
         }
       ],
       "view/title": [
