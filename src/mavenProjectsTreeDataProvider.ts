@@ -33,7 +33,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
                     }
                 });
             }
-            const config = vscode.workspace.getConfiguration("maven.projects").get<string[]>("poms") || [];
+            const config = vscode.workspace.getConfiguration("maven.projects").get<string[]>("pinnedPomPaths") || [];
             config.filter((pom) => !ret.find((value: MavenProjectTreeItem) => value.pomXmlFilePath === pom))
                 .forEach((pom) => {
                     const item = Utils.getProject(pom);
@@ -144,14 +144,14 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
         }
     }
 
-    public pinProject(entry) {
+    public async pinProject(entry) {
         if (entry && entry.scheme === "file") {
             const currentPomXml = entry.fsPath;
             const config = vscode.workspace.getConfiguration("maven.projects");
-            const pomXmls = config.get<string[]>("poms");
+            const pomXmls = config.get<string[]>("pinnedPomPaths");
             if (pomXmls.indexOf(currentPomXml) < 0) {
                 pomXmls.push(currentPomXml);
-                config.update("poms", pomXmls, false);
+                await config.update("pinnedPomPaths", pomXmls, false);
             }
         }
         this.refreshTree();

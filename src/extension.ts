@@ -11,40 +11,40 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal) => {
-        const commandMavenGoal = vscode.commands.registerCommand(`mavenGoal.${goal}`, (item) => {
+        const commandMavenGoal = vscode.commands.registerCommand(`maven.goal.${goal}`, (item) => {
             mavenProjectsTreeDataProvider.executeGoal(item, goal);
         });
         context.subscriptions.push(commandMavenGoal);
     });
 
-    context.subscriptions.push(vscode.commands.registerCommand("mavenProjects.refresh", () => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.projects.refresh", () => {
         mavenProjectsTreeDataProvider.refreshTree();
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("mavenGoal.exec", (goalItem) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.goal.exec", (goalItem) => {
         mavenProjectsTreeDataProvider.executeGoal(goalItem);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("mavenProject.effectivePom", (item) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.effectivePom", (item) => {
         mavenProjectsTreeDataProvider.effectivePom(item);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("mavenGoal.custom", (item) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.goal.custom", (item) => {
         mavenProjectsTreeDataProvider.customGoal(item);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("mavenProject.pinProject", (entry) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.pinProject", (entry) => {
         mavenProjectsTreeDataProvider.pinProject(entry);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("mavenProject.openPom", (item) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.openPom", (item) => {
         VSCodeUI.openFileIfExists(item.pomXmlFilePath);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("mavenArchetype.generate", (entry) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.generate", (entry) => {
         generateFromArchetype(entry);
     }));
-    context.subscriptions.push(vscode.commands.registerCommand("mavenArchetype.updateCache", () => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.updateCache", () => {
         updateLocalArchetypeCatalog();
     }));
 
