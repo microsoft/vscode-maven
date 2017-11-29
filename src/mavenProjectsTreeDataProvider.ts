@@ -26,14 +26,22 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             const ret = [];
             if (vscode.workspace.workspaceFolders) {
                 vscode.workspace.workspaceFolders.forEach((wf) => {
-                    const basepath = wf.uri.fsPath;
-                    const item = Utils.getProject(basepath, "pom.xml");
+                    const item = Utils.getProject(path.join(wf.uri.fsPath, "pom.xml"));
                     if (item) {
                         item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
                         ret.push(item);
                     }
                 });
             }
+            const config = vscode.workspace.getConfiguration("maven.projects").get<string[]>("poms") || [];
+            config.filter((pom) => !ret.find((value: MavenProjectTreeItem) => value.pomXmlFilePath === pom))
+                .forEach((pom) => {
+                    const item = Utils.getProject(pom);
+                    if (item) {
+                        item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
+                        ret.push(item);
+                    }
+                });
             return Promise.resolve(ret);
         } else if (element.contextValue === "mavenProject") {
             const items = [];
@@ -56,7 +64,10 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             return Promise.resolve(items);
         } else if (element.contextValue === "Modules") {
             const items = Array.from(element.params.modules,
-                (mod) => Utils.getProject(path.dirname(element.pomXmlFilePath), `${mod}/pom.xml`)).filter((x) => x);
+                (mod: string) => {
+                    const pomxml = path.join(path.dirname(element.pomXmlFilePath), mod, "pom.xml");
+                    return Utils.getProject(pomxml);
+                }).filter((x) => x);
             items.forEach((item) => item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg")));
             return Promise.resolve(items);
         } else if (element.contextValue === "Lifecycle") {
@@ -116,7 +127,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             placeHolder: "Select the custom command ... ",
         });
         if (selectedGoal === ENTRY_NEW_GOALS) {
-            const inputGoals = await vscode.window.showInputBox({placeHolder: "e.g. clean package -DskipTests"});
+            const inputGoals = await vscode.window.showInputBox({ placeHolder: "e.g. clean package -DskipTests" });
             const trimedGoals = inputGoals && inputGoals.trim();
             if (trimedGoals) {
                 Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
@@ -131,5 +142,18 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             VSCodeUI.runInTerminal(`mvn ${selectedGoal} -f "${item.pomXmlFilePath}"`,
                 { name: `Maven-${item.params.artifactId}` });
         }
+    }
+
+    public pinProject(entry) {
+        if (entry && entry.scheme === "file") {
+            const currentPomXml = entry.fsPath;
+            const config = vscode.workspace.getConfiguration("maven.projects");
+            const pomXmls = config.get<string[]>("poms");
+            if (pomXmls.indexOf(currentPomXml) < 0) {
+                pomXmls.push(currentPomXml);
+                config.update("poms", pomXmls, false);
+            }
+        }
+        this.refreshTree();
     }
 }

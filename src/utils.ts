@@ -13,8 +13,7 @@ export class Utils {
     public static exec(cmd: string, callback?) {
         return exec(cmd, callback);
     }
-    public static getProject(basePath: string, pomXmlRelativePath: string): MavenProjectTreeItem {
-        const pomXmlFilePath = path.resolve(basePath, pomXmlRelativePath);
+    public static getProject(pomXmlFilePath: string): MavenProjectTreeItem {
         if (fs.existsSync(pomXmlFilePath)) {
             const xml = fs.readFileSync(pomXmlFilePath, "utf8");
             let pomObject = null;

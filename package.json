@@ -95,6 +95,11 @@
         "category": "Maven"
       },
       {
+        "command": "mavenProject.pinProject",
+        "title": "Pin to Maven Project Explorer",
+        "category": "Maven"
+      },
+      {
         "command": "mavenProject.openPom",
         "title": "Open POM file",
         "category": "Maven"
@@ -128,6 +133,10 @@
         },
         {
           "command": "mavenProject.effectivePom",
+          "when": "resourceFilename == pom.xml"
+        },
+        {
+          "command": "mavenProject.pinProject",
           "when": "resourceFilename == pom.xml"
         }
       ],
@@ -208,11 +217,16 @@
     },
     "configuration": [
       {
-        "title": "Maven Projects",
+        "title": "Maven Project Explorer",
         "properties": {
-          "mavenProjects.showExplorer": {
+          "maven.showExplorer": {
             "type": "boolean",
             "default": true
+          },
+          "maven.projects.pinnedPomPaths": {
+            "type": "array",
+            "default": [],
+            "description": "Specifies pom.xml filepath of those projects you want to pin to Maven Project Explorer."
           }
         }
       }

@@ -33,6 +33,10 @@ export function activate(context: vscode.ExtensionContext) {
         mavenProjectsTreeDataProvider.customGoal(item);
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand("mavenProject.pinProject", (entry) => {
+        mavenProjectsTreeDataProvider.pinProject(entry);
+    }));
+
     context.subscriptions.push(vscode.commands.registerCommand("mavenProject.openPom", (item) => {
         VSCodeUI.openFileIfExists(item.pomXmlFilePath);
     }));
