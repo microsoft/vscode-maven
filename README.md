@@ -20,10 +20,12 @@ Maven installed and PATH added, i.e., `mvn` command can be executed directly in 
 ## Usage
 
 * By default, the extension scans `pom.xml` of each root folder in your workspace, and display corresponding projects and their modules in the sidebar.
-![Screenshot](images/view_context.png)
+
+    ![Screenshot](images/view_context.png)
 
 * If you want to add project whose `pom.xml` is not under root folder, you can `right-click` on the `pom.xml`, select `Pin to Maven Project Explorer`. The extension will force to show the corresponding project in sidebar.
-![Screenshot](images/explorer_context.png)
+
+    ![Screenshot](images/explorer_context.png)
 
     In fact, the extension simply adds the pom.xml absolute path in your `Workspace Settings`, and then refreshes the whole view.
     ```
@@ -34,7 +36,8 @@ Maven installed and PATH added, i.e., `mvn` command can be executed directly in 
     }
     ```
 * It perserves history of custom goals for each project, so you can fast re-run previous long commands, something like `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
-![Screenshot](images/customGoal.gif)
+
+    ![Screenshot](images/customGoal.gif)
 
 * Archetype Related
     * **Update Maven Archetype Catalog** Enter URL of the remote catelog file, then it's downloaded to you local repository.
