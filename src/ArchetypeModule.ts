@@ -35,14 +35,6 @@ export class ArchetypeModule {
         }
     }
 
-    public static async updateLocalArchetypeCatalog() {
-        const url = await vscode.window.showInputBox({
-            validateInput: (text) => null,
-            value: DEFAULT_ARCHETYPE_CATALOG_URL,
-        });
-        vscode.window.setStatusBarMessage("Updating archetype catalog ... ", Utils.httpGetContent(url));
-    }
-
     public static async getArchetypeList(url?: string): Promise<Archetype[]> {
         let xml = null;
         if (url) {

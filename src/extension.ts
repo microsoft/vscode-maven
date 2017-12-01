@@ -43,9 +43,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.generate", (entry) => {
         ArchetypeModule.generateFromArchetype(entry);
     }));
-    context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.updateCache", () => {
-        ArchetypeModule.updateLocalArchetypeCatalog();
-    }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
         VSCodeUI.onDidCloseTerminal(closedTerminal);

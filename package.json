@@ -20,6 +20,7 @@
   "activationEvents": [
     "workspaceContains:pom.xml",
     "onCommand:maven.projects.refresh",
+    "onCommand:maven.archetype.generate",
     "onView:mavenProjects"
   ],
   "main": "./out/extension",
@@ -107,11 +108,6 @@
       {
         "command": "maven.archetype.generate",
         "title": "Generate from Maven Archetype",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.archetype.updateCache",
-        "title": "Update Maven Archetype Catalog",
         "category": "Maven"
       }
     ],
