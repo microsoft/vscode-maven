@@ -1,6 +1,5 @@
 import { exec, execSync } from "child_process";
 import * as fs from "fs";
-import { existsSync } from "fs";
 import * as http from "http";
 import * as md5 from "md5";
 import * as os from "os";
@@ -8,6 +7,8 @@ import * as path from "path";
 import * as xml2js from "xml2js";
 import { Archetype } from "./Archetype";
 import { ProjectItem } from "./ProjectItem";
+
+const EXTENSION_ID: string = "vscode-maven";
 
 export class Utils {
     public static exec(cmd: string, callback?) {
@@ -17,9 +18,9 @@ export class Utils {
         if (fs.existsSync(pomXmlFilePath)) {
             const xml = fs.readFileSync(pomXmlFilePath, "utf8");
             let pomObject = null;
-            xml2js.parseString(xml, { explicitArray: false }, (err, res) => { pomObject = res; });
+            xml2js.parseString(xml, { explicitArray: true }, (err, res) => { pomObject = res; });
             if (pomObject && pomObject.project) {
-                const { artifactId } = pomObject.project;
+                const artifactId = pomObject.project.artifactId && pomObject.project.artifactId.toString();
                 return new ProjectItem(artifactId,
                     pomXmlFilePath, "mavenProject", { artifactId, pom: pomObject });
             }
@@ -51,56 +52,15 @@ export class Utils {
     }
 
     public static getEffectivePomOutputPath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), "effective-pom.xml");
+        return path.join(os.tmpdir(), EXTENSION_ID, md5(pomXmlFilePath), "effective-pom.xml");
     }
 
     public static getCommandHistoryCachePath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), "commandHistory.txt");
+        return path.join(os.tmpdir(), EXTENSION_ID, md5(pomXmlFilePath), "commandHistory.txt");
     }
 
-    public static getArchetypeList(): Archetype[] {
-        const localArchetypeXmlFilePath = this.getLocalArchetypeCatalogFilePath();
-        if (existsSync(localArchetypeXmlFilePath)) {
-            const xml = fs.readFileSync(localArchetypeXmlFilePath, "utf8");
-            let catalog = null;
-            xml2js.parseString(xml, { explicitArray: false }, (err, res) => { catalog = res; });
-            if (catalog && catalog["archetype-catalog"] && catalog["archetype-catalog"].archetypes) {
-                const dict: { [key: string]: Archetype } = {};
-                catalog["archetype-catalog"].archetypes.archetype.forEach((archetype) => {
-                    const identifier = `${archetype.groupId}:${archetype.artifactId}`;
-                    if (!dict[identifier]) {
-                        dict[identifier] =
-                            new Archetype(archetype.artifactId, archetype.groupId, archetype.description);
-                    }
-                    if (dict[identifier].versions.indexOf(archetype.version) < 0) {
-                        dict[identifier].versions.push(archetype.version);
-                    }
-                });
-                return Object.keys(dict).map((k) => dict[k]);
-            }
-        }
-        return [];
-    }
-    public static getLocalArchetypeCatalogFilePath(): string {
-        return path.join(os.homedir(), ".m2", "repository", "archetype-catalog.xml");
-    }
-
-    public static updateArchetypeCache(url: string): Promise<void> {
-        const filepath = this.getLocalArchetypeCatalogFilePath();
-        this.mkdirp(path.dirname(filepath));
-        const file = fs.createWriteStream(filepath);
-        const ret = new Promise<void>((resolve, reject) => {
-            const request = http.get(url, (response) => {
-                response.pipe(file);
-                response.on("end", () => {
-                    resolve();
-                });
-            });
-            request.on("error", (e) => {
-                reject();
-            });
-        });
-        return ret;
+    public static getTempFolder(): string {
+        return path.join(os.tmpdir(), EXTENSION_ID);
     }
 
     public static readFileIfExists(filepath: string): string {
@@ -121,11 +81,58 @@ export class Utils {
         }
     }
 
-    private static mkdirp(filepath) {
+    public static mkdirp(filepath) {
         if (fs.existsSync(filepath)) {
             return;
         }
         this.mkdirp(path.dirname(filepath));
         fs.mkdirSync(filepath);
+    }
+
+    public static listArchetypeFromXml(xml: string): Archetype[] {
+        let catalog = null;
+        xml2js.parseString(xml, { explicitArray: true }, (err, res) => { catalog = res; });
+        if (catalog && catalog["archetype-catalog"]) {
+            const dict: { [key: string]: Archetype } = {};
+            catalog["archetype-catalog"].archetypes.forEach((archetypes) => {
+                archetypes.archetype.forEach((archetype) => {
+                    const groupId = archetype.groupId && archetype.groupId.toString();
+                    const artifactId = archetype.artifactId && archetype.artifactId.toString();
+                    const description = archetype.description && archetype.description.toString();
+                    const version = archetype.version && archetype.version.toString();
+                    const identifier = `${groupId}:${artifactId}`;
+                    if (!dict[identifier]) {
+                        dict[identifier] =
+                            new Archetype(artifactId, groupId, description);
+                    }
+                    if (dict[identifier].versions.indexOf(version) < 0) {
+                        dict[identifier].versions.push(version);
+                    }
+                });
+            });
+            return Object.keys(dict).map((k) => dict[k]);
+        }
+    }
+
+    public static getLocalArchetypeCatalogFilePath(): string {
+        return path.join(os.homedir(), ".m2", "repository", "archetype-catalog.xml");
+    }
+
+    public static httpGetContent(url: string): Promise<string> {
+        const filepath = path.join(this.getTempFolder(), md5(url));
+        const file = fs.createWriteStream(filepath);
+        const contentBlocks: string[] = [];
+        const ret = new Promise<string>((resolve, reject) => {
+            const request = http.get(url, (response) => {
+                response.pipe(file);
+                response.on("end", () => {
+                    resolve(fs.readFileSync(filepath).toString());
+                });
+            });
+            request.on("error", (e) => {
+                reject();
+            });
+        });
+        return ret;
     }
 }

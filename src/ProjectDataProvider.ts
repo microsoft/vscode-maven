@@ -46,11 +46,10 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
         } else if (element.contextValue === "mavenProject") {
             const items = [];
             // sub modules
-            const pomObj = element.params.pom;
-            if (pomObj.project && pomObj.project.modules && pomObj.project.modules.module) {
-                const pomModule = pomObj.project.modules.module;
+            const pom = element.params.pom;
+            if (pom.project && pom.project.modules) {
                 const item = new ProjectItem("Modules", element.pomXmlFilePath, "Modules",
-                    { ...element.params, modules: Array.isArray(pomModule) ? pomModule : [pomModule] },
+                    { ...element.params, modules: pom.project.modules },
                 );
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(item);
@@ -63,12 +62,17 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
             });
             return Promise.resolve(items);
         } else if (element.contextValue === "Modules") {
-            const items = Array.from(element.params.modules,
-                (mod: string) => {
-                    const pomxml = path.join(path.dirname(element.pomXmlFilePath), mod, "pom.xml");
-                    return Utils.getProject(pomxml);
-                }).filter((x) => x);
-            items.forEach((item) => item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg")));
+            const items = [];
+            element.params.modules.forEach((modules)=>{
+                modules.module && modules.module.forEach((mod)=>{
+                    const pomxml = path.join(path.dirname(element.pomXmlFilePath), mod.toString(), "pom.xml");
+                    const item = Utils.getProject(pomxml);
+                    if (item) {
+                        item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
+                        items.push(item);
+                    }
+                });
+            });
             return Promise.resolve(items);
         } else if (element.contextValue === "Lifecycle") {
             const items = [];
