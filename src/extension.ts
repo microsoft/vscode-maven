@@ -1,13 +1,13 @@
 "use strict";
 import * as vscode from "vscode";
-import { MavenProjectsTreeDataProvider } from "./mavenProjectsTreeDataProvider";
+import { ProjectDataProvider } from "./ProjectDataProvider";
 import { Utils } from "./utils";
 import { VSCodeUI } from "./vscodeUI";
 
 const DEFAULT_ARCHETYPE_CATALOG_URL: string = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
 
 export function activate(context: vscode.ExtensionContext) {
-    const mavenProjectsTreeDataProvider = new MavenProjectsTreeDataProvider(context);
+    const mavenProjectsTreeDataProvider = new ProjectDataProvider(context);
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal) => {

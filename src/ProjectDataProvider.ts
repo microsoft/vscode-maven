@@ -1,14 +1,14 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { TreeItem, TreeItemCollapsibleState } from "vscode";
-import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
-import { Utils } from "./utils";
+import { ProjectItem } from "./ProjectItem";
+import { Utils } from "./Utils";
 import { VSCodeUI } from "./vscodeUI";
 
 const ENTRY_NEW_GOALS: string = "New ...";
 const ENTRY_OPEN_HIST: string = "Edit ...";
 
-export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 
     public _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem> = new vscode.EventEmitter<vscode.TreeItem>();
     public readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem> = this._onDidChangeTreeData.event;
@@ -21,7 +21,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
     }
 
     public getChildren(node?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
-        const element = node as MavenProjectTreeItem;
+        const element = node as ProjectItem;
         if (element === undefined) {
             const ret = [];
             if (vscode.workspace.workspaceFolders) {
@@ -34,7 +34,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
                 });
             }
             const config = vscode.workspace.getConfiguration("maven.projects").get<string[]>("pinnedPomPaths") || [];
-            config.filter((pom) => !ret.find((value: MavenProjectTreeItem) => value.pomXmlFilePath === pom))
+            config.filter((pom) => !ret.find((value: ProjectItem) => value.pomXmlFilePath === pom))
                 .forEach((pom) => {
                     const item = Utils.getProject(pom);
                     if (item) {
@@ -49,7 +49,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             const pomObj = element.params.pom;
             if (pomObj.project && pomObj.project.modules && pomObj.project.modules.module) {
                 const pomModule = pomObj.project.modules.module;
-                const item = new MavenProjectTreeItem("Modules", element.pomXmlFilePath, "Modules",
+                const item = new ProjectItem("Modules", element.pomXmlFilePath, "Modules",
                     { ...element.params, modules: Array.isArray(pomModule) ? pomModule : [pomModule] },
                 );
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
@@ -57,7 +57,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             }
             // others
             ["Lifecycle" /*, 'Dependencies' */].forEach((name) => {
-                const item = new MavenProjectTreeItem(name, element.pomXmlFilePath, name, element.params);
+                const item = new ProjectItem(name, element.pomXmlFilePath, name, element.params);
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(item);
             });
@@ -75,7 +75,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
             ["clean",
                 "validate",
                 "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal) => {
-                    const item = new MavenProjectTreeItem(goal, element.pomXmlFilePath, "goal", element.params);
+                    const item = new ProjectItem(goal, element.pomXmlFilePath, "goal", element.params);
                     item.collapsibleState = 0;
                     item.iconPath = this.context.asAbsolutePath(path.join("resources", "goal.svg"));
                     items.push(item);
@@ -92,13 +92,13 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
         this._onDidChangeTreeData.fire();
     }
 
-    public executeGoal(item: MavenProjectTreeItem, goal?: string): void {
+    public executeGoal(item: ProjectItem, goal?: string): void {
         const cmd = `mvn ${goal || item.label} -f "${item.pomXmlFilePath}"`;
         const name = `Maven-${item.params.artifactId}`;
         VSCodeUI.runInTerminal(cmd, { name });
     }
 
-    public async effectivePom(item: MavenProjectTreeItem | any): Promise<void> {
+    public async effectivePom(item: ProjectItem | any): Promise<void> {
         const pomXmlFilePath = item.fsPath || item.pomXmlFilePath;
         const p = new Promise<string>((resolve, reject) => {
             const filepath = Utils.getEffectivePomOutputPath(pomXmlFilePath);
@@ -121,7 +121,7 @@ export class MavenProjectsTreeDataProvider implements vscode.TreeDataProvider<vs
         }
     }
 
-    public async customGoal(item: MavenProjectTreeItem): Promise<void> {
+    public async customGoal(item: ProjectItem): Promise<void> {
         const cmdlist: string[] = Utils.loadCmdHistory(item.pomXmlFilePath);
         const selectedGoal = await vscode.window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
             placeHolder: "Select the custom command ... ",

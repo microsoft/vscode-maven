@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { TreeItemCollapsibleState } from "vscode";
 
-export class MavenProjectTreeItem extends vscode.TreeItem {
+export class ProjectItem extends vscode.TreeItem {
     public pomXmlFilePath: string;
     public params: any;
 

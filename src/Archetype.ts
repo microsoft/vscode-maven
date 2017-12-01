@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { QuickPickItem } from "vscode";
-export class MavenArchetype implements QuickPickItem {
+export class Archetype implements QuickPickItem {
     public label: string;
     public description: string;
     public artifactId: string;

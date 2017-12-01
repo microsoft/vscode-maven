@@ -6,21 +6,21 @@ import * as md5 from "md5";
 import * as os from "os";
 import * as path from "path";
 import * as xml2js from "xml2js";
-import { MavenArchetype } from "./mavenArchetype";
-import { MavenProjectTreeItem } from "./mavenProjectTreeItem";
+import { Archetype } from "./Archetype";
+import { ProjectItem } from "./ProjectItem";
 
 export class Utils {
     public static exec(cmd: string, callback?) {
         return exec(cmd, callback);
     }
-    public static getProject(pomXmlFilePath: string): MavenProjectTreeItem {
+    public static getProject(pomXmlFilePath: string): ProjectItem {
         if (fs.existsSync(pomXmlFilePath)) {
             const xml = fs.readFileSync(pomXmlFilePath, "utf8");
             let pomObject = null;
             xml2js.parseString(xml, { explicitArray: false }, (err, res) => { pomObject = res; });
             if (pomObject && pomObject.project) {
                 const { artifactId } = pomObject.project;
-                return new MavenProjectTreeItem(artifactId,
+                return new ProjectItem(artifactId,
                     pomXmlFilePath, "mavenProject", { artifactId, pom: pomObject });
             }
         }
@@ -58,19 +58,19 @@ export class Utils {
         return path.join(os.tmpdir(), "vscode-maven", md5(pomXmlFilePath), "commandHistory.txt");
     }
 
-    public static getArchetypeList(): MavenArchetype[] {
+    public static getArchetypeList(): Archetype[] {
         const localArchetypeXmlFilePath = this.getLocalArchetypeCatalogFilePath();
         if (existsSync(localArchetypeXmlFilePath)) {
             const xml = fs.readFileSync(localArchetypeXmlFilePath, "utf8");
             let catalog = null;
             xml2js.parseString(xml, { explicitArray: false }, (err, res) => { catalog = res; });
             if (catalog && catalog["archetype-catalog"] && catalog["archetype-catalog"].archetypes) {
-                const dict: { [key: string]: MavenArchetype } = {};
+                const dict: { [key: string]: Archetype } = {};
                 catalog["archetype-catalog"].archetypes.archetype.forEach((archetype) => {
                     const identifier = `${archetype.groupId}:${archetype.artifactId}`;
                     if (!dict[identifier]) {
                         dict[identifier] =
-                            new MavenArchetype(archetype.artifactId, archetype.groupId, archetype.description);
+                            new Archetype(archetype.artifactId, archetype.groupId, archetype.description);
                     }
                     if (dict[identifier].versions.indexOf(archetype.version) < 0) {
                         dict[identifier].versions.push(archetype.version);
