@@ -37,7 +37,9 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand("maven.project.openPom", (item) => {
-        VSCodeUI.openFileIfExists(item.pomXmlFilePath);
+        if (item) {
+            VSCodeUI.openFileIfExists(item.pomXmlFilePath);
+        }
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.generate", (entry) => {

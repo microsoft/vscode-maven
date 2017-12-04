@@ -107,7 +107,8 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
         }
     }
 
-    public async effectivePom(item: ProjectItem | any): Promise<void> {
+    public async effectivePom(projectItem: ProjectItem | any): Promise<void> {
+        const item = projectItem || await VSCodeUI.getQuickPick<ProjectItem>(this.cachedItems, (x) => x.label, (x) => x.pomXmlFilePath);
         const pomXmlFilePath = item.fsPath || item.pomXmlFilePath;
         const p = new Promise<string>((resolve, reject) => {
             const filepath = Utils.getEffectivePomOutputPath(pomXmlFilePath);
@@ -130,7 +131,8 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
         }
     }
 
-    public async customGoal(item: ProjectItem): Promise<void> {
+    public async customGoal(projectItem: ProjectItem): Promise<void> {
+        const item = projectItem || await VSCodeUI.getQuickPick<ProjectItem>(this.cachedItems, (x) => x.label, (x) => x.pomXmlFilePath);
         const cmdlist: string[] = Utils.loadCmdHistory(item.pomXmlFilePath);
         const selectedGoal = await vscode.window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
             placeHolder: "Select the custom command ... ",

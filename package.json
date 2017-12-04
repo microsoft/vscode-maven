@@ -24,7 +24,19 @@
   "activationEvents": [
     "workspaceContains:pom.xml",
     "onCommand:maven.projects.refresh",
-    "onCommand:maven.archetype.generate",
+    "onCommand:maven.goal.clean",
+    "onCommand:maven.goal.validate",
+    "onCommand:maven.goal.compile",
+    "onCommand:maven.goal.test",
+    "onCommand:maven.goal.package",
+    "onCommand:maven.goal.verify",
+    "onCommand:maven.goal.install",
+    "onCommand:maven.goal.site",
+    "onCommand:maven.goal.deploy",
+    "onCommand:maven.goal.custom",
+    "onCommand:maven.project.effectivePom",
+    "onCommand:maven.project.pinProject",
+    "onCommand:maven.project.openPom",
     "onView:mavenProjects"
   ],
   "main": "./out/extension",
@@ -38,11 +50,6 @@
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
         }
-      },
-      {
-        "command": "maven.goal.exec",
-        "title": "Execute",
-        "category": "Maven"
       },
       {
         "command": "maven.goal.clean",
