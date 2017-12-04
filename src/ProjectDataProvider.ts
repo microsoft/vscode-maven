@@ -63,15 +63,17 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
             return Promise.resolve(items);
         } else if (element.contextValue === "Modules") {
             const items = [];
-            element.params.modules.forEach((modules)=>{
-                modules.module && modules.module.forEach((mod)=>{
-                    const pomxml = path.join(path.dirname(element.pomXmlFilePath), mod.toString(), "pom.xml");
-                    const item = Utils.getProject(pomxml);
-                    if (item) {
-                        item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
-                        items.push(item);
-                    }
-                });
+            element.params.modules.forEach((modules) => {
+                if (modules.module) {
+                    modules.module.forEach((mod) => {
+                        const pomxml = path.join(path.dirname(element.pomXmlFilePath), mod.toString(), "pom.xml");
+                        const item = Utils.getProject(pomxml);
+                        if (item) {
+                            item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
+                            items.push(item);
+                        }
+                    });
+                }
             });
             return Promise.resolve(items);
         } else if (element.contextValue === "Lifecycle") {

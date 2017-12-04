@@ -1,9 +1,9 @@
 "use strict";
 import * as vscode from "vscode";
+import { ArchetypeModule } from "./ArchetypeModule";
 import { ProjectDataProvider } from "./ProjectDataProvider";
 import { Utils } from "./utils";
 import { VSCodeUI } from "./vscodeUI";
-import {ArchetypeModule} from "./ArchetypeModule";
 
 export function activate(context: vscode.ExtensionContext) {
     const mavenProjectsTreeDataProvider = new ProjectDataProvider(context);
@@ -52,4 +52,3 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
     // this method is called when your extension is deactivated
 }
-
