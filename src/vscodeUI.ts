@@ -52,6 +52,20 @@ export class VSCodeUI {
         }
     }
 
+    public static async openDialogForFile(customOptions: vscode.OpenDialogOptions): Promise<vscode.Uri> {
+        const options = {
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+        };
+        const result = await vscode.window.showOpenDialog(Object.assign(options, customOptions));
+        if (result && result.length) {
+            return Promise.resolve(result[0]);
+        } else {
+            return Promise.resolve(null);
+        }
+    }
+
     public static openFileIfExists(filepath: string) {
         if (fs.existsSync(filepath)) {
             vscode.window.showTextDocument(vscode.Uri.file(filepath), { preview: false });

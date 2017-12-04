@@ -23,7 +23,7 @@
   },
   "activationEvents": [
     "workspaceContains:pom.xml",
-    "onCommand:maven.projects.refresh",
+    "onCommand:maven.project.refreshAll",
     "onCommand:maven.goal.clean",
     "onCommand:maven.goal.validate",
     "onCommand:maven.goal.compile",
@@ -43,7 +43,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "maven.projects.refresh",
+        "command": "maven.project.refreshAll",
         "title": "Refresh",
         "category": "Maven",
         "icon": {
@@ -98,7 +98,7 @@
       },
       {
         "command": "maven.goal.custom",
-        "title": "custom goals ... ",
+        "title": "Custom goals ... ",
         "category": "Maven"
       },
       {
@@ -108,8 +108,12 @@
       },
       {
         "command": "maven.project.pinProject",
-        "title": "Pin to Maven Project Explorer",
-        "category": "Maven"
+        "title": "Import Maven Project",
+        "category": "Maven",
+        "icon": {
+          "light": "resources/light/add.svg",
+          "dark": "resources/dark/add.svg"
+        }
       },
       {
         "command": "maven.project.openPom",
@@ -120,6 +124,15 @@
         "command": "maven.archetype.generate",
         "title": "Generate from Maven Archetype",
         "category": "Maven"
+      },
+      {
+        "command": "maven.project.importAll",
+        "title": "Import All",
+        "category": "Maven",
+        "icon": {
+          "light": "resources/light/addAll.svg",
+          "dark": "resources/dark/addAll.svg"
+        }
       }
     ],
     "views": {
@@ -149,9 +162,19 @@
       ],
       "view/title": [
         {
-          "command": "maven.projects.refresh",
+          "command": "maven.project.refreshAll",
           "when": "view == mavenProjects",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "maven.project.importAll",
+          "when": "view == mavenProjects",
+          "group": "navigation@1"
+        },
+        {
+          "command": "maven.project.pinProject",
+          "when": "view == mavenProjects",
+          "group": "navigation@0"
         }
       ],
       "view/item/context": [

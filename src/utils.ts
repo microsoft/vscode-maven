@@ -149,7 +149,7 @@ export class Utils {
                     this.findAllInDir(filename, targetFileName, depth - 1).forEach((elem) => {
                         ret.push(elem);
                     });
-                } else if (path.basename(filename) === targetFileName) {
+                } else if (path.basename(filename).toLowerCase() === targetFileName) {
                     ret.push(filename);
                 }
             });

@@ -27,10 +27,8 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
             const ret = [];
             this.cachedItems = [];
             if (vscode.workspace.workspaceFolders) {
-                const maxDepthOfPom = vscode.workspace.getConfiguration("maven.projects")
-                    .get<number>("maxDepthOfPom") || 1;
                 vscode.workspace.workspaceFolders.forEach((wf) => {
-                    Utils.findAllInDir(wf.uri.fsPath, "pom.xml", maxDepthOfPom).forEach((pomxml) => {
+                    Utils.findAllInDir(wf.uri.fsPath, "pom.xml", 1).forEach((pomxml) => {
                         const item = Utils.getProject(pomxml);
                         if (item) {
                             ret.push(item);
@@ -39,8 +37,7 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
                 });
             }
 
-            const pinnedPomPaths = vscode.workspace.getConfiguration("maven.projects")
-                .get<string[]>("pinnedPomPaths") || [];
+            const pinnedPomPaths = vscode.workspace.getConfiguration("maven.projects").get<string[]>("pinnedPomPaths") || [];
             pinnedPomPaths.filter((pom) => !ret.find((value: ProjectItem) => value.pomXmlFilePath === pom))
                 .forEach((pom) => {
                     const item = Utils.getProject(pom);
@@ -156,15 +153,44 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
     }
 
     public async pinProject(entry) {
+        let currentPomXml;
         if (entry && entry.scheme === "file") {
-            const currentPomXml = entry.fsPath;
+            currentPomXml = entry.fsPath;
+        } else {
+            const res = await VSCodeUI.openDialogForFile({filters: {"POM File": ["xml"]}});
+            if (res && res.fsPath) {
+                currentPomXml = res.fsPath;
+            }
+        }
+        if (currentPomXml) {
             const config = vscode.workspace.getConfiguration("maven.projects");
             const pomXmls = config.get<string[]>("pinnedPomPaths");
             if (pomXmls.indexOf(currentPomXml) < 0) {
                 pomXmls.push(currentPomXml);
                 await config.update("pinnedPomPaths", pomXmls, false);
             }
+            this.refreshTree();
         }
-        this.refreshTree();
+    }
+
+    public async searchAndPinProjects(dirname: string) {
+        if (!dirname) {
+            const res = await VSCodeUI.openDialogForFolder({});
+            if (res && res.fsPath) {
+                dirname = res.fsPath;
+            }
+        }
+        if (dirname) {
+            const foundPomXmls = await Utils.findAllInDir(dirname, "pom.xml", 99);
+            const config = vscode.workspace.getConfiguration("maven.projects");
+            const pomXmls = config.get<string[]>("pinnedPomPaths");
+            foundPomXmls.forEach((currentPomXml) => {
+                if (pomXmls.indexOf(currentPomXml) < 0) {
+                    pomXmls.push(currentPomXml);
+                }
+            });
+            await config.update("pinnedPomPaths", pomXmls, false);
+            this.refreshTree();
+        }
     }
 }
