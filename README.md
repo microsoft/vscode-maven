@@ -4,7 +4,7 @@
 
 ## Features
 
-Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide project structures in sidebar.
+Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide project structures in sidebar, improving user experience for Java developers who use Maven.
 
 * Effective POM
 * Shortcut to common goals, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.

@@ -1,7 +1,7 @@
 {
   "name": "vscode-maven",
   "displayName": "Maven Project Explorer",
-  "description": "Browse maven projects in sidebar, execute goals, generate project from archetype.",
+  "description": "Manage maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
   "version": "0.2.0",
   "icon": "resources/logo.png",
   "publisher": "eskibear",
