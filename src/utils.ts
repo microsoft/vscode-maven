@@ -14,6 +14,7 @@ export class Utils {
     public static exec(cmd: string, callback?) {
         return exec(cmd, callback);
     }
+
     public static getProject(pomXmlFilePath: string): ProjectItem {
         if (fs.existsSync(pomXmlFilePath)) {
             const xml = fs.readFileSync(pomXmlFilePath, "utf8");
@@ -133,6 +134,25 @@ export class Utils {
                 reject();
             });
         });
+        return ret;
+    }
+
+    public static findAllInDir(dirname: string, targetFileName: string, depth: number): string[] {
+        const ret: string[] = [];
+        if (depth > 0 && fs.existsSync(dirname)) {
+            const files = fs.readdirSync(dirname);
+            files.forEach((file) => {
+                const filename = path.join(dirname, file);
+                const stat = fs.lstatSync(filename);
+                if (stat.isDirectory()) {
+                    this.findAllInDir(filename, targetFileName, depth - 1).forEach((elem) => {
+                        ret.push(elem);
+                    });
+                } else if (path.basename(filename) === targetFileName) {
+                    ret.push(filename);
+                }
+            });
+        }
         return ret;
     }
 }

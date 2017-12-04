@@ -12,6 +12,10 @@
     "Languages",
     "Other"
   ],
+  "keywords": [
+    "Maven",
+    "Java"
+  ],
   "homepage": "https://github.com/Eskibear/vscode-maven/blob/v0.2.0/README.md",
   "repository": {
     "type": "git",
@@ -126,10 +130,6 @@
           "group": "maven@3"
         },
         {
-          "command": "maven.archetype.updateCache",
-          "group": "maven@4"
-        },
-        {
           "command": "maven.project.effectivePom",
           "when": "resourceFilename == pom.xml",
           "group": "maven@1"
@@ -227,6 +227,11 @@
             "type": "array",
             "default": [],
             "description": "Specifies pom.xml filepath of those projects you want to pin to Maven Project Explorer."
+          },
+          "maven.projects.maxDepthOfPom": {
+            "type": "integer",
+            "default": 1,
+            "description": "Specifies max depth to find pom.xml recursively, only search root folder by default."
           }
         }
       }

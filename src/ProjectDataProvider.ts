@@ -25,23 +25,31 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
         if (element === undefined) {
             const ret = [];
             if (vscode.workspace.workspaceFolders) {
+                const maxDepthOfPom = vscode.workspace.getConfiguration("maven.projects")
+                    .get<number>("maxDepthOfPom") || 1;
                 vscode.workspace.workspaceFolders.forEach((wf) => {
-                    const item = Utils.getProject(path.join(wf.uri.fsPath, "pom.xml"));
-                    if (item) {
-                        item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
-                        ret.push(item);
-                    }
+                    Utils.findAllInDir(wf.uri.fsPath, "pom.xml", maxDepthOfPom).forEach((pomxml) => {
+                        const item = Utils.getProject(pomxml);
+                        if (item) {
+                            ret.push(item);
+                        }
+                    });
                 });
             }
-            const config = vscode.workspace.getConfiguration("maven.projects").get<string[]>("pinnedPomPaths") || [];
-            config.filter((pom) => !ret.find((value: ProjectItem) => value.pomXmlFilePath === pom))
+
+            const pinnedPomPaths = vscode.workspace.getConfiguration("maven.projects")
+                .get<string[]>("pinnedPomPaths") || [];
+            pinnedPomPaths.filter((pom) => !ret.find((value: ProjectItem) => value.pomXmlFilePath === pom))
                 .forEach((pom) => {
                     const item = Utils.getProject(pom);
                     if (item) {
-                        item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
                         ret.push(item);
                     }
                 });
+
+            ret.forEach((elem) => {
+                elem.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
+            });
             return Promise.resolve(ret);
         } else if (element.contextValue === "mavenProject") {
             const items = [];
