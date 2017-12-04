@@ -8,7 +8,7 @@ Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide 
 
 * Effective POM
 * Shortcut to common goals, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
-* Perserve history of custom goals for fast re-run long commands(e.g. `clean package -DskipTests`, `spring-boot:run`).
+* Perserve history of custom goals for fast re-run long commands(e.g. `mvn clean package -DskipTests -Dcheckstyle.skip`).
 * Can generate projects from Maven Archetype.
 * Support multi-module maven projects.
 * support VSCode multi-root workspace.
@@ -22,13 +22,6 @@ Maven installed and PATH added, i.e., `mvn` command can be executed directly in 
 * The extension scans `pom.xml` from each root folder in your workspace recursively, and display corresponding projects and their modules in the sidebar.
 
     ![Screenshot](images/view_context.png)
-
-* By default, the `maven.projects.maxDepthOfPom` is `1`, meaning it only imports pom file under root folder. You can modify it in your `User/Workspace Settings` to import projects deeper inside the root folder. e.g.
-```
-    {
-        "maven.projects.maxDepthOfPom": 5
-    }
-```
 
 * If you want to add project whose `pom.xml` is elsewhere not in the workspace, you can `right-click` on the `pom.xml`, select `Pin to Maven Project Explorer`. The extension will force to show the corresponding project in sidebar.
 
