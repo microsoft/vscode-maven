@@ -12,6 +12,7 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
 
     public _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem> = new vscode.EventEmitter<vscode.TreeItem>();
     public readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem> = this._onDidChangeTreeData.event;
+    private cachedItems: ProjectItem[] = [];
 
     constructor(protected context: vscode.ExtensionContext) {
     }
@@ -24,6 +25,7 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
         const element = node as ProjectItem;
         if (element === undefined) {
             const ret = [];
+            this.cachedItems = [];
             if (vscode.workspace.workspaceFolders) {
                 const maxDepthOfPom = vscode.workspace.getConfiguration("maven.projects")
                     .get<number>("maxDepthOfPom") || 1;
@@ -49,6 +51,7 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
 
             ret.forEach((elem) => {
                 elem.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
+                this.cachedItems.push(elem);
             });
             return Promise.resolve(ret);
         } else if (element.contextValue === "mavenProject") {
@@ -83,6 +86,12 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
                     });
                 }
             });
+            // update cached projects
+            items.filter(
+                (item) => !this.cachedItems.find((value: ProjectItem) => value.pomXmlFilePath === item.pomXmlFilePath))
+                .forEach((item) => {
+                    this.cachedItems.push(item);
+                });
             return Promise.resolve(items);
         } else if (element.contextValue === "Lifecycle") {
             const items = [];
@@ -106,10 +115,13 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
         this._onDidChangeTreeData.fire();
     }
 
-    public executeGoal(item: ProjectItem, goal?: string): void {
-        const cmd = `mvn ${goal || item.label} -f "${item.pomXmlFilePath}"`;
-        const name = `Maven-${item.params.artifactId}`;
-        VSCodeUI.runInTerminal(cmd, { name });
+    public async executeGoal(projectItem: ProjectItem, goal?: string): Promise<void> {
+        const item = projectItem || await VSCodeUI.getQuickPick<ProjectItem>(this.cachedItems, (x) => x.label, (x) => x.pomXmlFilePath);
+        if (item) {
+            const cmd = `mvn ${goal || item.label} -f "${item.pomXmlFilePath}"`;
+            const name = `Maven-${item.params.artifactId}`;
+            VSCodeUI.runInTerminal(cmd, { name });
+        }
     }
 
     public async effectivePom(item: ProjectItem | any): Promise<void> {

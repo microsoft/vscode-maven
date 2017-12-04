@@ -58,6 +58,25 @@ export class VSCodeUI {
         }
     }
 
+    public static async getQuickPick<T>(
+        items: T[],
+        labelfunc: (item: T) => string, descfunc: (item: T) => string,
+        detailfunc?: (item: T) => string,
+    ): Promise<T> {
+        const itemWrappers: vscode.QuickPickItem[] = [];
+        items.forEach((item) => {
+            const wrapper = {
+                description: descfunc(item),
+                detail: (detailfunc && detailfunc(item)),
+                label: labelfunc(item),
+                value: item,
+            };
+            itemWrappers.push(wrapper);
+        });
+        const selected = await vscode.window.showQuickPick(itemWrappers) as any;
+        return selected && selected.value as T;
+    }
+
     private static terminals: { [id: string]: vscode.Terminal } = {};
 }
 
