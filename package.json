@@ -149,11 +149,6 @@
       ],
       "view/item/context": [
         {
-          "command": "maven.goal.exec",
-          "when": "view == mavenProjects && viewItem == goal",
-          "group": "goal@0"
-        },
-        {
           "command": "maven.goal.clean",
           "when": "view == mavenProjects && viewItem == mavenProject",
           "group": "1-lifecycle@0"

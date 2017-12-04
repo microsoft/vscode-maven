@@ -65,12 +65,6 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(item);
             }
-            // others
-            ["Lifecycle" /*, 'Dependencies' */].forEach((name) => {
-                const item = new ProjectItem(name, element.pomXmlFilePath, name, element.params);
-                item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
-                items.push(item);
-            });
             return Promise.resolve(items);
         } else if (element.contextValue === "Modules") {
             const items = [];
@@ -91,17 +85,6 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
                 (item) => !this.cachedItems.find((value: ProjectItem) => value.pomXmlFilePath === item.pomXmlFilePath))
                 .forEach((item) => {
                     this.cachedItems.push(item);
-                });
-            return Promise.resolve(items);
-        } else if (element.contextValue === "Lifecycle") {
-            const items = [];
-            ["clean",
-                "validate",
-                "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal) => {
-                    const item = new ProjectItem(goal, element.pomXmlFilePath, "goal", element.params);
-                    item.collapsibleState = 0;
-                    item.iconPath = this.context.asAbsolutePath(path.join("resources", "goal.svg"));
-                    items.push(item);
                 });
             return Promise.resolve(items);
         } else if (element.contextValue === "Dependencies") {
