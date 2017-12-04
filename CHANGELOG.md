@@ -3,6 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.2.1](#021)
         - [0.2.0](#020)
         - [0.1.4](#014)
         - [0.1.3](#013)
@@ -19,6 +20,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## Unreleased
 
 ## Released
+### 0.2.1
+- add `maven.projects.maxDepthOfPom` to specify max depth to find pom.xml recursively. By default the value is 1, indicating it only searches root folder.
+
 ### 0.2.0
 - add `maven.projects.pinnedPomPaths` entry in Workspace Settings.
 - Can manually import `pom.xml` not located in root folder (right-click on `pom.xml`).
