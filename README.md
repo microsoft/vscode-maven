@@ -19,11 +19,18 @@ Maven installed and PATH added, i.e., `mvn` command can be executed directly in 
 
 ## Usage
 
-* By default, the extension scans `pom.xml` of each root folder in your workspace, and display corresponding projects and their modules in the sidebar.
+* The extension scans `pom.xml` from each root folder in your workspace recursively, and display corresponding projects and their modules in the sidebar.
 
     ![Screenshot](images/view_context.png)
 
-* If you want to add project whose `pom.xml` is not under root folder, you can `right-click` on the `pom.xml`, select `Pin to Maven Project Explorer`. The extension will force to show the corresponding project in sidebar.
+* By default, the `maven.projects.maxDepthOfPom` is `1`, meaning it only imports pom file under root folder. You can modify it in your `User/Workspace Settings` to import projects deeper inside the root folder. e.g.
+```
+    {
+        "maven.projects.maxDepthOfPom": 5
+    }
+```
+
+* If you want to add project whose `pom.xml` is elsewhere not in the workspace, you can `right-click` on the `pom.xml`, select `Pin to Maven Project Explorer`. The extension will force to show the corresponding project in sidebar.
 
     ![Screenshot](images/explorer_context.png)
 
