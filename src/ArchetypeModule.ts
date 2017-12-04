@@ -10,8 +10,8 @@ export class ArchetypeModule {
     public static async generateFromArchetype(entry): Promise<void> {
         let cwd: string = null;
         const result = await VSCodeUI.openDialogForFolder({
-            openLabel: "Select Destination Folder",
             defaultUri: entry && entry.fsPath ? vscode.Uri.file(entry.fsPath) : undefined,
+            openLabel: "Select Destination Folder",
         });
         if (result && result.fsPath) {
             cwd = result.fsPath;
