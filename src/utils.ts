@@ -18,12 +18,13 @@ export class Utils {
     public static getProject(pomXmlFilePath: string): ProjectItem {
         if (fs.existsSync(pomXmlFilePath)) {
             const xml = fs.readFileSync(pomXmlFilePath, "utf8");
-            let pomObject = null;
-            xml2js.parseString(xml, { explicitArray: true }, (err, res) => { pomObject = res; });
-            if (pomObject && pomObject.project) {
-                const artifactId = pomObject.project.artifactId && pomObject.project.artifactId.toString();
-                return new ProjectItem(artifactId,
-                    pomXmlFilePath, "mavenProject", { artifactId, pom: pomObject });
+            let pom = null;
+            xml2js.parseString(xml, { explicitArray: true }, (err, res) => { pom = res; });
+            if (pom && pom.project) {
+                const artifactId = pom.project.artifactId && pom.project.artifactId.toString();
+                const ret = new ProjectItem(artifactId, pomXmlFilePath, "mavenProject", { artifactId, pom });
+                ret.collapsibleState = pom.project && pom.project.modules ? 1 : 0;
+                return ret;
             }
         }
         return null;
