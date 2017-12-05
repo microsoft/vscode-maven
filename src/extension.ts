@@ -30,8 +30,8 @@ export function activate(context: vscode.ExtensionContext): void {
         mavenProjectsTreeDataProvider.customGoal(item);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.pinProject", (entry: Uri | undefined) => {
-        mavenProjectsTreeDataProvider.pinProject(entry);
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.import", (entry: Uri | undefined) => {
+        mavenProjectsTreeDataProvider.importProject(entry);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand("maven.project.openPom", (item: ProjectItem | undefined) => {
@@ -45,7 +45,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand("maven.project.importAll", () => {
-        mavenProjectsTreeDataProvider.searchAndPinProjects();
+        mavenProjectsTreeDataProvider.searchAndImportProjects();
     }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {

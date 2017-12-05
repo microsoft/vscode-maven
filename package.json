@@ -35,7 +35,7 @@
     "onCommand:maven.goal.deploy",
     "onCommand:maven.goal.custom",
     "onCommand:maven.project.effectivePom",
-    "onCommand:maven.project.pinProject",
+    "onCommand:maven.project.import",
     "onCommand:maven.project.openPom",
     "onCommand:maven.archetype.generate",
     "onView:mavenProjects"
@@ -108,7 +108,7 @@
         "category": "Maven"
       },
       {
-        "command": "maven.project.pinProject",
+        "command": "maven.project.import",
         "title": "Import Maven Project",
         "category": "Maven",
         "icon": {
@@ -156,7 +156,7 @@
           "group": "maven@1"
         },
         {
-          "command": "maven.project.pinProject",
+          "command": "maven.project.import",
           "when": "resourceFilename == pom.xml",
           "group": "maven@0"
         }
@@ -173,7 +173,7 @@
           "group": "navigation@1"
         },
         {
-          "command": "maven.project.pinProject",
+          "command": "maven.project.import",
           "when": "view == mavenProjects",
           "group": "navigation@0"
         }

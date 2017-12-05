@@ -188,7 +188,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         }
     }
 
-    public async pinProject(entry: Uri | undefined): Promise<void> {
+    public async importProject(entry: Uri | undefined): Promise<void> {
         let currentPomXml: string = null;
         if (!entry) {
             entry = await VSCodeUI.openDialogForFile({ filters: { "POM File": ["xml"] }, openLabel: "Import" });
@@ -209,7 +209,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         }
     }
 
-    public async searchAndPinProjects(): Promise<void> {
+    public async searchAndImportProjects(): Promise<void> {
         const res: Uri = await VSCodeUI.openDialogForFolder({openLabel: "Import All"});
         if (res && res.fsPath) {
             const foundPomXmls: string[] = await Utils.findAllInDir(res.fsPath, "pom.xml", 99);

@@ -23,15 +23,20 @@ Maven installed and PATH added, i.e., `mvn` command can be executed directly in 
 
     ![Screenshot](images/view_context.png)
 
-* If you want to add project whose `pom.xml` is elsewhere not in the workspace, you can `right-click` on the `pom.xml`, select `Pin to Maven Project Explorer`. The extension will force to show the corresponding project in sidebar.
+* If you want to add a project whose `pom.xml` is elsewhere not in the workspace, you have multiple ways to import it.
+    * `right-click` on the `pom.xml`, select `Import Maven Project`. The extension will force to show the corresponding project in sidebar.
+    * Or simply click the `+` button, and select a `pom.xml` in a system dialog.
+    * Or you just want to search `pom.xml` files recursively and import all of them. Then click the folder-shaped button beside.
 
     ![Screenshot](images/explorer_context.png)
 
-    In fact, the extension simply adds the pom.xml absolute path in your `Workspace Settings`, and then refreshes the whole view.
+
+
+    In fact, the extension imports a Maven project by adding its absolute path in your `Workspace Settings`, and then refreshes the whole view.
     ```
     {
         "maven.projects.pinnedPomPaths": [
-            "c:\\path-to-project\\a\\generated.from.archetype\\pom.xml"
+            "c:\\path-to-project\\pom.xml"
         ]
     }
     ```

@@ -18,6 +18,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
+- Support to import all projects under specified folder.
 
 ## Released
 ### 0.2.1
