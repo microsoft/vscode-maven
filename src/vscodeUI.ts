@@ -1,24 +1,26 @@
 import * as fs from "fs";
 import * as os from "os";
-import * as vscode from "vscode";
+import { OpenDialogOptions, QuickPickItem, Terminal, Uri, window, workspace, WorkspaceConfiguration } from "vscode";
 
-export class VSCodeUI {
-    public static runInTerminal(command: string, options?: ITerminalOptions): void {
+export namespace VSCodeUI {
+    const terminals: { [id: string]: Terminal } = {};
+
+    export function runInTerminal(command: string, options?: ITerminalOptions): void {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
         const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
-        if (this.terminals[name] === undefined) {
-            this.terminals[name] = vscode.window.createTerminal({ name });
+        if (terminals[name] === undefined) {
+            terminals[name] = window.createTerminal({ name });
         }
-        this.terminals[name].show();
+        terminals[name].show();
         if (cwd) {
-            this.terminals[name].sendText(this.getCDCommand(cwd), true);
+            terminals[name].sendText(getCDCommand(cwd), true);
         }
-        this.terminals[name].sendText(command, addNewLine);
+        terminals[name].sendText(command, addNewLine);
     }
 
-    public static getCDCommand(cwd: string): string {
+    export function getCDCommand(cwd: string): string {
         if (os.platform() === "win32") {
-            const windowsShell = vscode.workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
+            const windowsShell: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
                 .toLowerCase();
             if (windowsShell && windowsShell.indexOf("bash.exe") > -1 && windowsShell.indexOf("git") > -1) {
                 return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
@@ -34,17 +36,17 @@ export class VSCodeUI {
         }
     }
 
-    public static onDidCloseTerminal(closedTerminal: vscode.Terminal): void {
-        delete this.terminals[closedTerminal.name];
+    export function onDidCloseTerminal(closedTerminal: Terminal): void {
+        delete terminals[closedTerminal.name];
     }
 
-    public static async openDialogForFolder(customOptions: vscode.OpenDialogOptions): Promise<vscode.Uri> {
-        const options = {
+    export async function openDialogForFolder(customOptions: OpenDialogOptions): Promise<Uri> {
+        const options: OpenDialogOptions = {
             canSelectFiles: false,
             canSelectFolders: true,
-            canSelectMany: false,
+            canSelectMany: false
         };
-        const result = await vscode.window.showOpenDialog(Object.assign(options, customOptions));
+        const result: Uri[] = await window.showOpenDialog(Object.assign(options, customOptions));
         if (result && result.length) {
             return Promise.resolve(result[0]);
         } else {
@@ -52,13 +54,13 @@ export class VSCodeUI {
         }
     }
 
-    public static async openDialogForFile(customOptions: vscode.OpenDialogOptions): Promise<vscode.Uri> {
-        const options = {
+    export async function openDialogForFile(customOptions: OpenDialogOptions): Promise<Uri> {
+        const options: OpenDialogOptions = {
             canSelectFiles: true,
             canSelectFolders: false,
-            canSelectMany: false,
+            canSelectMany: false
         };
-        const result = await vscode.window.showOpenDialog(Object.assign(options, customOptions));
+        const result: Uri[] = await window.showOpenDialog(Object.assign(options, customOptions));
         if (result && result.length) {
             return Promise.resolve(result[0]);
         } else {
@@ -66,36 +68,39 @@ export class VSCodeUI {
         }
     }
 
-    public static openFileIfExists(filepath: string) {
+    export function openFileIfExists(filepath: string): void {
         if (fs.existsSync(filepath)) {
-            vscode.window.showTextDocument(vscode.Uri.file(filepath), { preview: false });
+            window.showTextDocument(Uri.file(filepath), { preview: false });
         }
     }
 
-    public static async getQuickPick<T>(
+    export async function getQuickPick<T>(
         items: T[],
         labelfunc: (item: T) => string, descfunc: (item: T) => string,
-        detailfunc?: (item: T) => string,
+        detailfunc?: (item: T) => string
     ): Promise<T> {
-        const itemWrappers: vscode.QuickPickItem[] = [];
-        items.forEach((item) => {
-            const wrapper = {
+        const itemWrappers: IQuickPickItemEx<T>[] = [];
+        items.forEach((item: T) => {
+            const wrapper: IQuickPickItemEx<T> = {
                 description: descfunc(item),
                 detail: (detailfunc && detailfunc(item)),
                 label: labelfunc(item),
-                value: item,
+                value: item
             };
             itemWrappers.push(wrapper);
         });
-        const selected = await vscode.window.showQuickPick(itemWrappers) as any;
-        return selected && selected.value as T;
+        const selected: IQuickPickItemEx<T> = await window.showQuickPick(itemWrappers);
+        return selected && selected.value;
     }
 
-    private static terminals: { [id: string]: vscode.Terminal } = {};
 }
 
 interface ITerminalOptions {
     addNewLine?: boolean;
     name?: string;
     cwd?: string;
+}
+
+interface IQuickPickItemEx<T> extends QuickPickItem {
+    value: T;
 }

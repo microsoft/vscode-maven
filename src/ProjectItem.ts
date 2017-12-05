@@ -1,9 +1,14 @@
-import * as vscode from "vscode";
-import { TreeItemCollapsibleState } from "vscode";
 
-export class ProjectItem extends vscode.TreeItem {
+import { TreeItem, TreeItemCollapsibleState } from "vscode";
+import { IPomModules, IPomRoot } from "./XmlSchema";
+
+export class ProjectItem extends TreeItem {
     public pomXmlFilePath: string;
-    public params: any;
+    public params: {
+        artifactId?: string,
+        pom?: IPomRoot,
+        modules?: IPomModules[]
+    };
 
     constructor(label: string, pomXmlFilePath: string, contextValue?: string, params?: object) {
         super(label, TreeItemCollapsibleState.Collapsed);

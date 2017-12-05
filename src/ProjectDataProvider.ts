@@ -1,93 +1,95 @@
+
+import { exec } from "child_process";
 import * as path from "path";
-import * as vscode from "vscode";
-import { TreeItem, TreeItemCollapsibleState } from "vscode";
+import { Event, EventEmitter, ExtensionContext, TextDocument, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri, window, workspace, WorkspaceConfiguration, WorkspaceFolder } from "vscode";
 import { ProjectItem } from "./ProjectItem";
 import { Utils } from "./Utils";
-import { VSCodeUI } from "./vscodeUI";
+import { VSCodeUI } from "./VSCodeUI";
+import { IPomModule, IPomModules, IPomRoot } from "./XmlSchema";
 
 const ENTRY_NEW_GOALS: string = "New ...";
 const ENTRY_OPEN_HIST: string = "Edit ...";
 
-export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
 
-    public _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem> = new vscode.EventEmitter<vscode.TreeItem>();
-    public readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem> = this._onDidChangeTreeData.event;
+    public _onDidChangeTreeData: EventEmitter<TreeItem> = new EventEmitter<TreeItem>();
+    public readonly onDidChangeTreeData: Event<TreeItem> = this._onDidChangeTreeData.event;
+    protected context: ExtensionContext;
     private cachedItems: ProjectItem[] = [];
 
-    constructor(protected context: vscode.ExtensionContext) {
+    constructor(context: ExtensionContext) {
+        this.context = context;
     }
 
-    public getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
+    public getTreeItem(element: TreeItem): TreeItem {
         return element;
     }
 
-    public getChildren(node?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
-        const element = node as ProjectItem;
+    public async getChildren(node?: TreeItem): Promise<TreeItem[]> {
+        const element: ProjectItem = <ProjectItem>node;
         if (element === undefined) {
-            const ret = [];
             this.cachedItems = [];
-            if (vscode.workspace.workspaceFolders) {
-                vscode.workspace.workspaceFolders.forEach((wf) => {
-                    Utils.findAllInDir(wf.uri.fsPath, "pom.xml", 1).forEach((pomxml) => {
-                        const item = Utils.getProject(pomxml);
-                        if (item) {
-                            ret.push(item);
-                        }
+            const todolist: Promise<ProjectItem>[] = [];
+            const pomXmlFilePaths: string[] = [];
+            if (workspace.workspaceFolders) {
+                const test: WorkspaceFolder[] = workspace.workspaceFolders;
+                workspace.workspaceFolders.forEach((wf: WorkspaceFolder) => {
+                    Utils.findAllInDir(wf.uri.fsPath, "pom.xml", 1).forEach((pomxml: string) => {
+                        pomXmlFilePaths.push(pomxml);
                     });
                 });
             }
 
-            const pinnedPomPaths = vscode.workspace.getConfiguration("maven.projects").get<string[]>("pinnedPomPaths") || [];
-            pinnedPomPaths.filter((pom) => !ret.find((value: ProjectItem) => value.pomXmlFilePath === pom))
-                .forEach((pom) => {
-                    const item = Utils.getProject(pom);
-                    if (item) {
-                        ret.push(item);
-                    }
-                });
+            const pinnedPomPaths: string[] = workspace.getConfiguration("maven.projects").get<string[]>("pinnedPomPaths") || [];
+            pinnedPomPaths.filter(
+                (pomPath: string) => !pomXmlFilePaths.find((value: string) => value === pomPath)
+            ).forEach((pomPath: string) => pomXmlFilePaths.push(pomPath));
 
-            ret.forEach((elem) => {
-                elem.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
-                this.cachedItems.push(elem);
+            pomXmlFilePaths.forEach((pomXmlFilePath: string) => {
+                todolist.push(Utils.getProject(pomXmlFilePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
             });
-            return Promise.resolve(ret);
+            return Promise.all(todolist).then((items: ProjectItem[]) => items.filter((x: ProjectItem) => x))
+                .then((items: ProjectItem[]) => {
+                    this.cachedItems = [].concat(items);
+                    return items;
+                });
         } else if (element.contextValue === "mavenProject") {
-            const items = [];
+            const items: ProjectItem[] = [];
             // sub modules
-            const pom = element.params.pom;
+            const pom: IPomRoot = element.params.pom;
             if (pom.project && pom.project.modules) {
-                const item = new ProjectItem("Modules", element.pomXmlFilePath, "Modules",
-                    { ...element.params, modules: pom.project.modules },
+                const item: ProjectItem = new ProjectItem(
+                    "Modules",
+                    element.pomXmlFilePath,
+                    "Modules",
+                    { ...element.params, modules: pom.project.modules }
                 );
                 item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(item);
             }
             return Promise.resolve(items);
         } else if (element.contextValue === "Modules") {
-            const items = [];
-            element.params.modules.forEach((modules) => {
+            const todolist: Promise<ProjectItem>[] = [];
+            const pomXmlFilePaths: string[] = [];
+            element.params.modules.forEach((modules: IPomModules) => {
                 if (modules.module) {
-                    modules.module.forEach((mod) => {
-                        const pomxml = path.join(path.dirname(element.pomXmlFilePath), mod.toString(), "pom.xml");
-                        const item = Utils.getProject(pomxml);
-                        if (item) {
-                            item.iconPath = this.context.asAbsolutePath(path.join("resources", "project.svg"));
-                            items.push(item);
-                        }
+                    modules.module.forEach((mod: IPomModule) => {
+                        const pomxml: string = path.join(path.dirname(element.pomXmlFilePath), mod.toString(), "pom.xml");
+                        pomXmlFilePaths.push(pomxml);
                     });
                 }
             });
-            // update cached projects
-            items.filter(
-                (item) => !this.cachedItems.find((value: ProjectItem) => value.pomXmlFilePath === item.pomXmlFilePath))
-                .forEach((item) => {
-                    this.cachedItems.push(item);
+            pomXmlFilePaths.forEach((pomXmlFilePath: string) => {
+                todolist.push(Utils.getProject(pomXmlFilePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
+            });
+
+            return Promise.all(todolist).then((items: ProjectItem[]) => items.filter((x: ProjectItem) => x))
+                .then((items: ProjectItem[]) => {
+                    this.cachedItems = this.cachedItems.concat(items.filter(
+                        (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.pomXmlFilePath === item.pomXmlFilePath)
+                    ));
+                    return items;
                 });
-            return Promise.resolve(items);
-        } else if (element.contextValue === "Dependencies") {
-            const items = [];
-            // TODO
-            return Promise.resolve(items);
         }
     }
 
@@ -95,76 +97,110 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
         this._onDidChangeTreeData.fire();
     }
 
-    public async executeGoal(projectItem: ProjectItem, goal?: string): Promise<void> {
-        const item = projectItem || await VSCodeUI.getQuickPick<ProjectItem>(this.cachedItems, (x) => x.label, (x) => x.pomXmlFilePath);
+    public async executeGoal(item: ProjectItem | undefined, goal?: string): Promise<void> {
+        if (!item) {
+            item = await VSCodeUI.getQuickPick<ProjectItem>(
+                this.cachedItems,
+                (x: ProjectItem) => x.label,
+                (x: ProjectItem) => x.pomXmlFilePath
+            );
+        }
         if (item) {
-            const cmd = `mvn ${goal || item.label} -f "${item.pomXmlFilePath}"`;
-            const name = `Maven-${item.params.artifactId}`;
+            const cmd: string = `mvn ${goal || item.label} -f "${item.pomXmlFilePath}"`;
+            const name: string = `Maven-${item.params.artifactId}`;
             VSCodeUI.runInTerminal(cmd, { name });
         }
     }
 
-    public async effectivePom(projectItem: ProjectItem | any): Promise<void> {
-        const item = projectItem || await VSCodeUI.getQuickPick<ProjectItem>(this.cachedItems, (x) => x.label, (x) => x.pomXmlFilePath);
-        const pomXmlFilePath = item.fsPath || item.pomXmlFilePath;
-        const p = new Promise<string>((resolve, reject) => {
-            const filepath = Utils.getEffectivePomOutputPath(pomXmlFilePath);
-            const cmd = `mvn help:effective-pom -f "${pomXmlFilePath}" -Doutput="${filepath}"`;
-            Utils.exec(cmd, (error, stdout, stderr) => {
-                if (error || stderr) {
-                    return resolve(null);
-                }
-                resolve(filepath);
-            });
-        });
-        vscode.window.setStatusBarMessage("Generating effective pom ... ", p);
-        const ret = await p;
-        const pomxml = Utils.readFileIfExists(ret);
+    public async effectivePom(item: Uri | ProjectItem | undefined): Promise<void> {
+        let pomXmlFilePath: string = null;
+        if (!item) {
+            item = await VSCodeUI.getQuickPick<ProjectItem>(
+                this.cachedItems,
+                (x: ProjectItem) => x.label,
+                (x: ProjectItem) => x.pomXmlFilePath
+            );
+        }
+        if (item instanceof Uri) {
+            pomXmlFilePath = item.fsPath;
+        } else if (item instanceof ProjectItem) {
+            pomXmlFilePath = item.pomXmlFilePath;
+        }
+        if (!pomXmlFilePath) {
+            return Promise.reject("Effective Failure");
+        }
+        const promise: Promise<string> = new Promise<string>(
+            (resolve: (value: string) => void, reject: (e: Error) => void): void => {
+                const filepath: string = Utils.getEffectivePomOutputPath(pomXmlFilePath);
+                const cmd: string = `mvn help:effective-pom -f "${pomXmlFilePath}" -Doutput="${filepath}"`;
+                exec(cmd, (error: Error, stdout: string, stderr: string): void => {
+                    if (error || stderr) {
+                        return resolve(null);
+                    }
+                    resolve(filepath);
+                });
+            }
+        );
+        window.setStatusBarMessage("Generating effective pom ... ", promise);
+        const ret: string = await promise;
+        const pomxml: string = Utils.readFileIfExists(ret);
         if (pomxml) {
-            const document = await vscode.workspace.openTextDocument({ language: "xml", content: pomxml });
-            vscode.window.showTextDocument(document);
+            const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
+            window.showTextDocument(document);
         } else {
-            vscode.window.showErrorMessage("Error occurred in generating effective pom.");
+            window.showErrorMessage("Error occurred in generating effective pom.");
         }
     }
 
-    public async customGoal(projectItem: ProjectItem): Promise<void> {
-        const item = projectItem || await VSCodeUI.getQuickPick<ProjectItem>(this.cachedItems, (x) => x.label, (x) => x.pomXmlFilePath);
+    public async customGoal(item: ProjectItem | undefined): Promise<void> {
+        if (!item) {
+            item = await VSCodeUI.getQuickPick<ProjectItem>(
+                this.cachedItems,
+                (x: ProjectItem) => x.label,
+                (x: ProjectItem) => x.pomXmlFilePath);
+        }
+        if (!item || !item.pomXmlFilePath) {
+            return Promise.reject("customGoal");
+        }
         const cmdlist: string[] = Utils.loadCmdHistory(item.pomXmlFilePath);
-        const selectedGoal = await vscode.window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
-            placeHolder: "Select the custom command ... ",
+        const selectedGoal: string = await window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
+            placeHolder: "Select the custom command ... "
         });
         if (selectedGoal === ENTRY_NEW_GOALS) {
-            const inputGoals = await vscode.window.showInputBox({ placeHolder: "e.g. clean package -DskipTests" });
-            const trimedGoals = inputGoals && inputGoals.trim();
+            const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests" });
+            const trimedGoals: string = inputGoals && inputGoals.trim();
             if (trimedGoals) {
                 Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
-                VSCodeUI.runInTerminal(`mvn ${trimedGoals} -f "${item.pomXmlFilePath}"`,
-                    { name: `Maven-${item.params.artifactId}` });
+                VSCodeUI.runInTerminal(
+                    `mvn ${trimedGoals} -f "${item.pomXmlFilePath}"`,
+                    { name: `Maven-${item.params.artifactId}` }
+                );
             }
         } else if (selectedGoal === ENTRY_OPEN_HIST) {
-            const historicalFilePath = Utils.getCommandHistoryCachePath(item.pomXmlFilePath);
-            vscode.window.showTextDocument(vscode.Uri.file(historicalFilePath));
+            const historicalFilePath: string = Utils.getCommandHistoryCachePath(item.pomXmlFilePath);
+            window.showTextDocument(Uri.file(historicalFilePath));
         } else if (selectedGoal) {
             Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
-            VSCodeUI.runInTerminal(`mvn ${selectedGoal} -f "${item.pomXmlFilePath}"`,
-                { name: `Maven-${item.params.artifactId}` });
+            VSCodeUI.runInTerminal(
+                `mvn ${selectedGoal} -f "${item.pomXmlFilePath}"`,
+                { name: `Maven-${item.params.artifactId}` }
+            );
         }
     }
 
-    public async pinProject(entry) {
-        let currentPomXml;
+    public async pinProject(entry: Uri | undefined): Promise<void> {
+        let currentPomXml: string = null;
+        if (!entry) {
+            entry = await VSCodeUI.openDialogForFile({ filters: { "POM File": ["xml"] }, openLabel: "Import" });
+        }
         if (entry && entry.scheme === "file") {
             currentPomXml = entry.fsPath;
         } else {
-            const res = await VSCodeUI.openDialogForFile({filters: {"POM File": ["xml"]}});
-            if (res && res.fsPath) {
-                currentPomXml = res.fsPath;
-            }
+            return Promise.reject("pinProject");
         }
         if (currentPomXml) {
-            const config = vscode.workspace.getConfiguration("maven.projects");
-            const pomXmls = config.get<string[]>("pinnedPomPaths");
+            const config: WorkspaceConfiguration = workspace.getConfiguration("maven.projects");
+            const pomXmls: string[] = config.get<string[]>("pinnedPomPaths");
             if (pomXmls.indexOf(currentPomXml) < 0) {
                 pomXmls.push(currentPomXml);
                 await config.update("pinnedPomPaths", pomXmls, false);
@@ -173,18 +209,13 @@ export class ProjectDataProvider implements vscode.TreeDataProvider<vscode.TreeI
         }
     }
 
-    public async searchAndPinProjects(dirname: string) {
-        if (!dirname) {
-            const res = await VSCodeUI.openDialogForFolder({});
-            if (res && res.fsPath) {
-                dirname = res.fsPath;
-            }
-        }
-        if (dirname) {
-            const foundPomXmls = await Utils.findAllInDir(dirname, "pom.xml", 99);
-            const config = vscode.workspace.getConfiguration("maven.projects");
-            const pomXmls = config.get<string[]>("pinnedPomPaths");
-            foundPomXmls.forEach((currentPomXml) => {
+    public async searchAndPinProjects(): Promise<void> {
+        const res: Uri = await VSCodeUI.openDialogForFolder({openLabel: "Import All"});
+        if (res && res.fsPath) {
+            const foundPomXmls: string[] = await Utils.findAllInDir(res.fsPath, "pom.xml", 99);
+            const config: WorkspaceConfiguration = workspace.getConfiguration("maven.projects");
+            const pomXmls: string[] = config.get<string[]>("pinnedPomPaths");
+            foundPomXmls.forEach((currentPomXml: string) => {
                 if (pomXmls.indexOf(currentPomXml) < 0) {
                     pomXmls.push(currentPomXml);
                 }

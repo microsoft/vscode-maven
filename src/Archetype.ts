@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import { QuickPickItem } from "vscode";
 export class Archetype implements QuickPickItem {
     public label: string;

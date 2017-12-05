@@ -1,16 +1,18 @@
 "use strict";
 import * as vscode from "vscode";
+import { Uri } from "vscode";
 import { ArchetypeModule } from "./ArchetypeModule";
 import { ProjectDataProvider } from "./ProjectDataProvider";
-import { Utils } from "./utils";
-import { VSCodeUI } from "./vscodeUI";
+import { ProjectItem } from "./ProjectItem";
+import { Utils } from "./Utils";
+import { VSCodeUI } from "./VSCodeUI";
 
-export function activate(context: vscode.ExtensionContext) {
-    const mavenProjectsTreeDataProvider = new ProjectDataProvider(context);
+export function activate(context: vscode.ExtensionContext): void {
+    const mavenProjectsTreeDataProvider: ProjectDataProvider = new ProjectDataProvider(context);
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
-    ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal) => {
-        const commandMavenGoal = vscode.commands.registerCommand(`maven.goal.${goal}`, (item) => {
+    ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
+        const commandMavenGoal: vscode.Disposable = vscode.commands.registerCommand(`maven.goal.${goal}`, (item: ProjectItem | undefined) => {
             mavenProjectsTreeDataProvider.executeGoal(item, goal);
         });
         context.subscriptions.push(commandMavenGoal);
@@ -20,34 +22,30 @@ export function activate(context: vscode.ExtensionContext) {
         mavenProjectsTreeDataProvider.refreshTree();
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.goal.exec", (goalItem) => {
-        mavenProjectsTreeDataProvider.executeGoal(goalItem);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.effectivePom", (item) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.effectivePom", (item: Uri | ProjectItem | undefined) => {
         mavenProjectsTreeDataProvider.effectivePom(item);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.goal.custom", (item) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.goal.custom", (item: ProjectItem | undefined) => {
         mavenProjectsTreeDataProvider.customGoal(item);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.pinProject", (entry) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.pinProject", (entry: Uri | undefined) => {
         mavenProjectsTreeDataProvider.pinProject(entry);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.openPom", (item) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.openPom", (item: ProjectItem | undefined) => {
         if (item) {
             VSCodeUI.openFileIfExists(item.pomXmlFilePath);
         }
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.generate", (entry) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.generate", (entry: Uri | undefined) => {
         ArchetypeModule.generateFromArchetype(entry);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.importAll", (entry) => {
-        mavenProjectsTreeDataProvider.searchAndPinProjects(entry);
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.importAll", () => {
+        mavenProjectsTreeDataProvider.searchAndPinProjects();
     }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
@@ -55,6 +53,6 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 }
 
-export function deactivate() {
+export function deactivate(): void {
     // this method is called when your extension is deactivated
 }

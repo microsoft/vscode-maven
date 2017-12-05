@@ -1,17 +1,18 @@
 import * as fs from "fs";
-import * as vscode from "vscode";
+import { Uri, window } from "vscode";
 import { Archetype } from "./Archetype";
-import { Utils } from "./utils";
-import { VSCodeUI } from "./vscodeUI";
+import { Utils } from "./Utils";
+import { VSCodeUI } from "./VSCodeUI";
 
-const DEFAULT_ARCHETYPE_CATALOG_URL: string = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
+const DEFAULT_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
 
-export class ArchetypeModule {
-    public static async generateFromArchetype(entry): Promise<void> {
+export namespace ArchetypeModule {
+
+    export async function generateFromArchetype(entry: Uri | undefined): Promise<void> {
         let cwd: string = null;
-        const result = await VSCodeUI.openDialogForFolder({
-            defaultUri: entry && entry.fsPath ? vscode.Uri.file(entry.fsPath) : undefined,
-            openLabel: "Select Destination Folder",
+        const result: Uri = await VSCodeUI.openDialogForFolder({
+            defaultUri: entry && entry.fsPath ? Uri.file(entry.fsPath) : undefined,
+            openLabel: "Select Destination Folder"
         });
         if (result && result.fsPath) {
             cwd = result.fsPath;
@@ -19,24 +20,26 @@ export class ArchetypeModule {
             return Promise.resolve();
         }
 
-        const selectedCatalog = await vscode.window.showQuickPick(
+        const selectedCatalog: string = await window.showQuickPick(
             ["Remote", "Local"],
-            { placeHolder: "Choose archetype catalog ... " },
+            { placeHolder: "Choose archetype catalog ... " }
         );
         if (!selectedCatalog) {
             return Promise.resolve();
         }
-        const catalogUrl = selectedCatalog === "Remote" ? DEFAULT_ARCHETYPE_CATALOG_URL : null;
-        const selectedArchetype = await vscode.window.showQuickPick(this.getArchetypeList(catalogUrl),
-            { matchOnDescription: true, placeHolder: "Select archetype with <groupId>:<artifactId> ..." });
+        const catalogUrl: string = selectedCatalog === "Remote" ? DEFAULT_ARCHETYPE_CATALOG_URL : null;
+        const selectedArchetype: Archetype = await window.showQuickPick(
+            getArchetypeList(catalogUrl),
+            { matchOnDescription: true, placeHolder: "Select archetype with <groupId>:<artifactId> ..." }
+        );
         if (selectedArchetype) {
             const { artifactId, groupId, versions } = selectedArchetype;
-            const version = await vscode.window.showQuickPick(
+            const version: string = await window.showQuickPick(
                 Promise.resolve(versions),
-                { placeHolder: "Select version ..." },
+                { placeHolder: "Select version ..." }
             );
             if (version) {
-                const cmd = ["mvn archetype:generate",
+                const cmd: string = ["mvn archetype:generate",
                     `-DarchetypeArtifactId="${artifactId}"`,
                     `-DarchetypeGroupId="${groupId}"`,
                     `-DarchetypeVersion="${version}"`].join(" ");
@@ -45,12 +48,12 @@ export class ArchetypeModule {
         }
     }
 
-    public static async getArchetypeList(url?: string): Promise<Archetype[]> {
-        let xml = null;
+    async function getArchetypeList(url?: string): Promise<Archetype[]> {
+        let xml: string = null;
         if (url) {
             xml = await Utils.httpGetContent(url);
         } else {
-            const localArchetypeXmlFilePath = Utils.getLocalArchetypeCatalogFilePath();
+            const localArchetypeXmlFilePath: string = Utils.getLocalArchetypeCatalogFilePath();
             if (fs.existsSync(localArchetypeXmlFilePath)) {
                 xml = fs.readFileSync(localArchetypeXmlFilePath, "utf8");
             }
