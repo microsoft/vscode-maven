@@ -11,7 +11,7 @@ Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide 
 * Perserve history of custom goals for fast re-run long commands(e.g. `mvn clean package -DskipTests -Dcheckstyle.skip`).
 * Can generate projects from Maven Archetype.
 * Support multi-module maven projects.
-* support VSCode multi-root workspace.
+* Support VSCode multi-root workspace.
 
 ## Requirements
 
@@ -35,13 +35,12 @@ Maven installed and PATH added, i.e., `mvn` command can be executed directly in 
         ]
     }
     ```
-* It perserves history of custom goals for each project, so you can fast re-run previous long commands, something like `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
+* It perserves history of custom goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
 
     ![Screenshot](images/customGoal.gif)
 
 * Archetype Related
-    * **Update Maven Archetype Catalog** Enter URL of the remote catelog file, then it's downloaded to you local repository.
-    * **Generate from Maven Archetype** The extension loads archetypes listed in your local catelog. After selection, the extension fires `mvn archetype:generate -D...` in terminal.
+    * **Generate from Maven Archetype** The extension loads archetypes listed in local/remote catelog. After selection, the extension fires `mvn archetype:generate -D...` in terminal.
 
     ![Screenshot](images/archetype.gif)
 

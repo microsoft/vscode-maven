@@ -37,6 +37,7 @@
     "onCommand:maven.project.effectivePom",
     "onCommand:maven.project.pinProject",
     "onCommand:maven.project.openPom",
+    "onCommand:maven.archetype.generate",
     "onView:mavenProjects"
   ],
   "main": "./out/extension",
