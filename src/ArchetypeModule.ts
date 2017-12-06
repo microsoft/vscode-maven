@@ -4,7 +4,8 @@ import { Archetype } from "./Archetype";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
-const DEFAULT_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
+// tslint:disable-next-line:no-http-string
+const DEFAULT_ARCHETYPE_CATALOG_URL: string = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
 
 export namespace ArchetypeModule {
 
