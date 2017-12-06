@@ -40,11 +40,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             pomXmlFilePaths.forEach((pomXmlFilePath: string) => {
                 todolist.push(Utils.getProject(pomXmlFilePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
             });
-            return Promise.all(todolist).then((items: ProjectItem[]) => items.filter((x: ProjectItem) => x))
-                .then((items: ProjectItem[]) => {
-                    this.cachedItems = [].concat(items);
-                    return items;
-                });
+            const items: ProjectItem[] = (await Promise.all(todolist)).filter((x: ProjectItem) => x);
+            this.cachedItems = [].concat(items);
+            return items;
         } else if (element.contextValue === "mavenProject") {
             const items: ProjectItem[] = [];
             // sub modules
@@ -75,13 +73,12 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 todolist.push(Utils.getProject(pomXmlFilePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
             });
 
-            return Promise.all(todolist).then((items: ProjectItem[]) => items.filter((x: ProjectItem) => x))
-                .then((items: ProjectItem[]) => {
-                    this.cachedItems = this.cachedItems.concat(items.filter(
-                        (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.pomXmlFilePath === item.pomXmlFilePath)
-                    ));
-                    return items;
-                });
+            const items: ProjectItem[] = (await Promise.all(todolist)).filter((x: ProjectItem) => x);
+            this.cachedItems = this.cachedItems.concat(items.filter(
+                (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.pomXmlFilePath === item.pomXmlFilePath)
+            ));
+            return items;
+
         }
     }
 
