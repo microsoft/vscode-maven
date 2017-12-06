@@ -48,6 +48,10 @@ export function activate(context: vscode.ExtensionContext): void {
         mavenProjectsTreeDataProvider.searchAndImportProjects();
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.remove", (item: ProjectItem | undefined) => {
+        mavenProjectsTreeDataProvider.removeProject(item);
+    }));
+
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
         VSCodeUI.onDidCloseTerminal(closedTerminal);
     }));

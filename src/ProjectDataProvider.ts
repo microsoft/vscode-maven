@@ -30,15 +30,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         if (element === undefined) {
             this.cachedItems = [];
             const todolist: Promise<ProjectItem>[] = [];
-            const pomXmlFilePaths: string[] = [];
-            if (workspace.workspaceFolders) {
-                const test: WorkspaceFolder[] = workspace.workspaceFolders;
-                workspace.workspaceFolders.forEach((wf: WorkspaceFolder) => {
-                    Utils.findAllInDir(wf.uri.fsPath, "pom.xml", 1).forEach((pomxml: string) => {
-                        pomXmlFilePaths.push(pomxml);
-                    });
-                });
-            }
+            const pomXmlFilePaths: string[] = this.getRootPomPaths();
 
             const pinnedPomPaths: string[] = workspace.getConfiguration("maven.projects").get<string[]>("pinnedPomPaths") || [];
             pinnedPomPaths.filter(
@@ -113,7 +105,6 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
     }
 
     public async effectivePom(item: Uri | ProjectItem | undefined): Promise<void> {
-        let pomXmlFilePath: string = null;
         if (!item) {
             item = await VSCodeUI.getQuickPick<ProjectItem>(
                 this.cachedItems,
@@ -121,13 +112,14 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 (x: ProjectItem) => x.pomXmlFilePath
             );
         }
+        let pomXmlFilePath: string = null;
         if (item instanceof Uri) {
             pomXmlFilePath = item.fsPath;
         } else if (item instanceof ProjectItem) {
             pomXmlFilePath = item.pomXmlFilePath;
         }
         if (!pomXmlFilePath) {
-            return Promise.reject("Effective Failure");
+            return Promise.resolve();
         }
         const promise: Promise<string> = new Promise<string>(
             (resolve: (value: string) => void, reject: (e: Error) => void): void => {
@@ -160,7 +152,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 (x: ProjectItem) => x.pomXmlFilePath);
         }
         if (!item || !item.pomXmlFilePath) {
-            return Promise.reject("customGoal");
+            return Promise.resolve();
         }
         const cmdlist: string[] = Utils.loadCmdHistory(item.pomXmlFilePath);
         const selectedGoal: string = await window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
@@ -189,16 +181,16 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
     }
 
     public async importProject(entry: Uri | undefined): Promise<void> {
-        let currentPomXml: string = null;
         if (!entry) {
             entry = await VSCodeUI.openDialogForFile({ filters: { "POM File": ["xml"] }, openLabel: "Import" });
         }
-        if (entry && entry.scheme === "file") {
-            currentPomXml = entry.fsPath;
+
+        const currentPomXml: string = entry && entry.fsPath;
+        if (!currentPomXml) {
+            return Promise.resolve();
+        } else if (this.getRootPomPaths().indexOf(currentPomXml) >= 0) {
+            window.showWarningMessage("Already imported.");
         } else {
-            return Promise.reject("pinProject");
-        }
-        if (currentPomXml) {
             const config: WorkspaceConfiguration = workspace.getConfiguration("maven.projects");
             const pomXmls: string[] = config.get<string[]>("pinnedPomPaths");
             if (pomXmls.indexOf(currentPomXml) < 0) {
@@ -210,18 +202,53 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
     }
 
     public async searchAndImportProjects(): Promise<void> {
-        const res: Uri = await VSCodeUI.openDialogForFolder({openLabel: "Import All"});
+        const pomXmlFilePaths: string[] = this.getRootPomPaths();
+        const res: Uri = await VSCodeUI.openDialogForFolder({ openLabel: "Import All" });
         if (res && res.fsPath) {
             const foundPomXmls: string[] = await Utils.findAllInDir(res.fsPath, "pom.xml", 99);
             const config: WorkspaceConfiguration = workspace.getConfiguration("maven.projects");
             const pomXmls: string[] = config.get<string[]>("pinnedPomPaths");
             foundPomXmls.forEach((currentPomXml: string) => {
-                if (pomXmls.indexOf(currentPomXml) < 0) {
+                if (pomXmlFilePaths.indexOf(currentPomXml) < 0 && pomXmls.indexOf(currentPomXml) < 0) {
                     pomXmls.push(currentPomXml);
                 }
             });
             await config.update("pinnedPomPaths", pomXmls, false);
             this.refreshTree();
         }
+    }
+
+    public async removeProject(item: ProjectItem | undefined): Promise<void> {
+        if (!item) {
+            item = await VSCodeUI.getQuickPick<ProjectItem>(
+                this.cachedItems,
+                (x: ProjectItem) => x.label,
+                (x: ProjectItem) => x.pomXmlFilePath
+            );
+        }
+        if (item) {
+            const config: WorkspaceConfiguration = workspace.getConfiguration("maven.projects");
+            const pomXmls: string[] = config.get<string[]>("pinnedPomPaths");
+            const newPomXmls: string[] = pomXmls.filter((elem: string) => elem !== item.pomXmlFilePath);
+            if (newPomXmls.length === pomXmls.length) {
+                window.showWarningMessage("Cannot remove default projects under root folder.");
+            } else {
+                await config.update("pinnedPomPaths", newPomXmls, false);
+                this.refreshTree();
+            }
+        }
+    }
+
+    private getRootPomPaths(): string[] {
+        const ret: string[] = [];
+        const depth: number = Math.max(workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom"), 1);
+        if (workspace.workspaceFolders) {
+            workspace.workspaceFolders.forEach((wf: WorkspaceFolder) => {
+                Utils.findAllInDir(wf.uri.fsPath, "pom.xml", depth).forEach((pomxml: string) => {
+                    ret.push(pomxml);
+                });
+            });
+        }
+        return ret;
     }
 }

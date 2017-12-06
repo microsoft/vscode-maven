@@ -29,11 +29,11 @@ export namespace Utils {
         return Promise.resolve(null);
     }
 
-    export async function readXmlContent(xml: string, options?: {}) : Promise<{}> {
+    export async function readXmlContent(xml: string, options?: {}): Promise<{}> {
         const opts: {} = Object.assign({ explicitArray: true }, options);
         return new Promise<{}>(
             (resolve: (value: {}) => void, reject: (e: Error) => void): void => {
-                xml2js.parseString(xml, opts, (err: Error , res: {}) => {
+                xml2js.parseString(xml, opts, (err: Error, res: {}) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -140,16 +140,16 @@ export namespace Utils {
         const contentBlocks: string[] = [];
         return new Promise<string>(
             (resolve: (value: string) => void, reject: (e: Error) => void): void => {
-            const request: http.ClientRequest = http.get(url, (response: http.IncomingMessage) => {
-                response.pipe(file);
-                response.on("end", () => {
-                    resolve(fs.readFileSync(filepath).toString());
+                const request: http.ClientRequest = http.get(url, (response: http.IncomingMessage) => {
+                    response.pipe(file);
+                    response.on("end", () => {
+                        resolve(fs.readFileSync(filepath).toString());
+                    });
+                });
+                request.on("error", (e: Error) => {
+                    reject(e);
                 });
             });
-            request.on("error", (e: Error) => {
-                reject(e);
-            });
-        });
     }
 
     export function findAllInDir(dirname: string, targetFileName: string, depth: number): string[] {
