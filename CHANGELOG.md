@@ -2,6 +2,7 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
+        - [0.3.0](#030)
     - [Released](#released)
         - [0.2.1](#021)
         - [0.2.0](#020)
@@ -18,7 +19,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
+### 0.3.0
 - Support to import all projects under specified folder.
+- Change extension icon.
 
 ## Released
 ### 0.2.1
