@@ -3,9 +3,6 @@ language: node_js
 node_js:
 - 'node'
 
-os:
-- osx
-
 branches:
   only:
     - master
@@ -19,10 +16,8 @@ before_install:
   fi
 
 install:
-- npm install -g vsce
-- npm install -g typescript
-- npm install
+  - npm install
 
 script:
-- npm run tslint
-- vsce package
+  - npm run tslint
+  - npm run compile
