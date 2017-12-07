@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven Project Explorer",
   "description": "Manage maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
-  "version": "0.3.0",
+  "version": "0.3.1-dev",
   "icon": "resources/logo.png",
   "publisher": "eskibear",
   "engines": {
@@ -16,7 +16,7 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Eskibear/vscode-maven/blob/v0.3.0/README.md",
+  "homepage": "https://github.com/Eskibear/vscode-maven/blob/develop/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Eskibear/vscode-maven.git"

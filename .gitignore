@@ -5,3 +5,4 @@ node_modules
 yarn.lock
 *.log
 .gradle/
+.DS_Store
