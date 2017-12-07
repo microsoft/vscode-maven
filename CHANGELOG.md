@@ -2,28 +2,19 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
-        - [0.3.0](#030)
     - [Released](#released)
-        - [0.2.1](#021)
-        - [0.2.0](#020)
-        - [0.1.4](#014)
-        - [0.1.3](#013)
-        - [0.1.2](#012)
-        - [0.1.1](#011)
-        - [0.1.0](#010)
-        - [0.0.6](#006)
-        - [0.0.5](#005)
-        - [0.0.4](#004)
-        - [0.0.3](#003)
-        - [0.0.2](#002)
-        - [0.0.1](#001)
+        - [0.3.0](#030)
+        - [0.2.x](#021)
+        - [0.1.x](#014)
+        - [0.0.x](#006)
 
 ## Unreleased
+
+## Released
 ### 0.3.0
 - Support to import all projects under specified folder.
 - Change extension icon.
 
-## Released
 ### 0.2.1
 - add `maven.projects.maxDepthOfPom` to specify max depth to find pom.xml recursively. By default the value is 1, indicating it only searches root folder.
 
