@@ -145,7 +145,7 @@ export namespace Utils {
             (resolve: (value: string) => void, reject: (e: Error) => void): void => {
                 const request: http.ClientRequest = http.get(url, (response: http.IncomingMessage) => {
                     response.pipe(file);
-                    file.on('finish', function() {
+                    file.on('finish', () => {
                         file.close();
                         resolve(fs.readFileSync(filepath).toString());
                     });
