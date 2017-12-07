@@ -136,13 +136,17 @@ export namespace Utils {
 
     export function httpGetContent(url: string): Promise<string> {
         const filepath: string = path.join(getTempFolder(), md5(url));
+        if (fs.existsSync(filepath)) {
+            fs.unlinkSync(filepath);
+        }
         const file: fs.WriteStream = fs.createWriteStream(filepath);
         const contentBlocks: string[] = [];
         return new Promise<string>(
             (resolve: (value: string) => void, reject: (e: Error) => void): void => {
                 const request: http.ClientRequest = http.get(url, (response: http.IncomingMessage) => {
                     response.pipe(file);
-                    response.on("end", () => {
+                    file.on('finish', function() {
+                        file.close();
                         resolve(fs.readFileSync(filepath).toString());
                     });
                 });
