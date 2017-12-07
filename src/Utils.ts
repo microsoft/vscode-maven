@@ -63,7 +63,7 @@ export namespace Utils {
 
     export function saveCmdHistory(pomXmlFilePath: string, cmdlist: string[]): void {
         const filepath: string = getCommandHistoryCachePath(pomXmlFilePath);
-        Utils.mkdirp(path.dirname(filepath));
+        mkdirp(path.dirname(filepath));
         fs.writeFileSync(filepath, cmdlist.join("\n"));
     }
 
@@ -139,6 +139,7 @@ export namespace Utils {
         if (fs.existsSync(filepath)) {
             fs.unlinkSync(filepath);
         }
+        mkdirp(path.dirname(filepath));
         const file: fs.WriteStream = fs.createWriteStream(filepath);
         const contentBlocks: string[] = [];
         return new Promise<string>(
