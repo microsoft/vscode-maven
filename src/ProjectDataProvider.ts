@@ -11,6 +11,7 @@ import { VSCodeUI } from "./VSCodeUI";
 
 const ENTRY_NEW_GOALS: string = "New ...";
 const ENTRY_OPEN_HIST: string = "Edit ...";
+const ITEM_NO_AVAILABLE_PROJECTS: string = "No maven projects found.";
 
 export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
 
@@ -51,6 +52,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 item.workspacePath = workspaceItem.abosolutePath;
             });
             this.cachedItems = this.cachedItems.concat(items);
+            if (items.length === 0) {
+                return [new TreeItem(ITEM_NO_AVAILABLE_PROJECTS)];
+            }
             return items;
         } else if (element.contextValue === "ProjectItem") {
             const projectItem: ProjectItem = <ProjectItem> element;
