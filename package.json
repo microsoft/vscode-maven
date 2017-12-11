@@ -224,6 +224,11 @@
             "type": "array",
             "default": ["**/.*", "**/node_modules"],
             "description": "Specifies filepath pattern of folders to exclude while searching for maven projects."
+          },
+          "maven.executable.path": {
+            "type": "string",
+            "default": "",
+            "description": "Specifies absolute path of mvn executable."
           }
         }
       }
