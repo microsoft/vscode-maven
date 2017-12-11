@@ -2,8 +2,8 @@
 import * as vscode from "vscode";
 import { Uri } from "vscode";
 import { ArchetypeModule } from "./ArchetypeModule";
+import { ProjectItem } from "./model/ProjectItem";
 import { ProjectDataProvider } from "./ProjectDataProvider";
-import { ProjectItem } from "./ProjectItem";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -30,10 +30,6 @@ export function activate(context: vscode.ExtensionContext): void {
         mavenProjectsTreeDataProvider.customGoal(item);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.import", (entry: Uri | undefined) => {
-        mavenProjectsTreeDataProvider.importProject(entry);
-    }));
-
     context.subscriptions.push(vscode.commands.registerCommand("maven.project.openPom", (item: ProjectItem | undefined) => {
         if (item) {
             VSCodeUI.openFileIfExists(item.abosolutePath);
@@ -42,14 +38,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
     context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.generate", (entry: Uri | undefined) => {
         ArchetypeModule.generateFromArchetype(entry);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.importAll", () => {
-        mavenProjectsTreeDataProvider.searchAndImportProjects();
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.remove", (item: ProjectItem | undefined) => {
-        mavenProjectsTreeDataProvider.removeProject(item);
     }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {

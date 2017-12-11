@@ -2,10 +2,12 @@
 import { exec } from "child_process";
 import * as path from "path";
 import { Event, EventEmitter, ExtensionContext, TextDocument, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri, window, workspace, WorkspaceConfiguration, WorkspaceFolder } from "vscode";
-import { ProjectItem } from "./ProjectItem";
+import { FolderItem } from "./model/FolderItem";
+import { ProjectItem } from "./model/ProjectItem";
+import { WorkspaceItem } from "./model/WorkspaceItem";
+import { IPomModule, IPomModules, IPomRoot } from "./model/XmlSchema";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
-import { IPomModule, IPomModules, IPomRoot } from "./XmlSchema";
 
 const ENTRY_NEW_GOALS: string = "New ...";
 const ENTRY_OPEN_HIST: string = "Edit ...";
@@ -25,64 +27,69 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         return element;
     }
 
-    public async getChildren(node?: TreeItem): Promise<TreeItem[]> {
-        const element: ProjectItem = <ProjectItem>node;
+    public async getChildren(element?: TreeItem): Promise<TreeItem[]> {
         if (element === undefined) {
             this.cachedItems = [];
-            const ret: TreeItem[] = [];
+            const ret: WorkspaceItem[] = [];
             if (workspace.workspaceFolders) {
                 workspace.workspaceFolders.forEach((wf: WorkspaceFolder) => {
-                    const item: ProjectItem = new ProjectItem(wf.name, wf.uri.fsPath, "WorkspaceItem");
+                    const item: WorkspaceItem = new WorkspaceItem(wf.name, wf.uri.fsPath);
                     ret.push(item);
                 });
             }
             return ret;
         } else if (element.contextValue === "WorkspaceItem") {
-            const todolist: Promise<ProjectItem>[] = [];
+            const workspaceItem: WorkspaceItem = <WorkspaceItem> element;
+            const promiseList: Promise<ProjectItem>[] = [];
             const depth: number = workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom") || -1;
-            const foundPomXmls: string[] = await Utils.findAllInDir(element.abosolutePath, "pom.xml", depth);
+            const foundPomXmls: string[] = await Utils.findAllInDir(workspaceItem.abosolutePath, "pom.xml", depth);
             foundPomXmls.forEach((pomXmlFilePath: string) => {
-                todolist.push(Utils.getProject(pomXmlFilePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
+                promiseList.push(Utils.getProject(pomXmlFilePath, workspaceItem.abosolutePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
             });
-            const items: ProjectItem[] = (await Promise.all(todolist)).filter((x: ProjectItem) => x);
+            const items: ProjectItem[] = (await Promise.all(promiseList)).filter((x: ProjectItem) => x);
+            items.forEach((item: ProjectItem) => {
+                item.workspacePath = workspaceItem.abosolutePath;
+            });
             this.cachedItems = this.cachedItems.concat(items);
             return items;
-        } else if (element.contextValue === "mavenProject") {
-            const items: ProjectItem[] = [];
+        } else if (element.contextValue === "ProjectItem") {
+            const projectItem: ProjectItem = <ProjectItem> element;
+            const items: FolderItem[] = [];
             // sub modules
-            const pom: IPomRoot = element.params.pom;
+            const pom: IPomRoot = projectItem.params.pom;
             if (pom.project && pom.project.modules) {
-                const item: ProjectItem = new ProjectItem(
+                const modulesFolderItem: FolderItem = new FolderItem(
                     "Modules",
-                    element.abosolutePath,
-                    "Modules",
-                    { ...element.params, modules: pom.project.modules }
+                    "ModulesFolderItem",
+                    projectItem.abosolutePath,
+                    projectItem.workspacePath,
+                    { ...projectItem.params, modules: pom.project.modules }
                 );
-                item.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
-                items.push(item);
+                modulesFolderItem.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
+                items.push(modulesFolderItem);
             }
             return Promise.resolve(items);
-        } else if (element.contextValue === "Modules") {
-            const todolist: Promise<ProjectItem>[] = [];
+        } else if (element.contextValue === "ModulesFolderItem") {
+            const modulesFolderItem: FolderItem = <FolderItem> element;
+            const promiseList: Promise<ProjectItem>[] = [];
             const pomXmlFilePaths: string[] = [];
-            element.params.modules.forEach((modules: IPomModules) => {
+            modulesFolderItem.params.modules.forEach((modules: IPomModules) => {
                 if (modules.module) {
                     modules.module.forEach((mod: IPomModule) => {
-                        const pomxml: string = path.join(path.dirname(element.abosolutePath), mod.toString(), "pom.xml");
+                        const pomxml: string = path.join(path.dirname(modulesFolderItem.parentAbsolutePath), mod.toString(), "pom.xml");
                         pomXmlFilePaths.push(pomxml);
                     });
                 }
             });
             pomXmlFilePaths.forEach((pomXmlFilePath: string) => {
-                todolist.push(Utils.getProject(pomXmlFilePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
+                promiseList.push(Utils.getProject(pomXmlFilePath, modulesFolderItem.workspacePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
             });
 
-            const items: ProjectItem[] = (await Promise.all(todolist)).filter((x: ProjectItem) => x);
+            const items: ProjectItem[] = (await Promise.all(promiseList)).filter((x: ProjectItem) => x);
             this.cachedItems = this.cachedItems.concat(items.filter(
                 (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.abosolutePath === item.abosolutePath)
             ));
             return items;
-
         }
     }
 
@@ -100,7 +107,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         }
         if (item) {
             const cmd: string = `mvn ${goal || item.label} -f "${item.abosolutePath}"`;
-            const name: string = `Maven-${item.params.artifactId}`;
+            const name: string = `Maven-${item.artifactId}`;
             VSCodeUI.runInTerminal(cmd, { name });
         }
     }
@@ -166,7 +173,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
                 VSCodeUI.runInTerminal(
                     `mvn ${trimedGoals} -f "${item.abosolutePath}"`,
-                    { name: `Maven-${item.params.artifactId}` }
+                    { name: `Maven-${item.artifactId}` }
                 );
             }
         } else if (selectedGoal === ENTRY_OPEN_HIST) {
@@ -176,7 +183,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
             VSCodeUI.runInTerminal(
                 `mvn ${selectedGoal} -f "${item.abosolutePath}"`,
-                { name: `Maven-${item.params.artifactId}` }
+                { name: `Maven-${item.artifactId}` }
             );
         }
     }

@@ -4,16 +4,17 @@ import { IPomModules, IPomRoot } from "./XmlSchema";
 
 export class ProjectItem extends TreeItem {
     public abosolutePath: string;
+    public workspacePath: string;
+    public artifactId: string;
     public params: {
-        artifactId?: string,
         pom?: IPomRoot,
         modules?: IPomModules[]
     };
 
-    constructor(label: string, absolutePath: string, contextValue?: string, params?: object) {
-        super(label, TreeItemCollapsibleState.Collapsed);
+    constructor(artifactId: string, workpacePath: string, absolutePath: string, params?: object) {
+        super(`${artifactId}`, TreeItemCollapsibleState.Collapsed);
         this.abosolutePath = absolutePath;
-        this.contextValue = contextValue || "folder";
         this.params = params || {};
+        this.contextValue = "ProjectItem";
     }
 }

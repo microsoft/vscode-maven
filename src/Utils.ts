@@ -6,19 +6,19 @@ import * as os from "os";
 import * as path from "path";
 import * as xml2js from "xml2js";
 import { Archetype } from "./Archetype";
-import { ProjectItem } from "./ProjectItem";
-import { IArchetype, IArchetypeCatalogRoot, IArchetypes, IPomRoot } from "./XmlSchema";
+import { ProjectItem } from "./model/ProjectItem";
+import { IArchetype, IArchetypeCatalogRoot, IArchetypes, IPomRoot } from "./model/XmlSchema";
 
 const EXTENSION_ID: string = "vscode-maven";
 
 export namespace Utils {
-    export async function getProject(pomXmlFilePath: string, iconPath?: string): Promise<ProjectItem> {
-        if (fs.existsSync(pomXmlFilePath)) {
-            const xml: string = fs.readFileSync(pomXmlFilePath, "utf8");
+    export async function getProject(absolutePath: string, workspacePath: string, iconPath?: string): Promise<ProjectItem> {
+        if (fs.existsSync(absolutePath)) {
+            const xml: string = fs.readFileSync(absolutePath, "utf8");
             const pom: IPomRoot = await readXmlContent(xml);
             if (pom && pom.project && pom.project.artifactId) {
                 const artifactId: string = pom.project.artifactId.toString();
-                const ret: ProjectItem = new ProjectItem(artifactId, pomXmlFilePath, "mavenProject", { artifactId, pom });
+                const ret: ProjectItem = new ProjectItem(artifactId, workspacePath, absolutePath, { pom });
                 ret.collapsibleState = pom.project && pom.project.modules ? 1 : 0;
                 if (iconPath) {
                     ret.iconPath = iconPath;
