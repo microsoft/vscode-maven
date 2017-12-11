@@ -90,6 +90,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             });
 
             const items: ProjectItem[] = (await Promise.all(promiseList)).filter((x: ProjectItem) => x);
+            items.forEach((item: ProjectItem) => {
+                item.workspacePath = modulesFolderItem.workspacePath;
+            });
             this.cachedItems = this.cachedItems.concat(items.filter(
                 (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.abosolutePath === item.abosolutePath)
             ));
