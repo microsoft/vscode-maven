@@ -1,9 +1,9 @@
-import * as fs from "fs";
+
+import * as fs from "fs-extra";
 import { Uri, window } from "vscode";
 import { Archetype } from "./Archetype";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
-
 // tslint:disable-next-line:no-http-string
 const DEFAULT_ARCHETYPE_CATALOG_URL: string = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
 
@@ -55,8 +55,8 @@ export namespace ArchetypeModule {
             xml = await Utils.httpGetContent(url);
         } else {
             const localArchetypeXmlFilePath: string = Utils.getLocalArchetypeCatalogFilePath();
-            if (fs.existsSync(localArchetypeXmlFilePath)) {
-                xml = fs.readFileSync(localArchetypeXmlFilePath, "utf8");
+            if (await fs.pathExists(localArchetypeXmlFilePath)) {
+                xml = await fs.readFile(localArchetypeXmlFilePath, "utf8");
             }
         }
         if (xml) {

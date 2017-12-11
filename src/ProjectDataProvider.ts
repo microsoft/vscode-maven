@@ -147,7 +147,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         );
         window.setStatusBarMessage("Generating effective pom ... ", promise);
         const ret: string = await promise;
-        const pomxml: string = Utils.readFileIfExists(ret);
+        const pomxml: string = await Utils.readFileIfExists(ret);
         if (pomxml) {
             const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
             window.showTextDocument(document);
@@ -166,7 +166,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         if (!item || !item.abosolutePath) {
             return Promise.resolve();
         }
-        const cmdlist: string[] = Utils.loadCmdHistory(item.abosolutePath);
+        const cmdlist: string[] = await Utils.loadCmdHistory(item.abosolutePath);
         const selectedGoal: string = await window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
             placeHolder: "Select the custom command ... "
         });
@@ -174,7 +174,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests" });
             const trimedGoals: string = inputGoals && inputGoals.trim();
             if (trimedGoals) {
-                Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
+                await Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
                 VSCodeUI.runInTerminal(
                     `mvn ${trimedGoals} -f "${item.abosolutePath}"`,
                     { name: `Maven-${item.artifactId}` }
@@ -184,7 +184,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             const historicalFilePath: string = Utils.getCommandHistoryCachePath(item.abosolutePath);
             window.showTextDocument(Uri.file(historicalFilePath));
         } else if (selectedGoal) {
-            Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
+            await Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
             VSCodeUI.runInTerminal(
                 `mvn ${selectedGoal} -f "${item.abosolutePath}"`,
                 { name: `Maven-${item.artifactId}` }

@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import * as fs from "fs-extra";
 import * as os from "os";
 import { OpenDialogOptions, QuickPickItem, Terminal, Uri, window, workspace, WorkspaceConfiguration } from "vscode";
 
@@ -68,8 +68,8 @@ export namespace VSCodeUI {
         }
     }
 
-    export function openFileIfExists(filepath: string): void {
-        if (fs.existsSync(filepath)) {
+    export async function openFileIfExists(filepath: string): Promise<void> {
+        if (await fs.pathExists(filepath)) {
             window.showTextDocument(Uri.file(filepath), { preview: false });
         }
     }

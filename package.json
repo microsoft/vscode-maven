@@ -233,6 +233,7 @@
     "test": "npm run compile && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
+    "@types/fs-extra": "^4.0.5",
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
     "@types/xml2js": "^0.4.2",
@@ -242,6 +243,7 @@
     "vscode": "^1.1.6"
   },
   "dependencies": {
+    "fs-extra": "^4.0.3",
     "md5": "^2.2.1",
     "xml2js": "^0.4.19"
   }

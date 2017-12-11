@@ -1,5 +1,4 @@
-import { exec, execSync } from "child_process";
-import * as fs from "fs";
+import * as fs from "fs-extra";
 import * as http from "http";
 import * as md5 from "md5";
 import * as os from "os";
@@ -13,8 +12,8 @@ const EXTENSION_ID: string = "vscode-maven";
 
 export namespace Utils {
     export async function getProject(absolutePath: string, workspacePath: string, iconPath?: string): Promise<ProjectItem> {
-        if (fs.existsSync(absolutePath)) {
-            const xml: string = fs.readFileSync(absolutePath, "utf8");
+        if (await fs.pathExists(absolutePath)) {
+            const xml: string = await fs.readFile(absolutePath, "utf8");
             const pom: IPomRoot = await readXmlContent(xml);
             if (pom && pom.project && pom.project.artifactId) {
                 const artifactId: string = pom.project.artifactId.toString();
@@ -50,10 +49,10 @@ export namespace Utils {
         return ret.reverse();
     }
 
-    export function loadCmdHistory(pomXmlFilePath: string): string[] {
+    export async function loadCmdHistory(pomXmlFilePath: string): Promise<string[]> {
         const filepath: string = getCommandHistoryCachePath(pomXmlFilePath);
-        if (fs.existsSync(filepath)) {
-            const content: string = fs.readFileSync(filepath).toString().trim();
+        if (await fs.pathExists(filepath)) {
+            const content: string = (await fs.readFile(filepath)).toString().trim();
             if (content) {
                 return content.split("\n");
             }
@@ -61,10 +60,10 @@ export namespace Utils {
         return [];
     }
 
-    export function saveCmdHistory(pomXmlFilePath: string, cmdlist: string[]): void {
+    export async function saveCmdHistory(pomXmlFilePath: string, cmdlist: string[]): Promise<void> {
         const filepath: string = getCommandHistoryCachePath(pomXmlFilePath);
-        mkdirp(path.dirname(filepath));
-        fs.writeFileSync(filepath, cmdlist.join("\n"));
+        await fs.ensureFile(filepath);
+        await fs.writeFile(filepath, cmdlist.join("\n"));
     }
 
     export function getEffectivePomOutputPath(pomXmlFilePath: string): string {
@@ -79,30 +78,11 @@ export namespace Utils {
         return path.join(os.tmpdir(), EXTENSION_ID);
     }
 
-    export function readFileIfExists(filepath: string): string {
-        if (filepath && fs.existsSync(filepath)) {
-            return fs.readFileSync(filepath).toString();
+    export async function readFileIfExists(filepath: string): Promise<string> {
+        if (await fs.pathExists(filepath)) {
+            return (await fs.readFile(filepath)).toString();
         }
         return null;
-    }
-
-    export function nearestDirPath(filepath: string): string {
-        if (fs.existsSync(filepath)) {
-            const stat: fs.Stats = fs.lstatSync(filepath);
-            if (stat.isDirectory()) {
-                return filepath;
-            } else if (stat.isFile) {
-                return path.dirname(filepath);
-            }
-        }
-    }
-
-    export function mkdirp(filepath: string): void {
-        if (fs.existsSync(filepath)) {
-            return;
-        }
-        mkdirp(path.dirname(filepath));
-        fs.mkdirSync(filepath);
     }
 
     export async function listArchetypeFromXml(xml: string): Promise<Archetype[]> {
@@ -134,21 +114,22 @@ export namespace Utils {
         return path.join(os.homedir(), ".m2", "repository", "archetype-catalog.xml");
     }
 
-    export function httpGetContent(url: string): Promise<string> {
+    export async function httpGetContent(url: string): Promise<string> {
         const filepath: string = path.join(getTempFolder(), md5(url));
-        if (fs.existsSync(filepath)) {
-            fs.unlinkSync(filepath);
+        if (await fs.pathExists(filepath)) {
+            await fs.unlink(filepath);
         }
-        mkdirp(path.dirname(filepath));
+        await fs.ensureFile(filepath);
         const file: fs.WriteStream = fs.createWriteStream(filepath);
         const contentBlocks: string[] = [];
         return new Promise<string>(
             (resolve: (value: string) => void, reject: (e: Error) => void): void => {
                 const request: http.ClientRequest = http.get(url, (response: http.IncomingMessage) => {
                     response.pipe(file);
-                    file.on('finish', () => {
+                    file.on('finish', async () => {
                         file.close();
-                        resolve(fs.readFileSync(filepath).toString());
+                        const buf: Buffer = await fs.readFile(filepath);
+                        resolve(buf.toString());
                     });
                 });
                 request.on("error", (e: Error) => {
@@ -157,22 +138,23 @@ export namespace Utils {
             });
     }
 
-    export function findAllInDir(dirname: string, targetFileName: string, depth: number): string[] {
+    export async function findAllInDir(dirname: string, targetFileName: string, depth: number): Promise<string[]> {
         const ret: string[] = [];
         // `depth < 0` means infinite
-        if (depth !== 0 && fs.existsSync(dirname)) {
-            const filenames: string[] = fs.readdirSync(dirname);
-            filenames.forEach((filename: string) => {
+        if (depth !== 0 && await fs.pathExists(dirname)) {
+            const filenames: string[] = await fs.readdir(dirname);
+            for (const filename of filenames) {
                 const filepath: string = path.join(dirname, filename);
-                const stat: fs.Stats = fs.lstatSync(filepath);
+                const stat: fs.Stats = await fs.lstat(filepath);
                 if (stat.isDirectory()) {
-                    findAllInDir(filepath, targetFileName, depth - 1).forEach((elem: string) => {
-                        ret.push(elem);
-                    });
+                    const results: string[] = await findAllInDir(filepath, targetFileName, depth - 1);
+                    for (const result of results) {
+                        ret.push(result);
+                    }
                 } else if (path.basename(filepath).toLowerCase() === targetFileName) {
                     ret.push(filepath);
                 }
-            });
+            }
         }
         return ret;
     }
