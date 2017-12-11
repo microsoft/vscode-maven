@@ -159,7 +159,8 @@ export namespace Utils {
 
     export function findAllInDir(dirname: string, targetFileName: string, depth: number): string[] {
         const ret: string[] = [];
-        if (depth > 0 && fs.existsSync(dirname)) {
+        // `depth < 0` means infinite
+        if (depth !== 0 && fs.existsSync(dirname)) {
             const filenames: string[] = fs.readdirSync(dirname);
             filenames.forEach((filename: string) => {
                 const filepath: string = path.join(dirname, filename);

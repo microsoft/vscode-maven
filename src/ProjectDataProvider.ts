@@ -29,19 +29,23 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         const element: ProjectItem = <ProjectItem>node;
         if (element === undefined) {
             this.cachedItems = [];
+            const ret: TreeItem[] = [];
+            if (workspace.workspaceFolders) {
+                workspace.workspaceFolders.forEach((wf: WorkspaceFolder) => {
+                    const item: ProjectItem = new ProjectItem(wf.name, wf.uri.fsPath, "WorkspaceItem");
+                    ret.push(item);
+                });
+            }
+            return ret;
+        } else if (element.contextValue === "WorkspaceItem") {
             const todolist: Promise<ProjectItem>[] = [];
-            const pomXmlFilePaths: string[] = this.getRootPomPaths();
-
-            const pinnedPomPaths: string[] = workspace.getConfiguration("maven.projects").get<string[]>("pinnedPomPaths") || [];
-            pinnedPomPaths.filter(
-                (pomPath: string) => !pomXmlFilePaths.find((value: string) => value === pomPath)
-            ).forEach((pomPath: string) => pomXmlFilePaths.push(pomPath));
-
-            pomXmlFilePaths.forEach((pomXmlFilePath: string) => {
+            const depth: number = workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom") || -1;
+            const foundPomXmls: string[] = await Utils.findAllInDir(element.abosolutePath, "pom.xml", depth);
+            foundPomXmls.forEach((pomXmlFilePath: string) => {
                 todolist.push(Utils.getProject(pomXmlFilePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
             });
             const items: ProjectItem[] = (await Promise.all(todolist)).filter((x: ProjectItem) => x);
-            this.cachedItems = [].concat(items);
+            this.cachedItems = this.cachedItems.concat(items);
             return items;
         } else if (element.contextValue === "mavenProject") {
             const items: ProjectItem[] = [];
@@ -50,7 +54,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             if (pom.project && pom.project.modules) {
                 const item: ProjectItem = new ProjectItem(
                     "Modules",
-                    element.pomXmlFilePath,
+                    element.abosolutePath,
                     "Modules",
                     { ...element.params, modules: pom.project.modules }
                 );
@@ -64,7 +68,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             element.params.modules.forEach((modules: IPomModules) => {
                 if (modules.module) {
                     modules.module.forEach((mod: IPomModule) => {
-                        const pomxml: string = path.join(path.dirname(element.pomXmlFilePath), mod.toString(), "pom.xml");
+                        const pomxml: string = path.join(path.dirname(element.abosolutePath), mod.toString(), "pom.xml");
                         pomXmlFilePaths.push(pomxml);
                     });
                 }
@@ -75,7 +79,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
 
             const items: ProjectItem[] = (await Promise.all(todolist)).filter((x: ProjectItem) => x);
             this.cachedItems = this.cachedItems.concat(items.filter(
-                (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.pomXmlFilePath === item.pomXmlFilePath)
+                (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.abosolutePath === item.abosolutePath)
             ));
             return items;
 
@@ -91,11 +95,11 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             item = await VSCodeUI.getQuickPick<ProjectItem>(
                 this.cachedItems,
                 (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.pomXmlFilePath
+                (x: ProjectItem) => x.abosolutePath
             );
         }
         if (item) {
-            const cmd: string = `mvn ${goal || item.label} -f "${item.pomXmlFilePath}"`;
+            const cmd: string = `mvn ${goal || item.label} -f "${item.abosolutePath}"`;
             const name: string = `Maven-${item.params.artifactId}`;
             VSCodeUI.runInTerminal(cmd, { name });
         }
@@ -106,14 +110,14 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             item = await VSCodeUI.getQuickPick<ProjectItem>(
                 this.cachedItems,
                 (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.pomXmlFilePath
+                (x: ProjectItem) => x.abosolutePath
             );
         }
         let pomXmlFilePath: string = null;
         if (item instanceof Uri) {
             pomXmlFilePath = item.fsPath;
         } else if (item instanceof ProjectItem) {
-            pomXmlFilePath = item.pomXmlFilePath;
+            pomXmlFilePath = item.abosolutePath;
         }
         if (!pomXmlFilePath) {
             return Promise.resolve();
@@ -146,12 +150,12 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             item = await VSCodeUI.getQuickPick<ProjectItem>(
                 this.cachedItems,
                 (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.pomXmlFilePath);
+                (x: ProjectItem) => x.abosolutePath);
         }
-        if (!item || !item.pomXmlFilePath) {
+        if (!item || !item.abosolutePath) {
             return Promise.resolve();
         }
-        const cmdlist: string[] = Utils.loadCmdHistory(item.pomXmlFilePath);
+        const cmdlist: string[] = Utils.loadCmdHistory(item.abosolutePath);
         const selectedGoal: string = await window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
             placeHolder: "Select the custom command ... "
         });
@@ -159,93 +163,21 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests" });
             const trimedGoals: string = inputGoals && inputGoals.trim();
             if (trimedGoals) {
-                Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
+                Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
                 VSCodeUI.runInTerminal(
-                    `mvn ${trimedGoals} -f "${item.pomXmlFilePath}"`,
+                    `mvn ${trimedGoals} -f "${item.abosolutePath}"`,
                     { name: `Maven-${item.params.artifactId}` }
                 );
             }
         } else if (selectedGoal === ENTRY_OPEN_HIST) {
-            const historicalFilePath: string = Utils.getCommandHistoryCachePath(item.pomXmlFilePath);
+            const historicalFilePath: string = Utils.getCommandHistoryCachePath(item.abosolutePath);
             window.showTextDocument(Uri.file(historicalFilePath));
         } else if (selectedGoal) {
-            Utils.saveCmdHistory(item.pomXmlFilePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
+            Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
             VSCodeUI.runInTerminal(
-                `mvn ${selectedGoal} -f "${item.pomXmlFilePath}"`,
+                `mvn ${selectedGoal} -f "${item.abosolutePath}"`,
                 { name: `Maven-${item.params.artifactId}` }
             );
         }
-    }
-
-    public async importProject(entry: Uri | undefined): Promise<void> {
-        if (!entry) {
-            entry = await VSCodeUI.openDialogForFile({ filters: { "POM File": ["xml"] }, openLabel: "Import" });
-        }
-
-        const currentPomXml: string = entry && entry.fsPath;
-        if (!currentPomXml) {
-            return Promise.resolve();
-        } else if (this.getRootPomPaths().indexOf(currentPomXml) >= 0) {
-            window.showWarningMessage("Already imported.");
-        } else {
-            const config: WorkspaceConfiguration = workspace.getConfiguration("maven.projects");
-            const pomXmls: string[] = config.get<string[]>("pinnedPomPaths");
-            if (pomXmls.indexOf(currentPomXml) < 0) {
-                pomXmls.push(currentPomXml);
-                await config.update("pinnedPomPaths", pomXmls, false);
-            }
-            this.refreshTree();
-        }
-    }
-
-    public async searchAndImportProjects(): Promise<void> {
-        const pomXmlFilePaths: string[] = this.getRootPomPaths();
-        const res: Uri = await VSCodeUI.openDialogForFolder({ openLabel: "Import All" });
-        if (res && res.fsPath) {
-            const foundPomXmls: string[] = await Utils.findAllInDir(res.fsPath, "pom.xml", 99);
-            const config: WorkspaceConfiguration = workspace.getConfiguration("maven.projects");
-            const pomXmls: string[] = config.get<string[]>("pinnedPomPaths");
-            foundPomXmls.forEach((currentPomXml: string) => {
-                if (pomXmlFilePaths.indexOf(currentPomXml) < 0 && pomXmls.indexOf(currentPomXml) < 0) {
-                    pomXmls.push(currentPomXml);
-                }
-            });
-            await config.update("pinnedPomPaths", pomXmls, false);
-            this.refreshTree();
-        }
-    }
-
-    public async removeProject(item: ProjectItem | undefined): Promise<void> {
-        if (!item) {
-            item = await VSCodeUI.getQuickPick<ProjectItem>(
-                this.cachedItems,
-                (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.pomXmlFilePath
-            );
-        }
-        if (item) {
-            const config: WorkspaceConfiguration = workspace.getConfiguration("maven.projects");
-            const pomXmls: string[] = config.get<string[]>("pinnedPomPaths");
-            const newPomXmls: string[] = pomXmls.filter((elem: string) => elem !== item.pomXmlFilePath);
-            if (newPomXmls.length === pomXmls.length) {
-                window.showWarningMessage("Cannot remove default projects under root folder.");
-            } else {
-                await config.update("pinnedPomPaths", newPomXmls, false);
-                this.refreshTree();
-            }
-        }
-    }
-
-    private getRootPomPaths(): string[] {
-        const ret: string[] = [];
-        const depth: number = Math.max(workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom"), 1);
-        if (workspace.workspaceFolders) {
-            workspace.workspaceFolders.forEach((wf: WorkspaceFolder) => {
-                Utils.findAllInDir(wf.uri.fsPath, "pom.xml", depth).forEach((pomxml: string) => {
-                    ret.push(pomxml);
-                });
-            });
-        }
-        return ret;
     }
 }

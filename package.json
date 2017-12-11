@@ -35,8 +35,6 @@
     "onCommand:maven.goal.deploy",
     "onCommand:maven.goal.custom",
     "onCommand:maven.project.effectivePom",
-    "onCommand:maven.project.import",
-    "onCommand:maven.project.remove",
     "onCommand:maven.project.openPom",
     "onCommand:maven.archetype.generate",
     "onView:mavenProjects"
@@ -109,37 +107,14 @@
         "category": "Maven"
       },
       {
-        "command": "maven.project.import",
-        "title": "Import Maven Project",
-        "category": "Maven",
-        "icon": {
-          "light": "resources/light/add.svg",
-          "dark": "resources/dark/add.svg"
-        }
-      },
-      {
         "command": "maven.project.openPom",
         "title": "Open POM file",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.project.remove",
-        "title": "Remove Maven Project",
         "category": "Maven"
       },
       {
         "command": "maven.archetype.generate",
         "title": "Generate from Maven Archetype",
         "category": "Maven"
-      },
-      {
-        "command": "maven.project.importAll",
-        "title": "Import All",
-        "category": "Maven",
-        "icon": {
-          "light": "resources/light/addAll.svg",
-          "dark": "resources/dark/addAll.svg"
-        }
       }
     ],
     "views": {
@@ -160,11 +135,6 @@
           "command": "maven.project.effectivePom",
           "when": "resourceFilename == pom.xml",
           "group": "maven@1"
-        },
-        {
-          "command": "maven.project.import",
-          "when": "resourceFilename == pom.xml",
-          "group": "maven@0"
         }
       ],
       "view/title": [
@@ -172,16 +142,6 @@
           "command": "maven.project.refreshAll",
           "when": "view == mavenProjects",
           "group": "navigation@2"
-        },
-        {
-          "command": "maven.project.importAll",
-          "when": "view == mavenProjects",
-          "group": "navigation@1"
-        },
-        {
-          "command": "maven.project.import",
-          "when": "view == mavenProjects",
-          "group": "navigation@0"
         }
       ],
       "view/item/context": [
@@ -244,11 +204,6 @@
           "command": "maven.project.effectivePom",
           "when": "view == mavenProjects && viewItem == mavenProject",
           "group": "0-pom@1"
-        },
-        {
-          "command": "maven.project.remove",
-          "when": "view == mavenProjects && viewItem == mavenProject",
-          "group": "2-ops@0"
         }
       ]
     },
@@ -260,14 +215,9 @@
             "type": "boolean",
             "default": true
           },
-          "maven.projects.pinnedPomPaths": {
-            "type": "array",
-            "default": [],
-            "description": "Specifies pom.xml filepath of those projects you want to pin to Maven Project Explorer."
-          },
           "maven.projects.maxDepthOfPom": {
             "type": "integer",
-            "default": 1,
+            "default": -1,
             "description": "Specifies max depth to find pom.xml recursively, only search root folder by default."
           }
         }
