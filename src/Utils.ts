@@ -1,6 +1,7 @@
 import * as fs from "fs-extra";
 import * as http from "http";
 import * as md5 from "md5";
+import * as minimatch from "minimatch";
 import * as os from "os";
 import * as path from "path";
 import * as xml2js from "xml2js";
@@ -138,8 +139,15 @@ export namespace Utils {
             });
     }
 
-    export async function findAllInDir(dirname: string, targetFileName: string, depth: number): Promise<string[]> {
+    export async function findAllInDir(dirname: string, targetFileName: string, depth: number, exclusion: string[] = ["**/.*"]): Promise<string[]> {
         const ret: string[] = [];
+        if (exclusion) {
+            for (const pattern of exclusion) {
+                if (minimatch(dirname, pattern)) {
+                    return ret;
+                }
+            }
+        }
         // `depth < 0` means infinite
         if (depth !== 0 && await fs.pathExists(dirname)) {
             const filenames: string[] = await fs.readdir(dirname);
@@ -147,7 +155,7 @@ export namespace Utils {
                 const filepath: string = path.join(dirname, filename);
                 const stat: fs.Stats = await fs.lstat(filepath);
                 if (stat.isDirectory()) {
-                    const results: string[] = await findAllInDir(filepath, targetFileName, depth - 1);
+                    const results: string[] = await findAllInDir(filepath, targetFileName, depth - 1, exclusion);
                     for (const result of results) {
                         ret.push(result);
                     }

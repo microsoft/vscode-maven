@@ -42,8 +42,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         } else if (element.contextValue === "WorkspaceItem") {
             const workspaceItem: WorkspaceItem = <WorkspaceItem> element;
             const promiseList: Promise<ProjectItem>[] = [];
-            const depth: number = workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom") || -1;
-            const foundPomXmls: string[] = await Utils.findAllInDir(workspaceItem.abosolutePath, "pom.xml", depth);
+            const depth: number = workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom");
+            const exclusions: string[] = workspace.getConfiguration("maven.projects").get<string[]>("excludedFolders");
+            const foundPomXmls: string[] = await Utils.findAllInDir(workspaceItem.abosolutePath, "pom.xml", depth, exclusions);
             foundPomXmls.forEach((pomXmlFilePath: string) => {
                 promiseList.push(Utils.getProject(pomXmlFilePath, workspaceItem.abosolutePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
             });

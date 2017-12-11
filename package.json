@@ -219,6 +219,11 @@
             "type": "integer",
             "default": -1,
             "description": "Specifies max depth to find pom.xml recursively, only search root folder by default."
+          },
+          "maven.projects.excludedFolders": {
+            "type": "array",
+            "default": ["**/.*", "**/node_modules"],
+            "description": "Specifies filepath pattern of folders to exclude while searching for maven projects."
           }
         }
       }
@@ -234,6 +239,7 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^4.0.5",
+    "@types/minimatch": "^3.0.1",
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
     "@types/xml2js": "^0.4.2",
@@ -245,6 +251,7 @@
   "dependencies": {
     "fs-extra": "^4.0.3",
     "md5": "^2.2.1",
+    "minimatch": "^3.0.4",
     "xml2js": "^0.4.19"
   }
 }
