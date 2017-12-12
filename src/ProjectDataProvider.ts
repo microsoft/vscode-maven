@@ -72,7 +72,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 items.push(modulesFolderItem);
             }
             return Promise.resolve(items);
-        } else if (element.contextValue === "ModulesFolderItem") {
+        } else if (element.contextValue === FolderItem.ContextValue.Modules) {
             const modulesFolderItem: FolderItem = <FolderItem> element;
             const pomXmlFilePaths: string[] = [];
             modulesFolderItem.params.modules.forEach((modules: IPomModules) => {
