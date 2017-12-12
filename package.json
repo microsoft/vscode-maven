@@ -211,24 +211,23 @@
       {
         "title": "Maven Project Explorer",
         "properties": {
-          "maven.showExplorer": {
-            "type": "boolean",
-            "default": true
-          },
           "maven.projects.maxDepthOfPom": {
             "type": "integer",
             "default": -1,
-            "description": "Specifies max depth to find pom.xml recursively, only search root folder by default."
+            "description": "Specifies max depth to find pom.xml recursively, only search root folder by default.",
+            "scope": "window"
           },
           "maven.projects.excludedFolders": {
             "type": "array",
             "default": ["**/.*", "**/node_modules"],
-            "description": "Specifies filepath pattern of folders to exclude while searching for maven projects."
+            "description": "Specifies filepath pattern of folders to exclude while searching for maven projects.",
+            "scope": "resource"
           },
           "maven.executable.path": {
             "type": "string",
             "default": "",
-            "description": "Specifies absolute path of mvn executable."
+            "description": "Specifies absolute path of mvn executable.",
+            "scope": "window"
           }
         }
       }
