@@ -2,6 +2,7 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
+        - [0.4.0](#040)
     - [Released](#released)
         - [0.3.0](#030)
         - [0.2.x](#021)
@@ -9,18 +10,21 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.x](#006)
 
 ## Unreleased
+### 0.4.0
+- For each root folder of current workspace, auto import all maven projects recursively.
+- Support to specify `mvn` executable path.
 
 ## Released
 ### 0.3.0
-- Support to import all projects under specified folder.
+- ~~Support~~ Force (Since 0.4.0) to import all projects under specified folder.
 - Change extension icon.
 
 ### 0.2.1
 - add `maven.projects.maxDepthOfPom` to specify max depth to find pom.xml recursively. By default the value is 1, indicating it only searches root folder.
 
 ### 0.2.0
-- add `maven.projects.pinnedPomPaths` entry in Workspace Settings.
-- Can manually import `pom.xml` not located in root folder (right-click on `pom.xml`).
+- ~~add `maven.projects.pinnedPomPaths` entry in Workspace Settings.~~ (removed since 0.4.0)
+- ~~Can manually import `pom.xml` not located in root folder (right-click on `pom.xml`).~~ (removed since 0.4.0)
 
 ### 0.1.4
 - Use artifactId as name of Node in side bar.(To fix display issues like unparsed `$` signs)

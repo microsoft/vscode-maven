@@ -15,31 +15,31 @@ Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide 
 
 ## Requirements
 
-Maven installed and PATH added, i.e., `mvn` command can be executed directly in the terminal.
+Provide Maven executable filepath.
+* By default, `mvn` command is executed directly in the terminal, which requires `mvn` can be found in system envronment `PATH`.
+* If you do not want to add it into `PATH`, you can specify maven executable path in settings:
+    ```
+    {
+        "maven.executable.path": "/some-path-to-maven-home/bin/mvn"
+    }
+    ```
 
 ## Usage
 
-* The extension scans `pom.xml` from each root folder in your workspace recursively, and display corresponding projects and their modules in the sidebar.
+* The extension scans `pom.xml` from each root folder in your workspace recursively, and display all maven projects and their modules in the sidebar.
 
     ![Screenshot](images/view_context.png)
 
-* If you want to add a project whose `pom.xml` is elsewhere not in the workspace, you have multiple ways to import it.
-    * `right-click` on the `pom.xml`, select `Import Maven Project`. The extension will force to show the corresponding project in sidebar.
-    * Or simply click the `+` button, and select a `pom.xml` in a system dialog.
-    * Or you just want to search `pom.xml` files recursively and import all of them. Then click the folder-shaped button beside.
-
-    ![Screenshot](images/explorer_context.png)
-
-
-
-    In fact, the extension imports a Maven project by adding its absolute path in your `Workspace Settings`, and then refreshes the whole view.
+* To speed up the searching of maven projects, you can exclude folders in settings:
     ```
     {
-        "maven.projects.pinnedPomPaths": [
-            "c:\\path-to-project\\pom.xml"
+        "maven.projects.excludedFolders": [
+            "**/.*",                // exclude hidden folders
+            "**/node_modules"       // exclude node modules to speed up
         ]
     }
     ```
+
 * It perserves history of custom goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
 
     ![Screenshot](images/customGoal.gif)
