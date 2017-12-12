@@ -139,29 +139,29 @@ export namespace Utils {
             });
     }
 
-    export async function findAllInDir(dirname: string, targetFileName: string, depth: number, exclusion: string[] = ["**/.*"]): Promise<string[]> {
-        const ret: string[] = [];
+    export async function findAllInDir(currentPath: string, targetFileName: string, depth: number, exclusion: string[] = ["**/.*"]): Promise<string[]> {
         if (exclusion) {
             for (const pattern of exclusion) {
-                if (minimatch(dirname, pattern)) {
-                    return ret;
+                if (minimatch(currentPath, pattern)) {
+                    return [];
                 }
             }
         }
+        const ret: string[] = [];
         // `depth < 0` means infinite
-        if (depth !== 0 && await fs.pathExists(dirname)) {
-            const filenames: string[] = await fs.readdir(dirname);
-            for (const filename of filenames) {
-                const filepath: string = path.join(dirname, filename);
-                const stat: fs.Stats = await fs.lstat(filepath);
-                if (stat.isDirectory()) {
+        if (depth !== 0 && await fs.pathExists(currentPath)) {
+            const stat: fs.Stats = await fs.lstat(currentPath);
+            if (stat.isDirectory()) {
+                const filenames: string[] = await fs.readdir(currentPath);
+                for (const filename of filenames) {
+                    const filepath: string = path.join(currentPath, filename);
                     const results: string[] = await findAllInDir(filepath, targetFileName, depth - 1, exclusion);
                     for (const result of results) {
                         ret.push(result);
                     }
-                } else if (path.basename(filepath).toLowerCase() === targetFileName) {
-                    ret.push(filepath);
                 }
+            } else if (path.basename(currentPath).toLowerCase() === targetFileName) {
+                ret.push(currentPath);
             }
         }
         return ret;

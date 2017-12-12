@@ -10,12 +10,19 @@ export class FolderItem extends TreeItem {
         modules?: IPomModules[]
     };
 
-    constructor(name: string, contextValue: string, parentAbsolutePath: string, workpacePath: string, params?: object) {
+    constructor(name: string, contextValue: FolderItem.ContextValue, parentAbsolutePath: string, workpacePath: string, params?: object) {
         super(name, TreeItemCollapsibleState.Collapsed);
         this.name = name;
         this.workspacePath = workpacePath;
         this.parentAbsolutePath = parentAbsolutePath;
         this.contextValue = contextValue;
         this.params = params || {};
+    }
+
+}
+
+export module FolderItem {
+    export enum ContextValue {
+        Modules = "ModulesFolderItem"
     }
 }
