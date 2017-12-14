@@ -1,10 +1,9 @@
 "use strict";
 import * as vscode from "vscode";
-import { Uri } from "vscode";
+import { Progress, Uri } from "vscode";
 import { ArchetypeModule } from "./ArchetypeModule";
 import { ProjectItem } from "./model/ProjectItem";
 import { ProjectDataProvider } from "./ProjectDataProvider";
-import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -38,6 +37,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
     context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.generate", (entry: Uri | undefined) => {
         ArchetypeModule.generateFromArchetype(entry);
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand("maven.archetype.update", () => {
+        vscode.window.withProgress({location: vscode.ProgressLocation.Window}, async (p: Progress<{}>) => {
+            p.report({message: "updating archetype catalog ..."});
+            await ArchetypeModule.updateArchetypeCatalog();
+            p.report({message: "finished."});
+        });
     }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {

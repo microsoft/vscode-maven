@@ -1,7 +1,7 @@
 
 import { exec } from "child_process";
 import * as path from "path";
-import { Event, EventEmitter, ExtensionContext, TextDocument, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri, window, workspace, WorkspaceConfiguration, WorkspaceFolder } from "vscode";
+import { Event, EventEmitter, ExtensionContext, TextDocument, TreeDataProvider, TreeItem, Uri, window, workspace, WorkspaceFolder } from "vscode";
 import { FolderItem } from "./model/FolderItem";
 import { ProjectItem } from "./model/ProjectItem";
 import { WorkspaceItem } from "./model/WorkspaceItem";
@@ -22,10 +22,6 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
 
     constructor(context: ExtensionContext) {
         this.context = context;
-    }
-
-    private static getMavenExecutable(): string {
-        return workspace.getConfiguration("maven.executable").get<string>("path") || "mvn";
     }
 
     public getTreeItem(element: TreeItem): TreeItem {
@@ -92,6 +88,8 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.abosolutePath === item.abosolutePath)
             ));
             return items;
+        } else {
+            return [];
         }
     }
 
@@ -104,11 +102,12 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             item = await VSCodeUI.getQuickPick<ProjectItem>(
                 this.cachedItems,
                 (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.abosolutePath
+                (x: ProjectItem) => x.abosolutePath,
+                null
             );
         }
         if (item) {
-            const cmd: string = `"${ProjectDataProvider.getMavenExecutable()}" ${goal || item.label} -f "${item.abosolutePath}"`;
+            const cmd: string = `"${Utils.getMavenExecutable()}" ${goal || item.label} -f "${item.abosolutePath}"`;
             const name: string = `Maven-${item.artifactId}`;
             VSCodeUI.runInTerminal(cmd, { name });
         }
@@ -119,7 +118,8 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             item = await VSCodeUI.getQuickPick<ProjectItem>(
                 this.cachedItems,
                 (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.abosolutePath
+                (x: ProjectItem) => x.abosolutePath,
+                null
             );
         }
         let pomXmlFilePath: string = null;
@@ -132,10 +132,10 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             return Promise.resolve();
         }
         const promise: Promise<string> = new Promise<string>(
-            (resolve: (value: string) => void, reject: (e: Error) => void): void => {
+            (resolve: (value: string) => void, _reject: (e: Error) => void): void => {
                 const filepath: string = Utils.getEffectivePomOutputPath(pomXmlFilePath);
-                const cmd: string = `"${ProjectDataProvider.getMavenExecutable()}" help:effective-pom -f "${pomXmlFilePath}" -Doutput="${filepath}"`;
-                exec(cmd, (error: Error, stdout: string, stderr: string): void => {
+                const cmd: string = `"${Utils.getMavenExecutable()}" help:effective-pom -f "${pomXmlFilePath}" -Doutput="${filepath}"`;
+                exec(cmd, (error: Error, _stdout: string, stderr: string): void => {
                     if (error || stderr) {
                         return resolve(null);
                     }
@@ -159,7 +159,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             item = await VSCodeUI.getQuickPick<ProjectItem>(
                 this.cachedItems,
                 (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.abosolutePath);
+                (x: ProjectItem) => x.abosolutePath,
+                null
+            );
         }
         if (!item || !item.abosolutePath) {
             return Promise.resolve();
@@ -174,7 +176,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             if (trimedGoals) {
                 await Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
                 VSCodeUI.runInTerminal(
-                    `"${ProjectDataProvider.getMavenExecutable()}" ${trimedGoals} -f "${item.abosolutePath}"`,
+                    `"${Utils.getMavenExecutable()}" ${trimedGoals} -f "${item.abosolutePath}"`,
                     { name: `Maven-${item.artifactId}` }
                 );
             }
@@ -184,7 +186,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         } else if (selectedGoal) {
             await Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
             VSCodeUI.runInTerminal(
-                `"${ProjectDataProvider.getMavenExecutable()}" ${selectedGoal} -f "${item.abosolutePath}"`,
+                `"${Utils.getMavenExecutable()}" ${selectedGoal} -f "${item.abosolutePath}"`,
                 { name: `Maven-${item.artifactId}` }
             );
         }

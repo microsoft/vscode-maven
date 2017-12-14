@@ -32,9 +32,11 @@ export interface IArchetype {
     artifactId?: IArchetypeArtifactId[];
     version?: IArchetypeVersion[];
     description?: IArchetypeDescription[];
+    repository?: IArchetypeRepository[];
 }
 
 export type IArchetypeGroupId = string[];
 export type IArchetypeArtifactId = string[];
 export type IArchetypeVersion = string[];
 export type IArchetypeDescription = string[];
+export type IArchetypeRepository = string[];

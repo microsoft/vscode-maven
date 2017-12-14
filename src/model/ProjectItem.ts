@@ -16,5 +16,6 @@ export class ProjectItem extends TreeItem {
         this.abosolutePath = absolutePath;
         this.params = params || {};
         this.contextValue = "ProjectItem";
+        this.workspacePath = workpacePath;
     }
 }

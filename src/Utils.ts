@@ -4,12 +4,13 @@ import * as md5 from "md5";
 import * as minimatch from "minimatch";
 import * as os from "os";
 import * as path from "path";
+import { extensions, workspace } from 'vscode';
 import * as xml2js from "xml2js";
-import { Archetype } from "./Archetype";
+import { Archetype } from "./model/Archetype";
 import { ProjectItem } from "./model/ProjectItem";
 import { IArchetype, IArchetypeCatalogRoot, IArchetypes, IPomRoot } from "./model/XmlSchema";
-
-const EXTENSION_ID: string = "vscode-maven";
+const EXTENSION_NAME: string = "vscode-maven";
+const EXTENSION_ID: string = "eskibear.vscode-maven";
 
 export namespace Utils {
     export async function getProject(absolutePath: string, workspacePath: string, iconPath?: string): Promise<ProjectItem> {
@@ -23,10 +24,10 @@ export namespace Utils {
                 if (iconPath) {
                     ret.iconPath = iconPath;
                 }
-                return Promise.resolve(ret);
+                return ret;
             }
         }
-        return Promise.resolve(null);
+        return null;
     }
 
     export async function readXmlContent(xml: string, options?: {}): Promise<{}> {
@@ -68,15 +69,15 @@ export namespace Utils {
     }
 
     export function getEffectivePomOutputPath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), EXTENSION_ID, md5(pomXmlFilePath), "effective-pom.xml");
+        return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), "effective-pom.xml");
     }
 
     export function getCommandHistoryCachePath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), EXTENSION_ID, md5(pomXmlFilePath), "commandHistory.txt");
+        return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), "commandHistory.txt");
     }
 
     export function getTempFolder(): string {
-        return path.join(os.tmpdir(), EXTENSION_ID);
+        return path.join(os.tmpdir(), EXTENSION_NAME);
     }
 
     export async function readFileIfExists(filepath: string): Promise<string> {
@@ -87,32 +88,41 @@ export namespace Utils {
     }
 
     export async function listArchetypeFromXml(xml: string): Promise<Archetype[]> {
-        const catalogRoot: IArchetypeCatalogRoot = await readXmlContent(xml);
-        if (catalogRoot && catalogRoot["archetype-catalog"]) {
-            const dict: { [key: string]: Archetype } = {};
-            catalogRoot["archetype-catalog"].archetypes.forEach((archetypes: IArchetypes) => {
-                archetypes.archetype.forEach((archetype: IArchetype) => {
-                    const groupId: string = archetype.groupId && archetype.groupId.toString();
-                    const artifactId: string = archetype.artifactId && archetype.artifactId.toString();
-                    const description: string = archetype.description && archetype.description.toString();
-                    const version: string = archetype.version && archetype.version.toString();
-                    const identifier: string = `${groupId}:${artifactId}`;
-                    if (!dict[identifier]) {
-                        dict[identifier] =
-                            new Archetype(artifactId, groupId, description);
-                    }
-                    if (dict[identifier].versions.indexOf(version) < 0) {
-                        dict[identifier].versions.push(version);
-                    }
+        try {
+            const catalogRoot: IArchetypeCatalogRoot = await readXmlContent(xml);
+            if (catalogRoot && catalogRoot["archetype-catalog"]) {
+                const dict: { [key: string]: Archetype } = {};
+                catalogRoot["archetype-catalog"].archetypes.forEach((archetypes: IArchetypes) => {
+                    archetypes.archetype.forEach((archetype: IArchetype) => {
+                        const groupId: string = archetype.groupId && archetype.groupId.toString();
+                        const artifactId: string = archetype.artifactId && archetype.artifactId.toString();
+                        const description: string = archetype.description && archetype.description.toString();
+                        const version: string = archetype.version && archetype.version.toString();
+                        const repository: string = archetype.repository && archetype.repository.toString();
+                        const identifier: string = `${groupId}:${artifactId}`;
+                        if (!dict[identifier]) {
+                            dict[identifier] =
+                                new Archetype(artifactId, groupId, repository, description);
+                        }
+                        if (dict[identifier].versions.indexOf(version) < 0) {
+                            dict[identifier].versions.push(version);
+                        }
+                    });
                 });
-            });
-            return Promise.resolve(Object.keys(dict).map((k: string) => dict[k]));
+                return Object.keys(dict).map((k: string) => dict[k]);
+            }
+        } catch (err) {
+            // do nothing
         }
-        Promise.resolve([]);
-    }
+        return [];
+     }
 
     export function getLocalArchetypeCatalogFilePath(): string {
         return path.join(os.homedir(), ".m2", "repository", "archetype-catalog.xml");
+    }
+
+    export function getProvidedArchetypeCatalogFilePath(): string {
+        return path.join(Utils.getExtensionRootPath(), "resources", "archetype-catalog.xml");
     }
 
     export async function httpGetContent(url: string): Promise<string> {
@@ -122,7 +132,6 @@ export namespace Utils {
         }
         await fs.ensureFile(filepath);
         const file: fs.WriteStream = fs.createWriteStream(filepath);
-        const contentBlocks: string[] = [];
         return new Promise<string>(
             (resolve: (value: string) => void, reject: (e: Error) => void): void => {
                 const request: http.ClientRequest = http.get(url, (response: http.IncomingMessage) => {
@@ -165,5 +174,13 @@ export namespace Utils {
             }
         }
         return ret;
+    }
+
+    export function getExtensionRootPath(): string {
+        return extensions.getExtension(EXTENSION_ID).extensionPath;
+    }
+
+    export function getMavenExecutable(): string {
+        return workspace.getConfiguration("maven.executable").get<string>("path") || "mvn";
     }
 }

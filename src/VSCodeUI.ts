@@ -1,6 +1,6 @@
 import * as fs from "fs-extra";
 import * as os from "os";
-import { OpenDialogOptions, QuickPickItem, Terminal, Uri, window, workspace, WorkspaceConfiguration } from "vscode";
+import { InputBoxOptions, OpenDialogOptions, QuickPickItem, QuickPickOptions, Terminal, Uri, window, workspace } from "vscode";
 
 export namespace VSCodeUI {
     const terminals: { [id: string]: Terminal } = {};
@@ -54,7 +54,7 @@ export namespace VSCodeUI {
         }
     }
 
-    export async function openDialogForFile(customOptions: OpenDialogOptions): Promise<Uri> {
+    export async function openDialogForFile(customOptions?: OpenDialogOptions): Promise<Uri> {
         const options: OpenDialogOptions = {
             canSelectFiles: true,
             canSelectFolders: false,
@@ -75,24 +75,31 @@ export namespace VSCodeUI {
     }
 
     export async function getQuickPick<T>(
-        items: T[],
+        itemsSource: T[] | Promise<T[]>,
         labelfunc: (item: T) => string, descfunc: (item: T) => string,
-        detailfunc?: (item: T) => string
+        detailfunc: (item: T) => string, options?: QuickPickOptions
     ): Promise<T> {
-        const itemWrappers: IQuickPickItemEx<T>[] = [];
-        items.forEach((item: T) => {
-            const wrapper: IQuickPickItemEx<T> = {
-                description: descfunc(item),
-                detail: (detailfunc && detailfunc(item)),
-                label: labelfunc(item),
-                value: item
-            };
-            itemWrappers.push(wrapper);
-        });
-        const selected: IQuickPickItemEx<T> = await window.showQuickPick(itemWrappers);
+        const items: T[] = await itemsSource;
+        const itemWrappersPromise: Promise<IQuickPickItemEx<T>[]> = new Promise<IQuickPickItemEx<T>[]>(
+            (resolve: (value: IQuickPickItemEx<T>[]) => void, _reject: (e: Error) => void): void => {
+                const ret: IQuickPickItemEx<T>[] = items.map((item: T) => Object.assign({}, {
+                    description: (detailfunc && descfunc(item)),
+                    detail: (detailfunc && detailfunc(item)),
+                    label: (labelfunc && labelfunc(item)),
+                    value: item
+                }));
+                resolve(ret);
+            }
+        );
+
+        const selected: IQuickPickItemEx<T> = await window.showQuickPick(itemWrappersPromise, Object.assign({ ignoreFocusOut: true }, options));
         return selected && selected.value;
     }
 
+    export async function getFromInputBox(options?: InputBoxOptions): Promise<string> {
+        return await window.showInputBox(Object.assign({ ignoreFocusOut: true }, options));
+
+    }
 }
 
 interface ITerminalOptions {
