@@ -132,6 +132,60 @@
       ]
     },
     "menus": {
+      "commandPalette": [
+        {
+          "command": "maven.goal.clean",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.validate",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.compile",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.test",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.package",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.verify",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.install",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.site",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.deploy",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.goal.custom",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.project.effectivePom",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.project.refreshAll",
+          "when": "false == true"
+        },
+        {
+          "command": "maven.project.openPom",
+          "when": "false == true"
+        }
+      ],
       "explorer/context": [
         {
           "command": "maven.archetype.generate",
@@ -152,52 +206,52 @@
       ],
       "view/item/context": [
         {
-          "command": "maven.goal.clean",
+          "command": "maven.goal.custom",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@0"
         },
         {
-          "command": "maven.goal.validate",
+          "command": "maven.goal.clean",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@1"
         },
         {
-          "command": "maven.goal.compile",
+          "command": "maven.goal.package",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@2"
         },
         {
-          "command": "maven.goal.test",
+          "command": "maven.goal.install",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@3"
         },
         {
-          "command": "maven.goal.package",
+          "command": "maven.goal.compile",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@4"
         },
         {
-          "command": "maven.goal.verify",
+          "command": "maven.goal.validate",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@5"
         },
         {
-          "command": "maven.goal.install",
+          "command": "maven.goal.verify",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@6"
         },
         {
-          "command": "maven.goal.site",
+          "command": "maven.goal.test",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@7"
         },
         {
-          "command": "maven.goal.deploy",
+          "command": "maven.goal.site",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@8"
         },
         {
-          "command": "maven.goal.custom",
+          "command": "maven.goal.deploy",
           "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@9"
         },

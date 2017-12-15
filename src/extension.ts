@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        const commandMavenGoal: vscode.Disposable = vscode.commands.registerCommand(`maven.goal.${goal}`, (item: ProjectItem | undefined) => {
+        const commandMavenGoal: vscode.Disposable = vscode.commands.registerCommand(`maven.goal.${goal}`, (item: ProjectItem) => {
             mavenProjectsTreeDataProvider.executeGoal(item, goal);
         });
         context.subscriptions.push(commandMavenGoal);
@@ -21,15 +21,15 @@ export function activate(context: vscode.ExtensionContext): void {
         mavenProjectsTreeDataProvider.refreshTree();
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.effectivePom", (item: Uri | ProjectItem | undefined) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.effectivePom", (item: Uri | ProjectItem) => {
         mavenProjectsTreeDataProvider.effectivePom(item);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.goal.custom", (item: ProjectItem | undefined) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.goal.custom", (item: ProjectItem) => {
         mavenProjectsTreeDataProvider.customGoal(item);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("maven.project.openPom", (item: ProjectItem | undefined) => {
+    context.subscriptions.push(vscode.commands.registerCommand("maven.project.openPom", (item: ProjectItem) => {
         if (item) {
             VSCodeUI.openFileIfExists(item.abosolutePath);
         }

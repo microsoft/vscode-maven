@@ -18,7 +18,6 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
     public _onDidChangeTreeData: EventEmitter<TreeItem> = new EventEmitter<TreeItem>();
     public readonly onDidChangeTreeData: Event<TreeItem> = this._onDidChangeTreeData.event;
     protected context: ExtensionContext;
-    private cachedItems: ProjectItem[] = [];
 
     constructor(context: ExtensionContext) {
         this.context = context;
@@ -30,7 +29,6 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
 
     public async getChildren(element?: TreeItem): Promise<TreeItem[]> {
         if (element === undefined) {
-            this.cachedItems = [];
             if (workspace.workspaceFolders) {
                 return workspace.workspaceFolders.map((wf: WorkspaceFolder) => new WorkspaceItem(wf.name, wf.uri.fsPath));
             } else {
@@ -46,7 +44,6 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             items.forEach((item: ProjectItem) => {
                 item.workspacePath = workspaceItem.abosolutePath;
             });
-            this.cachedItems = this.cachedItems.concat(items);
             if (items.length === 0) {
                 return [new TreeItem(ITEM_NO_AVAILABLE_PROJECTS)];
             }
@@ -67,7 +64,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 modulesFolderItem.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(modulesFolderItem);
             }
-            return Promise.resolve(items);
+            return items;
         } else if (element.contextValue === FolderItem.ContextValue.Modules) {
             const modulesFolderItem: FolderItem = <FolderItem> element;
             const pomXmlFilePaths: string[] = [];
@@ -84,9 +81,6 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             items.forEach((item: ProjectItem) => {
                 item.workspacePath = modulesFolderItem.workspacePath;
             });
-            this.cachedItems = this.cachedItems.concat(items.filter(
-                (item: ProjectItem) => !this.cachedItems.find((value: ProjectItem) => value.abosolutePath === item.abosolutePath)
-            ));
             return items;
         } else {
             return [];
@@ -97,15 +91,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         this._onDidChangeTreeData.fire();
     }
 
-    public async executeGoal(item: ProjectItem | undefined, goal?: string): Promise<void> {
-        if (!item) {
-            item = await VSCodeUI.getQuickPick<ProjectItem>(
-                this.cachedItems,
-                (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.abosolutePath,
-                null
-            );
-        }
+    public async executeGoal(item: ProjectItem, goal?: string): Promise<void> {
         if (item) {
             const cmd: string = `"${Utils.getMavenExecutable()}" ${goal || item.label} -f "${item.abosolutePath}"`;
             const name: string = `Maven-${item.artifactId}`;
@@ -113,15 +99,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         }
     }
 
-    public async effectivePom(item: Uri | ProjectItem | undefined): Promise<void> {
-        if (!item) {
-            item = await VSCodeUI.getQuickPick<ProjectItem>(
-                this.cachedItems,
-                (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.abosolutePath,
-                null
-            );
-        }
+    public async effectivePom(item: Uri | ProjectItem): Promise<void> {
         let pomXmlFilePath: string = null;
         if (item instanceof Uri) {
             pomXmlFilePath = item.fsPath;
@@ -129,7 +107,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             pomXmlFilePath = item.abosolutePath;
         }
         if (!pomXmlFilePath) {
-            return Promise.resolve();
+            return;
         }
         const promise: Promise<string> = new Promise<string>(
             (resolve: (value: string) => void, _reject: (e: Error) => void): void => {
@@ -154,17 +132,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         }
     }
 
-    public async customGoal(item: ProjectItem | undefined): Promise<void> {
-        if (!item) {
-            item = await VSCodeUI.getQuickPick<ProjectItem>(
-                this.cachedItems,
-                (x: ProjectItem) => x.label,
-                (x: ProjectItem) => x.abosolutePath,
-                null
-            );
-        }
+    public async customGoal(item: ProjectItem): Promise<void> {
         if (!item || !item.abosolutePath) {
-            return Promise.resolve();
+            return;
         }
         const cmdlist: string[] = await Utils.loadCmdHistory(item.abosolutePath);
         const selectedGoal: string = await window.showQuickPick(cmdlist.concat([ENTRY_NEW_GOALS, ENTRY_OPEN_HIST]), {
