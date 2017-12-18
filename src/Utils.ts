@@ -181,6 +181,7 @@ export namespace Utils {
     }
 
     export function getMavenExecutable(): string {
-        return workspace.getConfiguration("maven.executable").get<string>("path") || "mvn";
+        const mavenPath: string = workspace.getConfiguration("maven.executable").get<string>("path");
+        return mavenPath ? `"${mavenPath}"` : "mvn";
     }
 }
