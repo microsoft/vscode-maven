@@ -15,7 +15,21 @@ export namespace VSCodeUI {
         if (cwd) {
             terminals[name].sendText(getCDCommand(cwd), true);
         }
-        terminals[name].sendText(command, addNewLine);
+        terminals[name].sendText(getCommand(command), addNewLine);
+    }
+
+    export function getCommand(cmd: string): string {
+        if (os.platform() === "win32") {
+            const windowsShell: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
+                .toLowerCase();
+            if (windowsShell && windowsShell.indexOf("powershell.exe") > -1) {
+                return `& ${cmd}`; // PowerShell
+            } else {
+                return cmd; // others, try using common one.
+            }
+        } else {
+            return cmd;
+        }
     }
 
     export function getCDCommand(cwd: string): string {
