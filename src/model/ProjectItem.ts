@@ -13,6 +13,7 @@ export class ProjectItem extends TreeItem {
 
     constructor(artifactId: string, workpacePath: string, absolutePath: string, params?: object) {
         super(`${artifactId}`, TreeItemCollapsibleState.Collapsed);
+        this.artifactId = artifactId;
         this.abosolutePath = absolutePath;
         this.params = params || {};
         this.contextValue = "ProjectItem";
