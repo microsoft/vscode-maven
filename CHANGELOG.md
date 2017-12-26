@@ -2,20 +2,23 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
-        - [0.4.0](#040)
+        - [0.5.0](#050)
     - [Released](#released)
+        - [0.4.0](#040)
         - [0.3.0](#030)
         - [0.2.x](#021)
         - [0.1.x](#014)
         - [0.0.x](#006)
 
 ## Unreleased
+### 0.5.0
+
+## Released
 ### 0.4.0
 - For each root folder of current workspace, auto import all maven projects recursively.
 - Support to specify `mvn` executable path.
 - Better user experience for generating projects from maven archetypes.
 
-## Released
 ### 0.3.0
 - ~~Support~~ Force (Since 0.4.0) to import all projects under specified folder.
 - Change extension icon.
