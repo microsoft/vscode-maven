@@ -1,11 +1,12 @@
 
 import { exec } from "child_process";
 import * as path from "path";
-import { Event, EventEmitter, ExtensionContext, TextDocument, TreeDataProvider, TreeItem, Uri, window, workspace, WorkspaceFolder } from "vscode";
+import { Event, EventEmitter, ExtensionContext, Progress, ProgressLocation, TextDocument, TreeDataProvider, TreeItem, Uri, window, workspace, WorkspaceFolder } from "vscode";
 import { FolderItem } from "./model/FolderItem";
 import { ProjectItem } from "./model/ProjectItem";
 import { WorkspaceItem } from "./model/WorkspaceItem";
 import { IPomModule, IPomModules, IPomRoot } from "./model/XmlSchema";
+import { UsageData } from "./UsageData";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -35,7 +36,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 return [];
             }
         } else if (element.contextValue === "WorkspaceItem") {
-            const workspaceItem: WorkspaceItem = <WorkspaceItem> element;
+            const workspaceItem: WorkspaceItem = <WorkspaceItem>element;
             const depth: number = workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom");
             const exclusions: string[] = workspace.getConfiguration("maven.projects", Uri.file(workspaceItem.abosolutePath)).get<string[]>("excludedFolders");
             const foundPomXmls: string[] = await Utils.findAllInDir(workspaceItem.abosolutePath, "pom.xml", depth, exclusions);
@@ -49,7 +50,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             }
             return items;
         } else if (element.contextValue === "ProjectItem") {
-            const projectItem: ProjectItem = <ProjectItem> element;
+            const projectItem: ProjectItem = <ProjectItem>element;
             const items: FolderItem[] = [];
             // sub modules
             const pom: IPomRoot = projectItem.params.pom;
@@ -66,7 +67,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             }
             return items;
         } else if (element.contextValue === FolderItem.ContextValue.Modules) {
-            const modulesFolderItem: FolderItem = <FolderItem> element;
+            const modulesFolderItem: FolderItem = <FolderItem>element;
             const pomXmlFilePaths: string[] = [];
             modulesFolderItem.params.modules.forEach((modules: IPomModules) => {
                 if (modules.module) {
@@ -114,8 +115,10 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         if (!pomXmlFilePath) {
             return;
         }
-        const promise: Promise<string> = new Promise<string>(
-            (resolve: (value: string) => void, reject: (e: Error) => void): void => {
+        const ret: string = await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+            (resolve: (value: string) => void, _reject: (e: Error) => void): void => {
+                p.report({ message: "Generating effective pom ... " });
+                const transaction: UsageData.Transaction = UsageData.startTransaction("effective-pom");
                 const filepath: string = Utils.getEffectivePomOutputPath(pomXmlFilePath);
                 const cmd: string = [
                     Utils.getMavenExecutable(),
@@ -126,22 +129,21 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 ].join(" ");
                 exec(cmd, (error: Error, _stdout: string, _stderr: string): void => {
                     if (error) {
-                        reject(error);
+                        window.showErrorMessage(`Error occurred in generating effective pom.\n${error}`);
+                        UsageData.reportError(error);
+                        transaction.complete(false);
+                        resolve(null);
+                    } else {
+                        transaction.complete(true);
+                        resolve(filepath);
                     }
-                    resolve(filepath);
                 });
             }
-        );
-        try {
-            window.setStatusBarMessage("Generating effective pom ... ", promise);
-            const ret: string = await promise;
-            const pomxml: string = await Utils.readFileIfExists(ret);
-            if (pomxml) {
-                const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
-                window.showTextDocument(document);
-            }
-        } catch (error) {
-            window.showErrorMessage(`Error occurred in generating effective pom.\n${error}`);
+        ));
+        const pomxml: string = await Utils.readFileIfExists(ret);
+        if (pomxml) {
+            const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
+            window.showTextDocument(document);
         }
     }
 

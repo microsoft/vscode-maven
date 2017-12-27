@@ -5,6 +5,7 @@
   "version": "0.4.0",
   "icon": "resources/logo.png",
   "publisher": "eskibear",
+  "aiKey": "e4dc3512-4d13-406d-b886-a6c7bfe6a88b",
   "engines": {
     "vscode": "^1.18.0"
   },
@@ -291,6 +292,12 @@
             "default": "",
             "description": "Specifies absolute path of mvn executable.",
             "scope": "window"
+          },
+          "maven.enableStatistics": {
+            "type": "boolean",
+            "default": true,
+            "description": "Specifies whether to send anonymous usage data for statistics.",
+            "scope": "window"
           }
         }
       }
@@ -320,6 +327,7 @@
     "fs-extra": "^4.0.3",
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
+    "vscode-extension-telemetry": "0.0.8",
     "xml2js": "^0.4.19"
   }
 }

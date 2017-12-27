@@ -28,7 +28,7 @@
         "react-no-dangerous-html": true,
         "await-promise": [
             true,
-            "Thenable" // changed
+            "Thenable"
         ],
         "forin": true,
         "jquery-deferred-must-complete": true,
@@ -36,9 +36,9 @@
         "match-default-export-name": true,
         "mocha-avoid-only": true,
         "mocha-no-side-effect-code": true,
-        "no-any": true,
+        "no-any": false,
         "no-arg": true,
-        "no-backbone-get-set-outside-model": false, // changed
+        "no-backbone-get-set-outside-model": false,
         "no-bitwise": true,
         "no-conditional-assignment": true,
         "no-console": [
@@ -90,9 +90,9 @@
         "restrict-plus-operands": true,
         "strict-boolean-expressions": [
             true,
-            "allow-string", // changed
-            "allow-undefined-union", // changed
-            "allow-mix" // changed
+            "allow-string",
+            "allow-undefined-union",
+            "allow-mix"
         ],
         "switch-default": true,
         "triple-equals": [
@@ -114,12 +114,12 @@
         "class-name": true,
         "comment-format": true,
         "completed-docs": [
-            false, // changed
+            false,
             "classes"
         ],
         "export-name": true,
         "function-name": true,
-        "import-name": false, // changed
+        "import-name": false,
         "interface-name": true,
         "jsdoc-format": true,
         "max-classes-per-file": [
@@ -135,7 +135,7 @@
             }
         ],
         "max-line-length": [
-            false, // changed
+            false,
             140
         ],
         "member-access": true,
@@ -145,7 +145,7 @@
                 "order": "fields-first"
             }
         ],
-        "missing-jsdoc": false, // changed
+        "missing-jsdoc": false,
         "mocha-unneeded-done": true,
         "new-parens": true,
         "no-construct": true,
@@ -157,7 +157,7 @@
         "no-multiline-string": true,
         "no-null-keyword": false,
         "no-parameter-properties": true,
-        "no-relative-imports": false, // changed
+        "no-relative-imports": false,
         "no-require-imports": true,
         "no-shadowed-variable": true,
         "no-suspicious-comment": true,
@@ -172,7 +172,7 @@
         "no-var-self": true,
         "no-void-expression": [
             true,
-            "ignore-arrow-function-shorthand" // changed
+            "ignore-arrow-function-shorthand"
         ],
         "object-literal-sort-keys": false,
         "one-variable-per-declaration": true,
@@ -196,7 +196,7 @@
         ],
         "underscore-consistent-invocation": true,
         "unified-signatures": true,
-        "variable-name": [ // changed
+        "variable-name": [
             true,
             "ban-keywords",
             "check-format",
@@ -229,11 +229,11 @@
             true,
             "spaces"
         ],
-        "linebreak-style": false, // changed
-        "newline-before-return": false, // changed
+        "linebreak-style": false,
+        "newline-before-return": false,
         "no-consecutive-blank-lines": true,
         "no-empty-line-after-opening-brace": false,
-        "no-single-line-block-comment": false, // changed
+        "no-single-line-block-comment": false,
         "no-trailing-whitespace": true,
         "no-unnecessary-semicolons": true,
         "object-literal-key-quotes": [
@@ -248,7 +248,7 @@
             "check-whitespace"
         ],
         "quotemark": [
-            false, // changed
+            false,
             "single"
         ],
         "react-tsx-curly-spacing": true,
