@@ -19,6 +19,6 @@ export class ProjectItem extends TreeItem {
         this.params = params || {};
         this.contextValue = "ProjectItem";
         this.workspacePath = workpacePath;
-        this.iconPath = Utils.getPathToExtensionRoot("resources", "folder.svg");
+        this.iconPath = Utils.getPathToExtensionRoot("resources", "project.svg");
     }
 }
