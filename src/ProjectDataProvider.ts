@@ -40,7 +40,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             const depth: number = workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom");
             const exclusions: string[] = workspace.getConfiguration("maven.projects", Uri.file(workspaceItem.abosolutePath)).get<string[]>("excludedFolders");
             const foundPomXmls: string[] = await Utils.findAllInDir(workspaceItem.abosolutePath, "pom.xml", depth, exclusions);
-            const promiseList: Promise<ProjectItem>[] = foundPomXmls.map((pomXmlFilePath: string) => Utils.getProject(pomXmlFilePath, workspaceItem.abosolutePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
+            const promiseList: Promise<ProjectItem>[] = foundPomXmls.map((pomXmlFilePath: string) => Utils.getProject(pomXmlFilePath, workspaceItem.abosolutePath));
             const items: ProjectItem[] = (await Promise.all(promiseList)).filter((x: ProjectItem) => x);
             items.forEach((item: ProjectItem) => {
                 item.workspacePath = workspaceItem.abosolutePath;
@@ -62,7 +62,6 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                     projectItem.workspacePath,
                     { ...projectItem.params, modules: pom.project.modules }
                 );
-                modulesFolderItem.iconPath = this.context.asAbsolutePath(path.join("resources", "folder.svg"));
                 items.push(modulesFolderItem);
             }
             return items;
@@ -77,7 +76,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                     });
                 }
             });
-            const promiseList: Promise<ProjectItem>[] = pomXmlFilePaths.map((pomXmlFilePath: string) => Utils.getProject(pomXmlFilePath, modulesFolderItem.workspacePath, this.context.asAbsolutePath(path.join("resources", "project.svg"))));
+            const promiseList: Promise<ProjectItem>[] = pomXmlFilePaths.map((pomXmlFilePath: string) => Utils.getProject(pomXmlFilePath, modulesFolderItem.workspacePath));
             const items: ProjectItem[] = (await Promise.all(promiseList)).filter((x: ProjectItem) => x);
             items.forEach((item: ProjectItem) => {
                 item.workspacePath = modulesFolderItem.workspacePath;

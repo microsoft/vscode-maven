@@ -1,18 +1,18 @@
 "use strict";
-import * as fse from "fs-extra";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { ArchetypeModule } from "./ArchetypeModule";
 import { ProjectItem } from "./model/ProjectItem";
 import { ProjectDataProvider } from "./ProjectDataProvider";
 import { UsageData } from "./UsageData";
+import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
-export function activate(context: vscode.ExtensionContext): void {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+    await Utils.loadPackageInfo(context);
     // Usage data statistics.
-    const {publisher, name, version, aiKey} = fse.readJSONSync(context.asAbsolutePath("./package.json"));
-    if (aiKey) {
-        UsageData.initilize(publisher, name, version, aiKey);
+    if (Utils.getAiKey()) {
+        UsageData.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
     }
 
     const mavenProjectsTreeDataProvider: ProjectDataProvider = new ProjectDataProvider(context);
@@ -47,10 +47,10 @@ export function activate(context: vscode.ExtensionContext): void {
     });
 
     UsageData.registerCommand(context, "maven.archetype.update", () => {
-        vscode.window.withProgress({location: vscode.ProgressLocation.Window}, async (p: Progress<{}>) => {
-            p.report({message: "updating archetype catalog ..."});
+        vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: Progress<{}>) => {
+            p.report({ message: "updating archetype catalog ..." });
             await ArchetypeModule.updateArchetypeCatalog();
-            p.report({message: "finished."});
+            p.report({ message: "finished." });
         });
     });
 

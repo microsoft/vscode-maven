@@ -1,5 +1,6 @@
 
 import { TreeItem, TreeItemCollapsibleState } from "vscode";
+import { Utils } from "../Utils";
 import { IPomModules, IPomRoot } from "./XmlSchema";
 
 export class ProjectItem extends TreeItem {
@@ -18,5 +19,6 @@ export class ProjectItem extends TreeItem {
         this.params = params || {};
         this.contextValue = "ProjectItem";
         this.workspacePath = workpacePath;
+        this.iconPath = Utils.getPathToExtensionRoot("resources", "folder.svg");
     }
 }

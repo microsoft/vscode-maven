@@ -26,7 +26,7 @@ export namespace ArchetypeModule {
     export async function updateArchetypeCatalog(): Promise<void> {
         const xml: string = await Utils.httpGetContent(REMOTE_ARCHETYPE_CATALOG_URL);
         const archetypes: Archetype[] = await Utils.listArchetypeFromXml(xml);
-        const targetFilePath: string = path.join(Utils.getExtensionRootPath(), "resources", "archetypes.json");
+        const targetFilePath: string = path.join(Utils.getPathToExtensionRoot(), "resources", "archetypes.json");
         await fs.ensureFile(targetFilePath);
         await fs.writeJSON(targetFilePath, archetypes);
     }
@@ -62,7 +62,7 @@ export namespace ArchetypeModule {
     }
 
     async function loadArchetypePickItems(options?: {all: boolean}): Promise<Archetype[]> {
-        const contentPath: string = path.join(Utils.getExtensionRootPath(), "resources", "archetypes.json");
+        const contentPath: string = Utils.getPathToExtensionRoot("resources", "archetypes.json");
         if (await fs.pathExists(contentPath)) {
             const allItems: Archetype[] = await fs.readJSON(contentPath);
             if (options && options.all) {
