@@ -6,7 +6,6 @@ import { FolderItem } from "./model/FolderItem";
 import { ProjectItem } from "./model/ProjectItem";
 import { WorkspaceItem } from "./model/WorkspaceItem";
 import { IPomModule, IPomModules, IPomRoot } from "./model/XmlSchema";
-import { UsageData } from "./UsageData";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -115,9 +114,8 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             return;
         }
         const ret: string = await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
-            (resolve: (value: string) => void, _reject: (e: Error) => void): void => {
+            (resolve: (value: string) => void, reject: (e: Error) => void): void => {
                 p.report({ message: "Generating effective pom ... " });
-                const transaction: UsageData.Transaction = UsageData.startTransaction("effective-pom");
                 const filepath: string = Utils.getEffectivePomOutputPath(pomXmlFilePath);
                 const cmd: string = [
                     Utils.getMavenExecutable(),
@@ -128,12 +126,8 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 ].join(" ");
                 exec(cmd, (error: Error, _stdout: string, _stderr: string): void => {
                     if (error) {
-                        window.showErrorMessage(`Error occurred in generating effective pom.\n${error}`);
-                        UsageData.reportError(error);
-                        transaction.complete(false);
-                        resolve(null);
+                        reject(error);
                     } else {
-                        transaction.complete(true);
                         resolve(filepath);
                     }
                 });

@@ -81,6 +81,18 @@
         "description": "Blank Project for Spring Boot + Jersey"
     },
     {
+        "artifactId": "vanilla-spring-webflux-fn-blank-archetype",
+        "groupId": "am.ik.archetype",
+        "versions": [
+            "0.0.5",
+            "0.0.4",
+            "0.0.3",
+            "0.0.2",
+            "0.0.1"
+        ],
+        "description": "Blank project for Vanilla Spring WebFlux.fn"
+    },
+    {
         "artifactId": "chrl-spring-sample",
         "groupId": "at.chrl.archetypes",
         "versions": [
@@ -1109,7 +1121,11 @@
         "artifactId": "bamboo-specs-archetype",
         "groupId": "com.atlassian.bamboo",
         "versions": [
+            "6.3.0",
             "6.3.0-rc3",
+            "6.2.8",
+            "6.2.7",
+            "6.2.6",
             "6.2.5",
             "6.2.4",
             "6.2.3",
@@ -1388,6 +1404,7 @@
         "artifactId": "library-archetype",
         "groupId": "com.bernardomg.maven.archetypes",
         "versions": [
+            "1.1.1",
             "1.1.0"
         ],
         "description": "A Maven Archetype to ease the creation of new Java libraries."
@@ -1396,6 +1413,7 @@
         "artifactId": "spring-mvc-thymeleaf-archetype",
         "groupId": "com.bernardomg.maven.archetypes",
         "versions": [
+            "1.1.1",
             "1.1.0"
         ],
         "description": "A Maven Archetype for Spring MVC, and Thymeleaf, projects."
@@ -1638,6 +1656,7 @@
         "artifactId": "citrus-simulator-archetype-jms",
         "groupId": "com.consol.citrus.archetypes",
         "versions": [
+            "1.0.1",
             "1.0.0"
         ],
         "description": "Archetype for Citrus JMS simulator"
@@ -1646,6 +1665,7 @@
         "artifactId": "citrus-simulator-archetype-mail",
         "groupId": "com.consol.citrus.archetypes",
         "versions": [
+            "1.0.1",
             "1.0.0"
         ],
         "description": "Archetype for Citrus mail simulator"
@@ -1654,6 +1674,7 @@
         "artifactId": "citrus-simulator-archetype-rest",
         "groupId": "com.consol.citrus.archetypes",
         "versions": [
+            "1.0.1",
             "1.0.0"
         ],
         "description": "Archetype for Citrus REST simulator"
@@ -1662,6 +1683,7 @@
         "artifactId": "citrus-simulator-archetype-swagger",
         "groupId": "com.consol.citrus.archetypes",
         "versions": [
+            "1.0.1",
             "1.0.0"
         ],
         "description": "Archetype for Citrus Swagger auto generated REST simulator"
@@ -1670,6 +1692,7 @@
         "artifactId": "citrus-simulator-archetype-ws",
         "groupId": "com.consol.citrus.archetypes",
         "versions": [
+            "1.0.1",
             "1.0.0"
         ],
         "description": "Archetype for Citrus SOAP simulator"
@@ -1678,6 +1701,7 @@
         "artifactId": "citrus-simulator-archetype-wsdl",
         "groupId": "com.consol.citrus.archetypes",
         "versions": [
+            "1.0.1",
             "1.0.0"
         ],
         "description": "Archetype for Citrus WSDL auto generated SOAP simulator"
@@ -1897,6 +1921,7 @@
         "artifactId": "crud4j-archetype",
         "groupId": "com.dukescript.archetype",
         "versions": [
+            "0.20",
             "0.18",
             "0.17",
             "0.16",
@@ -1916,6 +1941,7 @@
         "artifactId": "knockout4j-archetype",
         "groupId": "com.dukescript.archetype",
         "versions": [
+            "0.20",
             "0.18",
             "0.17",
             "0.16",
@@ -1935,6 +1961,7 @@
         "artifactId": "visual-archetype",
         "groupId": "com.dukescript.archetype",
         "versions": [
+            "0.20",
             "0.18",
             "0.17",
             "0.16",
@@ -2041,6 +2068,8 @@
         "artifactId": "eosgi-module-archetype",
         "groupId": "com.effectiveosgi",
         "versions": [
+            "0.0.4",
+            "0.0.3",
             "0.0.2",
             "0.0.1"
         ]
@@ -2049,6 +2078,8 @@
         "artifactId": "eosgi-project-archetype",
         "groupId": "com.effectiveosgi",
         "versions": [
+            "0.0.4",
+            "0.0.3",
             "0.0.2",
             "0.0.1"
         ]
@@ -2057,6 +2088,8 @@
         "artifactId": "eosgi-test-module-archetype",
         "groupId": "com.effectiveosgi",
         "versions": [
+            "0.0.4",
+            "0.0.3",
             "0.0.2",
             "0.0.1"
         ]
@@ -2280,6 +2313,7 @@
         "artifactId": "wcomponents-app-archetype",
         "groupId": "com.github.bordertech.wcomponents",
         "versions": [
+            "1.4.19",
             "1.4.18",
             "1.4.17",
             "1.4.16",
@@ -2636,6 +2670,7 @@
         "artifactId": "invictum-junit-archetype",
         "groupId": "com.github.invictum",
         "versions": [
+            "1.7",
             "1.6",
             "1.5",
             "1.4",
@@ -2708,6 +2743,8 @@
         "artifactId": "k2-archetype-application",
         "groupId": "com.github.katari",
         "versions": [
+            "0.0.13",
+            "0.0.12",
             "0.0.11",
             "0.0.10",
             "0.0.9",
@@ -2727,6 +2764,8 @@
         "artifactId": "k2-archetype-module",
         "groupId": "com.github.katari",
         "versions": [
+            "0.0.13",
+            "0.0.12",
             "0.0.11",
             "0.0.10",
             "0.0.9",
@@ -3093,6 +3132,22 @@
             "2.0.0"
         ],
         "description": "Maven archetype for use a NORA-UI project"
+    },
+    {
+        "artifactId": "kafka-streams-app-archetype",
+        "groupId": "com.github.piotr-kalanski",
+        "versions": [
+            "0.1.4",
+            "0.1.3",
+            "0.1.1"
+        ]
+    },
+    {
+        "artifactId": "kafka-streams-app-archetype",
+        "groupId": "com.github.piotr-kalanski.kafka",
+        "versions": [
+            "0.1"
+        ]
     },
     {
         "artifactId": "apigatewayandauthentication",
@@ -4139,6 +4194,7 @@
         "artifactId": "quickstart-boot-archetype",
         "groupId": "com.indoqa.quickstart",
         "versions": [
+            "0.9.0",
             "0.8.0",
             "0.8.0.1"
         ],
@@ -4218,6 +4274,9 @@
             "0.1.2",
             "0.1.1",
             "0.1.0",
+            "0.7.0.RC2",
+            "0.7.0.RC1",
+            "0.6.2.3",
             "0.6.2.2",
             "0.6.2.1",
             "0.6.1.2",
@@ -4292,6 +4351,7 @@
         "artifactId": "struts2-jquery-archetype-base",
         "groupId": "com.jgeppert.struts2.jquery",
         "versions": [
+            "4.0.3",
             "4.0.2",
             "4.0.1",
             "3.7.1",
@@ -4312,6 +4372,7 @@
         "artifactId": "struts2-jquery-archetype-mobile",
         "groupId": "com.jgeppert.struts2.jquery",
         "versions": [
+            "4.0.3",
             "4.0.2",
             "4.0.1",
             "3.7.1",
@@ -4328,6 +4389,7 @@
         "artifactId": "struts2-jquery-bootstrap-archetype-grid",
         "groupId": "com.jgeppert.struts2.jquery",
         "versions": [
+            "4.0.3",
             "4.0.2",
             "4.0.1",
             "3.7.1",
@@ -4411,6 +4473,7 @@
         "artifactId": "com.liferay.project.templates.activator",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4424,6 +4487,7 @@
         "artifactId": "com.liferay.project.templates.api",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.7",
             "1.0.6",
             "1.0.5",
             "1.0.4",
@@ -4438,6 +4502,7 @@
         "artifactId": "com.liferay.project.templates.content.targeting.report",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4451,6 +4516,7 @@
         "artifactId": "com.liferay.project.templates.content.targeting.rule",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4464,6 +4530,7 @@
         "artifactId": "com.liferay.project.templates.content.targeting.tracking.action",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4477,6 +4544,7 @@
         "artifactId": "com.liferay.project.templates.control.menu.entry",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4490,6 +4558,7 @@
         "artifactId": "com.liferay.project.templates.form.field",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.4",
             "1.0.3",
             "1.0.2",
             "1.0.1",
@@ -4501,6 +4570,7 @@
         "artifactId": "com.liferay.project.templates.fragment",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4514,6 +4584,7 @@
         "artifactId": "com.liferay.project.templates.freemarker.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.3",
             "1.0.2",
             "1.0.1",
             "1.0.0"
@@ -4524,6 +4595,7 @@
         "artifactId": "com.liferay.project.templates.layout.template",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.4",
             "1.0.3",
             "1.0.2",
             "1.0.1",
@@ -4535,6 +4607,7 @@
         "artifactId": "com.liferay.project.templates.mvc.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4548,6 +4621,7 @@
         "artifactId": "com.liferay.project.templates.npm.angular.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.3",
             "1.0.2",
             "1.0.1",
             "1.0.0"
@@ -4558,6 +4632,7 @@
         "artifactId": "com.liferay.project.templates.npm.billboardjs.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4567,6 +4642,7 @@
         "artifactId": "com.liferay.project.templates.npm.isomorphic.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4576,6 +4652,7 @@
         "artifactId": "com.liferay.project.templates.npm.jquery.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4585,6 +4662,7 @@
         "artifactId": "com.liferay.project.templates.npm.metaljs.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4594,6 +4672,7 @@
         "artifactId": "com.liferay.project.templates.npm.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4603,6 +4682,7 @@
         "artifactId": "com.liferay.project.templates.npm.react.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4612,6 +4692,7 @@
         "artifactId": "com.liferay.project.templates.npm.vuejs.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4621,6 +4702,7 @@
         "artifactId": "com.liferay.project.templates.panel.app",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4634,6 +4716,7 @@
         "artifactId": "com.liferay.project.templates.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4647,6 +4730,7 @@
         "artifactId": "com.liferay.project.templates.portlet.configuration.icon",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4660,6 +4744,7 @@
         "artifactId": "com.liferay.project.templates.portlet.provider",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4673,6 +4758,7 @@
         "artifactId": "com.liferay.project.templates.portlet.toolbar.contributor",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4686,6 +4772,7 @@
         "artifactId": "com.liferay.project.templates.rest",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.5",
             "1.0.4",
             "1.0.3",
             "1.0.2",
@@ -4698,6 +4785,7 @@
         "artifactId": "com.liferay.project.templates.service",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4711,6 +4799,7 @@
         "artifactId": "com.liferay.project.templates.service.builder",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.7",
             "1.0.6",
             "1.0.5",
             "1.0.4",
@@ -4725,6 +4814,7 @@
         "artifactId": "com.liferay.project.templates.service.wrapper",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4738,6 +4828,7 @@
         "artifactId": "com.liferay.project.templates.simulation.panel.entry",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4751,6 +4842,7 @@
         "artifactId": "com.liferay.project.templates.soy.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.3",
             "1.0.2",
             "1.0.1",
             "1.0.0"
@@ -4761,6 +4853,7 @@
         "artifactId": "com.liferay.project.templates.spring.mvc.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.3",
             "1.0.2",
             "1.0.1",
             "1.0.0"
@@ -4771,6 +4864,7 @@
         "artifactId": "com.liferay.project.templates.template.context.contributor",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.6",
             "1.0.5",
             "1.0.4",
             "1.0.3",
@@ -4784,6 +4878,7 @@
         "artifactId": "com.liferay.project.templates.theme",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.7",
             "1.0.6",
             "1.0.5",
             "1.0.4",
@@ -4798,6 +4893,7 @@
         "artifactId": "com.liferay.project.templates.theme.contributor",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.5",
             "1.0.4",
             "1.0.3",
             "1.0.2",
@@ -4810,6 +4906,7 @@
         "artifactId": "com.liferay.project.templates.war.hook",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4819,6 +4916,7 @@
         "artifactId": "com.liferay.project.templates.war.mvc.portlet",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.2",
             "1.0.1",
             "1.0.0"
         ],
@@ -4828,6 +4926,7 @@
         "artifactId": "com.liferay.project.templates.workspace",
         "groupId": "com.liferay",
         "versions": [
+            "1.0.7",
             "1.0.6",
             "1.0.5",
             "1.0.4",
@@ -5484,6 +5583,7 @@
         "artifactId": "maven-archetype-lagom-java",
         "groupId": "com.lightbend.lagom",
         "versions": [
+            "1.4.0-RC1",
             "1.4.0-M3",
             "1.4.0-M2",
             "1.4.0-M1",
@@ -5594,6 +5694,7 @@
         "artifactId": "azure-functions-archetype",
         "groupId": "com.microsoft.azure",
         "versions": [
+            "1.5",
             "1.4",
             "1.3",
             "1.2",
@@ -5843,6 +5944,7 @@
         "artifactId": "opsdatastore-collector-plugin-archetype",
         "groupId": "com.opsdatastore",
         "versions": [
+            "1.3.0",
             "1.2.1",
             "1.2.1-RC3",
             "1.2.1-RC2",
@@ -6326,6 +6428,35 @@
         "description": "Simple RestyGWT, RestEasy maven archetype"
     },
     {
+        "artifactId": "at9-basic",
+        "groupId": "com.rudolfschmidt",
+        "versions": [
+            "1.0.1",
+            "1.0.0"
+        ],
+        "description": "Archetype with basic configuration for Java9"
+    },
+    {
+        "artifactId": "at9-linker",
+        "groupId": "com.rudolfschmidt",
+        "versions": [
+            "1.0.2",
+            "1.0.1",
+            "1.0.0"
+        ],
+        "description": "Archetype with configuration for assembling a Java9 project"
+    },
+    {
+        "artifactId": "at9-remote",
+        "groupId": "com.rudolfschmidt",
+        "versions": [
+            "1.0.2",
+            "1.0.1",
+            "1.0.0"
+        ],
+        "description": "Archetype with deployment configuration for a Java9 project"
+    },
+    {
         "artifactId": "javaee7-essentials-archetype",
         "groupId": "com.rudolfschmidt",
         "versions": [
@@ -6376,6 +6507,7 @@
         "artifactId": "scp-cf-spring",
         "groupId": "com.sap.cloud.s4hana.archetypes",
         "versions": [
+            "1.6.0",
             "1.5.0",
             "1.4.0",
             "1.3.0",
@@ -6390,6 +6522,7 @@
         "artifactId": "scp-cf-tomcat",
         "groupId": "com.sap.cloud.s4hana.archetypes",
         "versions": [
+            "1.6.0",
             "1.5.0",
             "1.4.0",
             "1.3.0",
@@ -6404,6 +6537,7 @@
         "artifactId": "scp-cf-tomee",
         "groupId": "com.sap.cloud.s4hana.archetypes",
         "versions": [
+            "1.6.0",
             "1.5.0",
             "1.4.0",
             "1.3.0",
@@ -6418,6 +6552,7 @@
         "artifactId": "scp-neo-javaee6",
         "groupId": "com.sap.cloud.s4hana.archetypes",
         "versions": [
+            "1.6.0",
             "1.5.0",
             "1.4.0",
             "1.3.0",
@@ -6442,6 +6577,7 @@
         "artifactId": "cloud-servicesdk-odatav4-quickstart",
         "groupId": "com.sap.cloud.servicesdk.archetypes",
         "versions": [
+            "1.11.4",
             "1.10.2",
             "1.1.3"
         ],
@@ -6451,6 +6587,7 @@
         "artifactId": "cloud-servicesdk-odatav4-sample",
         "groupId": "com.sap.cloud.servicesdk.archetypes",
         "versions": [
+            "1.11.4",
             "1.10.2",
             "1.1.3"
         ],
@@ -6460,6 +6597,7 @@
         "artifactId": "odata2-cdx",
         "groupId": "com.sap.cloud.servicesdk.archetypes",
         "versions": [
+            "1.11.4",
             "1.10.2",
             "1.7.4"
         ],
@@ -6707,6 +6845,7 @@
         "artifactId": "fitnesse-quickstart",
         "groupId": "com.sitture",
         "versions": [
+            "1.1.0",
             "1.0.2",
             "1.0.1",
             "1.0.0"
@@ -7006,6 +7145,7 @@
             "1.1.3",
             "1.1.2",
             "1.1.1",
+            "3.0.1.0",
             "3.0.0.0",
             "2.7.2.1",
             "2.7.2.0",
@@ -7462,6 +7602,7 @@
         "artifactId": "autotest.web.framework.archetype",
         "groupId": "com.surenpi.autotest",
         "versions": [
+            "2.0.1-20180106",
             "2.0.0-20170706",
             "1.0.2-20170610",
             "1.0.2-20170422"
@@ -7624,6 +7765,7 @@
         "artifactId": "vaadin-archetype-application",
         "groupId": "com.vaadin",
         "versions": [
+            "8.2.0",
             "8.1.7",
             "8.1.6",
             "8.1.5",
@@ -7640,6 +7782,7 @@
             "8.0.2",
             "8.0.1",
             "8.0.0",
+            "7.7.13",
             "7.7.12",
             "7.7.11",
             "7.7.10",
@@ -7773,6 +7916,7 @@
         "artifactId": "vaadin-archetype-application-example",
         "groupId": "com.vaadin",
         "versions": [
+            "8.2.0",
             "8.1.7",
             "8.1.6",
             "8.1.5",
@@ -7789,6 +7933,7 @@
             "8.0.2",
             "8.0.1",
             "8.0.0",
+            "7.7.13",
             "7.7.12",
             "7.7.11",
             "7.7.10",
@@ -7849,6 +7994,7 @@
         "artifactId": "vaadin-archetype-application-multimodule",
         "groupId": "com.vaadin",
         "versions": [
+            "8.2.0",
             "8.1.7",
             "8.1.6",
             "8.1.5",
@@ -7865,6 +8011,7 @@
             "8.0.2",
             "8.0.1",
             "8.0.0",
+            "7.7.13",
             "7.7.12",
             "7.7.11",
             "7.7.10",
@@ -7962,6 +8109,7 @@
         "artifactId": "vaadin-archetype-liferay-portlet",
         "groupId": "com.vaadin",
         "versions": [
+            "8.2.0",
             "8.1.7",
             "8.1.6",
             "8.1.5",
@@ -7978,6 +8126,7 @@
             "8.0.2",
             "8.0.1",
             "8.0.0",
+            "7.7.13",
             "7.7.12",
             "7.7.11",
             "7.7.10",
@@ -8131,6 +8280,7 @@
         "artifactId": "vaadin-archetype-widget",
         "groupId": "com.vaadin",
         "versions": [
+            "8.2.0",
             "8.1.7",
             "8.1.6",
             "8.1.5",
@@ -8147,6 +8297,7 @@
             "8.0.2",
             "8.0.1",
             "8.0.0",
+            "7.7.13",
             "7.7.12",
             "7.7.11",
             "7.7.10",
@@ -8290,6 +8441,7 @@
         "artifactId": "vaadin-maven-plugin",
         "groupId": "com.vaadin",
         "versions": [
+            "8.2.0",
             "8.1.7",
             "8.1.6",
             "8.1.5",
@@ -8306,6 +8458,7 @@
             "8.0.2",
             "8.0.1",
             "8.0.0",
+            "7.7.13",
             "7.7.12",
             "7.7.11",
             "7.7.10",
@@ -10214,6 +10367,7 @@
         "artifactId": "java-simple",
         "groupId": "io.dropwizard.archetypes",
         "versions": [
+            "1.3.0-rc2",
             "1.3.0-rc1",
             "1.2.2",
             "1.2.1",
@@ -16228,6 +16382,7 @@
         "artifactId": "osiris-archetype",
         "groupId": "io.github.cjkent.osiris",
         "versions": [
+            "0.6.1",
             "0.6.0",
             "0.5.0",
             "0.4.0",
@@ -16373,6 +16528,8 @@
         "artifactId": "mangooio-maven-archetype",
         "groupId": "io.mangoo",
         "versions": [
+            "4.10.0-Beta1",
+            "4.9.0",
             "4.9.0-Beta2",
             "4.9.0-Beta1",
             "4.8.0",
@@ -16665,6 +16822,14 @@
             "1.0.0-RC4",
             "1.0.0-RC1"
         ]
+    },
+    {
+        "artifactId": "io.wcm.maven.archetypes.aem",
+        "groupId": "io.wcm.maven.archetypes",
+        "versions": [
+            "1.0.0"
+        ],
+        "description": "Maven Archetype for creating new AEM projects."
     },
     {
         "artifactId": "babel-camel-archetype",
@@ -17267,6 +17432,14 @@
             "6.0.0",
             "5.0-beta"
         ]
+    },
+    {
+        "artifactId": "imagej-command-archetype",
+        "groupId": "net.imagej",
+        "versions": [
+            "0.0.1"
+        ],
+        "description": "ImageJ Command Archetype: an Apache Maven archetype for ImageJ2 Commands."
     },
     {
         "artifactId": "bukkit-plugin-simple",
@@ -18914,6 +19087,7 @@
         "artifactId": "liberty-archetype-ear",
         "groupId": "net.wasdev.wlp.maven",
         "versions": [
+            "2.1.2",
             "2.1.1",
             "2.1"
         ],
@@ -18923,6 +19097,7 @@
         "artifactId": "liberty-archetype-webapp",
         "groupId": "net.wasdev.wlp.maven",
         "versions": [
+            "2.1.2",
             "2.1.1",
             "2.1",
             "2.0"
@@ -18932,6 +19107,7 @@
         "artifactId": "liberty-plugin-archetype",
         "groupId": "net.wasdev.wlp.maven",
         "versions": [
+            "2.1.2",
             "2.1.1",
             "2.1",
             "2.0",
@@ -21596,6 +21772,7 @@
         "artifactId": "karaf-assembly-archetype",
         "groupId": "org.apache.karaf.archetypes",
         "versions": [
+            "4.1.4",
             "4.1.3",
             "4.1.2",
             "4.1.1",
@@ -21645,6 +21822,7 @@
             "2.2.7",
             "2.2.6",
             "2.2.5",
+            "4.2.0.M2",
             "4.2.0.M1",
             "4.0.0.M3",
             "4.0.0.M2",
@@ -21657,6 +21835,7 @@
         "artifactId": "karaf-blueprint-archetype",
         "groupId": "org.apache.karaf.archetypes",
         "versions": [
+            "4.1.4",
             "4.1.3",
             "4.1.2",
             "4.1.1",
@@ -21706,6 +21885,7 @@
             "2.2.7",
             "2.2.6",
             "2.2.5",
+            "4.2.0.M2",
             "4.2.0.M1",
             "4.0.0.M3",
             "4.0.0.M2",
@@ -21718,6 +21898,7 @@
         "artifactId": "karaf-bundle-archetype",
         "groupId": "org.apache.karaf.archetypes",
         "versions": [
+            "4.1.4",
             "4.1.3",
             "4.1.2",
             "4.1.1",
@@ -21767,6 +21948,7 @@
             "2.2.7",
             "2.2.6",
             "2.2.5",
+            "4.2.0.M2",
             "4.2.0.M1",
             "4.0.0.M3",
             "4.0.0.M2",
@@ -21779,6 +21961,7 @@
         "artifactId": "karaf-command-archetype",
         "groupId": "org.apache.karaf.archetypes",
         "versions": [
+            "4.1.4",
             "4.1.3",
             "4.1.2",
             "4.1.1",
@@ -21828,6 +22011,7 @@
             "2.2.7",
             "2.2.6",
             "2.2.5",
+            "4.2.0.M2",
             "4.2.0.M1",
             "4.0.0.M3",
             "4.0.0.M2",
@@ -21840,6 +22024,7 @@
         "artifactId": "karaf-feature-archetype",
         "groupId": "org.apache.karaf.archetypes",
         "versions": [
+            "4.1.4",
             "4.1.3",
             "4.1.2",
             "4.1.1",
@@ -21889,6 +22074,7 @@
             "2.2.7",
             "2.2.6",
             "2.2.5",
+            "4.2.0.M2",
             "4.2.0.M1",
             "4.0.0.M3",
             "4.0.0.M2",
@@ -21901,6 +22087,7 @@
         "artifactId": "karaf-kar-archetype",
         "groupId": "org.apache.karaf.archetypes",
         "versions": [
+            "4.1.4",
             "4.1.3",
             "4.1.2",
             "4.1.1",
@@ -21950,6 +22137,7 @@
             "2.2.7",
             "2.2.6",
             "2.2.5",
+            "4.2.0.M2",
             "4.2.0.M1",
             "4.0.0.M3",
             "4.0.0.M2",
@@ -23752,6 +23940,7 @@
         "artifactId": "syncope-archetype",
         "groupId": "org.apache.syncope",
         "versions": [
+            "2.0.7",
             "2.0.6",
             "2.0.5",
             "2.0.4",
@@ -23884,7 +24073,9 @@
         "artifactId": "gremlin-archetype-dsl",
         "groupId": "org.apache.tinkerpop",
         "versions": [
+            "3.3.1",
             "3.3.0",
+            "3.2.7",
             "3.2.6",
             "3.2.5"
         ]
@@ -23893,7 +24084,9 @@
         "artifactId": "gremlin-archetype-server",
         "groupId": "org.apache.tinkerpop",
         "versions": [
+            "3.3.1",
             "3.3.0",
+            "3.2.7",
             "3.2.6",
             "3.2.5",
             "3.2.4",
@@ -23914,7 +24107,9 @@
         "artifactId": "gremlin-archetype-tinkergraph",
         "groupId": "org.apache.tinkerpop",
         "versions": [
+            "3.3.1",
             "3.3.0",
+            "3.2.7",
             "3.2.6",
             "3.2.5",
             "3.2.4",
@@ -24788,6 +24983,8 @@
         "artifactId": "appng-archetype-application",
         "groupId": "org.appng",
         "versions": [
+            "1.16.1",
+            "1.16.0",
             "1.15.0",
             "1.14.4",
             "1.14.1"
@@ -24983,6 +25180,7 @@
         "artifactId": "beangle-webui-archetype_2.12",
         "groupId": "org.beangle.webui",
         "versions": [
+            "0.0.15",
             "0.0.14",
             "0.0.13",
             "0.0.12",
@@ -25728,6 +25926,7 @@
         "artifactId": "org.carewebframework.mvn.archetype.plugin",
         "groupId": "org.carewebframework",
         "versions": [
+            "6.0.0",
             "6.0.0-RC3",
             "6.0.0-RC2",
             "6.0.0-RC1",
@@ -25748,6 +25947,20 @@
             "3.1.2",
             "3.1.1",
             "3.1.0"
+        ]
+    },
+    {
+        "artifactId": "org.carewebframework.mvn.archetype.testharness",
+        "groupId": "org.carewebframework",
+        "versions": [
+            "6.0.0"
+        ]
+    },
+    {
+        "artifactId": "org.carewebframework.mvn.archetype.webapp",
+        "groupId": "org.carewebframework",
+        "versions": [
+            "6.0.0"
         ]
     },
     {
@@ -25774,6 +25987,7 @@
         "artifactId": "cargo-archetype-daemon",
         "groupId": "org.codehaus.cargo",
         "versions": [
+            "1.6.6",
             "1.6.5",
             "1.6.4",
             "1.6.3",
@@ -25808,6 +26022,7 @@
         "artifactId": "cargo-archetype-multiple-containers",
         "groupId": "org.codehaus.cargo",
         "versions": [
+            "1.6.6",
             "1.6.5",
             "1.6.4",
             "1.6.3",
@@ -25826,6 +26041,7 @@
         "artifactId": "cargo-archetype-remote-deployment",
         "groupId": "org.codehaus.cargo",
         "versions": [
+            "1.6.6",
             "1.6.5",
             "1.6.4",
             "1.6.3",
@@ -25873,6 +26089,7 @@
         "artifactId": "cargo-archetype-webapp-functional-tests-module",
         "groupId": "org.codehaus.cargo",
         "versions": [
+            "1.6.6",
             "1.6.5",
             "1.6.4",
             "1.6.3",
@@ -25944,6 +26161,7 @@
         "artifactId": "cargo-archetype-webapp-single-module",
         "groupId": "org.codehaus.cargo",
         "versions": [
+            "1.6.6",
             "1.6.5",
             "1.6.4",
             "1.6.3",
@@ -26015,6 +26233,7 @@
         "artifactId": "cargo-archetype-webapp-with-datasource",
         "groupId": "org.codehaus.cargo",
         "versions": [
+            "1.6.6",
             "1.6.5",
             "1.6.4",
             "1.6.3",
@@ -26886,6 +27105,7 @@
         "artifactId": "cometd-archetype-dojo-jetty9",
         "groupId": "org.cometd.archetypes",
         "versions": [
+            "4.0.0-BETA1",
             "4.0.0-BETA0",
             "3.1.3",
             "3.1.2",
@@ -27041,6 +27261,7 @@
         "artifactId": "cometd-archetype-jquery-jetty9",
         "groupId": "org.cometd.archetypes",
         "versions": [
+            "4.0.0-BETA1",
             "4.0.0-BETA0",
             "3.1.3",
             "3.1.2",
@@ -27115,6 +27336,7 @@
         "artifactId": "cometd-archetype-spring-dojo-jetty9",
         "groupId": "org.cometd.archetypes",
         "versions": [
+            "4.0.0-BETA1",
             "4.0.0-BETA0",
             "3.1.3",
             "3.1.2",
@@ -27189,6 +27411,7 @@
         "artifactId": "cometd-archetype-spring-jquery-jetty9",
         "groupId": "org.cometd.archetypes",
         "versions": [
+            "4.0.0-BETA1",
             "4.0.0-BETA0",
             "3.1.3",
             "3.1.2",
@@ -27392,21 +27615,23 @@
         "artifactId": "dd4t-spring-mvc-archetype",
         "groupId": "org.dd4t",
         "versions": [
+            "1.6",
             "1.5",
             "1.4",
             "1.3",
             "1.2",
             "1.1"
         ],
-        "description": "DD4T Spring MVC Archetype for Maven"
+        "description": "DD4T Spring MVC Archetype for Maven for Tridion 2013"
     },
     {
         "artifactId": "dd4t-web8-archetype",
         "groupId": "org.dd4t",
         "versions": [
+            "1.1",
             "1.0"
         ],
-        "description": "DD4T Web 8 MVC Archetype for Maven"
+        "description": "DD4T Web 8 Spring MVC Archetype for Maven"
     },
     {
         "artifactId": "webmotion-archetype",
@@ -28018,6 +28243,15 @@
         "description": "Archetype to create eurekaclinical webapp projects"
     },
     {
+        "artifactId": "exist-apps-archetype",
+        "groupId": "org.exist-db",
+        "versions": [
+            "1.1",
+            "1.0"
+        ],
+        "description": "Maven Archetype for eXist Apps"
+    },
+    {
         "artifactId": "flowable-archetype-unittest",
         "groupId": "org.flowable",
         "versions": [
@@ -28174,6 +28408,7 @@
         "artifactId": "fujion-archetype-angular",
         "groupId": "org.fujion",
         "versions": [
+            "1.1.4",
             "1.1.3",
             "1.1.2",
             "1.1.1",
@@ -28183,6 +28418,7 @@
             "1.1.0-RC3",
             "1.1.0-RC2",
             "1.1.0-RC1",
+            "1.0.19",
             "1.0.18",
             "1.0.17",
             "1.0.16",
@@ -28195,6 +28431,7 @@
         "artifactId": "fujion-archetype-component",
         "groupId": "org.fujion",
         "versions": [
+            "1.1.4",
             "1.1.3",
             "1.1.2",
             "1.1.1",
@@ -28204,6 +28441,7 @@
             "1.1.0-RC3",
             "1.1.0-RC2",
             "1.1.0-RC1",
+            "1.0.19",
             "1.0.18",
             "1.0.17",
             "1.0.16",
@@ -28219,6 +28457,7 @@
         "artifactId": "fujion-archetype-fsp",
         "groupId": "org.fujion",
         "versions": [
+            "1.1.4",
             "1.1.3",
             "1.1.2",
             "1.1.1",
@@ -28228,6 +28467,7 @@
             "1.1.0-RC3",
             "1.1.0-RC2",
             "1.1.0-RC1",
+            "1.0.19",
             "1.0.18",
             "1.0.17",
             "1.0.16",
@@ -28242,6 +28482,7 @@
         "artifactId": "fujion-archetype-react",
         "groupId": "org.fujion",
         "versions": [
+            "1.1.4",
             "1.1.3",
             "1.1.2",
             "1.1.1",
@@ -28251,6 +28492,7 @@
             "1.1.0-RC3",
             "1.1.0-RC2",
             "1.1.0-RC1",
+            "1.0.19",
             "1.0.18",
             "1.0.17",
             "1.0.16",
@@ -28263,6 +28505,7 @@
         "artifactId": "fujion-archetype-webapp",
         "groupId": "org.fujion",
         "versions": [
+            "1.1.4",
             "1.1.3",
             "1.1.2",
             "1.1.1",
@@ -28272,6 +28515,7 @@
             "1.1.0-RC3",
             "1.1.0-RC2",
             "1.1.0-RC1",
+            "1.0.19",
             "1.0.18",
             "1.0.17",
             "1.0.16",
@@ -28942,6 +29186,9 @@
         "artifactId": "graylog-plugin-archetype",
         "groupId": "org.graylog",
         "versions": [
+            "2.4.0",
+            "2.4.0-rc.2",
+            "2.4.0-rc.1",
             "2.4.0-beta.4",
             "2.4.0-beta.3",
             "2.4.0-beta.2",
@@ -29115,6 +29362,14 @@
             "4.0.0.Beta1"
         ],
         "description": "Aggregator of the Hibernate Validator modules."
+    },
+    {
+        "artifactId": "cwf-webapp-archetype",
+        "groupId": "org.hspconsortium.carewebframework",
+        "versions": [
+            "2.0.0"
+        ],
+        "description": "Template for creating a web application."
     },
     {
         "artifactId": "ikasan-build-parent-maven-plugin",
@@ -31056,6 +31311,7 @@
         "artifactId": "easy-rules-archetype",
         "groupId": "org.jeasy",
         "versions": [
+            "3.1.0",
             "3.0.0"
         ],
         "description": "Maven archetype to create a skeleton project"
@@ -32607,6 +32863,7 @@
         "artifactId": "ninja-appengine-blog-archetype",
         "groupId": "org.ninjaframework",
         "versions": [
+            "1.9.60",
             "1.9.54",
             "1.9.50",
             "1.9.50-rc1",
@@ -32669,6 +32926,7 @@
         "artifactId": "ninja-servlet-archetype-simple",
         "groupId": "org.ninjaframework",
         "versions": [
+            "6.2.1",
             "6.2.0",
             "6.1.0",
             "6.0.0",
@@ -32720,6 +32978,7 @@
         "artifactId": "ninja-servlet-jpa-blog-archetype",
         "groupId": "org.ninjaframework",
         "versions": [
+            "6.2.1",
             "6.2.0",
             "6.1.0",
             "6.0.0",
@@ -34104,6 +34363,7 @@
         "artifactId": "openmrs-sdk-archetype-module-platform",
         "groupId": "org.openmrs.maven.archetypes",
         "versions": [
+            "3.12.3",
             "3.12.2",
             "3.12.1",
             "3.12.0",
@@ -34135,6 +34395,7 @@
         "artifactId": "openmrs-sdk-archetype-module-refapp",
         "groupId": "org.openmrs.maven.archetypes",
         "versions": [
+            "3.12.3",
             "3.12.2",
             "3.12.1",
             "3.12.0",
@@ -34166,6 +34427,7 @@
         "artifactId": "openmrs-sdk-archetype-submodule-owa",
         "groupId": "org.openmrs.maven.archetypes",
         "versions": [
+            "3.12.3",
             "3.12.2",
             "3.12.1",
             "3.12.0",
@@ -34373,6 +34635,7 @@
         "artifactId": "wab-archetype",
         "groupId": "org.ops4j.pax.web.archetypes",
         "versions": [
+            "6.1.0",
             "6.0.9",
             "6.0.8",
             "6.0.7",
@@ -34383,8 +34646,10 @@
             "6.0.2",
             "6.0.1",
             "6.0.0",
+            "4.4.2",
             "4.4.1",
             "4.4.0",
+            "4.3.5",
             "4.3.4",
             "4.3.3",
             "4.3.2",
@@ -34475,6 +34740,7 @@
         "artifactId": "wab-gwt-archetype",
         "groupId": "org.ops4j.pax.web.archetypes",
         "versions": [
+            "6.1.0",
             "6.0.9",
             "6.0.8",
             "6.0.7",
@@ -34485,8 +34751,10 @@
             "6.0.2",
             "6.0.1",
             "6.0.0",
+            "4.4.2",
             "4.4.1",
             "4.4.0",
+            "4.3.5",
             "4.3.4",
             "4.3.3",
             "4.3.2",
@@ -34577,6 +34845,7 @@
         "artifactId": "war-archetype",
         "groupId": "org.ops4j.pax.web.archetypes",
         "versions": [
+            "6.1.0",
             "6.0.9",
             "6.0.8",
             "6.0.7",
@@ -34587,8 +34856,10 @@
             "6.0.2",
             "6.0.1",
             "6.0.0",
+            "4.4.2",
             "4.4.1",
             "4.4.0",
+            "4.3.5",
             "4.3.4",
             "4.3.3",
             "4.3.2",
@@ -34956,6 +35227,7 @@
         "artifactId": "dependency-check-plugin",
         "groupId": "org.owasp",
         "versions": [
+            "3.1.0",
             "3.0.2",
             "3.0.1",
             "3.0.0",
@@ -37340,6 +37612,7 @@
         "versions": [
             "5.1.0.RELEASE",
             "5.1.0.RC1",
+            "5.0.3.RELEASE",
             "5.0.2.RELEASE",
             "5.0.2.RC1",
             "5.0.1.RELEASE",
@@ -37373,6 +37646,7 @@
             "5.4.0.RC4",
             "5.4.0.RC3",
             "5.4.0.RC1",
+            "5.3.2.RC2",
             "5.3.2.RC1",
             "5.3.1.RELEASE",
             "5.3.1.RC1",
@@ -37408,6 +37682,7 @@
             "5.4.0.RC4",
             "5.4.0.RC3",
             "5.4.0.RC1",
+            "5.3.2.RC2",
             "5.3.2.RC1",
             "5.3.1.RELEASE",
             "5.3.1.RC1",
@@ -37449,6 +37724,7 @@
             "5.4.0.RC4",
             "5.4.0.RC3",
             "5.4.0.RC1",
+            "5.3.2.RC2",
             "5.3.2.RC1",
             "5.3.1.RELEASE",
             "5.3.1.RC1",
@@ -37476,6 +37752,7 @@
             "5.4.0.RC4",
             "5.4.0.RC3",
             "5.4.0.RC1",
+            "5.3.2.RC2",
             "5.3.2.RC1",
             "5.3.1.RELEASE",
             "5.3.1.RC1",
@@ -37503,6 +37780,7 @@
             "5.4.0.RC4",
             "5.4.0.RC3",
             "5.4.0.RC1",
+            "5.3.2.RC2",
             "5.3.2.RC1",
             "5.3.1.RELEASE",
             "5.3.1.RC1",
@@ -37529,9 +37807,18 @@
         "description": "Web Blank Project (MyBatis3) (JPA) using TERASOLUNA Server Framework for Java (5.x)"
     },
     {
+        "artifactId": "junit-grpc-systemtest-archetype",
+        "groupId": "org.testifyproject.archetypes",
+        "versions": [
+            "1.0.0"
+        ],
+        "description": "Creates a new quickstart project to system test Google gRPC applications with Testify, JUnit4, Mockito, and AssertJ."
+    },
+    {
         "artifactId": "junit-guice-integrationtest-archetype",
         "groupId": "org.testifyproject.archetypes",
         "versions": [
+            "1.0.0",
             "0.9.3",
             "0.9.2",
             "0.9.1",
@@ -37543,6 +37830,7 @@
         "artifactId": "junit-hk2-integrationtest-archetype",
         "groupId": "org.testifyproject.archetypes",
         "versions": [
+            "1.0.0",
             "0.9.3",
             "0.9.2",
             "0.9.1",
@@ -37554,6 +37842,7 @@
         "artifactId": "junit-jersey-systemtest-archetype",
         "groupId": "org.testifyproject.archetypes",
         "versions": [
+            "1.0.0",
             "0.9.3",
             "0.9.2",
             "0.9.1",
@@ -37565,6 +37854,7 @@
         "artifactId": "junit-resourceprovider-archetype",
         "groupId": "org.testifyproject.archetypes",
         "versions": [
+            "1.0.0",
             "0.9.3",
             "0.9.2",
             "0.9.1",
@@ -37576,6 +37866,7 @@
         "artifactId": "junit-spring-integrationtest-archetype",
         "groupId": "org.testifyproject.archetypes",
         "versions": [
+            "1.0.0",
             "0.9.3",
             "0.9.2",
             "0.9.1",
@@ -37587,6 +37878,7 @@
         "artifactId": "junit-spring-systemtest-archetype",
         "groupId": "org.testifyproject.archetypes",
         "versions": [
+            "1.0.0",
             "0.9.3",
             "0.9.2",
             "0.9.1",
@@ -37598,6 +37890,7 @@
         "artifactId": "junit-springboot-systemtest-archetype",
         "groupId": "org.testifyproject.archetypes",
         "versions": [
+            "1.0.0",
             "0.9.3",
             "0.9.2",
             "0.9.1",
@@ -37609,6 +37902,7 @@
         "artifactId": "junit-unittest-archetype",
         "groupId": "org.testifyproject.archetypes",
         "versions": [
+            "1.0.0",
             "0.9.3",
             "0.9.2",
             "0.9.1",
@@ -38018,6 +38312,7 @@
         "artifactId": "visallo-plugin-archetype",
         "groupId": "org.visallo",
         "versions": [
+            "4.0.0",
             "3.1.4",
             "3.1.3",
             "3.1.2",
@@ -38423,9 +38718,82 @@
         "description": "This is an archetype for a Carbon Component which consumes an OSGi service registered by Carbon Kernel"
     },
     {
+        "artifactId": "org.wso2.carbon.extension.analytics.publisher-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ]
+    },
+    {
+        "artifactId": "org.wso2.carbon.extension.analytics.receiver-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ]
+    },
+    {
+        "artifactId": "org.wso2.carbon.extension.esb.connector-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ]
+    },
+    {
+        "artifactId": "org.wso2.carbon.extension.is.authenticator-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ],
+        "description": "Platform Parent pom hold the properties, plugins which are required to build carbon components, carbon\n        features and products"
+    },
+    {
+        "artifactId": "org.wso2.carbon.extension.is.provisioning-connector-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ],
+        "description": "Platform Parent pom hold the properties, plugins which are required to build carbon components, carbon\n        features and products"
+    },
+    {
+        "artifactId": "org.wso2.extension.siddhi.aggregator-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ]
+    },
+    {
+        "artifactId": "org.wso2.extension.siddhi.function-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ]
+    },
+    {
+        "artifactId": "org.wso2.extension.siddhi.streamfunction-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ]
+    },
+    {
+        "artifactId": "org.wso2.extension.siddhi.streamprocessor-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ]
+    },
+    {
+        "artifactId": "org.wso2.extension.siddhi.window-archetype",
+        "groupId": "org.wso2.carbon.extension.archetype",
+        "versions": [
+            "2.0.4"
+        ]
+    },
+    {
         "artifactId": "iot-devicetype-archetype",
         "groupId": "org.wso2.iot",
         "versions": [
+            "3.1.0-UPDATE9",
             "3.1.0-UPDATE8",
             "3.1.0-UPDATE7",
             "3.1.0-UPDATE6",
@@ -38438,6 +38806,8 @@
         "artifactId": "msf4j-microservice",
         "groupId": "org.wso2.msf4j",
         "versions": [
+            "2.5.2",
+            "2.5.1",
             "2.5.0",
             "2.5.0-beta",
             "2.5.0-beta2",
@@ -38490,6 +38860,7 @@
         "artifactId": "xwiki-commons-component-archetype",
         "groupId": "org.xwiki.commons",
         "versions": [
+            "9.11",
             "9.11-rc-1",
             "9.10.1",
             "9.10",
@@ -38695,6 +39066,7 @@
         "artifactId": "xwiki-rendering-archetype-macro",
         "groupId": "org.xwiki.rendering",
         "versions": [
+            "9.11",
             "9.11-rc-1",
             "9.10.1",
             "9.10",
@@ -39401,6 +39773,7 @@
         "artifactId": "archetype",
         "groupId": "systems.manifold",
         "versions": [
+            "0.5-alpha-test-2",
             "0.5-alpha-test-1"
         ],
         "description": "Archetype to demonstrate the structure of a basic project using Manifold."
@@ -39528,6 +39901,7 @@
         "artifactId": "schemacrawler-archetype-maven-project",
         "groupId": "us.fatehi",
         "versions": [
+            "14.17.05",
             "14.17.04",
             "14.17.03",
             "14.17.02",
@@ -39611,6 +39985,7 @@
         "artifactId": "schemacrawler-archetype-plugin-command",
         "groupId": "us.fatehi",
         "versions": [
+            "14.17.05",
             "14.17.04",
             "14.17.03",
             "14.17.02",
@@ -39694,6 +40069,7 @@
         "artifactId": "schemacrawler-archetype-plugin-dbconnector",
         "groupId": "us.fatehi",
         "versions": [
+            "14.17.05",
             "14.17.04",
             "14.17.03",
             "14.17.02",
@@ -39776,6 +40152,7 @@
         "artifactId": "schemacrawler-archetype-plugin-lint",
         "groupId": "us.fatehi",
         "versions": [
+            "14.17.05",
             "14.17.04",
             "14.17.03",
             "14.17.02",
@@ -39853,6 +40230,14 @@
             "12.02.01",
             "12.01.01",
             "11.02.01"
+        ]
+    },
+    {
+        "artifactId": "xyz-generator",
+        "groupId": "xyz.luan.generator",
+        "versions": [
+            "0.2.0",
+            "0.1.0"
         ]
     }
 ]

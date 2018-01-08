@@ -5,7 +5,7 @@
   "version": "0.4.0",
   "icon": "resources/logo.png",
   "publisher": "eskibear",
-  "aiKey": "e4dc3512-4d13-406d-b886-a6c7bfe6a88b",
+  "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
   "engines": {
     "vscode": "^1.18.0"
   },
@@ -327,7 +327,7 @@
     "fs-extra": "^4.0.3",
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
-    "vscode-extension-telemetry": "0.0.8",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.4.19",
+    "vscode-extension-telemetry-wrapper": "0.0.1"
   }
 }
