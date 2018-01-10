@@ -292,12 +292,6 @@
             "default": "",
             "description": "Specifies absolute path of mvn executable.",
             "scope": "window"
-          },
-          "maven.enableStatistics": {
-            "type": "boolean",
-            "default": true,
-            "description": "Specifies whether to send anonymous usage data for statistics.",
-            "scope": "window"
           }
         }
       }
@@ -328,6 +322,6 @@
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
     "xml2js": "^0.4.19",
-    "vscode-extension-telemetry-wrapper": "0.0.4"
+    "vscode-extension-telemetry-wrapper": "0.0.8"
   }
 }

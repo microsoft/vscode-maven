@@ -126,6 +126,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                 ].join(" ");
                 exec(cmd, (error: Error, _stdout: string, _stderr: string): void => {
                     if (error) {
+                        window.showErrorMessage(`Error occurred in generating effective pom.\n${error}`);
                         reject(error);
                     } else {
                         resolve(filepath);
