@@ -124,7 +124,8 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                     `"${pomXmlFilePath}"`,
                     `-Doutput="${filepath}"`
                 ].join(" ");
-                exec(cmd, (error: Error, _stdout: string, _stderr: string): void => {
+                const rootfolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomXmlFilePath));
+                exec(cmd, { cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomXmlFilePath) }, (error: Error, _stdout: string, _stderr: string): void => {
                     if (error) {
                         window.showErrorMessage(`Error occurred in generating effective pom.\n${error}`);
                         reject(error);
