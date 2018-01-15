@@ -4,16 +4,31 @@ All notable changes to the "vscode-maven" extension will be documented in this f
     - [Unreleased](#unreleased)
         - [0.5.0](#050)
     - [Released](#released)
+    - [Early Versions](#early-versions)
         - [0.4.0](#040)
         - [0.3.0](#030)
-        - [0.2.x](#021)
-        - [0.1.x](#014)
-        - [0.0.x](#006)
+        - [0.2.1](#021)
+        - [0.2.0](#020)
+        - [0.1.4](#014)
+        - [0.1.3](#013)
+        - [0.1.2](#012)
+        - [0.1.1](#011)
+        - [0.1.0](#010)
+        - [0.0.6](#006)
+        - [0.0.5](#005)
+        - [0.0.4](#004)
+        - [0.0.3](#003)
+        - [0.0.2](#002)
+        - [0.0.1](#001)
 
 ## Unreleased
 ### 0.5.0
 
 ## Released
+
+## Early Versions
+For historical releases earlier than `v0.4.1`, please refer to [Eskibear/vscode-maven](https://github.com/Eskibear/vscode-maven/releases).
+
 ### 0.4.0
 - For each root folder of current workspace, auto import all maven projects recursively.
 - Support to specify `mvn` executable path.

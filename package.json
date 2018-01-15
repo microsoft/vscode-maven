@@ -4,7 +4,7 @@
   "description": "Manage maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
   "version": "0.5.0-dev",
   "icon": "resources/logo.png",
-  "publisher": "eskibear",
+  "publisher": "vscjava",
   "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
   "engines": {
     "vscode": "^1.18.0"
@@ -17,10 +17,10 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Eskibear/vscode-maven/blob/develop/README.md",
+  "homepage": "https://github.com/Microsoft/vscode-maven/blob/develop/README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Eskibear/vscode-maven.git"
+    "url": "https://github.com/Microsoft/vscode-maven.git"
   },
   "activationEvents": [
     "workspaceContains:pom.xml",
