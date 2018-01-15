@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
 import * as fse from "fs-extra";
 import * as http from "http";
 import * as md5 from "md5";
