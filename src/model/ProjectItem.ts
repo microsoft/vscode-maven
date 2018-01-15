@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
 
 import { TreeItem, TreeItemCollapsibleState } from "vscode";
 import { Utils } from "../Utils";
