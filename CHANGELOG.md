@@ -25,8 +25,8 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## Released
 ### 0.5.0
-- Support to use maven wrapper.
-- Change icon of treeItems for dark/light themes.
+- Supported to use maven wrapper.
+- Changed icon of treeItems for dark/light themes.
 - Fixed some bugs.
 
 ## Early Versions

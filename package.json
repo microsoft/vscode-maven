@@ -17,7 +17,7 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Microsoft/vscode-maven/blob/develop/README.md",
+  "homepage": "https://github.com/Microsoft/vscode-maven/blob/v0.5.0/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-maven.git"
