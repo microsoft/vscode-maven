@@ -2,8 +2,8 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
-        - [0.5.0](#050)
     - [Released](#released)
+        - [0.5.0](#050)
     - [Early Versions](#early-versions)
         - [0.4.0](#040)
         - [0.3.0](#030)
@@ -22,9 +22,12 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
-### 0.5.0
 
 ## Released
+### 0.5.0
+- Supported to use maven wrapper.
+- Changed icon of treeItems for dark/light themes.
+- Fixed some bugs.
 
 ## Early Versions
 For historical releases earlier than `v0.4.1`, please refer to [Eskibear/vscode-maven](https://github.com/Eskibear/vscode-maven/releases).
