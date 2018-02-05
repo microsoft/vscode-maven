@@ -22,33 +22,35 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, () => {
-            return (item: ProjectItem): Promise<void> => mavenProjectsTreeDataProvider.executeGoal(item, goal);
+        context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (item: ProjectItem) => {
+            await mavenProjectsTreeDataProvider.executeGoal(item, goal);
         }));
     });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.refreshAll", () => {
-        return (): void => mavenProjectsTreeDataProvider.refreshTree();
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.refreshAll", (): void => {
+        mavenProjectsTreeDataProvider.refreshTree();
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.effectivePom", () => {
-        return (item: Uri | ProjectItem): Promise<void> => mavenProjectsTreeDataProvider.effectivePom(item);
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.effectivePom", async (item: Uri | ProjectItem) => {
+        await mavenProjectsTreeDataProvider.effectivePom(item);
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.custom", () => {
-        return (item: ProjectItem): Promise<void> => mavenProjectsTreeDataProvider.customGoal(item);
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.custom", async (item: ProjectItem) => {
+        await mavenProjectsTreeDataProvider.customGoal(item);
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.openPom", () => {
-        return (item: ProjectItem): Promise<void> => item ? VSCodeUI.openFileIfExists(item.abosolutePath) : null;
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.openPom", async (item: ProjectItem) => {
+        if (item) {
+            await VSCodeUI.openFileIfExists(item.abosolutePath);
+        }
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.archetype.generate", () => {
-        return (entry: Uri | undefined): Promise<void> => ArchetypeModule.generateFromArchetype(entry);
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.archetype.generate", async (entry: Uri | undefined) => {
+        await ArchetypeModule.generateFromArchetype(entry);
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.archetype.update", () => {
-        return (): Thenable<void> => vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: Progress<{}>) => {
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.archetype.update", async () => {
+        await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: Progress<{}>) => {
             p.report({ message: "updating archetype catalog ..." });
             await ArchetypeModule.updateArchetypeCatalog();
             p.report({ message: "finished." });
