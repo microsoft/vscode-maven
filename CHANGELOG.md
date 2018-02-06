@@ -3,6 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.5.1](#051)
         - [0.5.0](#050)
     - [Early Versions](#early-versions)
         - [0.4.0](#040)
@@ -24,6 +25,10 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## Unreleased
 
 ## Released
+
+### 0.5.1
+- Excluded pom.xml in `target` folder by default. (to avoid duplicate item in explorer)
+
 ### 0.5.0
 - Supported to use maven wrapper.
 - Changed icon of treeItems for dark/light themes.

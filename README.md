@@ -38,7 +38,8 @@ Provide Maven executable filepath.
     {
         "maven.projects.excludedFolders": [
             "**/.*",                // exclude hidden folders
-            "**/node_modules"       // exclude node modules to speed up
+            "**/node_modules",      // exclude node modules to speed up
+            "**/target"             // exclude duplicated pom file in target folder
         ]
     }
     ```
