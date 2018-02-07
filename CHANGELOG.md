@@ -28,6 +28,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ### 0.5.1
 - Excluded pom.xml in `target` folder by default. (to avoid duplicate item in explorer)
+- Fixed CRLF issue [#10](https://github.com/Microsoft/vscode-maven/issues/10).
 
 ### 0.5.0
 - Supported to use maven wrapper.
