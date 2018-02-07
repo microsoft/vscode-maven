@@ -95,7 +95,7 @@ export namespace Utils {
         if (await fse.pathExists(filepath)) {
             const content: string = (await fse.readFile(filepath)).toString().trim();
             if (content) {
-                return content.split("\n");
+                return content.split("\n").map((line: string) => line.trim()).filter(Boolean);
             }
         }
         return [];
