@@ -96,10 +96,9 @@ export namespace VSCodeUI {
         labelfunc: (item: T) => string, descfunc: (item: T) => string,
         detailfunc: (item: T) => string, options?: QuickPickOptions
     ): Promise<T> {
-        const items: T[] = await itemsSource;
         const itemWrappersPromise: Promise<IQuickPickItemEx<T>[]> = new Promise<IQuickPickItemEx<T>[]>(
-            (resolve: (value: IQuickPickItemEx<T>[]) => void, _reject: (e: Error) => void): void => {
-                const ret: IQuickPickItemEx<T>[] = items.map((item: T) => Object.assign({}, {
+            async (resolve: (value: IQuickPickItemEx<T>[]) => void, _reject: (e: Error) => void): Promise<void> => {
+                const ret: IQuickPickItemEx<T>[] = (await itemsSource).map((item: T) => Object.assign({}, {
                     description: (detailfunc && descfunc(item)),
                     detail: (detailfunc && detailfunc(item)),
                     label: (labelfunc && labelfunc(item)),
