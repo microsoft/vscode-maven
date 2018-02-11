@@ -1,3 +1,4 @@
+VSCode extension Maven Project Explorer
 Copyright (c) Microsoft Corporation
 All rights reserved.
 
