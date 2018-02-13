@@ -136,55 +136,55 @@
       "commandPalette": [
         {
           "command": "maven.goal.clean",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.validate",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.compile",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.test",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.package",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.verify",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.install",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.site",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.deploy",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.goal.custom",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.project.effectivePom",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.project.refreshAll",
-          "when": "false == true"
+          "when": "never"
         },
         {
           "command": "maven.project.openPom",
-          "when": "false == true"
+          "when": "never"
         }
       ],
       "explorer/context": [
