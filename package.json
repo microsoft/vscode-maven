@@ -1,8 +1,8 @@
 {
   "name": "vscode-maven",
-  "displayName": "Maven Project Explorer",
+  "displayName": "Maven for Java",
   "description": "Manage maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
@@ -17,7 +17,7 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Microsoft/vscode-maven/blob/v0.5.1/README.md",
+  "homepage": "https://github.com/Microsoft/vscode-maven/blob/v0.5.2/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-maven.git"
@@ -270,7 +270,7 @@
     },
     "configuration": [
       {
-        "title": "Maven Project Explorer",
+        "title": "Maven for Java",
         "properties": {
           "maven.projects.maxDepthOfPom": {
             "type": "integer",
