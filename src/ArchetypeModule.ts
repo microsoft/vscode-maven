@@ -4,11 +4,36 @@
 import * as fs from "fs-extra";
 import * as path from "path";
 import { Uri } from "vscode";
+import { Session, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { Archetype } from "./model/Archetype";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 // tslint:disable-next-line:no-http-string
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
+
+class Step {
+    public readonly name: string;
+    public readonly info: string;
+    constructor(name: string, info: string) {
+        this.name = name;
+        this.info = info;
+    }
+}
+
+const stepTargetFolder: Step = new Step("TargetFolder", "Target folder selected.");
+const stepListMore: Step = new Step("ListMore", "All archetypes listed.");
+const stepArchetype: Step = new Step("Archetype", "Archetype selected.");
+
+function finishStep(step: Step): void {
+    const session: Session = TelemetryWrapper.currentSession();
+    if (session && session.extraProperties) {
+        if (!session.extraProperties.finishedSteps) {
+            session.extraProperties.finishedSteps = [];
+        }
+        session.extraProperties.finishedSteps.push(step.name);
+    }
+    TelemetryWrapper.info(step.info);
+}
 
 export namespace ArchetypeModule {
     export async function generateFromArchetype(entry: Uri | undefined): Promise<void> {
@@ -19,10 +44,9 @@ export namespace ArchetypeModule {
         });
         if (result && result.fsPath) {
             cwd = result.fsPath;
-        } else {
-            return Promise.resolve();
+            finishStep(stepTargetFolder);
+            await selectArchetypesSteps(cwd);
         }
-        await selectArchetypesSteps(cwd);
     }
 
     export async function updateArchetypeCatalog(): Promise<void> {
@@ -33,7 +57,7 @@ export namespace ArchetypeModule {
         await fs.writeJSON(targetFilePath, archetypes);
     }
 
-    async function showQuickPickForArchetypes(options?: {all: boolean}): Promise<Archetype> {
+    async function showQuickPickForArchetypes(options?: { all: boolean }): Promise<Archetype> {
         return await VSCodeUI.getQuickPick<Archetype>(
             loadArchetypePickItems(options),
             (item: Archetype) => item.artifactId ? `$(package) ${item.artifactId} ` : "More ...",
@@ -48,11 +72,19 @@ export namespace ArchetypeModule {
         if (selectedArchetype === undefined) {
             return;
         } else if (!selectedArchetype.artifactId) {
-            selectedArchetype = await showQuickPickForArchetypes({all : true});
+            finishStep(stepListMore);
+            selectedArchetype = await showQuickPickForArchetypes({ all: true });
         }
 
         if (selectedArchetype) {
             const { artifactId, groupId } = selectedArchetype;
+            const session: Session = TelemetryWrapper.currentSession();
+            if (session && session.extraProperties) {
+                session.extraProperties.artifactId = artifactId;
+                session.extraProperties.groupId = groupId;
+            }
+            finishStep(stepArchetype);
+
             const cmd: string = [
                 Utils.getMavenExecutable(),
                 "archetype:generate",
@@ -63,7 +95,7 @@ export namespace ArchetypeModule {
         }
     }
 
-    async function loadArchetypePickItems(options?: {all: boolean}): Promise<Archetype[]> {
+    async function loadArchetypePickItems(options?: { all: boolean }): Promise<Archetype[]> {
         const contentPath: string = Utils.getPathToExtensionRoot("resources", "archetypes.json");
         if (await fs.pathExists(contentPath)) {
             const allItems: Archetype[] = await fs.readJSON(contentPath);
