@@ -24,7 +24,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
-- Supported to auto update maven project explorer tree view when pom.xml has been created/modified/removed.
+- Supported to auto-update maven project explorer tree view when pom.xml has been created/modified/removed.
 
 ## Released
 ### 0.5.2
