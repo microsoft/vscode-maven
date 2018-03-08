@@ -21,6 +21,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     const mavenProjectsTreeDataProvider: ProjectDataProvider = new ProjectDataProvider(context);
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
+    // pom.xml listener to refresh tree view
+    const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
+    watcher.onDidCreate(() => mavenProjectsTreeDataProvider.refreshTree());
+    watcher.onDidChange(() => mavenProjectsTreeDataProvider.refreshTree());
+    watcher.onDidDelete(() => mavenProjectsTreeDataProvider.refreshTree());
+    context.subscriptions.push(watcher);
+
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
         context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (item: ProjectItem) => {
             await mavenProjectsTreeDataProvider.executeGoal(item, goal);
