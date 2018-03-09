@@ -323,6 +323,6 @@
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
     "xml2js": "^0.4.19",
-    "vscode-extension-telemetry-wrapper": "0.2.0"
+    "vscode-extension-telemetry-wrapper": "~0.2.1"
   }
 }
