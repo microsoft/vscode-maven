@@ -293,6 +293,12 @@
             "default": "",
             "description": "Specifies absolute path of mvn executable.",
             "scope": "window"
+          },
+          "maven.set.javaHome": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created.",
+            "scope": "window"
           }
         }
       }

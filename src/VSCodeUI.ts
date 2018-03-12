@@ -13,6 +13,7 @@ export namespace VSCodeUI {
         const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
         if (terminals[name] === undefined) {
             terminals[name] = window.createTerminal({ name });
+            setJavaHomeIfRequired(terminals[name]);
         }
         terminals[name].show();
         if (cwd) {
@@ -50,6 +51,32 @@ export namespace VSCodeUI {
             }
         } else {
             return `cd "${cwd}"`;
+        }
+    }
+
+    export function setJavaHomeIfRequired(terminal: Terminal) {
+        const javaHome: string = workspace.getConfiguration("java").get<string>("home");
+        const setJavaHome: boolean = workspace.getConfiguration("maven").get<boolean>("set.javaHome");
+        if (setJavaHome && javaHome) {
+            terminal.sendText(getJavaHomeCommand(javaHome), true);
+        }
+    }
+
+    export function getJavaHomeCommand(javaHome: string): string {
+        if (os.platform() === "win32") {
+            const windowsShell: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
+                .toLowerCase();
+            if (windowsShell && windowsShell.indexOf("bash.exe") > -1 && windowsShell.indexOf("git") > -1) {
+                return `export JAVA_HOME="${javaHome}"`; // Git Bash
+            } else if (windowsShell && windowsShell.indexOf("powershell.exe") > -1) {
+                return `$Env:JAVA_HOME="${javaHome}"`; // PowerShell
+            } else if (windowsShell && windowsShell.indexOf("cmd.exe") > -1) {
+                return `set JAVA_HOME=${javaHome}`; // CMD
+            } else {
+                return `set JAVA_HOME=${javaHome}`; // Unknown, try using common one.
+            }
+        } else {
+            return `export JAVA_HOME="${javaHome}"`; // general linux
         }
     }
 
