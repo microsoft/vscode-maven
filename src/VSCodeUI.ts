@@ -54,7 +54,7 @@ export namespace VSCodeUI {
         }
     }
 
-    export function setJavaHomeIfRequired(terminal: Terminal) {
+    export function setJavaHomeIfRequired(terminal: Terminal): void {
         const javaHome: string = workspace.getConfiguration("java").get<string>("home");
         const setJavaHome: boolean = workspace.getConfiguration("maven").get<boolean>("set.javaHome");
         if (setJavaHome && javaHome) {
