@@ -61,10 +61,10 @@ export namespace VSCodeUI {
         type EnvironmentSetting = {
             environmentVariable: string;
             value: string;
-        }
+        };
 
-        const environmentSettings: Array<EnvironmentSetting> = workspace.getConfiguration("maven").get("terminal.customEnv");
-        environmentSettings.forEach(s => {
+        const environmentSettings: EnvironmentSetting[] = workspace.getConfiguration("maven").get("terminal.customEnv");
+        environmentSettings.forEach((s: EnvironmentSetting) => {
             terminal.sendText(getEnvironmentVariableCommand(s.environmentVariable, s.value), true);
         });
     }
