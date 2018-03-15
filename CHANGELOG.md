@@ -3,6 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.6.0](#060)
         - [0.5.2](#052)
         - [0.5.1](#051)
         - [0.5.0](#050)
@@ -24,9 +25,12 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
-- Supported to auto-update maven project explorer tree view when pom.xml has been created/modified/removed.
 
 ## Released
+### 0.6.0
+- Supported to auto-update maven project explorer tree view when pom.xml has been created/modified/removed.
+- Started to collect anonymous data of **selected Maven Archetype** when users generate projects.
+
 ### 0.5.2
 - Updated extension name.
 
