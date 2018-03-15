@@ -96,10 +96,10 @@ This extension (Maven for Java) can reuse that setting if you desire:
     }
 ```
 
-With this support, you can specify JAVA_HOME in one place and you don't need to use the `maven.terminal.customEnv` setting unless
+With this support, you can specify JAVA_HOME in one place and you do not need to use the `maven.terminal.customEnv` setting unless
 you have other environment variables to set.
 
-If you have JAVA_HOME configured through the `maven.terminal.customEnv` setting, and also specify to reuse the Red Hat setting, then value from `maven.terminal.customEnv` will take precedent.
+If you have JAVA_HOME configured through the `maven.terminal.customEnv` setting, and also specify to reuse the Red Hat setting, then the value from `maven.terminal.customEnv` will take precedent.
 
 ## Contributing
 
