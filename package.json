@@ -293,6 +293,32 @@
             "default": "",
             "description": "Specifies absolute path of mvn executable.",
             "scope": "window"
+          },
+          "maven.terminal.useJavaHome": {
+            "type": "boolean",
+            "default": false,
+            "description": "If this value is true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created.",
+            "scope": "window"
+          },
+          "maven.terminal.customEnv": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "environment setting",
+              "properties": {
+                "environmentVariable": {
+                  "type": "string",
+                  "description": "Name of the environment variable to set"
+                },
+                "value" : {
+                  "type":"string",
+                  "description": "Value to set for the environment variable"
+                }
+              }              
+            },
+            "default": [],
+            "description": "Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed.",
+            "scope": "window"
           }
         }
       }

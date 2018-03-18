@@ -26,6 +26,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## Unreleased
 
+### 0.7.0
+- Added support for setting JAVA_HOME and other environment variables through configuration settings.
+
 ## Released
 ### 0.6.0
 - Supported to auto-update maven project explorer tree view when pom.xml has been created/modified/removed.

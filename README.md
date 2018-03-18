@@ -58,6 +58,49 @@ Provide Maven executable filepath.
 
 VS Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](http://go.microsoft.com/fwlink/?LinkId=521839) to learn more. If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
 
+## JAVA_HOME and Other Environment Variables
+
+This extension executes Maven by opening a terminal session and then calling Maven in that session.
+Maven requires the JAVA_HOME environment variable to be set. Maven will also look for other variables such as MAVEN_OPTS. If you prefer not to set those variables permanently you can configure them, or any other environment variable, in settings:
+
+```
+    {
+        "maven.terminal.customEnv": [
+            {
+                "environmentVariable": "MAVEN_OPTS",               // variable name
+                "value": "-Xms1024m -Xmx4096m"                     // value
+            },
+            {
+                "environmentVariable": "JAVA_HOME",                // variable name
+                "value": "C:\\Program Files\\Java\\jdk-9.0.4"      // value
+            }
+        ]
+    }
+```
+
+### Special Handling for JAVA_HOME
+
+If you have Red Hat's Java Language Support extension installed, then you can specify JAVA_HOME in settings for that extension:
+
+```
+    {
+        "java.home": "C:\\Program Files\\Java\\jdk-9.0.4"      // Red Hat Java Language Support Setting
+    }
+```
+
+This extension (Maven for Java) can reuse that setting if you desire:
+
+```
+    {
+        "maven.terminal.useJavaHome": true      // Use the Red Hat Java Language Support Setting for JAVA_HOME
+    }
+```
+
+With this support, you can specify JAVA_HOME in one place and you do not need to use the `maven.terminal.customEnv` setting unless
+you have other environment variables to set.
+
+If you have JAVA_HOME configured through the `maven.terminal.customEnv` setting, and also specify to reuse the Red Hat setting, then the value from `maven.terminal.customEnv` will take precedence.
+
 ## Contributing
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
