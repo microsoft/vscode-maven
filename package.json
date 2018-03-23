@@ -310,11 +310,11 @@
                   "type": "string",
                   "description": "Name of the environment variable to set"
                 },
-                "value" : {
-                  "type":"string",
+                "value": {
+                  "type": "string",
                   "description": "Value to set for the environment variable"
                 }
-              }              
+              }
             },
             "default": [],
             "description": "Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed.",
