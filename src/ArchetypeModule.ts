@@ -102,11 +102,27 @@ export namespace ArchetypeModule {
             if (options && options.all) {
                 return allItems;
             } else {
-                const preferredGroupIds: string[] = ["com.microsoft", "org.apache.maven.archetypes"];
-                const items: Archetype[][] = preferredGroupIds.map((gid: string) => allItems.filter((item: Archetype) => item.groupId.startsWith(gid)));
-                return [].concat.apply([new Archetype(null, null, null, "Find more archetypes available in remote catalog.")], items);
+                const items: Archetype[] = await getRecomendedItems(allItems);
+                return [new Archetype(null, null, null, "Find more archetypes available in remote catalog.")].concat(items);
             }
         }
         return [];
+    }
+
+    async function getRecomendedItems(allItems: Archetype[]): Promise<Archetype[]> {
+        // Top 10 popular archetypes according to usage data
+        const fixedList: string[] = [
+            "org.apache.maven.archetypes:maven-archetype-quickstart",
+            "org.apache.maven.archetypes:maven-archetype-archetype",
+            "org.apache.maven.archetypes:maven-archetype-webapp",
+            "org.apache.maven.archetypes:maven-archetype-j2ee-simple",
+            "com.microsoft.azure:azure-functions-archetype",
+            "am.ik.archetype:maven-reactjs-blank-archetype",
+            "am.ik.archetype:spring-boot-blank-archetype",
+            "org.apache.maven.archetypes:maven-archetype-site-simple",
+            "com.github.ngeor:archetype-quickstart-jdk8",
+            "com.microsoft.azure.gateway.archetypes:gateway-module-simple"
+        ];
+        return fixedList.map((fullname: string) => allItems.find((item: Archetype) => fullname === `${item.groupId}:${item.artifactId}`));
     }
 }
