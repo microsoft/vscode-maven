@@ -294,6 +294,12 @@
             "description": "Specifies absolute path of mvn executable.",
             "scope": "window"
           },
+          "maven.executable.options":{
+            "type": "string",
+            "default": "",
+            "description": "Specifies default options for all mvn commands.",
+            "scope": "resource"
+          },
           "maven.terminal.useJavaHome": {
             "type": "boolean",
             "default": false,

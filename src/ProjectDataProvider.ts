@@ -96,10 +96,11 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         if (item) {
             const cmd: string = [
                 Utils.getMavenExecutable(),
-                goal,
                 "-f",
-                `"${item.abosolutePath}"`
-            ].join(" ");
+                `"${item.abosolutePath}"`,
+                workspace.getConfiguration("maven.executable", Uri.file(item.abosolutePath)).get<string>("options"),
+                goal
+            ].filter((x: string) => x).join(" ");
             const name: string = `Maven-${item.artifactId}`;
             VSCodeUI.runInTerminal(cmd, { name });
         }
@@ -157,30 +158,28 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             const trimedGoals: string = inputGoals && inputGoals.trim();
             if (trimedGoals) {
                 await Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, trimedGoals));
-                VSCodeUI.runInTerminal(
-                    [
-                        Utils.getMavenExecutable(),
-                        trimedGoals,
-                        "-f",
-                        `"${item.abosolutePath}"`
-                    ].join(" "),
-                    { name: `Maven-${item.artifactId}` }
-                );
+                const cmd: string = [
+                    Utils.getMavenExecutable(),
+                    workspace.getConfiguration("maven.executable", Uri.file(item.abosolutePath)).get<string>("options"),
+                    trimedGoals,
+                    "-f",
+                    `"${item.abosolutePath}"`
+                ].filter((x: string) => x).join(" ");
+                VSCodeUI.runInTerminal(cmd, { name: `Maven-${item.artifactId}` });
             }
         } else if (selectedGoal === ENTRY_OPEN_HIST) {
             const historicalFilePath: string = Utils.getCommandHistoryCachePath(item.abosolutePath);
             window.showTextDocument(Uri.file(historicalFilePath));
         } else if (selectedGoal) {
             await Utils.saveCmdHistory(item.abosolutePath, Utils.withLRUItemAhead(cmdlist, selectedGoal));
-            VSCodeUI.runInTerminal(
-                [
-                    Utils.getMavenExecutable(),
-                    selectedGoal,
-                    "-f",
-                    `"${item.abosolutePath}"`
-                ].join(" "),
-                { name: `Maven-${item.artifactId}` }
-            );
+            const cmd: string = [
+                Utils.getMavenExecutable(),
+                workspace.getConfiguration("maven.executable", Uri.file(item.abosolutePath)).get<string>("options"),
+                selectedGoal,
+                "-f",
+                `"${item.abosolutePath}"`
+            ].filter((x: string) => x).join(" ");
+            VSCodeUI.runInTerminal(cmd, { name: `Maven-${item.artifactId}` });
         }
     }
 }
