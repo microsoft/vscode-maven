@@ -110,6 +110,8 @@ export namespace ArchetypeModule {
     }
 
     async function getRecomendedItems(allItems: Archetype[]): Promise<Archetype[]> {
+        // tslint:disable-next-line:no-suspicious-comment
+        // TODO: should not hard code.
         // Top 10 popular archetypes according to usage data
         const fixedList: string[] = [
             "org.apache.maven.archetypes:maven-archetype-quickstart",
@@ -118,10 +120,10 @@ export namespace ArchetypeModule {
             "org.apache.maven.archetypes:maven-archetype-j2ee-simple",
             "com.microsoft.azure:azure-functions-archetype",
             "am.ik.archetype:maven-reactjs-blank-archetype",
-            "am.ik.archetype:spring-boot-blank-archetype",
+            "com.microsoft.azure.gateway.archetypes:gateway-module-simple",
             "org.apache.maven.archetypes:maven-archetype-site-simple",
             "com.github.ngeor:archetype-quickstart-jdk8",
-            "com.microsoft.azure.gateway.archetypes:gateway-module-simple"
+            "org.apache.maven.archetypes:maven-archetype-plugin"
         ];
         return fixedList.map((fullname: string) => allItems.find((item: Archetype) => fullname === `${item.groupId}:${item.artifactId}`));
     }
