@@ -22,6 +22,13 @@ export namespace VSCodeUI {
         terminals[name].sendText(getCommand(command), addNewLine);
     }
 
+    export function closeAllTerminals(): void {
+        Object.keys(terminals).forEach((id: string) => {
+            terminals[id].dispose();
+            delete terminals[id];
+        });
+    }
+
     export function getCommand(cmd: string): string {
         if (os.platform() === "win32") {
             const windowsShell: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
@@ -54,9 +61,9 @@ export namespace VSCodeUI {
         }
     }
 
-    export function setupEnvironment(terminal: Terminal): void {
+    export function setupEnvironment(terminal?: Terminal): {} {
         // do this first so it can be overridden if desired
-        setJavaHomeIfAvailable(terminal);
+        const customEnv: any = setJavaHomeIfAvailable(terminal);
 
         type EnvironmentSetting = {
             environmentVariable: string;
@@ -65,17 +72,26 @@ export namespace VSCodeUI {
 
         const environmentSettings: EnvironmentSetting[] = workspace.getConfiguration("maven").get("terminal.customEnv");
         environmentSettings.forEach((s: EnvironmentSetting) => {
-            terminal.sendText(composeSetEnvironmentVariableCommand(s.environmentVariable, s.value), true);
+            if (terminal) {
+                terminal.sendText(composeSetEnvironmentVariableCommand(s.environmentVariable, s.value), true);
+            }
+            customEnv[s.environmentVariable] = s.value;
         });
+        return customEnv;
     }
 
-    export function setJavaHomeIfAvailable(terminal: Terminal): void {
+    export function setJavaHomeIfAvailable(terminal?: Terminal): {} {
         // Look for the java.home setting from the redhat.java extension.  We can reuse it
         // if it exists to avoid making the user configure it in two places.
         const javaHome: string = workspace.getConfiguration("java").get<string>("home");
         const useJavaHome: boolean = workspace.getConfiguration("maven").get<boolean>("terminal.useJavaHome");
         if (useJavaHome && javaHome) {
-            terminal.sendText(composeSetEnvironmentVariableCommand("JAVA_HOME", javaHome), true);
+            if (terminal) {
+                terminal.sendText(composeSetEnvironmentVariableCommand("JAVA_HOME", javaHome), true);
+            }
+            return {JAVA_HOME: javaHome};
+        } else {
+            return {};
         }
     }
 
