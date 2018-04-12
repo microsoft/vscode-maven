@@ -3,6 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.7.0](#070)
         - [0.6.0](#060)
         - [0.5.2](#052)
         - [0.5.1](#051)
@@ -26,10 +27,13 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## Unreleased
 
+## Released
+
 ### 0.7.0
 - Added support for setting JAVA_HOME and other environment variables through configuration settings.
+- Supported to put popular archetypes ahead when generating projects.
+- Supported to append default options for mvn commands.
 
-## Released
 ### 0.6.0
 - Supported to auto-update maven project explorer tree view when pom.xml has been created/modified/removed.
 - Started to collect anonymous data of **selected Maven Archetype** when users generate projects.
