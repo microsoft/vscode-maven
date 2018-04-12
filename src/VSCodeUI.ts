@@ -89,7 +89,7 @@ export namespace VSCodeUI {
             if (terminal) {
                 terminal.sendText(composeSetEnvironmentVariableCommand("JAVA_HOME", javaHome), true);
             }
-            return {JAVA_HOME: javaHome};
+            return { JAVA_HOME: javaHome };
         } else {
             return {};
         }
@@ -114,7 +114,11 @@ export namespace VSCodeUI {
     }
 
     export function onDidCloseTerminal(closedTerminal: Terminal): void {
-        delete terminals[closedTerminal.name];
+        try {
+            delete terminals[closedTerminal.name];
+        } catch (error) {
+            // ignore it.
+        }
     }
 
     export async function openDialogForFolder(customOptions: OpenDialogOptions): Promise<Uri> {
