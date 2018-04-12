@@ -67,6 +67,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
         VSCodeUI.onDidCloseTerminal(closedTerminal);
     }));
+
+    // close all terminals with outdated Envs
+    vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
+        if (e.affectsConfiguration("maven.terminal.useJavaHome") || e.affectsConfiguration("maven.terminal.customEnv")) {
+            VSCodeUI.closeAllTerminals();
+        } else {
+            const useJavaHome: boolean = vscode.workspace.getConfiguration("maven").get<boolean>("terminal.useJavaHome");
+            if (useJavaHome && e.affectsConfiguration("java.home")) {
+                VSCodeUI.closeAllTerminals();
+            }
+        }
+    });
 }
 
 export function deactivate(): void {

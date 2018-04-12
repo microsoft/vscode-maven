@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { exec } from "child_process";
+import * as child_process from "child_process";
 import * as path from "path";
 import { Event, EventEmitter, ExtensionContext, Progress, ProgressLocation, TextDocument, TreeDataProvider, TreeItem, Uri, window, workspace, WorkspaceFolder } from "vscode";
 import { FolderItem } from "./model/FolderItem";
@@ -128,7 +128,12 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
                     `-Doutput="${filepath}"`
                 ].join(" ");
                 const rootfolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomXmlFilePath));
-                exec(cmd, { cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomXmlFilePath) }, (error: Error, _stdout: string, _stderr: string): void => {
+                const customEnv: {} = VSCodeUI.setupEnvironment();
+                const execOptions: child_process.ExecOptions = {
+                    cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomXmlFilePath),
+                    env: Object.assign({}, process.env, customEnv)
+                };
+                child_process.exec(cmd, execOptions, (error: Error, _stdout: string, _stderr: string): void => {
                     if (error) {
                         window.showErrorMessage(`Error occurred in generating effective pom.\n${error}`);
                         reject(error);
