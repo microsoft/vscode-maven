@@ -7,11 +7,12 @@ import * as md5 from "md5";
 import * as minimatch from "minimatch";
 import * as os from "os";
 import * as path from "path";
-import { ExtensionContext, extensions, workspace } from 'vscode';
+import { ExtensionContext, extensions, Uri, workspace } from 'vscode';
 import * as xml2js from "xml2js";
 import { Archetype } from "./model/Archetype";
 import { ProjectItem } from "./model/ProjectItem";
 import { IArchetype, IArchetypeCatalogRoot, IArchetypes, IPomRoot } from "./model/XmlSchema";
+import { VSCodeUI } from "./VSCodeUI";
 
 export namespace Utils {
     let EXTENSION_PUBLISHER: string;
@@ -111,8 +112,8 @@ export namespace Utils {
         return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), "effective-pom.xml");
     }
 
-    export function getCommandHistoryCachePath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), "commandHistory.txt");
+    export function getCommandHistoryCachePath(pomXmlFilePath?: string): string {
+        return path.join(os.tmpdir(), EXTENSION_NAME, pomXmlFilePath ? md5(pomXmlFilePath) : "", "commandHistory.txt");
     }
 
     export async function readFileIfExists(filepath: string): Promise<string> {
@@ -214,5 +215,43 @@ export namespace Utils {
     export function getMavenExecutable(): string {
         const mavenPath: string = workspace.getConfiguration("maven.executable").get<string>("path");
         return mavenPath ? `"${mavenPath}"` : "mvn";
+    }
+
+    export function executeMavenCommand(command: string, pomfile: string): void {
+        const fullCommand: string = [
+            Utils.getMavenExecutable(),
+            command.trim(),
+            "-f",
+            `"${pomfile}"`,
+            workspace.getConfiguration("maven.executable", Uri.file(pomfile)).get<string>("options")
+        ].filter((x: string) => x).join(" ");
+        const name: string = "Maven";
+        VSCodeUI.runInTerminal(fullCommand, { name });
+        updateLRUCommands(command, pomfile);
+    }
+
+    export async function getLRUCommands(): Promise<{ command: string, pomfile: string }[]> {
+        const filepath: string = getCommandHistoryCachePath();
+        if (await fse.pathExists(filepath)) {
+            const content: string = (await fse.readFile(filepath)).toString().trim();
+            if (content) {
+                return content.split("\n").map(
+                    (line: string) => {
+                        const items: string[] = line.split(",");
+                        return { command: items[0], pomfile: items[1] };
+                    }
+                );
+            }
+        }
+        return [];
+    }
+
+    async function updateLRUCommands(command: string, pomfile: string): Promise<void> {
+        const filepath: string = getCommandHistoryCachePath();
+        await fse.ensureFile(filepath);
+        const content: string = (await fse.readFile(filepath)).toString().trim();
+        const lines: string[] = withLRUItemAhead<string>(content.split("\n"), `${command},${pomfile}`);
+        const newContent: string = lines.filter(Boolean).slice(0, 20).join("\n");
+        await fse.writeFile(filepath, newContent);
     }
 }
