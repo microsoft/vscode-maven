@@ -144,7 +144,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         if (!item || !item.abosolutePath) {
             return;
         }
-        const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests" });
+        const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
         const trimedGoals: string = inputGoals && inputGoals.trim();
         if (trimedGoals) {
             Utils.executeMavenCommand(trimedGoals, item.abosolutePath);
