@@ -11,7 +11,7 @@ Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide 
 
 * Effective POM
 * Shortcut to common goals, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
-* Perserve history of custom goals for fast re-run long commands(e.g. `mvn clean package -DskipTests -Dcheckstyle.skip`).
+* Perserve history of goals to fast re-run long commands(e.g. `mvn clean package -DskipTests -Dcheckstyle.skip`).
 * Can generate projects from Maven Archetype.
 * Support multi-module maven projects.
 * Support VSCode multi-root workspace.
@@ -44,7 +44,7 @@ Provide Maven executable filepath.
     }
     ```
 
-* It perserves history of custom goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
+* It perserves history of goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
 
     ![Screenshot](images/customGoal.gif)
 

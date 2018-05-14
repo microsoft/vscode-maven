@@ -26,6 +26,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
+- Simplified the workflow for executing custom goals.
+- Supported to fast re-run maven command from history.
+- Fixed some bugs.
 
 ## Released
 
