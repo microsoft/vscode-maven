@@ -64,6 +64,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         });
     }));
 
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.history", async () => {
+        await mavenProjectsTreeDataProvider.historicalGoals();
+    }));
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
         VSCodeUI.onDidCloseTerminal(closedTerminal);
     }));

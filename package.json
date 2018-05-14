@@ -10,7 +10,7 @@
     "vscode": "^1.18.0"
   },
   "categories": [
-    "Languages",
+    "Programming Languages",
     "Other"
   ],
   "keywords": [
@@ -39,6 +39,7 @@
     "onCommand:maven.project.openPom",
     "onCommand:maven.archetype.generate",
     "onCommand:maven.archetype.update",
+    "onCommand:maven.history",
     "onView:mavenProjects"
   ],
   "main": "./out/extension",
@@ -121,6 +122,11 @@
       {
         "command": "maven.archetype.update",
         "title": "Update Maven Archetype Catalog",
+        "category": "Maven"
+      },
+      {
+        "command": "maven.history",
+        "title": "Command History",
         "category": "Maven"
       }
     ],
