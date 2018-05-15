@@ -3,6 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.8.0](#080)
         - [0.7.0](#070)
         - [0.6.0](#060)
         - [0.5.2](#052)
@@ -26,12 +27,13 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
+
+## Released
+### 0.8.0
 - Simplified the workflow for executing custom goals.
 - Supported to fast re-run maven command from history.
 - Supported to trigger maven command from command palette.
 - Fixed some bugs.
-
-## Released
 
 ### 0.7.0
 - Added support for setting JAVA_HOME and other environment variables through configuration settings.
