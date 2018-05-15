@@ -28,6 +28,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## Unreleased
 - Simplified the workflow for executing custom goals.
 - Supported to fast re-run maven command from history.
+- Supported to trigger maven command from command palette.
 - Fixed some bugs.
 
 ## Released

@@ -10,7 +10,7 @@ export class WorkspaceItem extends TreeItem {
     };
 
     constructor(name: string, absolutePath: string, params?: object) {
-        super(name, TreeItemCollapsibleState.Collapsed);
+        super(name, TreeItemCollapsibleState.Expanded);
         this.name = name;
         this.abosolutePath = absolutePath;
         this.params = params || {};

@@ -126,7 +126,12 @@
       },
       {
         "command": "maven.history",
-        "title": "Command History",
+        "title": "Command history",
+        "category": "Maven"
+      },
+      {
+        "command": "maven.goal.execute",
+        "title": "Execute commands",
         "category": "Maven"
       }
     ],
@@ -281,7 +286,7 @@
           "maven.projects.maxDepthOfPom": {
             "type": "integer",
             "default": -1,
-            "description": "Specifies max depth to find pom.xml recursively, only search root folder by default.",
+            "description": "Specifies max depth to find pom.xml recursively, infinite by default.",
             "scope": "window"
           },
           "maven.projects.excludedFolders": {
