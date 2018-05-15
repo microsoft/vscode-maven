@@ -4,6 +4,7 @@
 import * as child_process from "child_process";
 import * as path from "path";
 import { Event, EventEmitter, ExtensionContext, Progress, ProgressLocation, TextDocument, TreeDataProvider, TreeItem, Uri, window, workspace, WorkspaceFolder } from "vscode";
+import * as vscode from "vscode";
 import { FolderItem } from "./model/FolderItem";
 import { ProjectItem } from "./model/ProjectItem";
 import { WorkspaceItem } from "./model/WorkspaceItem";
@@ -19,6 +20,8 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
     public readonly onDidChangeTreeData: Event<TreeItem> = this._onDidChangeTreeData.event;
     protected context: ExtensionContext;
 
+    private cachedProjectItems: Set<ProjectItem> = new Set<ProjectItem>();
+
     constructor(context: ExtensionContext) {
         this.context = context;
     }
@@ -29,6 +32,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
 
     public async getChildren(element?: TreeItem): Promise<TreeItem[]> {
         if (element === undefined) {
+            this.cachedProjectItems.clear();
             if (workspace.workspaceFolders) {
                 return workspace.workspaceFolders.map((wf: WorkspaceFolder) => new WorkspaceItem(wf.name, wf.uri.fsPath));
             } else {
@@ -43,6 +47,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             const items: ProjectItem[] = (await Promise.all(promiseList)).filter((x: ProjectItem) => x);
             items.forEach((item: ProjectItem) => {
                 item.workspacePath = workspaceItem.abosolutePath;
+                if (!this.cachedProjectItems.has(item)) {
+                    this.cachedProjectItems.add(item);
+                }
             });
             if (items.length === 0) {
                 return [new TreeItem(ITEM_NO_AVAILABLE_PROJECTS)];
@@ -164,6 +171,33 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             const pomfile: string = selected.pomfile;
             Utils.executeMavenCommand(command, pomfile);
         }
+    }
+
+    public async execute(): Promise<void> {
+        // select a project(pomfile)
+        const item: ProjectItem = await VSCodeUI.getQuickPick<ProjectItem>(
+            Array.from(this.cachedProjectItems.values()),
+            (x: ProjectItem) => `$(primitive-dot) ${x.label}`,
+            null,
+            (x: ProjectItem) => x.abosolutePath,
+            { placeHolder: "Select a Maven project." }
+        );
+        if (!item) {
+            return;
+        }
+        // select a command
+        const command: string = await VSCodeUI.getQuickPick<string>(
+            ["custom", "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
+            (x: string) => x === "custom" ? "Custom goals ..." : x,
+            null,
+            null,
+            { placeHolder: "Select the goal to execute." }
+        );
+        if (!command) {
+            return;
+        }
+        // execute
+        await vscode.commands.executeCommand(`maven.goal.${command}`, item);
     }
 }
 
