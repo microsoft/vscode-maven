@@ -118,7 +118,6 @@
             "classes"
         ],
         "export-name": true,
-        "function-name": true,
         "import-name": false,
         "interface-name": true,
         "jsdoc-format": true,
@@ -151,7 +150,6 @@
         "no-construct": true,
         "no-default-export": true,
         "no-empty-interface": true,
-        "no-for-in": true,
         "no-function-expression": true,
         "no-inferrable-types": false,
         "no-multiline-string": true,
@@ -296,5 +294,6 @@
         "no-switch-case-fall-through": false,
         "typeof-compare": false
     },
-    "rulesDirectory": "node_modules/tslint-microsoft-contrib/"
+    "rulesDirectory": "node_modules/tslint-microsoft-contrib/",
+    "defaultSeverity": "warning"
 }

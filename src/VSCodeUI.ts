@@ -32,7 +32,7 @@ export namespace VSCodeUI {
         if (process.platform === "win32") {
             switch (_currentWindowsShell()) {
                 case 'PowerShell':
-                    return `& ${cmd}`; // PowerShell    
+                    return `& ${cmd}`; // PowerShell
                 default:
                     return cmd; // others, try using common one.
             }
@@ -41,14 +41,13 @@ export namespace VSCodeUI {
         }
     }
 
-    function _toWSLPath(p: string) {
+    function _toWSLPath(p: string): string {
         const arr: string[] = p.split(":\\");
         if (arr.length === 2) {
             const drive: string = arr[0].toLowerCase();
             const dir: string = arr[1].replace("\\", "/");
             return `/mnt/${drive}/${dir}`;
-        }
-        else {
+        } else {
             return ".";
         }
     }
@@ -57,13 +56,13 @@ export namespace VSCodeUI {
         if (process.platform === "win32") {
             switch (_currentWindowsShell()) {
                 case 'Git Bash':
-                    return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'    
+                    return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
                 case 'PowerShell':
                     return `cd "${cwd}"`; // PowerShell
                 case 'Command Prompt':
                     return `cd /d "${cwd}"`; // CMD
                 case 'WSL Bash':
-                    return `cd "${_toWSLPath(cwd)}"` // WSL
+                    return `cd "${_toWSLPath(cwd)}"`; // WSL
                 default:
                     return `cd "${cwd}"`; // Unknown, try using common one.
             }
@@ -108,16 +107,16 @@ export namespace VSCodeUI {
 
     export function composeSetEnvironmentVariableCommand(variable: string, value: string): string {
         if (process.platform === "win32") {
-            const windowsShell: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
-                .toLowerCase();
-            if (windowsShell && windowsShell.indexOf("bash.exe") > -1 && windowsShell.indexOf("git") > -1) {
-                return `export ${variable}="${value}"`; // Git Bash
-            } else if (windowsShell && windowsShell.indexOf("powershell.exe") > -1) {
-                return `$Env:${variable}="${value}"`; // PowerShell
-            } else if (windowsShell && windowsShell.indexOf("cmd.exe") > -1) {
-                return `set ${variable}=${value}`; // CMD
-            } else {
-                return `set ${variable}=${value}`; // Unknown, try using common one.
+            switch (_currentWindowsShell()) {
+                case 'Git Bash':
+                case 'WSL Bash':
+                    return `export ${variable}="${value}"`; // Git Bash
+                case 'PowerShell':
+                    return `$Env:${variable}="${value}"`; // PowerShell
+                case 'Command Prompt':
+                    return `set ${variable}=${value}`; // CMD
+                default:
+                    return `set ${variable}=${value}`; // Unknown, try using common one.
             }
         } else {
             return `export ${variable}="${value}"`; // general linux
@@ -193,18 +192,18 @@ export namespace VSCodeUI {
     }
 
     function _currentWindowsShell(): string {
-        const is32ProcessOn64Windows = process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432');
-        const system32Path = `${process.env['windir']}\\${is32ProcessOn64Windows ? 'Sysnative' : 'System32'}`;
+        const is32ProcessOn64Windows: string = process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432');
+        const system32Path: string = `${process.env.windir}\\${is32ProcessOn64Windows ? 'Sysnative' : 'System32'}`;
         const expectedLocations: { [shell: string]: string[] } = {
             'Command Prompt': [`${system32Path}\\cmd.exe`],
             PowerShell: [`${system32Path}\\WindowsPowerShell\\v1.0\\powershell.exe`],
             'WSL Bash': [`${system32Path}\\bash.exe`],
             'Git Bash': [
-                `${process.env['ProgramW6432']}\\Git\\bin\\bash.exe`,
-                `${process.env['ProgramW6432']}\\Git\\usr\\bin\\bash.exe`,
-                `${process.env['ProgramFiles']}\\Git\\bin\\bash.exe`,
-                `${process.env['ProgramFiles']}\\Git\\usr\\bin\\bash.exe`,
-                `${process.env['LocalAppData']}\\Programs\\Git\\bin\\bash.exe`,
+                `${process.env.ProgramW6432}\\Git\\bin\\bash.exe`,
+                `${process.env.ProgramW6432}\\Git\\usr\\bin\\bash.exe`,
+                `${process.env.ProgramFiles}\\Git\\bin\\bash.exe`,
+                `${process.env.ProgramFiles}\\Git\\usr\\bin\\bash.exe`,
+                `${process.env.LocalAppData}\\Programs\\Git\\bin\\bash.exe`
             ]
         };
         const currentWindowsShellPath: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows");
