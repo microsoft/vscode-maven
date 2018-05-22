@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import * as fs from "fs-extra";
-import * as os from "os";
 import { InputBoxOptions, OpenDialogOptions, QuickPickItem, QuickPickOptions, Terminal, Uri, window, workspace } from "vscode";
 
 export namespace VSCodeUI {
@@ -30,31 +29,43 @@ export namespace VSCodeUI {
     }
 
     export function getCommand(cmd: string): string {
-        if (os.platform() === "win32") {
-            const windowsShell: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
-                .toLowerCase();
-            if (windowsShell && windowsShell.indexOf("powershell.exe") > -1) {
-                return `& ${cmd}`; // PowerShell
-            } else {
-                return cmd; // others, try using common one.
+        if (process.platform === "win32") {
+            switch (_currentWindowsShell()) {
+                case 'PowerShell':
+                    return `& ${cmd}`; // PowerShell    
+                default:
+                    return cmd; // others, try using common one.
             }
         } else {
             return cmd;
         }
     }
 
+    function _toWSLPath(p: string) {
+        const arr: string[] = p.split(":\\");
+        if (arr.length === 2) {
+            const drive: string = arr[0].toLowerCase();
+            const dir: string = arr[1].replace("\\", "/");
+            return `/mnt/${drive}/${dir}`;
+        }
+        else {
+            return ".";
+        }
+    }
+
     export function getCDCommand(cwd: string): string {
-        if (os.platform() === "win32") {
-            const windowsShell: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
-                .toLowerCase();
-            if (windowsShell && windowsShell.indexOf("bash.exe") > -1 && windowsShell.indexOf("git") > -1) {
-                return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
-            } else if (windowsShell && windowsShell.indexOf("powershell.exe") > -1) {
-                return `cd "${cwd}"`; // PowerShell
-            } else if (windowsShell && windowsShell.indexOf("cmd.exe") > -1) {
-                return `cd /d "${cwd}"`; // CMD
-            } else {
-                return `cd "${cwd}"`; // Unknown, try using common one.
+        if (process.platform === "win32") {
+            switch (_currentWindowsShell()) {
+                case 'Git Bash':
+                    return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'    
+                case 'PowerShell':
+                    return `cd "${cwd}"`; // PowerShell
+                case 'Command Prompt':
+                    return `cd /d "${cwd}"`; // CMD
+                case 'WSL Bash':
+                    return `cd "${_toWSLPath(cwd)}"` // WSL
+                default:
+                    return `cd "${cwd}"`; // Unknown, try using common one.
             }
         } else {
             return `cd "${cwd}"`;
@@ -96,7 +107,7 @@ export namespace VSCodeUI {
     }
 
     export function composeSetEnvironmentVariableCommand(variable: string, value: string): string {
-        if (os.platform() === "win32") {
+        if (process.platform === "win32") {
             const windowsShell: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows")
                 .toLowerCase();
             if (windowsShell && windowsShell.indexOf("bash.exe") > -1 && windowsShell.indexOf("git") > -1) {
@@ -179,6 +190,30 @@ export namespace VSCodeUI {
     export async function getFromInputBox(options?: InputBoxOptions): Promise<string> {
         return await window.showInputBox(Object.assign({ ignoreFocusOut: true }, options));
 
+    }
+
+    function _currentWindowsShell(): string {
+        const is32ProcessOn64Windows = process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432');
+        const system32Path = `${process.env['windir']}\\${is32ProcessOn64Windows ? 'Sysnative' : 'System32'}`;
+        const expectedLocations: { [shell: string]: string[] } = {
+            'Command Prompt': [`${system32Path}\\cmd.exe`],
+            PowerShell: [`${system32Path}\\WindowsPowerShell\\v1.0\\powershell.exe`],
+            'WSL Bash': [`${system32Path}\\bash.exe`],
+            'Git Bash': [
+                `${process.env['ProgramW6432']}\\Git\\bin\\bash.exe`,
+                `${process.env['ProgramW6432']}\\Git\\usr\\bin\\bash.exe`,
+                `${process.env['ProgramFiles']}\\Git\\bin\\bash.exe`,
+                `${process.env['ProgramFiles']}\\Git\\usr\\bin\\bash.exe`,
+                `${process.env['LocalAppData']}\\Programs\\Git\\bin\\bash.exe`,
+            ]
+        };
+        const currentWindowsShellPath: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows");
+        for (const key in expectedLocations) {
+            if (expectedLocations[key].indexOf(currentWindowsShellPath) >= 0) {
+                return key;
+            }
+        }
+        return 'Others';
     }
 }
 
