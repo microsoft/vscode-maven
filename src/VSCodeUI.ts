@@ -3,6 +3,7 @@
 
 import * as fs from "fs-extra";
 import { InputBoxOptions, OpenDialogOptions, QuickPickItem, QuickPickOptions, Terminal, Uri, window, workspace } from "vscode";
+import { Utils } from "./Utils";
 
 export namespace VSCodeUI {
     const terminals: { [id: string]: Terminal } = {};
@@ -30,7 +31,7 @@ export namespace VSCodeUI {
 
     export function getCommand(cmd: string): string {
         if (process.platform === "win32") {
-            switch (_currentWindowsShell()) {
+            switch (Utils.currentWindowsShell()) {
                 case 'PowerShell':
                     return `& ${cmd}`; // PowerShell
                 default:
@@ -41,20 +42,9 @@ export namespace VSCodeUI {
         }
     }
 
-    function _toWSLPath(p: string): string {
-        const arr: string[] = p.split(":\\");
-        if (arr.length === 2) {
-            const drive: string = arr[0].toLowerCase();
-            const dir: string = arr[1].replace("\\", "/");
-            return `/mnt/${drive}/${dir}`;
-        } else {
-            return ".";
-        }
-    }
-
     export function getCDCommand(cwd: string): string {
         if (process.platform === "win32") {
-            switch (_currentWindowsShell()) {
+            switch (Utils.currentWindowsShell()) {
                 case 'Git Bash':
                     return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
                 case 'PowerShell':
@@ -62,7 +52,7 @@ export namespace VSCodeUI {
                 case 'Command Prompt':
                     return `cd /d "${cwd}"`; // CMD
                 case 'WSL Bash':
-                    return `cd "${_toWSLPath(cwd)}"`; // WSL
+                    return `cd "${Utils.toWSLPath(cwd)}"`; // WSL
                 default:
                     return `cd "${cwd}"`; // Unknown, try using common one.
             }
@@ -107,7 +97,7 @@ export namespace VSCodeUI {
 
     export function composeSetEnvironmentVariableCommand(variable: string, value: string): string {
         if (process.platform === "win32") {
-            switch (_currentWindowsShell()) {
+            switch (Utils.currentWindowsShell()) {
                 case 'Git Bash':
                 case 'WSL Bash':
                     return `export ${variable}="${value}"`; // Git Bash
@@ -189,30 +179,6 @@ export namespace VSCodeUI {
     export async function getFromInputBox(options?: InputBoxOptions): Promise<string> {
         return await window.showInputBox(Object.assign({ ignoreFocusOut: true }, options));
 
-    }
-
-    function _currentWindowsShell(): string {
-        const is32ProcessOn64Windows: string = process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432');
-        const system32Path: string = `${process.env.windir}\\${is32ProcessOn64Windows ? 'Sysnative' : 'System32'}`;
-        const expectedLocations: { [shell: string]: string[] } = {
-            'Command Prompt': [`${system32Path}\\cmd.exe`],
-            PowerShell: [`${system32Path}\\WindowsPowerShell\\v1.0\\powershell.exe`],
-            'WSL Bash': [`${system32Path}\\bash.exe`],
-            'Git Bash': [
-                `${process.env.ProgramW6432}\\Git\\bin\\bash.exe`,
-                `${process.env.ProgramW6432}\\Git\\usr\\bin\\bash.exe`,
-                `${process.env.ProgramFiles}\\Git\\bin\\bash.exe`,
-                `${process.env.ProgramFiles}\\Git\\usr\\bin\\bash.exe`,
-                `${process.env.LocalAppData}\\Programs\\Git\\bin\\bash.exe`
-            ]
-        };
-        const currentWindowsShellPath: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows");
-        for (const key in expectedLocations) {
-            if (expectedLocations[key].indexOf(currentWindowsShellPath) >= 0) {
-                return key;
-            }
-        }
-        return 'Others';
     }
 }
 

@@ -222,7 +222,7 @@ export namespace Utils {
             Utils.getMavenExecutable(),
             command.trim(),
             "-f",
-            `"${pomfile}"`,
+            `"${formattedFilepath(pomfile)}"`,
             workspace.getConfiguration("maven.executable", Uri.file(pomfile)).get<string>("options")
         ].filter((x: string) => x).join(" ");
         const name: string = "Maven";
@@ -253,5 +253,53 @@ export namespace Utils {
         const lines: string[] = withLRUItemAhead<string>(content.split("\n"), `${command},${pomfile}`);
         const newContent: string = lines.filter(Boolean).slice(0, 20).join("\n");
         await fse.writeFile(filepath, newContent);
+    }
+
+    export function currentWindowsShell(): string {
+        const is32ProcessOn64Windows: string = process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432');
+        const system32Path: string = `${process.env.windir}\\${is32ProcessOn64Windows ? 'Sysnative' : 'System32'}`;
+        const expectedLocations: { [shell: string]: string[] } = {
+            'Command Prompt': [`${system32Path}\\cmd.exe`],
+            PowerShell: [`${system32Path}\\WindowsPowerShell\\v1.0\\powershell.exe`],
+            'WSL Bash': [`${system32Path}\\bash.exe`],
+            'Git Bash': [
+                `${process.env.ProgramW6432}\\Git\\bin\\bash.exe`,
+                `${process.env.ProgramW6432}\\Git\\usr\\bin\\bash.exe`,
+                `${process.env.ProgramFiles}\\Git\\bin\\bash.exe`,
+                `${process.env.ProgramFiles}\\Git\\usr\\bin\\bash.exe`,
+                `${process.env.LocalAppData}\\Programs\\Git\\bin\\bash.exe`
+            ]
+        };
+        const currentWindowsShellPath: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows");
+        for (const key in expectedLocations) {
+            if (expectedLocations[key].indexOf(currentWindowsShellPath) >= 0) {
+                return key;
+            }
+        }
+        return 'Others';
+    }
+
+    export function toWSLPath(p: string): string {
+        const arr: string[] = p.split(":\\");
+        if (arr.length === 2) {
+            const drive: string = arr[0].toLowerCase();
+            const dir: string = arr[1].replace(/\\/g, "/");
+            return `/mnt/${drive}/${dir}`;
+        } else {
+            return ".";
+        }
+    }
+
+    export function formattedFilepath(filepath: string): string {
+        if (process.platform === "win32") {
+            switch (currentWindowsShell()) {
+                case "WSL Bash":
+                    return toWSLPath(filepath);
+                default:
+                    return filepath;
+            }
+        } else {
+            return filepath;
+        }
     }
 }
