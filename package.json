@@ -359,7 +359,7 @@
     "tslint": "^5.8.0",
     "tslint-microsoft-contrib": "^5.0.1",
     "typescript": "^2.6.1",
-    "vscode": "^1.1.6"
+    "vscode": "^1.1.18"
   },
   "dependencies": {
     "fs-extra": "^4.0.3",
