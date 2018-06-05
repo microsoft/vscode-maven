@@ -27,6 +27,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.0.1](#001)
 
 ## Unreleased
+- Fixed vulnerabilities in package dependencies.
+- Formatted filepath for WSL Bash.
+- Added entry for historical commands in context menu.
 
 ## Released
 ### 0.8.0

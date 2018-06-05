@@ -230,7 +230,7 @@ export namespace Utils {
         updateLRUCommands(command, pomfile);
     }
 
-    export async function getLRUCommands(): Promise<{ command: string, pomfile: string }[]> {
+    export async function getLRUCommands(pomfile?: string): Promise<{ command: string, pomfile: string }[]> {
         const filepath: string = getCommandHistoryCachePath();
         if (await fse.pathExists(filepath)) {
             const content: string = (await fse.readFile(filepath)).toString().trim();
@@ -240,7 +240,7 @@ export namespace Utils {
                         const items: string[] = line.split(",");
                         return { command: items[0], pomfile: items[1] };
                     }
-                );
+                ).filter((item: { command: string, pomfile: string }) => !pomfile || pomfile === item.pomfile);
             }
         }
         return [];

@@ -126,7 +126,7 @@
       },
       {
         "command": "maven.history",
-        "title": "Command history",
+        "title": "History ...",
         "category": "Maven"
       },
       {
@@ -220,52 +220,57 @@
         {
           "command": "maven.goal.custom",
           "when": "view == mavenProjects && viewItem == ProjectItem",
+          "group": "1-lifecycle@5"
+        },
+        {
+          "command": "maven.history",
+          "when": "view == mavenProjects && viewItem == ProjectItem",
           "group": "1-lifecycle@0"
         },
         {
           "command": "maven.goal.clean",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@1"
+          "group": "1-lifecycle@10"
         },
         {
           "command": "maven.goal.package",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@2"
+          "group": "1-lifecycle@20"
         },
         {
           "command": "maven.goal.install",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@3"
+          "group": "1-lifecycle@30"
         },
         {
           "command": "maven.goal.compile",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@4"
+          "group": "1-lifecycle@40"
         },
         {
           "command": "maven.goal.validate",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@5"
+          "group": "1-lifecycle@50"
         },
         {
           "command": "maven.goal.verify",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@6"
+          "group": "1-lifecycle@60"
         },
         {
           "command": "maven.goal.test",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@7"
+          "group": "1-lifecycle@70"
         },
         {
           "command": "maven.goal.site",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@8"
+          "group": "1-lifecycle@80"
         },
         {
           "command": "maven.goal.deploy",
           "when": "view == mavenProjects && viewItem == ProjectItem",
-          "group": "1-lifecycle@9"
+          "group": "1-lifecycle@90"
         },
         {
           "command": "maven.project.openPom",
