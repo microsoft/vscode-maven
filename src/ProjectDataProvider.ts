@@ -158,9 +158,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
         }
     }
 
-    public async historicalGoals(): Promise<void> {
+    public async historicalGoals(projectPomPath?: string): Promise<void> {
         const selected: IHistory = await VSCodeUI.getQuickPick(
-            Utils.getLRUCommands(),
+            Utils.getLRUCommands(projectPomPath),
             (x: IHistory) => x.command,
             null,
             (x: IHistory) => x.pomfile,
