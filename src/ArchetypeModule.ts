@@ -63,7 +63,7 @@ export namespace ArchetypeModule {
             (item: Archetype) => item.artifactId ? `$(package) ${item.artifactId} ` : "More ...",
             (item: Archetype) => item.groupId ? `${item.groupId}` : "",
             (item: Archetype) => item.description,
-            { matchOnDescription: true, placeHolder: "Select archetype with <groupId>:<artifactId> ..." }
+            { matchOnDescription: true, placeHolder: "Select an archetype ..." }
         );
     }
 
