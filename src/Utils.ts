@@ -3,10 +3,12 @@
 
 import * as fse from "fs-extra";
 import * as http from "http";
+import * as https from "https";
 import * as md5 from "md5";
 import * as minimatch from "minimatch";
 import * as os from "os";
 import * as path from "path";
+import * as url from "url";
 import { ExtensionContext, extensions, Uri, workspace } from 'vscode';
 import * as xml2js from "xml2js";
 import { Archetype } from "./model/Archetype";
@@ -50,6 +52,10 @@ export namespace Utils {
 
     export function getTempFolderPath(...args: string[]): string {
         return path.join(os.tmpdir(), EXTENSION_NAME, ...args);
+    }
+
+    export function getTempFolder(): string {
+        return path.join(os.tmpdir(), getExtensionId());
     }
 
     export function getPathToExtensionRoot(...args: string[]): string {
@@ -161,27 +167,52 @@ export namespace Utils {
         return path.join(Utils.getPathToExtensionRoot(), "resources", "archetype-catalog.xml");
     }
 
-    export async function httpGetContent(url: string): Promise<string> {
-        const filepath: string = getTempFolderPath(md5(url));
-        if (await fse.pathExists(filepath)) {
-            await fse.unlink(filepath);
+    export async function downloadFile(targetUrl: string, readContent?: boolean, customHeaders?: {}): Promise<string> {
+        const tempFilePath: string = path.join(getTempFolder(), md5(targetUrl));
+        await fse.ensureDir(getTempFolder());
+        if (await fse.pathExists(tempFilePath)) {
+            await fse.remove(tempFilePath);
         }
-        await fse.ensureFile(filepath);
-        const file: fse.WriteStream = fse.createWriteStream(filepath);
-        return new Promise<string>(
-            (resolve: (value: string) => void, reject: (e: Error) => void): void => {
-                const request: http.ClientRequest = http.get(url, (response: http.IncomingMessage) => {
-                    response.pipe(file);
-                    file.on('finish', async () => {
-                        file.close();
-                        const buf: Buffer = await fse.readFile(filepath);
-                        resolve(buf.toString());
-                    });
+
+        return await new Promise((resolve: (res: string) => void, reject: (e: Error) => void): void => {
+            const urlObj: url.Url = url.parse(targetUrl);
+            const options: Object = Object.assign({ headers: Object.assign({}, customHeaders, { 'User-Agent': `vscode/${getExtensionVersion()}` }) }, urlObj);
+            let client: any;
+            if (urlObj.protocol === "https:") {
+                client = https;
+                // tslint:disable-next-line:no-http-string
+            } else if (urlObj.protocol === "http:") {
+                client = http;
+            } else {
+                return reject(new Error("Unsupported protocol."));
+            }
+            client.get(options, (res: http.IncomingMessage) => {
+                let rawData: string;
+                let ws: fse.WriteStream;
+                if (readContent) {
+                    rawData = "";
+                } else {
+                    ws = fse.createWriteStream(tempFilePath);
+                }
+                res.on('data', (chunk: string | Buffer) => {
+                    if (readContent) {
+                        rawData += chunk;
+                    } else {
+                        ws.write(chunk);
+                    }
                 });
-                request.on("error", (e: Error) => {
-                    reject(e);
+                res.on('end', () => {
+                    if (readContent) {
+                        resolve(rawData);
+                    } else {
+                        ws.end();
+                        resolve(tempFilePath);
+                    }
                 });
+            }).on("error", (err: Error) => {
+                reject(err);
             });
+        });
     }
 
     export async function findAllInDir(currentPath: string, targetFileName: string, depth: number, exclusion: string[] = ["**/.*"]): Promise<string[]> {

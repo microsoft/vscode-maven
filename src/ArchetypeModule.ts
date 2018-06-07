@@ -50,7 +50,7 @@ export namespace ArchetypeModule {
     }
 
     export async function updateArchetypeCatalog(): Promise<void> {
-        const xml: string = await Utils.httpGetContent(REMOTE_ARCHETYPE_CATALOG_URL);
+        const xml: string = await Utils.downloadFile(REMOTE_ARCHETYPE_CATALOG_URL, true);
         const archetypes: Archetype[] = await Utils.listArchetypeFromXml(xml);
         const targetFilePath: string = path.join(Utils.getPathToExtensionRoot(), "resources", "archetypes.json");
         await fs.ensureFile(targetFilePath);
@@ -110,21 +110,25 @@ export namespace ArchetypeModule {
     }
 
     async function getRecomendedItems(allItems: Archetype[]): Promise<Archetype[]> {
-        // tslint:disable-next-line:no-suspicious-comment
-        // TODO: should not hard code.
-        // Top 10 popular archetypes according to usage data
-        const fixedList: string[] = [
-            "org.apache.maven.archetypes:maven-archetype-quickstart",
-            "org.apache.maven.archetypes:maven-archetype-archetype",
-            "org.apache.maven.archetypes:maven-archetype-webapp",
-            "org.apache.maven.archetypes:maven-archetype-j2ee-simple",
-            "com.microsoft.azure:azure-functions-archetype",
-            "am.ik.archetype:maven-reactjs-blank-archetype",
-            "com.microsoft.azure.gateway.archetypes:gateway-module-simple",
-            "org.apache.maven.archetypes:maven-archetype-site-simple",
-            "com.github.ngeor:archetype-quickstart-jdk8",
-            "org.apache.maven.archetypes:maven-archetype-plugin"
-        ];
+        // Top popular archetypes according to usage data
+        let fixedList: string[];
+        try {
+            const rawlist: string = await Utils.downloadFile("https://yanzh.blob.core.windows.net/vscode-maven/popular_archetypes.json", true);
+            fixedList = JSON.parse(rawlist);
+        } catch (error) {
+            fixedList = [
+                "org.apache.maven.archetypes:maven-archetype-quickstart",
+                "org.apache.maven.archetypes:maven-archetype-archetype",
+                "org.apache.maven.archetypes:maven-archetype-webapp",
+                "org.apache.maven.archetypes:maven-archetype-j2ee-simple",
+                "com.microsoft.azure:azure-functions-archetype",
+                "am.ik.archetype:maven-reactjs-blank-archetype",
+                "com.microsoft.azure.gateway.archetypes:gateway-module-simple",
+                "org.apache.maven.archetypes:maven-archetype-site-simple",
+                "com.github.ngeor:archetype-quickstart-jdk8",
+                "org.apache.maven.archetypes:maven-archetype-plugin"
+            ];
+        }
         return fixedList.map((fullname: string) => allItems.find((item: Archetype) => fullname === `${item.groupId}:${item.artifactId}`));
     }
 }
