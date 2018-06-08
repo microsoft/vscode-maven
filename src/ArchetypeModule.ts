@@ -10,7 +10,7 @@ import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 // tslint:disable-next-line:no-http-string
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
-
+const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
 class Step {
     public readonly name: string;
     public readonly info: string;
@@ -113,7 +113,7 @@ export namespace ArchetypeModule {
         // Top popular archetypes according to usage data
         let fixedList: string[];
         try {
-            const rawlist: string = await Utils.downloadFile("https://yanzh.blob.core.windows.net/vscode-maven/popular_archetypes.json", true);
+            const rawlist: string = await Utils.downloadFile(POPULAR_ARCHETYPES_URL, true);
             fixedList = JSON.parse(rawlist);
         } catch (error) {
             fixedList = [
