@@ -28,6 +28,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     watcher.onDidDelete(() => mavenProjectsTreeDataProvider.refreshTree());
     context.subscriptions.push(watcher);
 
+    // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
         context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (item: ProjectItem) => {
             await mavenProjectsTreeDataProvider.executeGoal(item, goal);
@@ -76,8 +77,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         VSCodeUI.onDidCloseTerminal(closedTerminal);
     }));
 
-    // close all terminals with outdated Envs
+    // configuration change listener
     vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
+        // close all terminals with outdated JAVA related Envs
         if (e.affectsConfiguration("maven.terminal.useJavaHome") || e.affectsConfiguration("maven.terminal.customEnv")) {
             VSCodeUI.closeAllTerminals();
         } else {
@@ -86,9 +88,33 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 VSCodeUI.closeAllTerminals();
             }
         }
+        checkMavenAvailablility();
     });
+
+    // check maven executable file
+    checkMavenAvailablility();
 }
 
 export function deactivate(): void {
     // this method is called when your extension is deactivated
+}
+
+// private helpers
+async function checkMavenAvailablility(): Promise<void> {
+    try {
+        await Utils.getMavenVersion();
+    } catch (error) {
+        const OPTION_SHOW_DETAILS: string = "Show details";
+        const OPTION_GUIDE: string = "Guidance";
+        const choice: string = await vscode.window.showErrorMessage("Unable to execute Maven commands. Please make sure Maven is either in the PATH, or that 'maven.executable.path' is pointed to its installed location. Also make sure JAVA_HOME is specified either in environment variables or settings.", OPTION_SHOW_DETAILS);
+        if (choice === OPTION_SHOW_DETAILS) {
+            const choice2: string = await vscode.window.showErrorMessage(error.message, OPTION_GUIDE);
+            if (choice2 === OPTION_GUIDE) {
+                // open FAQ
+                const readmeFilePath: string = Utils.getPathToExtensionRoot("FAQ.md");
+                vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(readmeFilePath));
+            }
+        }
+    }
+
 }
