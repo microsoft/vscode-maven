@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as child_process from "child_process";
 import * as fse from "fs-extra";
 import * as http from "http";
 import * as https from "https";
@@ -332,5 +333,22 @@ export namespace Utils {
         } else {
             return filepath;
         }
+    }
+
+    export function getMavenVersion(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const customEnv: {} = VSCodeUI.setupEnvironment();
+            const execOptions: child_process.ExecOptions = {
+                env: Object.assign({}, process.env, customEnv)
+            };
+            child_process.exec(
+                `${Utils.getMavenExecutable()} --version`, execOptions, (error: Error, _stdout: string, _stderr: string): void => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                });
+        });
     }
 }
