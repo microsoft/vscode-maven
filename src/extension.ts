@@ -106,10 +106,10 @@ async function checkMavenAvailablility(): Promise<void> {
     } catch (error) {
         const OPTION_SHOW_DETAILS: string = "Show details";
         const OPTION_GUIDE: string = "Guidance";
-        const choice: string = await vscode.window.showErrorMessage("Unable to execute Maven commands. Please make sure Maven is either in the PATH, or that 'maven.executable.path' is pointed to its installed location. Also make sure JAVA_HOME is specified either in environment variables or settings.", OPTION_SHOW_DETAILS);
-        if (choice === OPTION_SHOW_DETAILS) {
-            const choice2: string = await vscode.window.showErrorMessage(error.message, OPTION_GUIDE);
-            if (choice2 === OPTION_GUIDE) {
+        const choiceForDetails: string = await vscode.window.showErrorMessage("Unable to execute Maven commands. Please make sure Maven is either in the PATH, or that 'maven.executable.path' is pointed to its installed location. Also make sure JAVA_HOME is specified either in environment variables or settings.", OPTION_SHOW_DETAILS);
+        if (choiceForDetails === OPTION_SHOW_DETAILS) {
+            const choiceForGuide: string = await vscode.window.showErrorMessage(error.message, OPTION_GUIDE);
+            if (choiceForGuide === OPTION_GUIDE) {
                 // open FAQ
                 const readmeFilePath: string = Utils.getPathToExtensionRoot("FAQ.md");
                 vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(readmeFilePath));
