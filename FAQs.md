@@ -1,6 +1,7 @@
 # FAQs
 
 ## Requirements
+Please make sure Maven is either in the `PATH`, or that `maven.executable.path` is pointed to its installed location. Also make sure `JAVA_HOME` is specified either in environment variables or settings.
 
 ### Available Maven executable
 By default, `mvn` command is executed directly in the terminal, which requires `mvn` can be found in system envronment `PATH`.

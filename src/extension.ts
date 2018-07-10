@@ -105,7 +105,7 @@ async function checkMavenAvailablility(): Promise<void> {
         await Utils.getMavenVersion();
     } catch (error) {
         const OPTION_FAQS: string = "Show FAQs";
-        const MESSAGE_MAVEN_ERROR: string = "Unable to execute Maven commands. Please make sure Maven is either in the PATH, or that 'maven.executable.path' is pointed to its installed location. Also make sure JAVA_HOME is specified either in environment variables or settings.";
+        const MESSAGE_MAVEN_ERROR: string = "Unable to execute Maven commands.";
         const choiceForDetails: string = await vscode.window.showErrorMessage(`${MESSAGE_MAVEN_ERROR}\nError:\n${error.message}`, OPTION_FAQS);
         if (choiceForDetails === OPTION_FAQS) {
             // open FAQs
