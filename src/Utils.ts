@@ -339,6 +339,7 @@ export namespace Utils {
         return new Promise<void>((resolve, reject) => {
             const customEnv: {} = VSCodeUI.setupEnvironment();
             const execOptions: child_process.ExecOptions = {
+                cwd: path.dirname(workspace.getConfiguration("maven.executable").get<string>("path") || ""), /* fix for `mvnw --version` */
                 env: Object.assign({}, process.env, customEnv)
             };
             child_process.exec(
