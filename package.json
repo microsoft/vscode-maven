@@ -299,7 +299,8 @@
             "default": [
               "**/.*",
               "**/node_modules",
-              "**/target"
+              "**/target",
+              "**/bin"
             ],
             "description": "Specifies filepath pattern of folders to exclude while searching for maven projects.",
             "scope": "resource"

@@ -104,13 +104,16 @@ async function checkMavenAvailablility(): Promise<void> {
     try {
         await Utils.getMavenVersion();
     } catch (error) {
-        const OPTION_FAQS: string = "Show FAQs";
+        const OPTION_SHOW_FAQS: string = "Show FAQs";
+        const OPTION_OPEN_SETTINGS: string = "Open Settings";
         const MESSAGE_MAVEN_ERROR: string = "Unable to execute Maven commands.";
-        const choiceForDetails: string = await vscode.window.showErrorMessage(`${MESSAGE_MAVEN_ERROR}\nError:\n${error.message}`, OPTION_FAQS);
-        if (choiceForDetails === OPTION_FAQS) {
+        const choiceForDetails: string = await vscode.window.showErrorMessage(`${MESSAGE_MAVEN_ERROR}\nError:\n${error.message}`, OPTION_OPEN_SETTINGS, OPTION_SHOW_FAQS);
+        if (choiceForDetails === OPTION_SHOW_FAQS) {
             // open FAQs
             const readmeFilePath: string = Utils.getPathToExtensionRoot("FAQs.md");
             vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(readmeFilePath));
+        } else if (choiceForDetails === OPTION_OPEN_SETTINGS) {
+            vscode.commands.executeCommand("workbench.action.openSettings");
         }
     }
 }
