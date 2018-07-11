@@ -15,6 +15,11 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## Unreleased
 
 ## Released
+### 0.9.1
+- Fetch list of popular archetypes on the fly. [#63](https://github.com/Microsoft/vscode-maven/pull/63)
+- Guide users to setup correct mvn executable path when error occurs. [#66](https://github.com/Microsoft/vscode-maven/pull/66)
+- Fixed some bugs.
+
 ### 0.9.0
 - Fixed vulnerabilities in package dependencies.
 - Formatted filepath for WSL Bash.
