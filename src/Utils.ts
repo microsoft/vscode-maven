@@ -339,7 +339,7 @@ export namespace Utils {
         return new Promise<void>(async (resolve, reject) => {
             const customEnv: {} = VSCodeUI.setupEnvironment();
             const mvnExecutablePath: string = workspace.getConfiguration("maven.executable").get<string>("path") || "mvn";
-            let mvnExecutableAbsolutePath: string = null;
+            let mvnExecutableAbsolutePath: string = mvnExecutablePath;
             if (workspace.workspaceFolders && workspace.workspaceFolders.length) {
                 for (const ws of workspace.workspaceFolders) {
                     if (await fse.exists(path.resolve(ws.uri.fsPath, mvnExecutablePath))) {
