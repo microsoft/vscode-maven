@@ -3,6 +3,8 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.9.2](#092)
+        - [0.9.1](#091)
         - [0.9.0](#090)
         - [0.8.0](#080)
         - [0.7.0](#070)
@@ -15,6 +17,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## Unreleased
 
 ## Released
+### 0.9.2
+- Fixed bug of using `./mvnw` as maven executable.
+
 ### 0.9.1
 - Fetch list of popular archetypes on the fly. [#63](https://github.com/Microsoft/vscode-maven/pull/63)
 - Guide users to setup correct mvn executable path when error occurs. [#66](https://github.com/Microsoft/vscode-maven/pull/66)
