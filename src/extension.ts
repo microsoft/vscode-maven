@@ -102,7 +102,9 @@ export function deactivate(): void {
 // private helpers
 async function checkMavenAvailablility(): Promise<void> {
     try {
-        await Utils.getMavenVersion();
+        if (vscode.workspace.workspaceFolders) {
+            await Utils.getMavenVersion();
+        }
     } catch (error) {
         const OPTION_SHOW_FAQS: string = "Show FAQs";
         const OPTION_OPEN_SETTINGS: string = "Open Settings";

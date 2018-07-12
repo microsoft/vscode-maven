@@ -336,10 +336,20 @@ export namespace Utils {
     }
 
     export function getMavenVersion(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>(async (resolve, reject) => {
             const customEnv: {} = VSCodeUI.setupEnvironment();
+            const mvnExecutablePath: string = workspace.getConfiguration("maven.executable").get<string>("path") || "mvn";
+            let mvnExecutableAbsolutePath: string = mvnExecutablePath;
+            if (workspace.workspaceFolders && workspace.workspaceFolders.length) {
+                for (const ws of workspace.workspaceFolders) {
+                    if (await fse.exists(path.resolve(ws.uri.fsPath, mvnExecutablePath))) {
+                        mvnExecutableAbsolutePath = path.resolve(ws.uri.fsPath, mvnExecutablePath);
+                        break;
+                    }
+                }
+            }
             const execOptions: child_process.ExecOptions = {
-                cwd: path.dirname(workspace.getConfiguration("maven.executable").get<string>("path") || ""), /* fix for `mvnw --version` */
+                cwd: mvnExecutableAbsolutePath && path.dirname(mvnExecutableAbsolutePath),
                 env: Object.assign({}, process.env, customEnv)
             };
             child_process.exec(
