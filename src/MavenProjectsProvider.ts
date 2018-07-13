@@ -14,7 +14,7 @@ import { VSCodeUI } from "./VSCodeUI";
 
 const ITEM_NO_AVAILABLE_PROJECTS: string = "No maven projects found.";
 
-export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
+export class MavenProjectsProvider implements TreeDataProvider<TreeItem> {
 
     public _onDidChangeTreeData: EventEmitter<TreeItem> = new EventEmitter<TreeItem>();
     public readonly onDidChangeTreeData: Event<TreeItem> = this._onDidChangeTreeData.event;
@@ -24,6 +24,7 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
 
     constructor(context: ExtensionContext) {
         this.context = context;
+        this.refreshTree();
     }
 
     public getTreeItem(element: TreeItem): TreeItem {
@@ -53,6 +54,8 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
             });
             if (items.length === 0) {
                 return [new TreeItem(ITEM_NO_AVAILABLE_PROJECTS)];
+            } else {
+                
             }
             return items;
         } else if (element.contextValue === "ProjectItem") {
@@ -94,7 +97,9 @@ export class ProjectDataProvider implements TreeDataProvider<TreeItem> {
     }
 
     public refreshTree(): void {
+        Utils.enableMavenProjectExplorer(false);
         this._onDidChangeTreeData.fire();
+        // Utils.enableMavenProjectExplorer(this.cachedProjectItems.size > 0);
     }
 
     public async executeGoal(item: ProjectItem, goal: string): Promise<void> {

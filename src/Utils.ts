@@ -10,12 +10,13 @@ import * as minimatch from "minimatch";
 import * as os from "os";
 import * as path from "path";
 import * as url from "url";
-import { ExtensionContext, extensions, Uri, workspace } from 'vscode';
+import { ExtensionContext, extensions, Uri, workspace, commands } from 'vscode';
 import * as xml2js from "xml2js";
 import { Archetype } from "./model/Archetype";
 import { ProjectItem } from "./model/ProjectItem";
 import { IArchetype, IArchetypeCatalogRoot, IArchetypes, IPomRoot } from "./model/XmlSchema";
 import { VSCodeUI } from "./VSCodeUI";
+import { contextKeys } from "./Constants";
 
 export namespace Utils {
     let EXTENSION_PUBLISHER: string;
@@ -361,5 +362,9 @@ export namespace Utils {
                     }
                 });
         });
+    }
+
+    export async function enableMavenProjectExplorer(enabled: boolean): Promise<void> {
+        await commands.executeCommand("setContext", contextKeys.mavenProjectViewEnabled, enabled);
     }
 }

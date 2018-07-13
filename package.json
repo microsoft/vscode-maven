@@ -139,7 +139,8 @@
       "explorer": [
         {
           "id": "mavenProjects",
-          "name": "Maven Projects"
+          "name": "Maven Projects",
+          "when": "mavenProjectViewEnabled"
         }
       ]
     },
