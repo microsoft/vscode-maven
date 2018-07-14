@@ -371,10 +371,6 @@ export namespace Utils {
         });
     }
 
-    export async function enableMavenProjectExplorer(enabled: boolean): Promise<void> {
-        await commands.executeCommand("setContext", contextKeys.MAVEN_EXPLORER_ENABLED, true);
-    }
-
     export function getResourcePath(...args: string[]) : string {
         return path.join(__filename, "..", "..", "resources", ... args);
     }

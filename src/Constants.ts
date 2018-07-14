@@ -1,6 +1,6 @@
 
 export namespace contextKeys {
-    export const MAVEN_EXPLORER_ENABLED: string = "mavenProjectViewEnabled";
+    export const MAVEN_EXTENSION_ACTIVATED: string = "mavenExtensionActivated";
 }
 
 export namespace contextValue {

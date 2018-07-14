@@ -2,7 +2,6 @@ import { TreeDataProvider } from "vscode";
 import * as vscode from "vscode";
 import { NodeBase } from "./model/NodeBase";
 import { WorkspaceFolderNode } from "./model/WorkspaceFolderNode";
-import { Utils } from "../Utils";
 
 export class MavenExplorerProvider implements TreeDataProvider<NodeBase> {
     public readonly onDidChangeTreeData: vscode.Event<NodeBase>;
@@ -28,17 +27,12 @@ export class MavenExplorerProvider implements TreeDataProvider<NodeBase> {
         }
     }
 
-    public async refresh(): Promise<void> {
+    public refresh(): void {
         this._updateWorkspaceFolderNodes();
-        Utils.enableMavenProjectExplorer(await this._hasPomInWorkspace());
         this._onDidChangeTreeData.fire();
     }
 
     private _updateWorkspaceFolderNodes(): void {
         this._workspaceFolderNodes = vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolderNode(workspaceFolder));
-    }
-    private async _hasPomInWorkspace(): Promise<boolean> {
-        const allPomPaths: string[] = [].concat.apply([], await Promise.all(this._workspaceFolderNodes.map(node => node.getPomPaths())));
-        return allPomPaths.length > 0;
     }
 }

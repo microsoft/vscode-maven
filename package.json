@@ -140,7 +140,7 @@
         {
           "id": "mavenProjects",
           "name": "Maven Projects",
-          "when": "mavenProjectViewEnabled"
+          "when": "mavenExtensionActivated"
         }
       ]
     },

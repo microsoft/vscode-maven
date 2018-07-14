@@ -97,7 +97,6 @@ export class MavenProjectsProvider implements TreeDataProvider<TreeItem> {
     }
 
     public refreshTree(): void {
-        Utils.enableMavenProjectExplorer(false);
         this._onDidChangeTreeData.fire();
         // Utils.enableMavenProjectExplorer(this.cachedProjectItems.size > 0);
     }

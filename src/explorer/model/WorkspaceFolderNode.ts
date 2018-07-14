@@ -13,14 +13,12 @@ export class WorkspaceFolderNode extends NodeBase {
         this._workspaceFolder = workspaceFolder;
     }
 
-    public async getPomPaths(): Promise<string[]> {
-        while (this._pomPaths === undefined) {
-            await this.searchForPomPaths();
-        }
+    public get pomPaths(): string[] {
         return this._pomPaths;
     }
+
     public async getChildren(): Promise<NodeBase[]> {
-        await this.searchForPomPaths();
+        await this._searchForPomPaths();
         return this._pomPaths.map(pomPath => new MavenProjectNode(pomPath));
     }
 
@@ -28,7 +26,7 @@ export class WorkspaceFolderNode extends NodeBase {
         return new vscode.TreeItem(this._workspaceFolder.name, TreeItemCollapsibleState.Expanded);
     }
 
-    public async searchForPomPaths(): Promise<void> {
+    private async _searchForPomPaths(): Promise<void> {
         const depth: number = workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom");
         const exclusions: string[] = workspace.getConfiguration("maven.projects", this._workspaceFolder.uri).get<string[]>("excludedFolders");
         this._pomPaths = await Utils.findAllInDir(this._workspaceFolder.uri.fsPath, "pom.xml", depth, exclusions);

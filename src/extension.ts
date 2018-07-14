@@ -10,6 +10,7 @@ import { ProjectItem } from "./model/ProjectItem";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
+import { contextKeys } from "./Constants";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     await Utils.loadPackageInfo(context);
@@ -17,6 +18,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     if (Utils.getAiKey()) {
         TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
     }
+
+    vscode.commands.executeCommand("setContext", contextKeys.MAVEN_EXTENSION_ACTIVATED, true);
 
     const provider: MavenExplorerProvider = new MavenExplorerProvider();
     vscode.window.registerTreeDataProvider("mavenProjects", provider);
