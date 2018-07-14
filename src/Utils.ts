@@ -67,7 +67,7 @@ export namespace Utils {
     export async function getProject(absolutePath: string, workspacePath: string): Promise<ProjectItem> {
         if (await fse.pathExists(absolutePath)) {
             const xml: string = await fse.readFile(absolutePath, "utf8");
-            const pom: IPomRoot = await readXmlContent(xml);
+            const pom: IPomRoot = await parseXmlContent(xml);
             if (pom && pom.project && pom.project.artifactId) {
                 const artifactId: string = pom.project.artifactId.toString();
                 const ret: ProjectItem = new ProjectItem(artifactId, workspacePath, absolutePath, { pom });
@@ -77,8 +77,15 @@ export namespace Utils {
         }
         return null;
     }
-
-    export async function readXmlContent(xml: string, options?: {}): Promise<{}> {
+    export async function parseXmlFile(filepath: string, options?: xml2js.OptionsV2): Promise<{}> {
+        if (await fse.exists(filepath)) {
+            const xmlString: string = await fse.readFile(filepath, "utf8");
+            return parseXmlContent(xmlString, options);
+        } else {
+            return null;
+        }
+    }
+    export async function parseXmlContent(xml: string, options?: xml2js.OptionsV2): Promise<{}> {
         const opts: {} = Object.assign({ explicitArray: true }, options);
         return new Promise<{}>(
             (resolve: (value: {}) => void, reject: (e: Error) => void): void => {
@@ -133,7 +140,7 @@ export namespace Utils {
 
     export async function listArchetypeFromXml(xml: string): Promise<Archetype[]> {
         try {
-            const catalogRoot: IArchetypeCatalogRoot = await readXmlContent(xml);
+            const catalogRoot: IArchetypeCatalogRoot = await parseXmlContent(xml);
             if (catalogRoot && catalogRoot["archetype-catalog"]) {
                 const dict: { [key: string]: Archetype } = {};
                 catalogRoot["archetype-catalog"].archetypes.forEach((archetypes: IArchetypes) => {
@@ -365,6 +372,10 @@ export namespace Utils {
     }
 
     export async function enableMavenProjectExplorer(enabled: boolean): Promise<void> {
-        await commands.executeCommand("setContext", contextKeys.mavenProjectViewEnabled, enabled);
+        await commands.executeCommand("setContext", contextKeys.MAVEN_EXPLORER_ENABLED, true);
+    }
+
+    export function getResourcePath(...args: string[]) : string {
+        return path.join(__filename, "..", "..", "resources", ... args);
     }
 }

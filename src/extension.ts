@@ -31,20 +31,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
         context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (item: ProjectItem) => {
-            await provider.executeGoal(item, goal);
+            // await provider.executeGoal(item, goal);
+            item;
         }));
     });
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.refreshAll", (): void => {
-        provider.refreshTree();
+        provider.refresh();
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.effectivePom", async (item: Uri | ProjectItem) => {
-        await provider.effectivePom(item);
+        // await provider.effectivePom(item);
+        item;
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.custom", async (item: ProjectItem) => {
-        await provider.customGoal(item);
+        // await provider.customGoal(item);
+        item;
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.openPom", async (item: ProjectItem) => {
@@ -66,11 +69,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.history", async (item: ProjectItem | undefined) => {
-        await provider.historicalGoals(item && item.abosolutePath);
+        // await provider.historicalGoals(item && item.abosolutePath);
+        item;
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.execute", async () => {
-        await provider.execute();
+        // await provider.execute();
     }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {

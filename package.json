@@ -23,7 +23,7 @@
     "url": "https://github.com/Microsoft/vscode-maven.git"
   },
   "activationEvents": [
-    "workspaceContains:pom.xml",
+    "workspaceContains:**/pom.xml",
     "onCommand:maven.project.refreshAll",
     "onCommand:maven.goal.clean",
     "onCommand:maven.goal.validate",

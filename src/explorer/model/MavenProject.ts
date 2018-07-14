@@ -1,12 +1,12 @@
-import { Utils } from "../../Utils";
-
 export class MavenProject {
-    private _pom: {};
+    private _pom: any;
     private _name: string;
+
     get name(): string {
         return this._name;
     }
-    constructor(pomPath: string) {
-        this._pom = Utils.readXmlContent(pomPath);
+    constructor(pom: any) {
+        this._pom = pom;
+        this._name = this._pom.project.artifactId[0];
     }
 }
