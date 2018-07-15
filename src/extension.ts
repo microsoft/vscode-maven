@@ -18,6 +18,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
     }
 
+    vscode.commands.executeCommand("setContext", "mavenExtensionActivated", true);
+
     const mavenProjectsTreeDataProvider: ProjectDataProvider = new ProjectDataProvider(context);
     vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
