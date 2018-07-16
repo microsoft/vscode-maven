@@ -1,5 +1,6 @@
 import { TreeDataProvider } from "vscode";
 import * as vscode from "vscode";
+import { MavenProjectNode } from "./model/MavenProjectNode";
 import { NodeBase } from "./model/NodeBase";
 import { WorkspaceFolderNode } from "./model/WorkspaceFolderNode";
 
@@ -14,6 +15,10 @@ export class MavenExplorerProvider implements TreeDataProvider<NodeBase> {
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
 
         this.refresh();
+    }
+
+    public get mavenProjectNodes(): MavenProjectNode[] {
+        return Array.prototype.concat.apply([], this._workspaceFolderNodes.map(ws => ws.children));
     }
 
     public getTreeItem(element: NodeBase): vscode.TreeItem | Thenable<vscode.TreeItem> {

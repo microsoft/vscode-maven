@@ -151,7 +151,7 @@ export namespace VSCodeUI {
 
     export async function openFileIfExists(filepath: string): Promise<void> {
         if (await fs.pathExists(filepath)) {
-            window.showTextDocument(Uri.file(filepath), { preview: false });
+            window.showTextDocument(Uri.file(filepath));
         }
     }
 
