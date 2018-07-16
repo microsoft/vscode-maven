@@ -6,8 +6,9 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./ArchetypeModule";
-import { ProjectItem } from "./model/ProjectItem";
-import { ProjectDataProvider } from "./ProjectDataProvider";
+import { contextKeys } from "./Constants";
+import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -18,40 +19,46 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
     }
 
-    vscode.commands.executeCommand("setContext", "mavenExtensionActivated", true);
+    vscode.commands.executeCommand("setContext", contextKeys.MAVEN_EXTENSION_ACTIVATED, true);
 
-    const mavenProjectsTreeDataProvider: ProjectDataProvider = new ProjectDataProvider(context);
-    vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
+    const provider: MavenExplorerProvider = new MavenExplorerProvider();
+    vscode.window.registerTreeDataProvider("mavenProjects", provider);
 
     // pom.xml listener to refresh tree view
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
-    watcher.onDidCreate(() => mavenProjectsTreeDataProvider.refreshTree());
-    watcher.onDidChange(() => mavenProjectsTreeDataProvider.refreshTree());
-    watcher.onDidDelete(() => mavenProjectsTreeDataProvider.refreshTree());
+    watcher.onDidCreate(() => provider.refresh());
+    watcher.onDidChange(() => provider.refresh());
+    watcher.onDidDelete(() => provider.refresh());
     context.subscriptions.push(watcher);
 
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (item: ProjectItem) => {
-            await mavenProjectsTreeDataProvider.executeGoal(item, goal);
+        context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (node: MavenProjectNode) => {
+            Utils.executeInTerminal(goal, node.pomPath);
         }));
     });
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.refreshAll", (): void => {
-        mavenProjectsTreeDataProvider.refreshTree();
+        provider.refresh();
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.effectivePom", async (item: Uri | ProjectItem) => {
-        await mavenProjectsTreeDataProvider.effectivePom(item);
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.effectivePom", async (node: Uri | MavenProjectNode) => {
+        if (node instanceof Uri && node.fsPath) {
+            await Utils.showEffectivePom(node.fsPath);
+        } else if (node instanceof MavenProjectNode && node.pomPath) {
+            await Utils.showEffectivePom(node.pomPath);
+        }
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.custom", async (item: ProjectItem) => {
-        await mavenProjectsTreeDataProvider.customGoal(item);
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.custom", async (node: MavenProjectNode) => {
+        if (node && node.pomPath) {
+            await Utils.excuteCustomGoal(node.pomPath);
+        }
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.openPom", async (item: ProjectItem) => {
-        if (item) {
-            await VSCodeUI.openFileIfExists(item.abosolutePath);
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.openPom", async (node: MavenProjectNode) => {
+        if (node && node.pomPath) {
+            await VSCodeUI.openFileIfExists(node.pomPath);
         }
     }));
 
@@ -67,12 +74,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         });
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.history", async (item: ProjectItem | undefined) => {
-        await mavenProjectsTreeDataProvider.historicalGoals(item && item.abosolutePath);
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.history", async (item: MavenProjectNode | undefined) => {
+        await Utils.executeHistoricalGoals(item && item.pomPath);
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.execute", async () => {
-        await mavenProjectsTreeDataProvider.execute();
+        // await provider.execute();
+        await Utils.executeMavenCommand(provider);
     }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
