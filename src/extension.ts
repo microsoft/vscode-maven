@@ -6,11 +6,11 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./ArchetypeModule";
-import { ProjectItem } from "./model/ProjectItem";
+import { contextKeys } from "./Constants";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { ProjectItem } from "./model/ProjectItem";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
-import { contextKeys } from "./Constants";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     await Utils.loadPackageInfo(context);
