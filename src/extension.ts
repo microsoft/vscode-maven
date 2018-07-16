@@ -19,10 +19,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
     }
 
-    vscode.commands.executeCommand("setContext", contextKeys.MAVEN_EXTENSION_ACTIVATED, true);
+    vscode.commands.executeCommand("setContext", "mavenExtensionActivated", true);
 
-    const provider: MavenExplorerProvider = new MavenExplorerProvider();
-    vscode.window.registerTreeDataProvider("mavenProjects", provider);
+    const mavenProjectsTreeDataProvider: ProjectDataProvider = new ProjectDataProvider(context);
+    vscode.window.registerTreeDataProvider("mavenProjects", mavenProjectsTreeDataProvider);
 
     // pom.xml listener to refresh tree view
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
