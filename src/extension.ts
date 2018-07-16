@@ -8,7 +8,7 @@ import { TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./ArchetypeModule";
 import { contextKeys } from "./Constants";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
-import { ProjectItem } from "./model/ProjectItem";
+import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -33,9 +33,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (item: ProjectItem) => {
-            // await provider.executeGoal(item, goal);
-            item;
+        context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (node: MavenProjectNode) => {
+            Utils.executeInTerminal(goal, node.pomPath);
         }));
     });
 
@@ -43,19 +42,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         provider.refresh();
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.effectivePom", async (item: Uri | ProjectItem) => {
-        // await provider.effectivePom(item);
-        item;
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.effectivePom", async (node: Uri | MavenProjectNode) => {
+        if (node instanceof Uri && node.fsPath) {
+            await Utils.showEffectivePom(node.fsPath);
+        } else if (node instanceof MavenProjectNode && node.pomPath) {
+            await Utils.showEffectivePom(node.pomPath);
+        }
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.custom", async (item: ProjectItem) => {
-        // await provider.customGoal(item);
-        item;
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.custom", async (node: MavenProjectNode) => {
+        if (node && node.pomPath) {
+            await Utils.excuteCustomGoal(node.pomPath);
+        }
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.openPom", async (item: ProjectItem) => {
-        if (item) {
-            await VSCodeUI.openFileIfExists(item.abosolutePath);
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.openPom", async (node: MavenProjectNode) => {
+        if (node && node.pomPath) {
+            await VSCodeUI.openFileIfExists(node.pomPath);
         }
     }));
 
@@ -71,13 +74,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         });
     }));
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.history", async (item: ProjectItem | undefined) => {
-        // await provider.historicalGoals(item && item.abosolutePath);
-        item;
+    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.history", async (item: MavenProjectNode | undefined) => {
+        await Utils.executeHistoricalGoals(item && item.pomPath);
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.execute", async () => {
         // await provider.execute();
+        await Utils.executeMavenCommand(provider);
     }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
