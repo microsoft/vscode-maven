@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 import * as fse from "fs-extra";
-import * as path from "path";
 import * as os from "os";
+import * as path from "path";
 import { Uri } from "vscode";
 import { Session, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { Utils } from "../Utils";
