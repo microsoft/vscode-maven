@@ -289,12 +289,6 @@
       {
         "title": "Maven for Java",
         "properties": {
-          "maven.projects.maxDepthOfPom": {
-            "type": "integer",
-            "default": -1,
-            "description": "Specifies max depth to find pom.xml recursively, infinite by default.",
-            "scope": "window"
-          },
           "maven.projects.excludedFolders": {
             "type": "array",
             "default": [

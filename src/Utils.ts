@@ -6,15 +6,15 @@ import * as fse from "fs-extra";
 import * as http from "http";
 import * as https from "https";
 import * as md5 from "md5";
-import * as minimatch from "minimatch";
 import * as os from "os";
 import * as path from "path";
 import * as url from "url";
-import { ExtensionContext, extensions, Uri, workspace } from 'vscode';
+import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, window, workspace, WorkspaceFolder } from 'vscode';
 import * as xml2js from "xml2js";
+import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
 import { Archetype } from "./model/Archetype";
-import { ProjectItem } from "./model/ProjectItem";
-import { IArchetype, IArchetypeCatalogRoot, IArchetypes, IPomRoot } from "./model/XmlSchema";
+import { IArchetype, IArchetypeCatalogRoot, IArchetypes } from "./model/XmlSchema";
 import { VSCodeUI } from "./VSCodeUI";
 
 export namespace Utils {
@@ -63,21 +63,15 @@ export namespace Utils {
         return path.join(extensions.getExtension(getExtensionId()).extensionPath, ...args);
     }
 
-    export async function getProject(absolutePath: string, workspacePath: string): Promise<ProjectItem> {
-        if (await fse.pathExists(absolutePath)) {
-            const xml: string = await fse.readFile(absolutePath, "utf8");
-            const pom: IPomRoot = await readXmlContent(xml);
-            if (pom && pom.project && pom.project.artifactId) {
-                const artifactId: string = pom.project.artifactId.toString();
-                const ret: ProjectItem = new ProjectItem(artifactId, workspacePath, absolutePath, { pom });
-                ret.collapsibleState = pom.project && pom.project.modules ? 1 : 0;
-                return ret;
-            }
+    export async function parseXmlFile(filepath: string, options?: xml2js.OptionsV2): Promise<{}> {
+        if (await fse.exists(filepath)) {
+            const xmlString: string = await fse.readFile(filepath, "utf8");
+            return parseXmlContent(xmlString, options);
+        } else {
+            return null;
         }
-        return null;
     }
-
-    export async function readXmlContent(xml: string, options?: {}): Promise<{}> {
+    export async function parseXmlContent(xml: string, options?: xml2js.OptionsV2): Promise<{}> {
         const opts: {} = Object.assign({ explicitArray: true }, options);
         return new Promise<{}>(
             (resolve: (value: {}) => void, reject: (e: Error) => void): void => {
@@ -132,7 +126,7 @@ export namespace Utils {
 
     export async function listArchetypeFromXml(xml: string): Promise<Archetype[]> {
         try {
-            const catalogRoot: IArchetypeCatalogRoot = await readXmlContent(xml);
+            const catalogRoot: IArchetypeCatalogRoot = await parseXmlContent(xml);
             if (catalogRoot && catalogRoot["archetype-catalog"]) {
                 const dict: { [key: string]: Archetype } = {};
                 catalogRoot["archetype-catalog"].archetypes.forEach((archetypes: IArchetypes) => {
@@ -216,50 +210,69 @@ export namespace Utils {
         });
     }
 
-    export async function findAllInDir(currentPath: string, targetFileName: string, depth: number, exclusion: string[] = ["**/.*"]): Promise<string[]> {
-        if (exclusion) {
-            for (const pattern of exclusion) {
-                if (minimatch(currentPath, pattern)) {
-                    return [];
-                }
-            }
-        }
-        const ret: string[] = [];
-        // `depth < 0` means infinite
-        if (depth !== 0 && await fse.pathExists(currentPath)) {
-            const stat: fse.Stats = await fse.lstat(currentPath);
-            if (stat.isDirectory()) {
-                const filenames: string[] = await fse.readdir(currentPath);
-                for (const filename of filenames) {
-                    const filepath: string = path.join(currentPath, filename);
-                    const results: string[] = await findAllInDir(filepath, targetFileName, depth - 1, exclusion);
-                    for (const result of results) {
-                        ret.push(result);
-                    }
-                }
-            } else if (path.basename(currentPath).toLowerCase() === targetFileName) {
-                ret.push(currentPath);
-            }
-        }
-        return ret;
-    }
-
     export function getMavenExecutable(): string {
         const mavenPath: string = workspace.getConfiguration("maven.executable").get<string>("path");
         return mavenPath ? `"${mavenPath}"` : "mvn";
     }
 
-    export function executeMavenCommand(command: string, pomfile: string): void {
+    function getMaven(): string {
+        const executablePathInConf: string = workspace.getConfiguration("maven.executable").get<string>("path");
+        // TODO: use maven wrapper if path is not set and mvnw is found.
+        return executablePathInConf ? executablePathInConf : "mvn";
+    }
+
+    function wrapMavenWithQuotes(mvn: string): string {
+        if (mvn === "mvn") {
+            return mvn;
+        } else {
+            return `"${mvn}"`;
+        }
+    }
+
+    export function executeInTerminal(command: string, pomfile: string): void {
+        const mvnString: string = wrapMavenWithQuotes(getMaven());
         const fullCommand: string = [
-            Utils.getMavenExecutable(),
+            mvnString,
             command.trim(),
             "-f",
             `"${formattedFilepath(pomfile)}"`,
             workspace.getConfiguration("maven.executable", Uri.file(pomfile)).get<string>("options")
-        ].filter((x: string) => x).join(" ");
-        const name: string = "Maven";
+        ].filter(Boolean).join(" ");
+        const workspaceFolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomfile));
+        const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
         VSCodeUI.runInTerminal(fullCommand, { name });
         updateLRUCommands(command, pomfile);
+    }
+
+    export async function executeInBackground(command: string, pomfile: string): Promise<{}> {
+        const mvnString: string = wrapMavenWithQuotes(getMaven());
+
+        const fullCommand: string = [
+            mvnString,
+            command.trim(),
+            "-f",
+            `"${formattedFilepath(pomfile)}"`,
+            workspace.getConfiguration("maven.executable", Uri.file(pomfile)).get<string>("options")
+        ].filter(Boolean).join(" ");
+
+        const rootfolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomfile));
+        const customEnv: {} = VSCodeUI.setupEnvironment();
+        const execOptions: child_process.ExecOptions = {
+            cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomfile), // TODO: path.dirname(mvnw path). we should force to use mvnw if found. fix later
+            env: Object.assign({}, process.env, customEnv)
+        };
+        return new Promise<{}>(
+            (resolve: (value: {}) => void, reject: (e: Error) => void): void => {
+                child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve({ stdout });
+                    }
+                });
+
+            }
+        );
     }
 
     export async function getLRUCommands(pomfile?: string): Promise<{ command: string, pomfile: string }[]> {
@@ -361,5 +374,89 @@ export namespace Utils {
                     }
                 });
         });
+    }
+
+    export function getResourcePath(...args: string[]): string {
+        return path.join(__filename, "..", "..", "resources", ...args);
+    }
+
+    export async function getAllPomPaths(workspaceFolder: WorkspaceFolder): Promise<string[]> {
+        const exclusions: string[] = workspace.getConfiguration("maven.projects", workspaceFolder.uri).get<string[]>("excludedFolders");
+        const pomFileUris: Uri[] = await workspace.findFiles(new RelativePattern(workspaceFolder, "**/pom.xml"), `{${exclusions.join(",")}}`);
+        return pomFileUris.map(_uri => _uri.fsPath);
+    }
+
+    export async function showEffectivePom(pomPath: string): Promise<void> {
+        const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
+        await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+            async (resolve, reject): Promise<void> => {
+                p.report({ message: "Generating effective pom ... " });
+                try {
+                    await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            }
+        ));
+        const pomxml: string = await Utils.readFileIfExists(outputPath);
+        fse.remove(outputPath);
+        if (pomxml) {
+            const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
+            window.showTextDocument(document);
+        }
+    }
+
+    export async function excuteCustomGoal(pomPath: string): Promise<void> {
+        if (!pomPath) {
+            return;
+        }
+        const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
+        const trimedGoals: string = inputGoals && inputGoals.trim();
+        if (trimedGoals) {
+            Utils.executeInTerminal(trimedGoals, pomPath);
+        }
+    }
+
+    export async function executeHistoricalGoals(projectPomPath?: string): Promise<void> {
+        const selected: { command: string, pomfile: string } = await VSCodeUI.getQuickPick(
+            Utils.getLRUCommands(projectPomPath),
+            (x) => x.command,
+            null,
+            (x) => x.pomfile,
+            { placeHolder: "Select from history ... " }
+        );
+        if (selected) {
+            const command: string = selected.command;
+            const pomfile: string = selected.pomfile;
+            Utils.executeInTerminal(command, pomfile);
+        }
+    }
+
+    export async function executeMavenCommand(provider: MavenExplorerProvider): Promise<void> {
+        // select a project(pomfile)
+        const item: MavenProjectNode = await VSCodeUI.getQuickPick<MavenProjectNode>(
+            provider.mavenProjectNodes,
+            node => `$(primitive-dot) ${node.mavenProject.name}`,
+            null,
+            node => node.pomPath,
+            { placeHolder: "Select a Maven project." }
+        );
+        if (!item) {
+            return;
+        }
+        // select a command
+        const command: string = await VSCodeUI.getQuickPick<string>(
+            ["custom", "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
+            (x: string) => x === "custom" ? "Custom goals ..." : x,
+            null,
+            null,
+            { placeHolder: "Select the goal to execute." }
+        );
+        if (!command) {
+            return;
+        }
+        // execute
+        await commands.executeCommand(`maven.goal.${command}`, item);
     }
 }
