@@ -74,7 +74,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.history", async (item: MavenProjectNode | undefined) => {
-        await Utils.executeHistoricalGoals(item && item.pomPath);
+        if (item) {
+            await Utils.executeHistoricalGoals([item.pomPath]);
+        } else {
+            await Utils.executeHistoricalGoals(provider.mavenProjectNodes.map(_node => _node.pomPath));
+        }
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.execute", async () => {

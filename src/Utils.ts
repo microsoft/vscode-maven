@@ -15,6 +15,11 @@ import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
 import { VSCodeUI } from "./VSCodeUI";
 
+interface ICommandHistory {
+    pomPath: string;
+    timestamps: { [command: string]: number };
+}
+
 export namespace Utils {
     let EXTENSION_PUBLISHER: string;
     let EXTENSION_NAME: string;
@@ -61,19 +66,20 @@ export namespace Utils {
         return path.join(extensions.getExtension(getExtensionId()).extensionPath, ...args);
     }
 
-    export async function parseXmlFile(filepath: string, options?: xml2js.OptionsV2): Promise<{}> {
-        if (await fse.exists(filepath)) {
-            const xmlString: string = await fse.readFile(filepath, "utf8");
+    export async function parseXmlFile(xmlFilePath: string, options?: xml2js.OptionsV2): Promise<{}> {
+        if (await fse.exists(xmlFilePath)) {
+            const xmlString: string = await fse.readFile(xmlFilePath, "utf8");
             return parseXmlContent(xmlString, options);
         } else {
             return null;
         }
     }
-    export async function parseXmlContent(xml: string, options?: xml2js.OptionsV2): Promise<{}> {
+
+    export async function parseXmlContent(xmlString: string, options?: xml2js.OptionsV2): Promise<{}> {
         const opts: {} = Object.assign({ explicitArray: true }, options);
         return new Promise<{}>(
             (resolve: (value: {}) => void, reject: (e: Error) => void): void => {
-                xml2js.parseString(xml, opts, (err: Error, res: {}) => {
+                xml2js.parseString(xmlString, opts, (err: Error, res: {}) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -84,35 +90,12 @@ export namespace Utils {
         );
     }
 
-    export function withLRUItemAhead<T>(array: T[], lruItem: T): T[] {
-        const ret: T[] = array.filter((elem: T) => elem !== lruItem).reverse();
-        ret.push(lruItem);
-        return ret.reverse();
-    }
-
-    export async function loadCmdHistory(pomXmlFilePath: string): Promise<string[]> {
-        const filepath: string = getCommandHistoryCachePath(pomXmlFilePath);
-        if (await fse.pathExists(filepath)) {
-            const content: string = (await fse.readFile(filepath)).toString().trim();
-            if (content) {
-                return content.split("\n").map((line: string) => line.trim()).filter(Boolean);
-            }
-        }
-        return [];
-    }
-
-    export async function saveCmdHistory(pomXmlFilePath: string, cmdlist: string[]): Promise<void> {
-        const filepath: string = getCommandHistoryCachePath(pomXmlFilePath);
-        await fse.ensureFile(filepath);
-        await fse.writeFile(filepath, cmdlist.join("\n"));
-    }
-
     export function getEffectivePomOutputPath(pomXmlFilePath: string): string {
         return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), "effective-pom.xml");
     }
 
-    export function getCommandHistoryCachePath(pomXmlFilePath?: string): string {
-        return path.join(os.tmpdir(), EXTENSION_NAME, pomXmlFilePath ? md5(pomXmlFilePath) : "", "commandHistory.txt");
+    export function getCommandHistoryCachePath(pomXmlFilePath: string): string {
+        return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), "commandHistory.json");
     }
 
     export async function readFileIfExists(filepath: string): Promise<string> {
@@ -235,29 +218,38 @@ export namespace Utils {
         );
     }
 
-    export async function getLRUCommands(pomfile?: string): Promise<{ command: string, pomfile: string }[]> {
-        const filepath: string = getCommandHistoryCachePath();
+    export async function getLRUCommands(pomPath: string): Promise<{}[]> {
+        const filepath: string = getCommandHistoryCachePath(pomPath);
         if (await fse.pathExists(filepath)) {
-            const content: string = (await fse.readFile(filepath)).toString().trim();
-            if (content) {
-                return content.split("\n").map(
-                    (line: string) => {
-                        const items: string[] = line.split(",");
-                        return { command: items[0], pomfile: items[1] };
-                    }
-                ).filter((item: { command: string, pomfile: string }) => !pomfile || pomfile === item.pomfile);
+            const content: string = (await fse.readFile(filepath)).toString();
+            let historyObject: ICommandHistory;
+            try {
+                historyObject = JSON.parse(content);
+            } catch (error) {
+                historyObject = { pomPath, timestamps: {} };
             }
+            const timestamps: { [command: string]: number } = historyObject.timestamps;
+            const commandList: string[] = Object.keys(timestamps).sort((a, b) => timestamps[b] - timestamps[a]);
+            return commandList.map(command => Object.assign({command, pomPath, timestamp: timestamps[command]}));
         }
         return [];
     }
 
-    async function updateLRUCommands(command: string, pomfile: string): Promise<void> {
-        const filepath: string = getCommandHistoryCachePath();
-        await fse.ensureFile(filepath);
-        const content: string = (await fse.readFile(filepath)).toString().trim();
-        const lines: string[] = withLRUItemAhead<string>(content.split("\n"), `${command},${pomfile}`);
-        const newContent: string = lines.filter(Boolean).slice(0, 20).join("\n");
-        await fse.writeFile(filepath, newContent);
+    async function updateLRUCommands(command: string, pomPath: string): Promise<void> {
+        const historyFilePath: string = getCommandHistoryCachePath(pomPath);
+        await fse.ensureFile(historyFilePath);
+        const content: string = (await fse.readFile(historyFilePath)).toString();
+        let historyObject: ICommandHistory;
+        try {
+            historyObject = JSON.parse(content);
+            historyObject.pomPath = pomPath;
+            historyObject.timestamps[command] = Date.now();
+        } catch (error) {
+            historyObject = { pomPath, timestamps: {} };
+        } finally {
+            historyObject.timestamps[command] = Date.now();
+        }
+        await fse.writeFile(historyFilePath, JSON.stringify(historyObject));
     }
 
     export function currentWindowsShell(): string {
@@ -378,18 +370,21 @@ export namespace Utils {
         }
     }
 
-    export async function executeHistoricalGoals(projectPomPath?: string): Promise<void> {
-        const selected: { command: string, pomfile: string } = await VSCodeUI.getQuickPick(
-            Utils.getLRUCommands(projectPomPath),
+    export async function executeHistoricalGoals(projectPomPaths: string[]): Promise<void> {
+        const candidates: any[] = Array.prototype.concat.apply(
+            [],
+            await Promise.all(projectPomPaths.map(projectPomPath => Utils.getLRUCommands(projectPomPath)))
+        );
+        candidates.sort((a, b) => b.timestamp - a.timestamp);
+        const selected: { command: string, pomPath: string } = await VSCodeUI.getQuickPick(
+            candidates,
             (x) => x.command,
             null,
-            (x) => x.pomfile,
+            (x) => x.pomPath,
             { placeHolder: "Select from history ... " }
         );
         if (selected) {
-            const command: string = selected.command;
-            const pomfile: string = selected.pomfile;
-            Utils.executeInTerminal(command, pomfile);
+            Utils.executeInTerminal(selected.command, selected.pomPath);
         }
     }
 
