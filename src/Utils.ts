@@ -6,11 +6,10 @@ import * as fse from "fs-extra";
 import * as http from "http";
 import * as https from "https";
 import * as md5 from "md5";
-import * as minimatch from "minimatch";
 import * as os from "os";
 import * as path from "path";
 import * as url from "url";
-import { commands, ExtensionContext, extensions, Progress, ProgressLocation, TextDocument, Uri, window, workspace, WorkspaceFolder, RelativePattern } from 'vscode';
+import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, window, workspace, WorkspaceFolder } from 'vscode';
 import * as xml2js from "xml2js";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
@@ -222,7 +221,7 @@ export namespace Utils {
         return executablePathInConf ? executablePathInConf : "mvn";
     }
 
-    function wrapMaven(mvn: string): string {
+    function wrapMavenWithQuotes(mvn: string): string {
         if (mvn === "mvn") {
             return mvn;
         } else {
@@ -231,14 +230,14 @@ export namespace Utils {
     }
 
     export function executeInTerminal(command: string, pomfile: string): void {
-        const mvnString: string = wrapMaven(getMaven());
+        const mvnString: string = wrapMavenWithQuotes(getMaven());
         const fullCommand: string = [
             mvnString,
             command.trim(),
             "-f",
             `"${formattedFilepath(pomfile)}"`,
             workspace.getConfiguration("maven.executable", Uri.file(pomfile)).get<string>("options")
-        ].filter((x: string) => x).join(" ");
+        ].filter(Boolean).join(" ");
         const workspaceFolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomfile));
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
         VSCodeUI.runInTerminal(fullCommand, { name });
@@ -246,7 +245,7 @@ export namespace Utils {
     }
 
     export async function executeInBackground(command: string, pomfile: string): Promise<{}> {
-        const mvnString: string = wrapMaven(getMaven());
+        const mvnString: string = wrapMavenWithQuotes(getMaven());
 
         const fullCommand: string = [
             mvnString,
@@ -254,12 +253,12 @@ export namespace Utils {
             "-f",
             `"${formattedFilepath(pomfile)}"`,
             workspace.getConfiguration("maven.executable", Uri.file(pomfile)).get<string>("options")
-        ].filter((x: string) => x).join(" ");
+        ].filter(Boolean).join(" ");
 
         const rootfolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomfile));
         const customEnv: {} = VSCodeUI.setupEnvironment();
         const execOptions: child_process.ExecOptions = {
-            cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomfile),
+            cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomfile), // TODO: path.dirname(mvnw path). we should force to use mvnw if found. fix later
             env: Object.assign({}, process.env, customEnv)
         };
         return new Promise<{}>(
