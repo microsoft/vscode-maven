@@ -10,7 +10,7 @@ import * as minimatch from "minimatch";
 import * as os from "os";
 import * as path from "path";
 import * as url from "url";
-import { commands, ExtensionContext, extensions, Progress, ProgressLocation, TextDocument, Uri, window, workspace, WorkspaceFolder } from 'vscode';
+import { commands, ExtensionContext, extensions, Progress, ProgressLocation, TextDocument, Uri, window, workspace, WorkspaceFolder, RelativePattern } from 'vscode';
 import * as xml2js from "xml2js";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
@@ -211,34 +211,6 @@ export namespace Utils {
         });
     }
 
-    async function findAllInDir(currentPath: string, targetFileName: string, depth: number, exclusion?: string[]): Promise<string[]> {
-        if (exclusion) {
-            for (const pattern of exclusion) {
-                if (minimatch(currentPath, pattern)) {
-                    return [];
-                }
-            }
-        }
-        const ret: string[] = [];
-        // `depth < 0` means infinite
-        if (depth !== 0 && await fse.pathExists(currentPath)) {
-            const stat: fse.Stats = await fse.lstat(currentPath);
-            if (stat.isDirectory()) {
-                const filenames: string[] = await fse.readdir(currentPath);
-                for (const filename of filenames) {
-                    const filepath: string = path.join(currentPath, filename);
-                    const results: string[] = await findAllInDir(filepath, targetFileName, depth - 1, exclusion);
-                    for (const result of results) {
-                        ret.push(result);
-                    }
-                }
-            } else if (path.basename(currentPath).toLowerCase() === targetFileName) {
-                ret.push(currentPath);
-            }
-        }
-        return ret;
-    }
-
     export function getMavenExecutable(): string {
         const mavenPath: string = workspace.getConfiguration("maven.executable").get<string>("path");
         return mavenPath ? `"${mavenPath}"` : "mvn";
@@ -410,9 +382,9 @@ export namespace Utils {
     }
 
     export async function getAllPomPaths(workspaceFolder: WorkspaceFolder): Promise<string[]> {
-        const depth: number = workspace.getConfiguration("maven.projects").get<number>("maxDepthOfPom");
         const exclusions: string[] = workspace.getConfiguration("maven.projects", workspaceFolder.uri).get<string[]>("excludedFolders");
-        return await findAllInDir(workspaceFolder.uri.fsPath, "pom.xml", depth, exclusions);
+        const pomFileUris: Uri[] = await workspace.findFiles(new RelativePattern(workspaceFolder, "**/pom.xml"), `{${exclusions.join(",")}}`);
+        return pomFileUris.map(_uri => _uri.fsPath);
     }
 
     export async function showEffectivePom(pomPath: string): Promise<void> {
