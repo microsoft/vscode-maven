@@ -5,7 +5,7 @@
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
-import { ArchetypeModule } from "./ArchetypeModule";
+import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
 import { Utils } from "./Utils";
@@ -78,7 +78,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }));
 
     context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.execute", async () => {
-        // await provider.execute();
         await Utils.executeMavenCommand(provider);
     }));
 

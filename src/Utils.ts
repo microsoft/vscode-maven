@@ -13,8 +13,6 @@ import { commands, ExtensionContext, extensions, Progress, ProgressLocation, Rel
 import * as xml2js from "xml2js";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
-import { Archetype } from "./model/Archetype";
-import { IArchetype, IArchetypeCatalogRoot, IArchetypes } from "./model/XmlSchema";
 import { VSCodeUI } from "./VSCodeUI";
 
 export namespace Utils {
@@ -124,44 +122,6 @@ export namespace Utils {
         return null;
     }
 
-    export async function listArchetypeFromXml(xml: string): Promise<Archetype[]> {
-        try {
-            const catalogRoot: IArchetypeCatalogRoot = await parseXmlContent(xml);
-            if (catalogRoot && catalogRoot["archetype-catalog"]) {
-                const dict: { [key: string]: Archetype } = {};
-                catalogRoot["archetype-catalog"].archetypes.forEach((archetypes: IArchetypes) => {
-                    archetypes.archetype.forEach((archetype: IArchetype) => {
-                        const groupId: string = archetype.groupId && archetype.groupId.toString();
-                        const artifactId: string = archetype.artifactId && archetype.artifactId.toString();
-                        const description: string = archetype.description && archetype.description.toString();
-                        const version: string = archetype.version && archetype.version.toString();
-                        const repository: string = archetype.repository && archetype.repository.toString();
-                        const identifier: string = `${groupId}:${artifactId}`;
-                        if (!dict[identifier]) {
-                            dict[identifier] =
-                                new Archetype(artifactId, groupId, repository, description);
-                        }
-                        if (dict[identifier].versions.indexOf(version) < 0) {
-                            dict[identifier].versions.push(version);
-                        }
-                    });
-                });
-                return Object.keys(dict).map((k: string) => dict[k]);
-            }
-        } catch (err) {
-            // do nothing
-        }
-        return [];
-    }
-
-    export function getLocalArchetypeCatalogFilePath(): string {
-        return path.join(os.homedir(), ".m2", "repository", "archetype-catalog.xml");
-    }
-
-    export function getProvidedArchetypeCatalogFilePath(): string {
-        return path.join(Utils.getPathToExtensionRoot(), "resources", "archetype-catalog.xml");
-    }
-
     export async function downloadFile(targetUrl: string, readContent?: boolean, customHeaders?: {}): Promise<string> {
         const tempFilePath: string = path.join(getTempFolder(), md5(targetUrl));
         await fse.ensureDir(getTempFolder());
@@ -229,18 +189,17 @@ export namespace Utils {
         }
     }
 
-    export function executeInTerminal(command: string, pomfile: string): void {
+    export function executeInTerminal(command: string, pomfile?: string, options?: {}): void {
         const mvnString: string = wrapMavenWithQuotes(getMaven());
         const fullCommand: string = [
             mvnString,
             command.trim(),
-            "-f",
-            `"${formattedFilepath(pomfile)}"`,
-            workspace.getConfiguration("maven.executable", Uri.file(pomfile)).get<string>("options")
+            pomfile && `-f "${formattedFilepath(pomfile)}"`,
+            workspace.getConfiguration("maven.executable", pomfile && Uri.file(pomfile)).get<string>("options")
         ].filter(Boolean).join(" ");
-        const workspaceFolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomfile));
+        const workspaceFolder: WorkspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
-        VSCodeUI.runInTerminal(fullCommand, { name });
+        VSCodeUI.runInTerminal(fullCommand, Object.assign({ name }, options));
         updateLRUCommands(command, pomfile);
     }
 
@@ -258,7 +217,8 @@ export namespace Utils {
         const rootfolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomfile));
         const customEnv: {} = VSCodeUI.setupEnvironment();
         const execOptions: child_process.ExecOptions = {
-            cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomfile), // TODO: path.dirname(mvnw path). we should force to use mvnw if found. fix later
+            /* TODO: path.dirname(mvnw path). we should force to use mvnw if found. fix later */
+            cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomfile),
             env: Object.assign({}, process.env, customEnv)
         };
         return new Promise<{}>(

@@ -1,7 +1,10 @@
-import { NodeBase } from "./NodeBase";
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
 import * as vscode from "vscode";
-import { MavenProjectNode } from "./MavenProjectNode";
 import { Utils } from "../../Utils";
+import { MavenProjectNode } from "./MavenProjectNode";
+import { NodeBase } from "./NodeBase";
 
 export abstract class MenuNode extends NodeBase {
     protected _projectNode: MavenProjectNode;
@@ -15,7 +18,7 @@ export abstract class MenuNode extends NodeBase {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this._name, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {
             light: Utils.getResourcePath("light", "folder.svg"),
-            dark: Utils.getResourcePath("dark", "folder.svg"),
+            dark: Utils.getResourcePath("dark", "folder.svg")
         };
         return treeItem;
     }
