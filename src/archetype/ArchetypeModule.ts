@@ -152,7 +152,7 @@ export namespace ArchetypeModule {
 
     async function getLocalArchetypeItems(): Promise<Archetype[]> {
         const localCatalogPath: string = path.join(os.homedir(), ".m2", "repository", "archetype-catalog.xml");
-        if (await fse.exists(localCatalogPath)) {
+        if (await fse.pathExists(localCatalogPath)) {
             const buf: Buffer = await fse.readFile(localCatalogPath);
             return listArchetypeFromXml(buf.toString());
         } else {
