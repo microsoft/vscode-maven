@@ -243,7 +243,6 @@ export namespace Utils {
         try {
             historyObject = JSON.parse(content);
             historyObject.pomPath = pomPath;
-            historyObject.timestamps[command] = Date.now();
         } catch (error) {
             historyObject = { pomPath, timestamps: {} };
         } finally {
