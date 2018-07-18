@@ -298,7 +298,7 @@
           "maven.executable.path": {
             "type": "string",
             "default": "",
-            "description": "Specifies absolute path of mvn executable if you don't have `mvn` in PATH. If a relative path is specified, the absolute path will be resolved from your workspace root folder.",
+            "description": "Specifies absolute path of mvn executable if you don't have `mvn` in PATH or `mvnw` in root folder. If a relative path is specified, the absolute path will be resolved from your workspace root folder.",
             "scope": "resource"
           },
           "maven.executable.options": {
