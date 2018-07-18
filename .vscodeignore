@@ -6,4 +6,6 @@ src/**
 images/**
 .gitignore
 tsconfig.json
-vsc-extension-quickstart.md
+TestPlan.md
+.github/**
+.travis.yml
