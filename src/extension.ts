@@ -113,21 +113,32 @@ export function deactivate(): void {
 
 // private helpers
 async function checkMavenAvailablility(): Promise<void> {
-    try {
-        if (vscode.workspace.workspaceFolders) {
-            await Utils.getMavenVersion();
+    const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length) {
+        const errors: any = {};
+        for (const workspaceFolder of workspaceFolders) {
+            try {
+                const pomPaths: string[] = await Utils.getAllPomPaths(workspaceFolder);
+                if (pomPaths && pomPaths.length) {
+                    await Utils.executeInBackground("--version", null, workspaceFolder);
+                }
+            } catch (error) {
+                errors[workspaceFolder.name] = error;
+            }
         }
-    } catch (error) {
-        const OPTION_SHOW_FAQS: string = "Show FAQs";
-        const OPTION_OPEN_SETTINGS: string = "Open Settings";
-        const MESSAGE_MAVEN_ERROR: string = "Unable to execute Maven commands.";
-        const choiceForDetails: string = await vscode.window.showErrorMessage(`${MESSAGE_MAVEN_ERROR}\nError:\n${error.message}`, OPTION_OPEN_SETTINGS, OPTION_SHOW_FAQS);
-        if (choiceForDetails === OPTION_SHOW_FAQS) {
-            // open FAQs
-            const readmeFilePath: string = Utils.getPathToExtensionRoot("FAQs.md");
-            vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(readmeFilePath));
-        } else if (choiceForDetails === OPTION_OPEN_SETTINGS) {
-            vscode.commands.executeCommand("workbench.action.openSettings");
+        if (Object.keys(errors).length > 0) {
+            const OPTION_SHOW_FAQS: string = "Show FAQs";
+            const OPTION_OPEN_SETTINGS: string = "Open Settings";
+            const MESSAGE_MAVEN_ERROR: string = "Unable to execute Maven commands.";
+            // TODO: show more detailed info. e.g. which workspace fail the command.
+            const choiceForDetails: string = await vscode.window.showErrorMessage(`${MESSAGE_MAVEN_ERROR}\n`, OPTION_OPEN_SETTINGS, OPTION_SHOW_FAQS);
+            if (choiceForDetails === OPTION_SHOW_FAQS) {
+                // open FAQs
+                const readmeFilePath: string = Utils.getPathToExtensionRoot("FAQs.md");
+                vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(readmeFilePath));
+            } else if (choiceForDetails === OPTION_OPEN_SETTINGS) {
+                vscode.commands.executeCommand("workbench.action.openSettings");
+            }
         }
     }
 }

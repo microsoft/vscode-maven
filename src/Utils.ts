@@ -54,10 +54,6 @@ export namespace Utils {
         return EXTENSION_AI_KEY;
     }
 
-    export function getTempFolderPath(...args: string[]): string {
-        return path.join(os.tmpdir(), EXTENSION_NAME, ...args);
-    }
-
     export function getTempFolder(): string {
         return path.join(os.tmpdir(), getExtensionId());
     }
@@ -67,7 +63,7 @@ export namespace Utils {
     }
 
     export async function parseXmlFile(xmlFilePath: string, options?: xml2js.OptionsV2): Promise<{}> {
-        if (await fse.exists(xmlFilePath)) {
+        if (await fse.pathExists(xmlFilePath)) {
             const xmlString: string = await fse.readFile(xmlFilePath, "utf8");
             return parseXmlContent(xmlString, options);
         } else {
@@ -153,18 +149,24 @@ export namespace Utils {
         });
     }
 
-    export function getMavenExecutable(): string {
-        const mavenPath: string = workspace.getConfiguration("maven.executable").get<string>("path");
-        return mavenPath ? `"${mavenPath}"` : "mvn";
+    async function getMaven(workspaceFolder?: WorkspaceFolder): Promise<string> {
+        if (!workspaceFolder) {
+            return workspace.getConfiguration("maven.executable").get<string>("path") || "mvn";
+        }
+        const executablePathInConf: string = workspace.getConfiguration("maven.executable", workspaceFolder.uri).get<string>("path");
+        if (!executablePathInConf) {
+            const mvnwPathWithoutExt: string = path.join(workspaceFolder.uri.fsPath, "mvnw");
+            if (await fse.pathExists(mvnwPathWithoutExt)) {
+                return mvnwPathWithoutExt;
+            } else {
+                return "mvn";
+            }
+        } else {
+            return path.resolve(workspaceFolder.uri.fsPath, executablePathInConf);
+        }
     }
 
-    function getMaven(): string {
-        const executablePathInConf: string = workspace.getConfiguration("maven.executable").get<string>("path");
-        // TODO: use maven wrapper if path is not set and mvnw is found.
-        return executablePathInConf ? executablePathInConf : "mvn";
-    }
-
-    function wrapMavenWithQuotes(mvn: string): string {
+    function wrappedWithQuotes(mvn: string): string {
         if (mvn === "mvn") {
             return mvn;
         } else {
@@ -172,36 +174,38 @@ export namespace Utils {
         }
     }
 
-    export function executeInTerminal(command: string, pomfile?: string, options?: {}): void {
-        const mvnString: string = wrapMavenWithQuotes(getMaven());
+    export async function executeInTerminal(command: string, pomfile?: string, options?: {}): Promise<void> {
+        const workspaceFolder: WorkspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
+        const mvnString: string = wrappedWithQuotes(formattedPathForTerminal(await getMaven(workspaceFolder)));
         const fullCommand: string = [
             mvnString,
             command.trim(),
-            pomfile && `-f "${formattedFilepath(pomfile)}"`,
+            pomfile && `-f "${formattedPathForTerminal(pomfile)}"`,
             workspace.getConfiguration("maven.executable", pomfile && Uri.file(pomfile)).get<string>("options")
         ].filter(Boolean).join(" ");
-        const workspaceFolder: WorkspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
         VSCodeUI.runInTerminal(fullCommand, Object.assign({ name }, options));
         updateLRUCommands(command, pomfile);
     }
 
-    export async function executeInBackground(command: string, pomfile: string): Promise<{}> {
-        const mvnString: string = wrapMavenWithQuotes(getMaven());
+    export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder ): Promise<{}> {
+        if (!workspaceFolder) {
+            workspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
+        }
+        const mvnExecutable: string = await getMaven(workspaceFolder);
+        const mvnString: string = wrappedWithQuotes(mvnExecutable);
+        const commandCwd: string = path.resolve(workspaceFolder.uri.fsPath, mvnExecutable, "..");
 
         const fullCommand: string = [
             mvnString,
             command.trim(),
-            "-f",
-            `"${formattedFilepath(pomfile)}"`,
-            workspace.getConfiguration("maven.executable", Uri.file(pomfile)).get<string>("options")
+            pomfile && `-f "${pomfile}"`,
+            workspace.getConfiguration("maven.executable", pomfile && Uri.file(pomfile)).get<string>("options")
         ].filter(Boolean).join(" ");
 
-        const rootfolder: WorkspaceFolder = workspace.getWorkspaceFolder(Uri.file(pomfile));
         const customEnv: {} = VSCodeUI.setupEnvironment();
         const execOptions: child_process.ExecOptions = {
-            /* TODO: path.dirname(mvnw path). we should force to use mvnw if found. fix later */
-            cwd: rootfolder ? rootfolder.uri.fsPath : path.dirname(pomfile),
+            cwd: commandCwd,
             env: Object.assign({}, process.env, customEnv)
         };
         return new Promise<{}>(
@@ -286,7 +290,7 @@ export namespace Utils {
         }
     }
 
-    export function formattedFilepath(filepath: string): string {
+    export function formattedPathForTerminal(filepath: string): string {
         if (process.platform === "win32") {
             switch (currentWindowsShell()) {
                 case "WSL Bash":
@@ -298,15 +302,15 @@ export namespace Utils {
             return filepath;
         }
     }
-
+/*
     export function getMavenVersion(): Promise<void> {
         return new Promise<void>(async (resolve, reject) => {
             const customEnv: {} = VSCodeUI.setupEnvironment();
-            const mvnExecutablePath: string = workspace.getConfiguration("maven.executable").get<string>("path") || "mvn";
+            const mvnExecutablePath: string = getMaven();
             let mvnExecutableAbsolutePath: string = mvnExecutablePath;
             if (workspace.workspaceFolders && workspace.workspaceFolders.length) {
                 for (const ws of workspace.workspaceFolders) {
-                    if (await fse.exists(path.resolve(ws.uri.fsPath, mvnExecutablePath))) {
+                    if (await fse.pathExists(path.resolve(ws.uri.fsPath, mvnExecutablePath))) {
                         mvnExecutableAbsolutePath = path.resolve(ws.uri.fsPath, mvnExecutablePath);
                         break;
                     }
@@ -326,7 +330,7 @@ export namespace Utils {
                 });
         });
     }
-
+*/
     export function getResourcePath(...args: string[]): string {
         return path.join(__filename, "..", "..", "resources", ...args);
     }
