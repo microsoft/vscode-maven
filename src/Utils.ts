@@ -302,35 +302,7 @@ export namespace Utils {
             return filepath;
         }
     }
-/*
-    export function getMavenVersion(): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
-            const customEnv: {} = VSCodeUI.setupEnvironment();
-            const mvnExecutablePath: string = getMaven();
-            let mvnExecutableAbsolutePath: string = mvnExecutablePath;
-            if (workspace.workspaceFolders && workspace.workspaceFolders.length) {
-                for (const ws of workspace.workspaceFolders) {
-                    if (await fse.pathExists(path.resolve(ws.uri.fsPath, mvnExecutablePath))) {
-                        mvnExecutableAbsolutePath = path.resolve(ws.uri.fsPath, mvnExecutablePath);
-                        break;
-                    }
-                }
-            }
-            const execOptions: child_process.ExecOptions = {
-                cwd: mvnExecutableAbsolutePath && path.dirname(mvnExecutableAbsolutePath),
-                env: Object.assign({}, process.env, customEnv)
-            };
-            child_process.exec(
-                `${Utils.getMavenExecutable()} --version`, execOptions, (error: Error, _stdout: string, _stderr: string): void => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                });
-        });
-    }
-*/
+
     export function getResourcePath(...args: string[]): string {
         return path.join(__filename, "..", "..", "resources", ...args);
     }

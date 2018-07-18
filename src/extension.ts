@@ -129,9 +129,8 @@ async function checkMavenAvailablility(): Promise<void> {
         if (Object.keys(errors).length > 0) {
             const OPTION_SHOW_FAQS: string = "Show FAQs";
             const OPTION_OPEN_SETTINGS: string = "Open Settings";
-            const MESSAGE_MAVEN_ERROR: string = "Unable to execute Maven commands.";
-            // TODO: show more detailed info. e.g. which workspace fail the command.
-            const choiceForDetails: string = await vscode.window.showErrorMessage(`${MESSAGE_MAVEN_ERROR}\n`, OPTION_OPEN_SETTINGS, OPTION_SHOW_FAQS);
+            const errorMessage: string = `Unable to execute Maven commands for workspace folder [${Object.keys(errors).join(", ")}], please check your settings.`;
+            const choiceForDetails: string = await vscode.window.showErrorMessage(errorMessage, OPTION_OPEN_SETTINGS, OPTION_SHOW_FAQS);
             if (choiceForDetails === OPTION_SHOW_FAQS) {
                 // open FAQs
                 const readmeFilePath: string = Utils.getPathToExtensionRoot("FAQs.md");
