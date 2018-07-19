@@ -2,9 +2,10 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "Manage maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
-  "version": "1.0.0-beta",
+  "version": "0.10.0",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
+  "preview": true,
   "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
   "engines": {
     "vscode": "^1.18.0"
@@ -17,7 +18,7 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Microsoft/vscode-maven/blob/master/README.md",
+  "homepage": "https://github.com/Microsoft/vscode-maven/blob/0.10.0/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-maven.git"
