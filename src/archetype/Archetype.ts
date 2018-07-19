@@ -11,10 +11,10 @@ export class Archetype {
         return `${this.groupId}:${this.artifactId}`;
     }
 
-    constructor(aid: string, gid: string, repo?: string, desc?: string, versions?: string[]) {
+    constructor(aid: string, gid: string, repo?: string, desc?: string, versions: string[] = []) {
         this.artifactId = aid;
         this.groupId = gid;
-        this.versions = versions || [];
+        this.versions = versions;
         this.description = desc;
         this.repository = repo;
     }
