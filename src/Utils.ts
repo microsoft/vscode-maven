@@ -13,6 +13,7 @@ import { commands, ExtensionContext, extensions, Progress, ProgressLocation, Rel
 import * as xml2js from "xml2js";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
+import { Settings } from "./Settings";
 import { VSCodeUI } from "./VSCodeUI";
 
 interface ICommandHistory {
@@ -151,9 +152,9 @@ export namespace Utils {
 
     async function getMaven(workspaceFolder?: WorkspaceFolder): Promise<string> {
         if (!workspaceFolder) {
-            return workspace.getConfiguration("maven.executable").get<string>("path") || "mvn";
+            return Settings.Executable.path() || "mvn";
         }
-        const executablePathInConf: string = workspace.getConfiguration("maven.executable", workspaceFolder.uri).get<string>("path");
+        const executablePathInConf: string = Settings.Executable.path(workspaceFolder.uri);
         if (!executablePathInConf) {
             const mvnwPathWithoutExt: string = path.join(workspaceFolder.uri.fsPath, "mvnw");
             if (await fse.pathExists(mvnwPathWithoutExt)) {
@@ -181,7 +182,7 @@ export namespace Utils {
             mvnString,
             command.trim(),
             pomfile && `-f "${formattedPathForTerminal(pomfile)}"`,
-            workspace.getConfiguration("maven.executable", pomfile && Uri.file(pomfile)).get<string>("options")
+            Settings.Executable.options(pomfile && Uri.file(pomfile))
         ].filter(Boolean).join(" ");
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
         VSCodeUI.runInTerminal(fullCommand, Object.assign({ name }, options));
@@ -200,7 +201,7 @@ export namespace Utils {
             mvnString,
             command.trim(),
             pomfile && `-f "${pomfile}"`,
-            workspace.getConfiguration("maven.executable", pomfile && Uri.file(pomfile)).get<string>("options")
+            Settings.Executable.options(pomfile && Uri.file(pomfile))
         ].filter(Boolean).join(" ");
 
         const customEnv: {} = VSCodeUI.setupEnvironment();
@@ -270,7 +271,7 @@ export namespace Utils {
                 `${process.env.LocalAppData}\\Programs\\Git\\bin\\bash.exe`
             ]
         };
-        const currentWindowsShellPath: string = workspace.getConfiguration("terminal").get<string>("integrated.shell.windows");
+        const currentWindowsShellPath: string = Settings.External.defaultWindowsShell();
         for (const key in expectedLocations) {
             if (expectedLocations[key].indexOf(currentWindowsShellPath) >= 0) {
                 return key;
@@ -308,7 +309,7 @@ export namespace Utils {
     }
 
     export async function getAllPomPaths(workspaceFolder: WorkspaceFolder): Promise<string[]> {
-        const exclusions: string[] = workspace.getConfiguration("maven.projects", workspaceFolder.uri).get<string[]>("excludedFolders");
+        const exclusions: string[] = Settings.excludedFolders(workspaceFolder.uri);
         const pomFileUris: Uri[] = await workspace.findFiles(new RelativePattern(workspaceFolder, "**/pom.xml"), `{${exclusions.join(",")}}`);
         return pomFileUris.map(_uri => _uri.fsPath);
     }
