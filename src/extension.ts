@@ -86,18 +86,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }));
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
-        VSCodeUI.onDidCloseTerminal(closedTerminal);
+        VSCodeUI.mavenTerminal.onDidCloseTerminal(closedTerminal);
     }));
 
     // configuration change listener
     vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
         // close all terminals with outdated JAVA related Envs
         if (e.affectsConfiguration("maven.terminal.useJavaHome") || e.affectsConfiguration("maven.terminal.customEnv")) {
-            VSCodeUI.closeAllTerminals();
+            VSCodeUI.mavenTerminal.closeAllTerminals();
         } else {
             const useJavaHome: boolean = vscode.workspace.getConfiguration("maven").get<boolean>("terminal.useJavaHome");
             if (useJavaHome && e.affectsConfiguration("java.home")) {
-                VSCodeUI.closeAllTerminals();
+                VSCodeUI.mavenTerminal.closeAllTerminals();
             }
         }
         checkMavenAvailablility();
