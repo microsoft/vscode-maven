@@ -104,7 +104,6 @@ export namespace ArchetypeModule {
             const recommendedItems: Archetype[] = await getRecomendedItems(remoteItems);
             return [new Archetype(null, null, null, "Find more archetypes available in remote catalog.")].concat(localOnlyItems, recommendedItems);
         }
-        return [];
     }
 
     async function getRecomendedItems(allItems: Archetype[]): Promise<Archetype[]> {
