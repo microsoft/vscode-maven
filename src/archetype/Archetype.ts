@@ -7,11 +7,14 @@ export class Archetype {
     public repository: string;
     public description: string;
     public versions: string[];
+    public get identifier(): string {
+        return `${this.groupId}:${this.artifactId}`;
+    }
 
-    constructor(aid: string, gid: string, repo?: string, desc?: string) {
+    constructor(aid: string, gid: string, repo?: string, desc?: string, versions: string[] = []) {
         this.artifactId = aid;
         this.groupId = gid;
-        this.versions = [];
+        this.versions = versions;
         this.description = desc;
         this.repository = repo;
     }

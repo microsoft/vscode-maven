@@ -96,17 +96,14 @@ export namespace ArchetypeModule {
         // from local catalog
         const localItems: Archetype[] = await getLocalArchetypeItems();
         // from cached remote-catalog
-        const contentPath: string = Utils.getPathToExtensionRoot("resources", "archetypes.json");
-        if (await fse.pathExists(contentPath)) {
-            const allItems: Archetype[] = await fse.readJSON(contentPath);
-            if (options && options.all) {
-                return [].concat(localItems, allItems);
-            } else {
-                const recommendedItems: Archetype[] = await getRecomendedItems(allItems);
-                return [new Archetype(null, null, null, "Find more archetypes available in remote catalog.")].concat(localItems, recommendedItems);
-            }
+        const remoteItems: Archetype[] = await getCachedRemoteArchetypeItems();
+        const localOnlyItems: Archetype[] = localItems.filter(localItem => !remoteItems.find(remoteItem => remoteItem.identifier === localItem.identifier));
+        if (options && options.all) {
+            return [].concat(localOnlyItems, remoteItems);
+        } else {
+            const recommendedItems: Archetype[] = await getRecomendedItems(remoteItems);
+            return [new Archetype(null, null, null, "Find more archetypes available in remote catalog.")].concat(localOnlyItems, recommendedItems);
         }
-        return [];
     }
 
     async function getRecomendedItems(allItems: Archetype[]): Promise<Archetype[]> {
@@ -155,6 +152,23 @@ export namespace ArchetypeModule {
         if (await fse.pathExists(localCatalogPath)) {
             const buf: Buffer = await fse.readFile(localCatalogPath);
             return listArchetypeFromXml(buf.toString());
+        } else {
+            return [];
+        }
+    }
+
+    async function getCachedRemoteArchetypeItems(): Promise<Archetype[]> {
+        const contentPath: string = Utils.getPathToExtensionRoot("resources", "archetypes.json");
+        if (await fse.pathExists(contentPath)) {
+            return (await fse.readJSON(contentPath)).map(
+                (rawItem: Archetype) => new Archetype(
+                    rawItem.artifactId,
+                    rawItem.groupId,
+                    rawItem.repository,
+                    rawItem.description,
+                    rawItem.versions
+                )
+            );
         } else {
             return [];
         }
