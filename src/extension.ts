@@ -8,6 +8,7 @@ import { TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
+import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -95,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         if (e.affectsConfiguration("maven.terminal.useJavaHome") || e.affectsConfiguration("maven.terminal.customEnv")) {
             VSCodeUI.mavenTerminal.closeAllTerminals();
         } else {
-            const useJavaHome: boolean = vscode.workspace.getConfiguration("maven").get<boolean>("terminal.useJavaHome");
+            const useJavaHome: boolean = Settings.Terminal.useJavaHome();
             if (useJavaHome && e.affectsConfiguration("java.home")) {
                 VSCodeUI.mavenTerminal.closeAllTerminals();
             }
@@ -127,13 +128,13 @@ async function checkMavenAvailablility(): Promise<void> {
             }
         }
         if (Object.keys(errors).length > 0) {
-            const OPTION_SHOW_FAQS: string = "Show FAQs";
+            const OPTION_LEARN_MORE: string = "Learn more";
             const OPTION_OPEN_SETTINGS: string = "Open Settings";
             const errorMessage: string = `Unable to execute Maven commands for workspace folder [${Object.keys(errors).join(", ")}], please check your settings.`;
-            const choiceForDetails: string = await vscode.window.showErrorMessage(errorMessage, OPTION_OPEN_SETTINGS, OPTION_SHOW_FAQS);
-            if (choiceForDetails === OPTION_SHOW_FAQS) {
+            const choiceForDetails: string = await vscode.window.showErrorMessage(errorMessage, OPTION_OPEN_SETTINGS, OPTION_LEARN_MORE);
+            if (choiceForDetails === OPTION_LEARN_MORE) {
                 // open FAQs
-                const readmeFilePath: string = Utils.getPathToExtensionRoot("FAQs.md");
+                const readmeFilePath: string = Utils.getPathToExtensionRoot("Troubleshooting.md");
                 vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(readmeFilePath));
             } else if (choiceForDetails === OPTION_OPEN_SETTINGS) {
                 vscode.commands.executeCommand("workbench.action.openSettings");

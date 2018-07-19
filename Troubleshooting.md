@@ -1,4 +1,4 @@
-# FAQs
+# Troubleshooting
 
 ## Requirements
 Please make sure Maven is either in the `PATH`, or that `maven.executable.path` is pointed to its installed location. Also make sure `JAVA_HOME` is specified either in environment variables or settings.
@@ -13,6 +13,7 @@ If you do not want to add it into `PATH`, you can specify maven executable path 
     ```
 
 #### Possible error messages
+Error message can be collected either **directly from the integrated terminal**, or **from `Maven for Java` output panel**.
 * Maven executable file not found/set.
     ```
     Command failed: mvn --version 'mvn' is not recognized as an internal or external command, operable program or batch file.

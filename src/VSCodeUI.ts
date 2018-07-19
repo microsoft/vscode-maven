@@ -2,14 +2,14 @@
 // Licensed under the MIT license.
 
 import * as fs from "fs-extra";
-import * as vscode from "vscode";
-import { InputBoxOptions, OpenDialogOptions, QuickPickItem, QuickPickOptions, Terminal, Uri, window, workspace } from "vscode";
+import { InputBoxOptions, OpenDialogOptions, OutputChannel, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
+import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 
 export namespace VSCodeUI {
     // output channel
     class MavenOutputChannel {
-        private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("Maven for Java");
+        private readonly channel: OutputChannel = window.createOutputChannel("Maven for Java");
 
         public appendLine(message: any, title?: string): void {
             if (title) {
@@ -108,7 +108,7 @@ export namespace VSCodeUI {
             value: string;
         };
 
-        const environmentSettings: EnvironmentSetting[] = workspace.getConfiguration("maven").get("terminal.customEnv");
+        const environmentSettings: EnvironmentSetting[] = Settings.Terminal.customEnv();
         environmentSettings.forEach((s: EnvironmentSetting) => {
             if (terminal) {
                 terminal.sendText(composeSetEnvironmentVariableCommand(s.environmentVariable, s.value), true);
@@ -121,8 +121,8 @@ export namespace VSCodeUI {
     function setJavaHomeIfAvailable(terminal?: Terminal): {} {
         // Look for the java.home setting from the redhat.java extension.  We can reuse it
         // if it exists to avoid making the user configure it in two places.
-        const javaHome: string = workspace.getConfiguration("java").get<string>("home");
-        const useJavaHome: boolean = workspace.getConfiguration("maven").get<boolean>("terminal.useJavaHome");
+        const javaHome: string = Settings.External.javaHome();
+        const useJavaHome: boolean = Settings.Terminal.useJavaHome();
         if (useJavaHome && javaHome) {
             if (terminal) {
                 terminal.sendText(composeSetEnvironmentVariableCommand("JAVA_HOME", javaHome), true);
