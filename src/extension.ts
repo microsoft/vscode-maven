@@ -8,6 +8,7 @@ import { TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
+import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -95,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         if (e.affectsConfiguration("maven.terminal.useJavaHome") || e.affectsConfiguration("maven.terminal.customEnv")) {
             VSCodeUI.closeAllTerminals();
         } else {
-            const useJavaHome: boolean = vscode.workspace.getConfiguration("maven").get<boolean>("terminal.useJavaHome");
+            const useJavaHome: boolean = Settings.Terminal.useJavaHome();
             if (useJavaHome && e.affectsConfiguration("java.home")) {
                 VSCodeUI.closeAllTerminals();
             }
