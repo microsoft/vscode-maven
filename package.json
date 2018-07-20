@@ -296,10 +296,16 @@
             "description": "Specifies filepath pattern of folders to exclude while searching for maven projects.",
             "scope": "resource"
           },
+          "maven.executable.preferMavenWrapper": {
+            "type": "boolean",
+            "default": "true",
+            "description": "Specifies whether you perfer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file exists. Otherwise it tries 'mvn' in PATH instead.",
+            "scope": "resource"
+          },
           "maven.executable.path": {
             "type": "string",
             "default": "",
-            "description": "Specifies absolute path of mvn executable if you don't have `mvn` in PATH or `mvnw` in root folder. If a relative path is specified, the absolute path will be resolved from your workspace root folder.",
+            "description": "Specifies absolute path of your mvn executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to value of 'maven.executeble.preferMavenWapper'. Note that a relative path is not suggested, but if you do specify one, the absolute path will be resolved from your workspace root folder (if exists). ",
             "scope": "resource"
           },
           "maven.executable.options": {
