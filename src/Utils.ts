@@ -185,11 +185,11 @@ export namespace Utils {
             Settings.Executable.options(pomfile && Uri.file(pomfile))
         ].filter(Boolean).join(" ");
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
-        VSCodeUI.runInTerminal(fullCommand, Object.assign({ name }, options));
+        VSCodeUI.mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
         updateLRUCommands(command, pomfile);
     }
 
-    export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder ): Promise<{}> {
+    export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder): Promise<{}> {
         if (!workspaceFolder) {
             workspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
         }
@@ -209,18 +209,17 @@ export namespace Utils {
             cwd: commandCwd,
             env: Object.assign({}, process.env, customEnv)
         };
-        return new Promise<{}>(
-            (resolve: (value: {}) => void, reject: (e: Error) => void): void => {
-                child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve({ stdout });
-                    }
-                });
-
-            }
-        );
+        return new Promise<{}>((resolve: (value: {}) => void, reject: (e: Error) => void): void => {
+            VSCodeUI.outputChannel.appendLine(fullCommand, "Background Command");
+            child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
+                if (error) {
+                    VSCodeUI.outputChannel.appendLine(error);
+                    reject(error);
+                } else {
+                    resolve({ stdout });
+                }
+            });
+        });
     }
 
     export async function getLRUCommands(pomPath: string): Promise<{}[]> {
@@ -235,7 +234,7 @@ export namespace Utils {
             }
             const timestamps: { [command: string]: number } = historyObject.timestamps;
             const commandList: string[] = Object.keys(timestamps).sort((a, b) => timestamps[b] - timestamps[a]);
-            return commandList.map(command => Object.assign({command, pomPath, timestamp: timestamps[command]}));
+            return commandList.map(command => Object.assign({ command, pomPath, timestamp: timestamps[command] }));
         }
         return [];
     }

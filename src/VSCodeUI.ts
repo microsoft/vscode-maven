@@ -2,35 +2,72 @@
 // Licensed under the MIT license.
 
 import * as fs from "fs-extra";
-import { InputBoxOptions, OpenDialogOptions, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
+import { InputBoxOptions, OpenDialogOptions, OutputChannel, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 
 export namespace VSCodeUI {
-    const terminals: { [id: string]: Terminal } = {};
+    // output channel
+    class MavenOutputChannel {
+        private readonly channel: OutputChannel = window.createOutputChannel("Maven for Java");
 
-    export function runInTerminal(command: string, options?: ITerminalOptions): void {
-        const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
-        const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
-        if (terminals[name] === undefined) {
-            terminals[name] = window.createTerminal({ name });
-            setupEnvironment(terminals[name]);
+        public appendLine(message: any, title?: string): void {
+            if (title) {
+                const simplifiedTime: string = (new Date()).toISOString().replace(/z|t/gi, " ").trim(); // YYYY-MM-DD HH:mm:ss.sss
+                const hightlightingTitle: string = `[${title} ${simplifiedTime}]`;
+                this.channel.appendLine(hightlightingTitle);
+            }
+            this.channel.appendLine(message);
         }
-        terminals[name].show();
-        if (cwd) {
-            terminals[name].sendText(getCDCommand(cwd), true);
+
+        public append(message: any): void {
+            this.channel.append(message);
         }
-        terminals[name].sendText(getCommand(command), addNewLine);
+
+        public show(): void {
+            this.channel.show();
+        }
     }
 
-    export function closeAllTerminals(): void {
-        Object.keys(terminals).forEach((id: string) => {
-            terminals[id].dispose();
-            delete terminals[id];
-        });
+    export const outputChannel: MavenOutputChannel = new MavenOutputChannel();
+
+    // terminal
+    class MavenTerminal {
+        private readonly terminals: { [id: string]: Terminal } = {};
+
+        public runInTerminal(command: string, options?: ITerminalOptions): void {
+            const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
+            const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
+            if (this.terminals[name] === undefined) {
+                this.terminals[name] = window.createTerminal({ name });
+                setupEnvironment(this.terminals[name]);
+            }
+            this.terminals[name].show();
+            if (cwd) {
+                this.terminals[name].sendText(getCDCommand(cwd), true);
+            }
+            this.terminals[name].sendText(getCommand(command), addNewLine);
+        }
+
+        public closeAllTerminals(): void {
+            Object.keys(this.terminals).forEach((id: string) => {
+                this.terminals[id].dispose();
+                delete this.terminals[id];
+            });
+        }
+
+        public onDidCloseTerminal(closedTerminal: Terminal): void {
+            try {
+                delete this.terminals[closedTerminal.name];
+            } catch (error) {
+                // ignore it.
+            }
+        }
     }
 
-    export function getCommand(cmd: string): string {
+    export const mavenTerminal: MavenTerminal = new MavenTerminal();
+
+    function getCommand(cmd: string): string {
         if (process.platform === "win32") {
             switch (Utils.currentWindowsShell()) {
                 case 'PowerShell':
@@ -43,7 +80,7 @@ export namespace VSCodeUI {
         }
     }
 
-    export function getCDCommand(cwd: string): string {
+    function getCDCommand(cwd: string): string {
         if (process.platform === "win32") {
             switch (Utils.currentWindowsShell()) {
                 case 'Git Bash':
@@ -81,7 +118,7 @@ export namespace VSCodeUI {
         return customEnv;
     }
 
-    export function setJavaHomeIfAvailable(terminal?: Terminal): {} {
+    function setJavaHomeIfAvailable(terminal?: Terminal): {} {
         // Look for the java.home setting from the redhat.java extension.  We can reuse it
         // if it exists to avoid making the user configure it in two places.
         const javaHome: string = Settings.External.javaHome();
@@ -96,7 +133,7 @@ export namespace VSCodeUI {
         }
     }
 
-    export function composeSetEnvironmentVariableCommand(variable: string, value: string): string {
+    function composeSetEnvironmentVariableCommand(variable: string, value: string): string {
         if (process.platform === "win32") {
             switch (Utils.currentWindowsShell()) {
                 case 'Git Bash':
@@ -114,14 +151,7 @@ export namespace VSCodeUI {
         }
     }
 
-    export function onDidCloseTerminal(closedTerminal: Terminal): void {
-        try {
-            delete terminals[closedTerminal.name];
-        } catch (error) {
-            // ignore it.
-        }
-    }
-
+    // file chooser dialog
     export async function openDialogForFolder(customOptions: OpenDialogOptions): Promise<Uri> {
         const options: OpenDialogOptions = {
             canSelectFiles: false,
@@ -150,12 +180,14 @@ export namespace VSCodeUI {
         }
     }
 
+    // editor
     export async function openFileIfExists(filepath: string): Promise<void> {
         if (await fs.pathExists(filepath)) {
             window.showTextDocument(Uri.file(filepath));
         }
     }
 
+    // Quick pick
     export async function getQuickPick<T>(
         itemsSource: T[] | Promise<T[]>,
         labelfunc: (item: T) => string, descfunc: (item: T) => string,
@@ -177,6 +209,7 @@ export namespace VSCodeUI {
         return selected && selected.value;
     }
 
+    // Inputbox
     export async function getFromInputBox(options?: InputBoxOptions): Promise<string> {
         return await window.showInputBox(Object.assign({ ignoreFocusOut: true }, options));
 
