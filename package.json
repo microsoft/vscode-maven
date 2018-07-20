@@ -285,7 +285,7 @@
       {
         "title": "Maven for Java",
         "properties": {
-          "maven.projects.excludedFolders": {
+          "maven.excludedFolders": {
             "type": "array",
             "default": [
               "**/.*",
