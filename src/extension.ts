@@ -33,58 +33,58 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        context.subscriptions.push(TelemetryWrapper.registerCommand(`maven.goal.${goal}`, async (node: MavenProjectNode) => {
+        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProjectNode) => {
             Utils.executeInTerminal(goal, node.pomPath);
-        }));
+        });
     });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.refreshAll", (): void => {
+    registerCommand(context, "maven.project.refreshAll", (): void => {
         provider.refresh();
-    }));
+    });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.effectivePom", async (node: Uri | MavenProjectNode) => {
+    registerCommand(context, "maven.project.effectivePom", async (node: Uri | MavenProjectNode) => {
         if (node instanceof Uri && node.fsPath) {
             await Utils.showEffectivePom(node.fsPath);
         } else if (node instanceof MavenProjectNode && node.pomPath) {
             await Utils.showEffectivePom(node.pomPath);
         }
-    }));
+    });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.custom", async (node: MavenProjectNode) => {
+    registerCommand(context, "maven.goal.custom", async (node: MavenProjectNode) => {
         if (node && node.pomPath) {
             await Utils.excuteCustomGoal(node.pomPath);
         }
-    }));
+    });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.project.openPom", async (node: MavenProjectNode) => {
+    registerCommand(context, "maven.project.openPom", async (node: MavenProjectNode) => {
         if (node && node.pomPath) {
             await VSCodeUI.openFileIfExists(node.pomPath);
         }
-    }));
+    });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.archetype.generate", async (entry: Uri | undefined) => {
+    registerCommand(context, "maven.archetype.generate", async (entry: Uri | undefined) => {
         await ArchetypeModule.generateFromArchetype(entry);
-    }));
+    });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.archetype.update", async () => {
+    registerCommand(context, "maven.archetype.update", async () => {
         await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: Progress<{}>) => {
             p.report({ message: "updating archetype catalog ..." });
             await ArchetypeModule.updateArchetypeCatalog();
             p.report({ message: "finished." });
         });
-    }));
+    });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.history", async (item: MavenProjectNode | undefined) => {
+    registerCommand(context, "maven.history", async (item: MavenProjectNode | undefined) => {
         if (item) {
             await Utils.executeHistoricalGoals([item.pomPath]);
         } else {
             await Utils.executeHistoricalGoals(provider.mavenProjectNodes.map(_node => _node.pomPath));
         }
-    }));
+    });
 
-    context.subscriptions.push(TelemetryWrapper.registerCommand("maven.goal.execute", async () => {
+    registerCommand(context, "maven.goal.execute", async () => {
         await Utils.executeMavenCommand(provider);
-    }));
+    });
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
         VSCodeUI.mavenTerminal.onDidCloseTerminal(closedTerminal);
@@ -101,44 +101,20 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                 VSCodeUI.mavenTerminal.closeAllTerminals();
             }
         }
-        checkMavenAvailablility();
     });
-
-    // check maven executable file
-    checkMavenAvailablility();
 }
 
 export function deactivate(): void {
     // this method is called when your extension is deactivated
 }
 
-// private helpers
-async function checkMavenAvailablility(): Promise<void> {
-    const workspaceFolders: vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders;
-    if (workspaceFolders && workspaceFolders.length) {
-        const errors: any = {};
-        for (const workspaceFolder of workspaceFolders) {
-            try {
-                const pomPaths: string[] = await Utils.getAllPomPaths(workspaceFolder);
-                if (pomPaths && pomPaths.length) {
-                    await Utils.executeInBackground("--version", null, workspaceFolder);
-                }
-            } catch (error) {
-                errors[workspaceFolder.name] = error;
-            }
+function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any): void {
+    context.subscriptions.push(TelemetryWrapper.registerCommand(commandName, async (args) => {
+        try {
+            await func(args);
+        } catch (error) {
+            VSCodeUI.showTroubleshootingDialog(`Command "${commandName}" fails.`);
+            throw error;
         }
-        if (Object.keys(errors).length > 0) {
-            const OPTION_LEARN_MORE: string = "Learn more";
-            const OPTION_OPEN_SETTINGS: string = "Open Settings";
-            const errorMessage: string = `Unable to execute Maven commands for workspace folder [${Object.keys(errors).join(", ")}], please check your settings.`;
-            const choiceForDetails: string = await vscode.window.showErrorMessage(errorMessage, OPTION_OPEN_SETTINGS, OPTION_LEARN_MORE);
-            if (choiceForDetails === OPTION_LEARN_MORE) {
-                // open FAQs
-                const readmeFilePath: string = Utils.getPathToExtensionRoot("Troubleshooting.md");
-                vscode.commands.executeCommand("markdown.showPreview", vscode.Uri.file(readmeFilePath));
-            } else if (choiceForDetails === OPTION_OPEN_SETTINGS) {
-                vscode.commands.executeCommand("workbench.action.openSettings");
-            }
-        }
-    }
+    }));
 }
