@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import * as fs from "fs-extra";
-import { InputBoxOptions, OpenDialogOptions, OutputChannel, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
+import { commands, InputBoxOptions, OpenDialogOptions, OutputChannel, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 
@@ -213,6 +213,17 @@ export namespace VSCodeUI {
     export async function getFromInputBox(options?: InputBoxOptions): Promise<string> {
         return await window.showInputBox(Object.assign({ ignoreFocusOut: true }, options));
 
+    }
+
+    // Troubleshooting
+    export async function showTroubleshootingDialog(errorMessage: string): Promise<void> {
+        const OPTION_LEARN_MORE: string = "Learn more";
+        const choiceForDetails: string = await window.showErrorMessage(errorMessage, OPTION_LEARN_MORE);
+        if (choiceForDetails === OPTION_LEARN_MORE) {
+            // open FAQs
+            const readmeFilePath: string = Utils.getPathToExtensionRoot("Troubleshooting.md");
+            commands.executeCommand("markdown.showPreview", Uri.file(readmeFilePath));
+        }
     }
 }
 
