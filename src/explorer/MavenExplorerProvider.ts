@@ -41,6 +41,8 @@ export class MavenExplorerProvider implements TreeDataProvider<NodeBase> {
     }
 
     private _updateWorkspaceFolderNodes(): void {
-        this._workspaceFolderNodes = vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolderNode(workspaceFolder));
+        this._workspaceFolderNodes = vscode.workspace.workspaceFolders ?
+            vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolderNode(workspaceFolder)) :
+            [];
     }
 }
