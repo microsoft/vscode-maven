@@ -27,7 +27,7 @@ export namespace Settings {
             environmentVariable: string;
             value: string;
         }[] {
-            return _getMavenSection("customEnv");
+            return _getMavenSection("terminal.customEnv");
         }
     }
     export namespace Executable {
