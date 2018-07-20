@@ -40,6 +40,6 @@ export namespace Settings {
     }
 
     function _getMavenSection<T>(section: string, resource?: Uri): T {
-        return workspace.getConfiguration("maven", resource).get<T>(section);
+        return workspace.getConfiguration("maven", resource || null).get<T>(section);
     }
 }
