@@ -155,9 +155,10 @@ export namespace Utils {
             return Settings.Executable.path(null) || "mvn";
         }
         const executablePathInConf: string = Settings.Executable.path(workspaceFolder.uri);
+        const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(workspaceFolder.uri);
         if (!executablePathInConf) {
             const mvnwPathWithoutExt: string = path.join(workspaceFolder.uri.fsPath, "mvnw");
-            if (await fse.pathExists(mvnwPathWithoutExt)) {
+            if (preferMavenWrapper && await fse.pathExists(mvnwPathWithoutExt)) {
                 return mvnwPathWithoutExt;
             } else {
                 return "mvn";

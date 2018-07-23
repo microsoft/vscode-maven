@@ -37,6 +37,9 @@ export namespace Settings {
         export function options(resource: Uri): string {
             return _getMavenSection("executable.options", resource);
         }
+        export function preferMavenWrapper(resource?: Uri): boolean {
+            return _getMavenSection("executable.preferMavenWrapper", resource);
+        }
     }
 
     function _getMavenSection<T>(section: string, resource?: Uri): T {
