@@ -152,7 +152,7 @@ export namespace Utils {
 
     async function getMaven(workspaceFolder?: WorkspaceFolder): Promise<string> {
         if (!workspaceFolder) {
-            return Settings.Executable.path() || "mvn";
+            return Settings.Executable.path(null) || "mvn";
         }
         const executablePathInConf: string = Settings.Executable.path(workspaceFolder.uri);
         if (!executablePathInConf) {
