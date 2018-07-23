@@ -7,60 +7,68 @@
 
 ## Features
 
-Maven extension for VS Code. It now reads `pom.xml` in root folder, and provide project structures in sidebar, improving user experience for Java developers who use Maven.
+Maven extension for VS Code. It provides a project explorer and shorcuts to execute maven commands, improving user experience for Java developers who use Maven.
 
-* Effective POM
-* Shortcut to common goals, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
-* Perserve history of goals to fast re-run long commands(e.g. `mvn clean package -DskipTests -Dcheckstyle.skip`).
-* Can generate projects from Maven Archetype.
-* Support multi-module maven projects.
-* Support VSCode multi-root workspace.
+* Support to generate projects from Maven Archetype.
+* Support to generate effective POM.
+* Provide shortcuts to common goals, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
+* Perserve command history to fast re-run.
+
 
 ## Requirements
+* Java
+* Maven / Maven Wrapper
 
-Provide Maven executable filepath.
-* By default, `mvn` command is executed directly in the terminal, which requires `mvn` can be found in system envronment `PATH`.
-* If you do not want to add it into `PATH`, you can specify maven executable path in settings:
-    ```
-    {
-        "maven.executable.path": "/some-path-to-maven-home/bin/mvn"
-    }
-    ```
+For troubleshooting, please refer to the page [HERE](Troubleshooting.md).
 
-## Usage
+## Basic Usage
+<details>
+<summary>Maven Explorer</summary>
 
-* The extension scans `pom.xml` from each root folder in your workspace recursively, and display all maven projects and their modules in the sidebar.
+The extension scans `pom.xml` in your workspace, and displays all maven projects and their modules in the sidebar.
 
-    ![Screenshot](images/view_context.png)
+![Screenshot](images/explorer.png)
 
-* To speed up the searching of maven projects, you can exclude folders in settings:
-    ```
-    {
-        "maven.projects.excludedFolders": [
-            "**/.*",                // exclude hidden folders
-            "**/node_modules",      // exclude node modules to speed up
-            "**/target"             // exclude duplicated pom file in target folder
-        ]
-    }
-    ```
+</details>
 
-* It perserves history of goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
+<details>
+<summary>Re-Run Historical Commands</summary>
 
-    ![Screenshot](images/customGoal.gif)
+It perserves history of goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
+There are 2 entries for it:
+* Command Palette -> select `Maven: History ...` -> Select a project -> Select command from the history
+* Right-click on a project -> Click `History ...` -> Select command from the history
 
-* Archetype Related
-    * **Generate from Maven Archetype** The extension loads archetypes listed in local/remote catelog. After selection, the extension fires `mvn archetype:generate -D...` in terminal.
+![Screenshot](images/history.gif)
+</details>
+ 
+<details>
+<summary>Archetype Related</summary>
 
-    ![Screenshot](images/archetype.gif)
+### Generate from Maven Archetype
+The extension loads archetypes listed in local/remote catelog. After selection, the extension sends `mvn archetype:generate -D...` to terminal.
+There are 2 entries for it:
+* Command Palette -> select `Maven: Generate from Maven Archetype`
+* Right-click on a folder -> Click `Generate from Maven Archetype` 
+
+![Screenshot](images/archetype.gif)
+
+### Update Maven Archetype Catalog
+With following steps, you can update the **local cache** of Maven **remote catelog**. It takes some time to download meta data from Maven central repository.
+
+Command Palette -> select `Maven: Update Maven Archetype Catalog`.
+
+</details>
 
 ## Additional Configurations
 
-### JAVA_HOME and Other Environment Variables
+<details>
+<summary>JAVA_HOME and Other Environment Variables</summary>
 
 This extension executes Maven by opening a terminal session and then calling Maven in that session.
 Maven requires the JAVA_HOME environment variable to be set. Maven will also look for other variables such as MAVEN_OPTS. If you prefer not to set those variables permanently you can configure them, or any other environment variable, in settings:
 
-```
+```json
 {
     "maven.terminal.customEnv": [
         {
@@ -74,12 +82,14 @@ Maven requires the JAVA_HOME environment variable to be set. Maven will also loo
     ]
 }
 ```
+</details>
 
-### Special Handling for JAVA_HOME
+<details>
+<summary>Special Handling for JAVA_HOME</summary>
 
 If you have Red Hat's Java Language Support extension installed, then you can specify JAVA_HOME in settings for that extension:
 
-```
+```json
 {
     "java.home": "C:\\Program Files\\Java\\jdk-9.0.4"      // Red Hat Java Language Support Setting
 }
@@ -87,7 +97,7 @@ If you have Red Hat's Java Language Support extension installed, then you can sp
 
 This extension (Maven for Java) can reuse that setting if you desire:
 
-```
+```json
 {
     "maven.terminal.useJavaHome": true      // Use the Red Hat Java Language Support Setting for JAVA_HOME
 }
@@ -98,16 +108,36 @@ you have other environment variables to set.
 
 If you have JAVA_HOME configured through the `maven.terminal.customEnv` setting, and also specify to reuse the Red Hat setting, then the value from `maven.terminal.customEnv` will take precedence.
 
-### Default Options for Maven Command
+</details>
+
+<details>
+<summary>Default Options for Maven Command</summary>
 The usage of maven executable is:
 > usage: mvn [options] [<goal(s)>] [<phase(s)>]
 
 You can use `maven.executable.options` to specify default **options** for all your maven commands executed in current project.
-```
+```json
 {
     "maven.executable.options": "-o -s ./settings.xml"      // work offline, and use an alternative settings file 
 }
 ```
+</details>
+
+<details>
+<summary>Folder Exclusion for Searching POM Files</summary>
+
+To speed up the searching of maven projects, you can exclude folders in settings:
+
+```json
+{
+    "maven.projects.excludedFolders": [
+        "**/.*",                // exclude hidden folders
+        "**/node_modules",      // exclude node modules to speed up
+        "**/target"             // exclude duplicated pom file in target folder
+    ]
+}
+```
+</details>
 
 ## Data/Telemetry
 
