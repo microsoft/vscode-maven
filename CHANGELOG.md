@@ -2,7 +2,7 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
-        - [1.0.0](#100)
+        - [0.10.0](#0100)
     - [Released](#released)
         - [0.9.2](#092)
         - [0.9.1](#091)
@@ -16,14 +16,13 @@ All notable changes to the "vscode-maven" extension will be documented in this f
     - [Early Versions](#early-versions)
 
 ## Unreleased
-### 1.0.0
+### 0.10.0
 - Supported to hide Maven explorer view by default. [#51](https://github.com/Microsoft/vscode-maven/issues/51)
 - Started to use a separate terminal for each root folder. [#68](https://github.com/Microsoft/vscode-maven/pull/87)
 - Improved performance of searching for pom.xml [#77](https://github.com/Microsoft/vscode-maven/issues/77)
 - Started to includes Maven archetypes in local catalog when generating projects. [#82](https://github.com/Microsoft/vscode-maven/issues/82)
-(https://github.com/Microsoft/vscode-maven/issues/68)
-- Forced to use mvn wrapper as Maven executable file if one is found in root folder. [#84](https://github.com/Microsoft/vscode-maven/issues/84)
-- Refined command `maven.history` to re-run historical goals.[#87]
+- Forced to use mvn wrapper as Maven executable file if one is found in root folder, and added a new configuration `maven.executable.preferMavenWrapper` allowing to turn it off. [#84](https://github.com/Microsoft/vscode-maven/issues/84) [#105](https://github.com/Microsoft/vscode-maven/pull/105)
+- Refined command `maven.history` to re-run historical goals.[#87](https://github.com/Microsoft/vscode-maven/issues/87)
 - Some code refactoring and bug fixing.
 
 ## Released
