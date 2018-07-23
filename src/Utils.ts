@@ -186,7 +186,9 @@ export namespace Utils {
         ].filter(Boolean).join(" ");
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
         VSCodeUI.mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
-        updateLRUCommands(command, pomfile);
+        if (pomfile) {
+            updateLRUCommands(command, pomfile);
+        }
     }
 
     export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder): Promise<{}> {
