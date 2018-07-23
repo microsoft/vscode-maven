@@ -113,6 +113,7 @@ If you have JAVA_HOME configured through the `maven.terminal.customEnv` setting,
 <details>
 <summary>Default Options for Maven Command</summary>
 The usage of maven executable is:
+
 > usage: mvn [options] [<goal(s)>] [<phase(s)>]
 
 You can use `maven.executable.options` to specify default **options** for all your maven commands executed in current project.
