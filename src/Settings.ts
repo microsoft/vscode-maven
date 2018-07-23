@@ -14,7 +14,7 @@ export namespace Settings {
         }
     }
 
-    export function excludedFolders(resource?: Uri): string[] {
+    export function excludedFolders(resource: Uri): string[] {
         return _getMavenSection("excludedFolders", resource);
     }
 
@@ -31,15 +31,15 @@ export namespace Settings {
         }
     }
     export namespace Executable {
-        export function path(resource?: Uri): string {
+        export function path(resource: Uri): string {
             return _getMavenSection("executable.path", resource);
         }
-        export function options(resource?: Uri): string {
+        export function options(resource: Uri): string {
             return _getMavenSection("executable.options", resource);
         }
     }
 
     function _getMavenSection<T>(section: string, resource?: Uri): T {
-        return workspace.getConfiguration("maven", resource || null).get<T>(section);
+        return workspace.getConfiguration("maven", resource).get<T>(section);
     }
 }
