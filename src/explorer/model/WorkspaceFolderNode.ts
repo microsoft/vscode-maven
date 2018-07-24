@@ -15,6 +15,7 @@ export class WorkspaceFolderNode extends NodeBase {
     constructor(workspaceFolder: vscode.WorkspaceFolder) {
         super();
         this._workspaceFolder = workspaceFolder;
+        this._children = [];
     }
 
     public get pomPaths(): string[] {
