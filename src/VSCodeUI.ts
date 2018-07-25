@@ -71,7 +71,7 @@ export namespace VSCodeUI {
         if (process.platform === "win32") {
             switch (Utils.currentWindowsShell()) {
                 case 'PowerShell':
-                    return `& ${cmd}`; // PowerShell
+                    return `cmd /c ${cmd}`; // PowerShell
                 default:
                     return cmd; // others, try using common one.
             }
