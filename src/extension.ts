@@ -102,6 +102,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             }
         }
     });
+
+    // workspace folder change listener
+    vscode.workspace.onDidChangeWorkspaceFolders( (_e: vscode.WorkspaceFoldersChangeEvent) => {
+        provider.refresh();
+    });
 }
 
 export function deactivate(): void {
