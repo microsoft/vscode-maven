@@ -2,8 +2,8 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Unreleased](#unreleased)
-        - [0.10.0](#0100)
     - [Released](#released)
+        - [0.10.0](#0100)
         - [0.9.2](#092)
         - [0.9.1](#091)
         - [0.9.0](#090)
@@ -16,6 +16,8 @@ All notable changes to the "vscode-maven" extension will be documented in this f
     - [Early Versions](#early-versions)
 
 ## Unreleased
+
+## Released
 ### 0.10.0
 - Supported to hide Maven explorer view by default. [#51](https://github.com/Microsoft/vscode-maven/issues/51)
 - Started to use a separate terminal for each root folder. [#68](https://github.com/Microsoft/vscode-maven/pull/87)
@@ -23,9 +25,10 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - Started to includes Maven archetypes in local catalog when generating projects. [#82](https://github.com/Microsoft/vscode-maven/issues/82)
 - Forced to use mvn wrapper as Maven executable file if one is found in root folder, and added a new configuration `maven.executable.preferMavenWrapper` allowing to turn it off. [#84](https://github.com/Microsoft/vscode-maven/issues/84) [#105](https://github.com/Microsoft/vscode-maven/pull/105)
 - Refined command `maven.history` to re-run historical goals.[#87](https://github.com/Microsoft/vscode-maven/issues/87)
+- Started to use "cmd /c" to execute Maven commands for PowerShell.[#112](https://github.com/Microsoft/vscode-maven/pull/112)
+- Supported to update explorer automatically when workspace folders change. [#27](https://github.com/Microsoft/vscode-maven/issues/27)
 - Some code refactoring and bug fixing.
 
-## Released
 ### 0.9.2
 - Fixed bug of using `./mvnw` as maven executable.
 
