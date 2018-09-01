@@ -18,7 +18,7 @@ export class MavenProjectNode extends NodeBase {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        await this._ensureMavenProjectParsed();
+        await this.ensureMavenProjectParsed();
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this._mavenProject.name);
         treeItem.iconPath = {
             light: Utils.getResourcePath("project.svg"),
@@ -53,7 +53,7 @@ export class MavenProjectNode extends NodeBase {
         return this._mavenProject.modules.length > 0;
     }
 
-    private async _ensureMavenProjectParsed(): Promise<void> {
+    public async ensureMavenProjectParsed(): Promise<void> {
         if (!this._mavenProject) {
             const pom: {} = await Utils.parseXmlFile(this._pomPath);
             this._mavenProject = new MavenProject(pom);
