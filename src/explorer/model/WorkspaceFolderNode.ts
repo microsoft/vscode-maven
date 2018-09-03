@@ -28,7 +28,17 @@ export class WorkspaceFolderNode extends NodeBase {
 
     public async getChildren(): Promise<NodeBase[]> {
         await this._searchForPomPaths();
-        this._children = this._pomPaths.map(pomPath => new MavenProjectNode(pomPath));
+        this._children = [];
+
+        for ( const pomPath of this._pomPaths ) {
+            const projectNode: MavenProjectNode = new MavenProjectNode(pomPath);
+
+            if ( await projectNode.hasValidPom() ) {
+                this._children.push(projectNode);
+            }
+        }
+
+        this._sortChildren();
         return this._children;
     }
 
@@ -38,5 +48,11 @@ export class WorkspaceFolderNode extends NodeBase {
 
     private async _searchForPomPaths(): Promise<void> {
         this._pomPaths = await Utils.getAllPomPaths(this._workspaceFolder);
+    }
+
+    private _sortChildren(): void {
+        this._children.sort( (a, b) => {
+            return  a.mavenProject.name > b.mavenProject.name ? 1 : a.mavenProject.name < b.mavenProject.name ? -1 : 0;
+        } );
     }
 }

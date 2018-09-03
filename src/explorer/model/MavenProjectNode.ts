@@ -18,7 +18,10 @@ export class MavenProjectNode extends NodeBase {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        await this._ensureMavenProjectParsed();
+        if (! await this.hasValidPom()) {
+            return undefined;
+        }
+
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this._mavenProject.name);
         treeItem.iconPath = {
             light: Utils.getResourcePath("project.svg"),
@@ -28,7 +31,6 @@ export class MavenProjectNode extends NodeBase {
         treeItem.collapsibleState = this._hasModules ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
         treeItem.command = { title: "open pom", command: "maven.project.openPom", arguments: [this] };
         return treeItem;
-
     }
 
     public getChildren(): vscode.ProviderResult<NodeBase[]> {
@@ -49,14 +51,24 @@ export class MavenProjectNode extends NodeBase {
     public get mavenProject(): MavenProject {
         return this._mavenProject;
     }
+
+    public async hasValidPom(): Promise<boolean> {
+        await this._parseMavenProject();
+        return !!this._mavenProject;
+    }
+
     private get _hasModules(): boolean {
         return this._mavenProject.modules.length > 0;
     }
 
-    private async _ensureMavenProjectParsed(): Promise<void> {
+    private async _parseMavenProject(): Promise<void> {
         if (!this._mavenProject) {
-            const pom: {} = await Utils.parseXmlFile(this._pomPath);
-            this._mavenProject = new MavenProject(pom);
+            try {
+                const pom: {} = await Utils.parseXmlFile(this._pomPath);
+                this._mavenProject = new MavenProject(pom);
+            } catch (error) {
+                // Error parsing pom.xml file
+            }
         }
     }
 }

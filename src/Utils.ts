@@ -259,7 +259,7 @@ export namespace Utils {
     }
 
     export function currentWindowsShell(): string {
-        const is32ProcessOn64Windows: string = process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432');
+        const is32ProcessOn64Windows: boolean = process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432');
         const system32Path: string = `${process.env.windir}\\${is32ProcessOn64Windows ? 'Sysnative' : 'System32'}`;
         const expectedLocations: { [shell: string]: string[] } = {
             'Command Prompt': [`${system32Path}\\cmd.exe`],
