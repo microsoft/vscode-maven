@@ -36,6 +36,7 @@
     "onCommand:maven.goal.site",
     "onCommand:maven.goal.deploy",
     "onCommand:maven.goal.custom",
+    "onCommand:maven.goal.execute",
     "onCommand:maven.project.effectivePom",
     "onCommand:maven.project.openPom",
     "onCommand:maven.archetype.generate",
