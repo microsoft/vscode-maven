@@ -369,7 +369,7 @@
     "fs-extra": "^4.0.3",
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
-    "vscode-extension-telemetry-wrapper": "next",
+    "vscode-extension-telemetry-wrapper": "^0.3.0",
     "xml2js": "^0.4.19"
   }
 }
