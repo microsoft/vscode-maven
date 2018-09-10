@@ -362,14 +362,14 @@
     "@types/xml2js": "^0.4.2",
     "tslint": "^5.8.0",
     "tslint-microsoft-contrib": "^5.0.1",
-    "typescript": "^2.6.1",
-    "vscode": "^1.1.18"
+    "typescript": "^2.9.2",
+    "vscode": "^1.1.21"
   },
   "dependencies": {
     "fs-extra": "^4.0.3",
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
-    "xml2js": "^0.4.19",
-    "vscode-extension-telemetry-wrapper": "~0.2.1"
+    "vscode-extension-telemetry-wrapper": "^0.3.0",
+    "xml2js": "^0.4.19"
   }
 }

@@ -10,6 +10,7 @@ import * as os from "os";
 import * as path from "path";
 import * as url from "url";
 import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, window, workspace, WorkspaceFolder } from 'vscode';
+import { setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
@@ -325,6 +326,7 @@ export namespace Utils {
                     await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
                     resolve();
                 } catch (error) {
+                    setUserError(error);
                     reject(error);
                 }
             }

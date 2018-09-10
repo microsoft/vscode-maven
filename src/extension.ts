@@ -4,7 +4,7 @@
 "use strict";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
-import { TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
+import { initializeFromJsonFile, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
@@ -17,12 +17,33 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Usage data statistics.
     if (Utils.getAiKey()) {
         TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
+        await initializeFromJsonFile(context.asAbsolutePath("./package.json"));
     }
+    await instrumentOperation("activation", doActivate)(context);
+}
 
-    vscode.commands.executeCommand("setContext", "mavenExtensionActivated", true);
+export function deactivate(): void {
+    // this method is called when your extension is deactivated
+}
 
+function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any): void {
+    const callbackWithTroubleshooting: (...args: any[]) => any = instrumentOperation(commandName, async (_operationId: string, ...args: any[]) => {
+        try {
+            return await func(...args);
+        } catch (error) {
+            VSCodeUI.showTroubleshootingDialog(`Command "${commandName}" fails.`);
+            throw error;
+        }
+    });
+    // tslint:disable-next-line:no-suspicious-comment
+    // TODO: replace TelemetryWrapper.registerCommand with vscode.commands.registerCommand.
+    context.subscriptions.push(TelemetryWrapper.registerCommand(commandName, callbackWithTroubleshooting));
+}
+
+async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
+    await vscode.commands.executeCommand("setContext", "mavenExtensionActivated", true);
     const provider: MavenExplorerProvider = new MavenExplorerProvider();
-    vscode.window.registerTreeDataProvider("mavenProjects", provider);
+    context.subscriptions.push(vscode.window.registerTreeDataProvider("mavenProjects", provider));
 
     // pom.xml listener to refresh tree view
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
@@ -107,19 +128,4 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.workspace.onDidChangeWorkspaceFolders( (_e: vscode.WorkspaceFoldersChangeEvent) => {
         provider.refresh();
     });
-}
-
-export function deactivate(): void {
-    // this method is called when your extension is deactivated
-}
-
-function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any): void {
-    context.subscriptions.push(TelemetryWrapper.registerCommand(commandName, async (args) => {
-        try {
-            await func(args);
-        } catch (error) {
-            VSCodeUI.showTroubleshootingDialog(`Command "${commandName}" fails.`);
-            throw error;
-        }
-    }));
 }
