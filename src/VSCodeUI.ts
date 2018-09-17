@@ -2,11 +2,15 @@
 // Licensed under the MIT license.
 
 import * as fs from "fs-extra";
-import { commands, InputBoxOptions, OpenDialogOptions, OutputChannel, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
+// tslint:disable-next-line:no-require-imports
+import opn = require('opn');
+import { InputBoxOptions, OpenDialogOptions, OutputChannel, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 
 export namespace VSCodeUI {
+    const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
+
     // output channel
     class MavenOutputChannel {
         private readonly channel: OutputChannel = window.createOutputChannel("Maven for Java");
@@ -221,8 +225,7 @@ export namespace VSCodeUI {
         const choiceForDetails: string = await window.showErrorMessage(errorMessage, OPTION_LEARN_MORE);
         if (choiceForDetails === OPTION_LEARN_MORE) {
             // open FAQs
-            const readmeFilePath: string = Utils.getPathToExtensionRoot("Troubleshooting.md");
-            commands.executeCommand("markdown.showPreview", Uri.file(readmeFilePath));
+            opn(TROUBLESHOOTING_LINK);
         }
     }
 }
