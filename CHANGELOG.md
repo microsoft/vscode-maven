@@ -20,6 +20,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ### 0.11.0
 - Sort Maven projects alphabetically in Explorer. [PR#118](https://github.com/Microsoft/vscode-maven/pull/118) by @owenconti
 - Adjust order of steps when generating projects from an archetype. [#122](https://github.com/Microsoft/vscode-maven/issues/122)
+- Open trouble-shooting page in browser.[PR#131](https://github.com/Microsoft/vscode-maven/pull/131)
 - Fixed some bugs.
 
 Thank [Owen Conti (@owenconti)](https://github.com/owenconti) for the help to make the extension even better.
