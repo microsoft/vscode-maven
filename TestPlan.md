@@ -51,11 +51,11 @@
 ### Generate project from maven archetypes
 1. Right-click a target folder in file explorer view.
 2. Click `Generate from Maven Archetype`.
-3. Select the target folder in the popup dialog.
-4. Verify:
+3. Verify:
     1. It should show a dropdown list of popular maven archetypes.
     2. The first item is `More ...`.
-5. Select one of the listed archetype.
+4. Select one of the listed archetype.
+5. Select the target folder in the popup dialog.
 6. Verify: 
     1. It opens an integrated terminal, and navigates to the target folder you previously selected.
     2. It issues the corresponding maven command (archetype:generate) with correct parameters.
@@ -64,11 +64,11 @@
 ### Generate project from maven archetypes (for empty workspace)
 1. Open Command Palette.
 2. Click `Maven: Generate from Maven Archetype`.
-3. Select the target folder in the popup dialog.
-4. Verify:
+3. Verify:
     1. It should show a dropdown list of popular maven archetypes.
     2. The first item is `More ...`.
-5. Select one of the listed archetype.
+4. Select one of the listed archetype.
+5. Select the target folder in the popup dialog.
 6. Verify: 
     1. It opens an integrated terminal, and navigates to the target folder you previously selected.
     2. It issues the corresponding maven command (archetype:generate) with correct parameters.

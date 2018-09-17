@@ -38,6 +38,27 @@ function finishStep(step: Step): void {
 
 export namespace ArchetypeModule {
     export async function generateFromArchetype(entry: Uri | undefined): Promise<void> {
+        // select archetype.
+        let selectedArchetype: Archetype = await showQuickPickForArchetypes();
+        if (selectedArchetype === undefined) {
+            return;
+        }
+        if (!selectedArchetype.artifactId) {
+            finishStep(stepListMore);
+            selectedArchetype = await showQuickPickForArchetypes({ all: true });
+            if (!selectedArchetype) {
+                return;
+            }
+        }
+        const { artifactId, groupId } = selectedArchetype;
+        const session: Session = TelemetryWrapper.currentSession();
+        if (session && session.extraProperties) {
+            session.extraProperties.artifactId = artifactId;
+            session.extraProperties.groupId = groupId;
+        }
+        finishStep(stepArchetype);
+
+        // choose target folder.
         const result: Uri = await VSCodeUI.openDialogForFolder({
             defaultUri: entry && entry.fsPath ? Uri.file(entry.fsPath) : undefined,
             openLabel: "Select Destination Folder"
@@ -46,32 +67,13 @@ export namespace ArchetypeModule {
         if (!cwd) { return; }
         finishStep(stepTargetFolder);
 
-        // selectArchetype
-        let selectedArchetype: Archetype = await showQuickPickForArchetypes();
-        if (selectedArchetype === undefined) {
-            return;
-        } else if (!selectedArchetype.artifactId) {
-            finishStep(stepListMore);
-            selectedArchetype = await showQuickPickForArchetypes({ all: true });
-        }
-
-        if (selectedArchetype) {
-            const { artifactId, groupId } = selectedArchetype;
-            const session: Session = TelemetryWrapper.currentSession();
-            if (session && session.extraProperties) {
-                session.extraProperties.artifactId = artifactId;
-                session.extraProperties.groupId = groupId;
-            }
-            finishStep(stepArchetype);
-
-            const cmd: string = [
-                "archetype:generate",
-                `-DarchetypeArtifactId="${artifactId}"`,
-                `-DarchetypeGroupId="${groupId}"`
-            ].join(" ");
-            Utils.executeInTerminal(cmd, null, { cwd });
-        }
-
+        // execute.
+        const cmd: string = [
+            "archetype:generate",
+            `-DarchetypeArtifactId="${artifactId}"`,
+            `-DarchetypeGroupId="${groupId}"`
+        ].join(" ");
+        Utils.executeInTerminal(cmd, null, { cwd });
     }
 
     export async function updateArchetypeCatalog(): Promise<void> {
