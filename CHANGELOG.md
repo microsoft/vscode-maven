@@ -1,8 +1,8 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
-    - [Unreleased](#unreleased)
     - [Released](#released)
+        - [0.11.0](#0110)
         - [0.10.0](#0100)
         - [0.9.2](#092)
         - [0.9.1](#091)
@@ -15,9 +15,15 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.5.0](#050)
     - [Early Versions](#early-versions)
 
-## Unreleased
-
 ## Released
+
+### 0.11.0
+- Sort Maven projects alphabetically in Explorer. [PR#118](https://github.com/Microsoft/vscode-maven/pull/118) by @owenconti
+- Adjust order of steps when generating projects from an archetype. [#122](https://github.com/Microsoft/vscode-maven/issues/122)
+- Fixed some bugs.
+
+Thank [Owen Conti (@owenconti)](https://github.com/owenconti) for the help to make the extension even better.
+
 ### 0.10.0
 - Supported to hide Maven explorer view by default. [#51](https://github.com/Microsoft/vscode-maven/issues/51)
 - Started to use a separate terminal for each root folder. [#68](https://github.com/Microsoft/vscode-maven/pull/87)
