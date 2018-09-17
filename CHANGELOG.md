@@ -1,6 +1,7 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
+    - [Released](#released)
         - [0.11.0](#0110)
         - [0.10.0](#0100)
         - [0.9.2](#092)
@@ -12,7 +13,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
         - [0.5.2](#052)
         - [0.5.1](#051)
         - [0.5.0](#050)
-        - [Early Versions](#early-versions)
+    - [Early Versions](#early-versions)
+
+## Released
 
 ### 0.11.0
 - Sort Maven projects alphabetically in Explorer. [PR#118](https://github.com/Microsoft/vscode-maven/pull/118) by @owenconti
@@ -72,5 +75,5 @@ Thank [Owen Conti (@owenconti)](https://github.com/owenconti) for the help to ma
 - Changed icon of treeItems for dark/light themes.
 - Fixed some bugs.
 
-### Early Versions
+## Early Versions
 For historical releases earlier than `v0.4.1`, please refer to [Eskibear/vscode-maven](https://github.com/Eskibear/vscode-maven/releases).
