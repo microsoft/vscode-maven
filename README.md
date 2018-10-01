@@ -7,12 +7,12 @@
 
 ## Features
 
-Maven extension for VS Code. It provides a project explorer and shorcuts to execute maven commands, improving user experience for Java developers who use Maven.
+Maven extension for VS Code. It provides a project explorer and shortcuts to execute maven commands, improving user experience for Java developers who use Maven.
 
 * Support to generate projects from Maven Archetype.
 * Support to generate effective POM.
 * Provide shortcuts to common goals, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
-* Perserve command history to fast re-run.
+* Preserve command history to fast re-run.
 
 
 ## Requirements
@@ -34,7 +34,7 @@ The extension scans `pom.xml` in your workspace, and displays all maven projects
 <details>
 <summary>Re-Run Historical Commands</summary>
 
-It perserves history of goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
+It preserves history of goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
 There are 2 entries for it:
 * Command Palette -> select `Maven: History ...` -> Select a project -> Select command from the history
 * Right-click on a project -> Click `History ...` -> Select command from the history
@@ -46,7 +46,7 @@ There are 2 entries for it:
 <summary>Archetype Related</summary>
 
 ### Generate from Maven Archetype
-The extension loads archetypes listed in local/remote catelog. After selection, the extension sends `mvn archetype:generate -D...` to terminal.
+The extension loads archetypes listed in local/remote catalog. After selection, the extension sends `mvn archetype:generate -D...` to terminal.
 There are 2 entries for it:
 * Command Palette -> select `Maven: Generate from Maven Archetype`
 * Right-click on a folder -> Click `Generate from Maven Archetype` 
@@ -54,7 +54,7 @@ There are 2 entries for it:
 ![Screenshot](images/archetype.gif)
 
 ### Update Maven Archetype Catalog
-With following steps, you can update the **local cache** of Maven **remote catelog**. It takes some time to download meta data from Maven central repository.
+With following steps, you can update the **local cache** of Maven **remote catalog**. It takes some time to download meta data from Maven central repository.
 
 Command Palette -> select `Maven: Update Maven Archetype Catalog`.
 
