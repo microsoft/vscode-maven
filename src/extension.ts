@@ -4,7 +4,7 @@
 "use strict";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
-import { initializeFromJsonFile, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
+import { dispose as disposeTelemetryWrapper, initializeFromJsonFile, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
@@ -22,8 +22,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await instrumentOperation("activation", doActivate)(context);
 }
 
-export function deactivate(): void {
-    // this method is called when your extension is deactivated
+export async function deactivate(): Promise<void> {
+    await disposeTelemetryWrapper();
 }
 
 function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any): void {
