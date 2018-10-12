@@ -2,6 +2,7 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Released](#released)
+        - [0.11.1](#0111)
         - [0.11.0](#0110)
         - [0.10.0](#0100)
         - [0.9.2](#092)
@@ -16,6 +17,8 @@ All notable changes to the "vscode-maven" extension will be documented in this f
     - [Early Versions](#early-versions)
 
 ## Released
+### 0.11.1
+- Use the latest version of vscode-extension-telemetry dependency. [#135](https://github.com/Microsoft/vscode-maven/issues/135)
 
 ### 0.11.0
 - Sort Maven projects alphabetically in Explorer. [PR#118](https://github.com/Microsoft/vscode-maven/pull/118) by @owenconti
