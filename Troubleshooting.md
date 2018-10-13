@@ -5,8 +5,8 @@
 ### Where to find Error logs
 
 There are 2 types of command execution methods.
-* **Background command**. It spawn a child process in background for your commnad, and the process is showing in status bar. E.g. generating effective pom. You can find error logs in an `Output` panel named `Maven for Java`.
-* **Terminal command**. It sends plain text of your command to a terminal to execute. E.g. almost all the other maven comands. Error logs are directly printed in the corresponding terminals.
+* **Background command**. It spawns a child process in background for your command, and the process is showing in status bar. E.g. generating effective pom. You can find error logs in an `Output` panel named `Maven for Java`.
+* **Terminal command**. It sends plain text of your command to a terminal to execute. E.g. almost all the other Maven commands. Error logs are directly printed in the corresponding terminals.
   
 ### Requirements
 
@@ -23,7 +23,7 @@ Error message can be collected either **directly from the integrated terminal**,
     ```
     Command failed: mvn --version 'mvn' is not recognized as an internal or external command, operable program or batch file.
     ```
-    In this case, please follow above instructions to set available maven executable path.
+    In this case, please follow above instructions to set available Maven executable path.
 
 * `M2_HOME` not correctly set.
     ```

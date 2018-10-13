@@ -1,7 +1,7 @@
 {
   "name": "vscode-maven",
   "displayName": "Maven for Java",
-  "description": "Manage maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
+  "description": "Manage Maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
   "version": "0.11.1",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
@@ -293,13 +293,13 @@
               "**/target",
               "**/bin"
             ],
-            "description": "Specifies filepath pattern of folders to exclude while searching for maven projects.",
+            "description": "Specifies filepath pattern of folders to exclude while searching for Maven projects.",
             "scope": "resource"
           },
           "maven.executable.preferMavenWrapper": {
             "type": "boolean",
             "default": "true",
-            "description": "Specifies whether you perfer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file exists. Otherwise it tries 'mvn' in PATH instead.",
+            "description": "Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file exists. Otherwise it tries 'mvn' in PATH instead.",
             "scope": "resource"
           },
           "maven.executable.path": {
