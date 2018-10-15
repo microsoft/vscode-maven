@@ -7,7 +7,7 @@
 
 ## Features
 
-Maven extension for VS Code. It provides a project explorer and shortcuts to execute maven commands, improving user experience for Java developers who use Maven.
+Maven extension for VS Code. It provides a project explorer and shortcuts to execute Maven commands, improving user experience for Java developers who use Maven.
 
 * Support to generate projects from Maven Archetype.
 * Support to generate effective POM.
@@ -25,7 +25,7 @@ For troubleshooting, please refer to the page [HERE](Troubleshooting.md).
 <details>
 <summary>Maven Explorer</summary>
 
-The extension scans `pom.xml` in your workspace, and displays all maven projects and their modules in the sidebar.
+The extension scans `pom.xml` in your workspace, and displays all Maven projects and their modules in the sidebar.
 
 ![Screenshot](images/explorer.png)
 
@@ -116,7 +116,7 @@ The usage of maven executable is:
 
 > usage: mvn [options] [<goal(s)>] [<phase(s)>]
 
-You can use `maven.executable.options` to specify default **options** for all your maven commands executed in current project.
+You can use `maven.executable.options` to specify default **options** for all your Maven commands executed in current project.
 ```json
 {
     "maven.executable.options": "-o -s ./settings.xml"      // work offline, and use an alternative settings file 
@@ -127,7 +127,7 @@ You can use `maven.executable.options` to specify default **options** for all yo
 <details>
 <summary>Folder Exclusion for Searching POM Files</summary>
 
-To speed up the searching of maven projects, you can exclude folders in settings:
+To speed up the searching of Maven projects, you can exclude folders in settings:
 
 ```json
 {
