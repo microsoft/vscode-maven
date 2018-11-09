@@ -260,27 +260,19 @@ export namespace Utils {
     }
 
     export function currentWindowsShell(): string {
-        const is32ProcessOn64Windows: boolean = process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432');
-        const system32Path: string = `${process.env.windir}\\${is32ProcessOn64Windows ? 'Sysnative' : 'System32'}`;
-        const expectedLocations: { [shell: string]: string[] } = {
-            'Command Prompt': [`${system32Path}\\cmd.exe`],
-            PowerShell: [`${system32Path}\\WindowsPowerShell\\v1.0\\powershell.exe`],
-            'WSL Bash': [`${system32Path}\\bash.exe`],
-            'Git Bash': [
-                `${process.env.ProgramW6432}\\Git\\bin\\bash.exe`,
-                `${process.env.ProgramW6432}\\Git\\usr\\bin\\bash.exe`,
-                `${process.env.ProgramFiles}\\Git\\bin\\bash.exe`,
-                `${process.env.ProgramFiles}\\Git\\usr\\bin\\bash.exe`,
-                `${process.env.LocalAppData}\\Programs\\Git\\bin\\bash.exe`
-            ]
-        };
         const currentWindowsShellPath: string = Settings.External.defaultWindowsShell();
-        for (const key in expectedLocations) {
-            if (expectedLocations[key].indexOf(currentWindowsShellPath) >= 0) {
-                return key;
+        if (currentWindowsShellPath.endsWith("cmd.exe")) {
+            return 'Command Prompt';
+        } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
+            return 'PowerShell';
+        } else if (currentWindowsShellPath.endsWith("bash.exe")) {
+            if (currentWindowsShellPath.includes("Git")) {
+                return 'Git Bash';
             }
+            return 'WSL Bash';
+        } else {
+            return 'Others';
         }
-        return 'Others';
     }
 
     export function toWSLPath(p: string): string {
@@ -290,7 +282,7 @@ export namespace Utils {
             const dir: string = arr[1].replace(/\\/g, "/");
             return `/mnt/${drive}/${dir}`;
         } else {
-            return ".";
+            return p.replace(/\\/g, '/');
         }
     }
 
