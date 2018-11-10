@@ -265,7 +265,7 @@ export namespace Utils {
             return 'Command Prompt';
         } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
             return 'PowerShell';
-        } else if (currentWindowsShellPath.endsWith("bash.exe")) {
+        } else if (currentWindowsShellPath.endsWith("bash.exe") || currentWindowsShellPath.endsWith("wsl.exe")) {
             if (currentWindowsShellPath.includes("Git")) {
                 return 'Git Bash';
             }
