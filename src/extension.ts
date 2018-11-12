@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initializeFromJsonFile, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
-import { UserCancelError } from "./Errors";
+import { OperationCanceledError } from "./Errors";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
 import { Settings } from "./Settings";
@@ -27,12 +27,12 @@ export async function deactivate(): Promise<void> {
     await disposeTelemetryWrapper();
 }
 
-function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOerationIdAhead?: boolean): void {
+function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
     const callbackWithTroubleshooting: (...args: any[]) => any = instrumentOperation(commandName, async (_operationId: string, ...args: any[]) => {
         try {
-            return withOerationIdAhead ? await func(_operationId, ...args) : await func(...args);
+            return withOperationIdAhead ? await func(_operationId, ...args) : await func(...args);
         } catch (error) {
-            if (error instanceof UserCancelError) {
+            if (error instanceof OperationCanceledError) {
                 // swallow
             } else {
                 VSCodeUI.showTroubleshootingDialog(`Command "${commandName}" fails. ${error.message}`);
