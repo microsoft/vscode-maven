@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initializeFromJsonFile, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
+import { UserCancelError } from "./Errors";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
 import { Settings } from "./Settings";
@@ -17,7 +18,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Usage data statistics.
     if (Utils.getAiKey()) {
         TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
-        await initializeFromJsonFile(context.asAbsolutePath("./package.json"));
+        await initializeFromJsonFile(context.asAbsolutePath("./package.json"), true);
     }
     await instrumentOperation("activation", doActivate)(context);
 }
@@ -26,12 +27,16 @@ export async function deactivate(): Promise<void> {
     await disposeTelemetryWrapper();
 }
 
-function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any): void {
+function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOerationIdAhead?: boolean): void {
     const callbackWithTroubleshooting: (...args: any[]) => any = instrumentOperation(commandName, async (_operationId: string, ...args: any[]) => {
         try {
-            return await func(...args);
+            return withOerationIdAhead ? await func(_operationId, ...args) : await func(...args);
         } catch (error) {
-            VSCodeUI.showTroubleshootingDialog(`Command "${commandName}" fails.`);
+            if (error instanceof UserCancelError) {
+                // swallow
+            } else {
+                VSCodeUI.showTroubleshootingDialog(`Command "${commandName}" fails. ${error.message}`);
+            }
             throw error;
         }
     });
@@ -83,9 +88,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         }
     });
 
-    registerCommand(context, "maven.archetype.generate", async (entry: Uri | undefined) => {
-        await ArchetypeModule.generateFromArchetype(entry);
-    });
+    registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
+        await ArchetypeModule.generateFromArchetype(entry, operationId);
+    },              true);
 
     registerCommand(context, "maven.archetype.update", async () => {
         await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: Progress<{}>) => {
@@ -125,7 +130,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     });
 
     // workspace folder change listener
-    vscode.workspace.onDidChangeWorkspaceFolders( (_e: vscode.WorkspaceFoldersChangeEvent) => {
+    vscode.workspace.onDidChangeWorkspaceFolders((_e: vscode.WorkspaceFoldersChangeEvent) => {
         provider.refresh();
     });
 }

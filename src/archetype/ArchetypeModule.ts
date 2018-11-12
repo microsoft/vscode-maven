@@ -5,13 +5,16 @@ import * as fse from "fs-extra";
 import * as os from "os";
 import * as path from "path";
 import { Uri } from "vscode";
-import { Session, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
+import { instrumentOperationStep, sendInfo, Session, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
+import { UserCancelError } from "../Errors";
 import { Utils } from "../Utils";
 import { VSCodeUI } from "../VSCodeUI";
 import { Archetype } from "./Archetype";
 // tslint:disable-next-line:no-http-string
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
 const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
+
+// TO REMOVE
 class Step {
     public readonly name: string;
     public readonly info: string;
@@ -36,20 +39,19 @@ function finishStep(step: Step): void {
     TelemetryWrapper.info(step.info);
 }
 
+// UNTIL HERE
 export namespace ArchetypeModule {
-    export async function generateFromArchetype(entry: Uri | undefined): Promise<void> {
-        // select archetype.
+    async function selectArchetype(): Promise<Archetype> {
         let selectedArchetype: Archetype = await showQuickPickForArchetypes();
-        if (selectedArchetype === undefined) {
-            return;
-        }
         if (!selectedArchetype.artifactId) {
             finishStep(stepListMore);
             selectedArchetype = await showQuickPickForArchetypes({ all: true });
-            if (!selectedArchetype) {
-                return;
-            }
         }
+        if (!selectedArchetype) {
+            throw new UserCancelError("Archeype not selected.");
+        }
+
+        // TO REMOVE
         const { artifactId, groupId } = selectedArchetype;
         const session: Session = TelemetryWrapper.currentSession();
         if (session && session.extraProperties) {
@@ -57,23 +59,46 @@ export namespace ArchetypeModule {
             session.extraProperties.groupId = groupId;
         }
         finishStep(stepArchetype);
+        // UNTIL HERE
 
-        // choose target folder.
+        return selectedArchetype;
+    }
+
+    async function chooseTargetFolder(entry: Uri | undefined): Promise<string> {
+
         const result: Uri = await VSCodeUI.openDialogForFolder({
             defaultUri: entry && entry.fsPath ? Uri.file(entry.fsPath) : undefined,
             openLabel: "Select Destination Folder"
         });
         const cwd: string = result && result.fsPath;
-        if (!cwd) { return; }
+        if (!cwd) {
+            throw new UserCancelError("Target folder not selected.");
+        }
+        // TO REMOVE
         finishStep(stepTargetFolder);
+        // UNTIL HERE
+        return cwd;
+    }
 
-        // execute.
+    async function executeInTerminal(archetypeGroupId: string, archetypeArtifactId: string, cwd: string): Promise<void> {
         const cmd: string = [
             "archetype:generate",
-            `-DarchetypeArtifactId="${artifactId}"`,
-            `-DarchetypeGroupId="${groupId}"`
+            `-DarchetypeArtifactId="${archetypeArtifactId}"`,
+            `-DarchetypeGroupId="${archetypeGroupId}"`
         ].join(" ");
-        Utils.executeInTerminal(cmd, null, { cwd });
+        await Utils.executeInTerminal(cmd, null, { cwd });
+    }
+
+    export async function generateFromArchetype(entry: Uri | undefined, operationId: string | undefined): Promise<void> {
+        // select archetype.
+        const { artifactId, groupId } = await instrumentOperationStep(operationId, "selectArchetype", selectArchetype)();
+        sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId }, {});
+
+        // choose target folder.
+        const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(entry);
+
+        // execute in terminal.
+        await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminal)(groupId, artifactId, cwd);
     }
 
     export async function updateArchetypeCatalog(): Promise<void> {
