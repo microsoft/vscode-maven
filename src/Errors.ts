@@ -4,7 +4,7 @@
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 
 // tslint:disable-next-line:export-name
-export class UserCancelError extends Error {
+export class OperationCanceledError extends Error {
     constructor(msg?: string) {
         super(msg);
         setUserError(this);

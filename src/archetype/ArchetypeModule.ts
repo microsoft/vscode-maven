@@ -6,7 +6,7 @@ import * as os from "os";
 import * as path from "path";
 import { Uri } from "vscode";
 import { instrumentOperationStep, sendInfo, Session, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
-import { UserCancelError } from "../Errors";
+import { OperationCanceledError } from "../Errors";
 import { Utils } from "../Utils";
 import { VSCodeUI } from "../VSCodeUI";
 import { Archetype } from "./Archetype";
@@ -48,7 +48,7 @@ export namespace ArchetypeModule {
             selectedArchetype = await showQuickPickForArchetypes({ all: true });
         }
         if (!selectedArchetype) {
-            throw new UserCancelError("Archeype not selected.");
+            throw new OperationCanceledError("Archeype not selected.");
         }
 
         // TO REMOVE
@@ -72,7 +72,7 @@ export namespace ArchetypeModule {
         });
         const cwd: string = result && result.fsPath;
         if (!cwd) {
-            throw new UserCancelError("Target folder not selected.");
+            throw new OperationCanceledError("Target folder not selected.");
         }
         // TO REMOVE
         finishStep(stepTargetFolder);
