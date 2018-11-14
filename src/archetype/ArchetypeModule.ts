@@ -92,7 +92,7 @@ export namespace ArchetypeModule {
     export async function generateFromArchetype(entry: Uri | undefined, operationId: string | undefined): Promise<void> {
         // select archetype.
         const { artifactId, groupId } = await instrumentOperationStep(operationId, "selectArchetype", selectArchetype)();
-        sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId }, {});
+        sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId });
 
         // choose target folder.
         const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(entry);

@@ -18,7 +18,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Usage data statistics.
     if (Utils.getAiKey()) {
         TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
-        await initializeFromJsonFile(context.asAbsolutePath("./package.json"), true);
+        await initializeFromJsonFile(context.asAbsolutePath("./package.json"));
     }
     await instrumentOperation("activation", doActivate)(context);
 }
