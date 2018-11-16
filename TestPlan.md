@@ -182,11 +182,27 @@ The tree view of maven projects should update when any pom.xml is created/modifi
 
 ## For Telemetry 
 After above tests, verify corresponding entries in Application Insight portal (vscode maven telemetry test).
+
+### Legacy (Still need to verify for now)
 * For each command executed, verify:
     1. There are records named `vscjava.vscode-maven/commandStart` and `vscjava.vscode-maven/commandEnd` with same `customDimensions.sessionId`.
     2. For record `vscjava.vscode-maven/commandEnd`, value (ms) of `customMeasurements.duration` is reasonable.
 * For command `Generate from Maven Archetype`, verify: 
     1. values of `customDimensions.extra.finishedSteps`, `customDimensions.extra.artifactId` and `customDimensions.extra.groupId` are reasonable.
         * **finishedSteps**: The steps user goes through after triggering the command. Candidates are `TargetFolder`, `ListMore` and `Archetype`.
+        * **groupId**: Group Id of selected archetype.
+        * **artifactId**: Artifact Id of selected archetype.
+
+### New
+
+* For extension activation and each command executed, verify:
+    1. There are records named `vscjava.vscode-maven/opStart` and `vscjava.vscode-maven/opEnd` with same `customDimensions.operationId`, `customDimensions.operationName`
+    2. In `opEnd`, check `customDimensions.errorCode`
+        1. 0 for no error.
+        2. Non-zero values indicate there's an error, check `message`, `stack`, `errorType` in `customDimensions`.
+        3. For non-zero values, there should be an extra record `vscjava.vscode-maven/error` carrying the same error information.
+* For command `Generate from Maven Archetype`, verify: 
+    1. Records named `vscjava.vscode-maven/opStep` are sent after each step is executed. 
+    2. For some steps, an extra `vscjava.vscode-maven/info` is sent carrying information. E.g.:
         * **groupId**: Group Id of selected archetype.
         * **artifactId**: Artifact Id of selected archetype.
