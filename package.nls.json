@@ -1,0 +1,12 @@
+{
+    "description": "Manage Maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
+    "contributes.commands.maven.project.refreshAll": "Refresh",
+    "contributes.commands.maven.goal.custom": "Custom goals ... ",
+    "contributes.commands.maven.project.effectivePom": "Effective POM",
+    "contributes.commands.maven.project.openPom": "Open POM file",
+    "contributes.commands.maven.archetype.generate": "Generate from Maven Archetype",
+    "contributes.commands.maven.archetype.update": "Update Maven Archetype Catalog",
+    "contributes.commands.maven.history": "History ...",
+    "contributes.commands.maven.goal.execute": "Execute commands",
+    "contributes.views.explorer.mavenProjects": "Maven Projects"
+}

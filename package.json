@@ -1,7 +1,7 @@
 {
   "name": "vscode-maven",
   "displayName": "Maven for Java",
-  "description": "Manage Maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
+  "description": "%description%",
   "version": "0.11.1",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
@@ -48,7 +48,7 @@
     "commands": [
       {
         "command": "maven.project.refreshAll",
-        "title": "Refresh",
+        "title": "%contributes.commands.maven.project.refreshAll%",
         "category": "Maven",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -102,37 +102,37 @@
       },
       {
         "command": "maven.goal.custom",
-        "title": "Custom goals ... ",
+        "title": "%contributes.commands.maven.goal.custom%",
         "category": "Maven"
       },
       {
         "command": "maven.project.effectivePom",
-        "title": "Effective POM",
+        "title": "%contributes.commands.maven.project.effectivePom%",
         "category": "Maven"
       },
       {
         "command": "maven.project.openPom",
-        "title": "Open POM file",
+        "title": "%contributes.commands.maven.project.openPom%",
         "category": "Maven"
       },
       {
         "command": "maven.archetype.generate",
-        "title": "Generate from Maven Archetype",
+        "title": "%contributes.commands.maven.archetype.generate%",
         "category": "Maven"
       },
       {
         "command": "maven.archetype.update",
-        "title": "Update Maven Archetype Catalog",
+        "title": "%contributes.commands.maven.archetype.update%",
         "category": "Maven"
       },
       {
         "command": "maven.history",
-        "title": "History ...",
+        "title": "%contributes.commands.maven.history%",
         "category": "Maven"
       },
       {
         "command": "maven.goal.execute",
-        "title": "Execute commands",
+        "title": "%contributes.commands.maven.goal.execute%",
         "category": "Maven"
       }
     ],
@@ -140,7 +140,7 @@
       "explorer": [
         {
           "id": "mavenProjects",
-          "name": "Maven Projects",
+          "name": "%contributes.views.explorer.mavenProjects%",
           "when": "mavenExtensionActivated"
         }
       ]
