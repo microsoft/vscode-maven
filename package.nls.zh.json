@@ -10,8 +10,8 @@
     "contributes.commands.maven.goal.execute": "执行命令",
     "contributes.views.explorer.mavenProjects": "Maven项目",
 
-    "configuration.maven.excludedFolders": "指定搜索Maven项目时要排除的文件夹的文件路径模式。",
-    "configuration.maven.executable.preferMavenWrapper":"指定是否优先使用Maven包装器。 如果为true，则默认情况下，如果文件存在，则尝试使用根文件夹下的'mvnw'作为可执行文件；否则它会尝试在使用系统PATH中的'mvn'。",
+    "configuration.maven.excludedFolders": "指定搜索Maven项目时要排除的文件夹。",
+    "configuration.maven.executable.preferMavenWrapper":"指定是否优先使用Maven Wrapper。 如果为true，则尝试使用根文件夹下的'mvnw'作为可执行文件；否则尝试使用系统PATH中的'mvn'。",
     "configuration.maven.executable.path":"指定mvn可执行文件的绝对路径。 当此值为空时，它会根据'maven.executeble.preferMavenWapper'的值尝试使用'mvn'或'mvnw'。 请注意，不建议使用相对路径，但如果指定了相对路径，则将从工作区根文件夹（如果存在）中解析绝对路径。",
     "configuration.maven.executable.options":"指定所有mvn命令的默认选项。",
     "configuration.maven.terminal.useJavaHome":"如果此值为true，并且配置项java.home具有值，则在创建新的终端窗口时，将环境变量JAVA_HOME设置为java.home的值。",
