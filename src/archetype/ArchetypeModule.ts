@@ -43,14 +43,13 @@ function finishStep(step: Step): void {
 export namespace ArchetypeModule {
     async function selectArchetype(): Promise<Archetype> {
         let selectedArchetype: Archetype = await showQuickPickForArchetypes();
-        if (!selectedArchetype.artifactId) {
+        if (selectedArchetype && !selectedArchetype.artifactId) {
             finishStep(stepListMore);
             selectedArchetype = await showQuickPickForArchetypes({ all: true });
         }
         if (!selectedArchetype) {
             throw new OperationCanceledError("Archeype not selected.");
         }
-
         // TO REMOVE
         const { artifactId, groupId } = selectedArchetype;
         const session: Session = TelemetryWrapper.currentSession();
