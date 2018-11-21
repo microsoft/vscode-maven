@@ -1,0 +1,21 @@
+{
+    "description": "Manage Maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
+    "contributes.commands.maven.project.refreshAll": "Refresh",
+    "contributes.commands.maven.goal.custom": "Custom goals ... ",
+    "contributes.commands.maven.project.effectivePom": "Effective POM",
+    "contributes.commands.maven.project.openPom": "Open POM file",
+    "contributes.commands.maven.archetype.generate": "Generate from Maven Archetype",
+    "contributes.commands.maven.archetype.update": "Update Maven Archetype Catalog",
+    "contributes.commands.maven.history": "History ...",
+    "contributes.commands.maven.goal.execute": "Execute commands",
+    "contributes.views.explorer.mavenProjects": "Maven Projects",
+
+    "configuration.maven.excludedFolders": "Specifies filepath pattern of folders to exclude while searching for Maven projects.",
+    "configuration.maven.executable.preferMavenWrapper":"Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file econfiguration.xists. Otherwise it tries 'mvn' in PATH instead.",
+    "configuration.maven.executable.path":"Specifies absolute path of your mvn executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to value of 'maven.executeble.preferMavenWapper'. Note that a relative path is not suggested, but if you do specify one, the absolute path will be resolved from your workspace root folder (if exists). ",
+    "configuration.maven.executable.options":"Specifies default options for all mvn commands.",
+    "configuration.maven.terminal.useJavaHome":"If this value is true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created.",
+    "configuration.maven.terminal.customEnv":"Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed.",
+    "configuration.maven.terminal.customEnv.environmentVariable":"Name of the environment variable to set.",
+    "configuration.maven.terminal.customEnv.value":"Value of the environment variable to set"
+}

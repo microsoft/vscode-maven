@@ -1,7 +1,7 @@
 {
   "name": "vscode-maven",
   "displayName": "Maven for Java",
-  "description": "Manage Maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
+  "description": "%description%",
   "version": "0.11.1",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
@@ -48,7 +48,7 @@
     "commands": [
       {
         "command": "maven.project.refreshAll",
-        "title": "Refresh",
+        "title": "%contributes.commands.maven.project.refreshAll%",
         "category": "Maven",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -102,37 +102,37 @@
       },
       {
         "command": "maven.goal.custom",
-        "title": "Custom goals ... ",
+        "title": "%contributes.commands.maven.goal.custom%",
         "category": "Maven"
       },
       {
         "command": "maven.project.effectivePom",
-        "title": "Effective POM",
+        "title": "%contributes.commands.maven.project.effectivePom%",
         "category": "Maven"
       },
       {
         "command": "maven.project.openPom",
-        "title": "Open POM file",
+        "title": "%contributes.commands.maven.project.openPom%",
         "category": "Maven"
       },
       {
         "command": "maven.archetype.generate",
-        "title": "Generate from Maven Archetype",
+        "title": "%contributes.commands.maven.archetype.generate%",
         "category": "Maven"
       },
       {
         "command": "maven.archetype.update",
-        "title": "Update Maven Archetype Catalog",
+        "title": "%contributes.commands.maven.archetype.update%",
         "category": "Maven"
       },
       {
         "command": "maven.history",
-        "title": "History ...",
+        "title": "%contributes.commands.maven.history%",
         "category": "Maven"
       },
       {
         "command": "maven.goal.execute",
-        "title": "Execute commands",
+        "title": "%contributes.commands.maven.goal.execute%",
         "category": "Maven"
       }
     ],
@@ -140,7 +140,7 @@
       "explorer": [
         {
           "id": "mavenProjects",
-          "name": "Maven Projects",
+          "name": "%contributes.views.explorer.mavenProjects%",
           "when": "mavenExtensionActivated"
         }
       ]
@@ -293,31 +293,31 @@
               "**/target",
               "**/bin"
             ],
-            "description": "Specifies filepath pattern of folders to exclude while searching for Maven projects.",
+            "description": "%configuration.maven.excludedFolders%",
             "scope": "resource"
           },
           "maven.executable.preferMavenWrapper": {
             "type": "boolean",
             "default": "true",
-            "description": "Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file exists. Otherwise it tries 'mvn' in PATH instead.",
+            "description": "%configuration.maven.executable.preferMavenWrapper%",
             "scope": "resource"
           },
           "maven.executable.path": {
             "type": "string",
             "default": "",
-            "description": "Specifies absolute path of your mvn executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to value of 'maven.executeble.preferMavenWapper'. Note that a relative path is not suggested, but if you do specify one, the absolute path will be resolved from your workspace root folder (if exists). ",
+            "description": "%configuration.maven.executable.path%",
             "scope": "resource"
           },
           "maven.executable.options": {
             "type": "string",
             "default": "",
-            "description": "Specifies default options for all mvn commands.",
+            "description": "%configuration.maven.executable.options%",
             "scope": "resource"
           },
           "maven.terminal.useJavaHome": {
             "type": "boolean",
             "default": false,
-            "description": "If this value is true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created.",
+            "description": "%configuration.maven.terminal.useJavaHome%",
             "scope": "window"
           },
           "maven.terminal.customEnv": {
@@ -328,16 +328,16 @@
               "properties": {
                 "environmentVariable": {
                   "type": "string",
-                  "description": "Name of the environment variable to set"
+                  "description": "%configuration.maven.terminal.customEnv.environmentVariable%"
                 },
                 "value": {
                   "type": "string",
-                  "description": "Value to set for the environment variable"
+                  "description": "%configuration.maven.terminal.customEnv.value%"
                 }
               }
             },
             "default": [],
-            "description": "Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed.",
+            "description": "%configuration.maven.terminal.customEnv%",
             "scope": "window"
           }
         }
