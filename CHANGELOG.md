@@ -2,6 +2,7 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Released](#released)
+        - [0.11.2](#0112)
         - [0.11.1](#0111)
         - [0.11.0](#0110)
         - [0.10.0](#0100)
@@ -17,6 +18,13 @@ All notable changes to the "vscode-maven" extension will be documented in this f
     - [Early Versions](#early-versions)
 
 ## Released
+### 0.11.2
+- Better support for WSL. [PR#143](https://github.com/Microsoft/vscode-maven/pull/143) by [@RobertDeRose](https://github.com/RobertDeRose)
+- Add Chinese localization for configuration entries and command names. [PR#147](https://github.com/Microsoft/vscode-maven/pull/147)
+- Fix wording in documents.
+
+Thank [@RobertDeRose](https://github.com/RobertDeRose), [@johanhammar](https://github.com/johanhammar) and [@apupier](https://github.com/apupier) for the contribution.
+
 ### 0.11.1
 - Use the latest version of vscode-extension-telemetry dependency. [#135](https://github.com/Microsoft/vscode-maven/issues/135)
 
