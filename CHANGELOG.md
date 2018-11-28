@@ -2,6 +2,7 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
     - [Released](#released)
+        - [0.11.3](#0113)
         - [0.11.2](#0112)
         - [0.11.1](#0111)
         - [0.11.0](#0110)
@@ -18,6 +19,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
     - [Early Versions](#early-versions)
 
 ## Released
+### 0.11.3
+- Fix vulnerability issue of event-stream. [PR#154](https://github.com/Microsoft/vscode-maven/pull/154)
+
 ### 0.11.2
 - Better support for WSL. [PR#143](https://github.com/Microsoft/vscode-maven/pull/143) by [@RobertDeRose](https://github.com/RobertDeRose)
 - Add Chinese localization for configuration entries and command names. [PR#147](https://github.com/Microsoft/vscode-maven/pull/147)

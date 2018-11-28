@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -18,7 +18,7 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Microsoft/vscode-maven/blob/0.11.2/README.md",
+  "homepage": "https://github.com/Microsoft/vscode-maven/blob/0.11.3/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-maven.git"
@@ -362,7 +362,7 @@
     "tslint": "^5.8.0",
     "tslint-microsoft-contrib": "^5.0.1",
     "typescript": "^2.9.2",
-    "vscode": "^1.1.21"
+    "vscode": "^1.1.22"
   },
   "dependencies": {
     "fs-extra": "^4.0.3",
