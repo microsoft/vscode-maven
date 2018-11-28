@@ -2,8 +2,7 @@
 // Licensed under the MIT license.
 
 import * as fs from "fs-extra";
-// tslint:disable-next-line:no-require-imports
-import opn = require('opn');
+import * as vscode from "vscode";
 import { InputBoxOptions, OpenDialogOptions, OutputChannel, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
@@ -225,7 +224,7 @@ export namespace VSCodeUI {
         const choiceForDetails: string = await window.showErrorMessage(errorMessage, OPTION_LEARN_MORE);
         if (choiceForDetails === OPTION_LEARN_MORE) {
             // open FAQs
-            opn(TROUBLESHOOTING_LINK);
+            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(TROUBLESHOOTING_LINK));
         }
     }
 }
