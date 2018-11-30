@@ -4,16 +4,17 @@
 import * as vscode from "vscode";
 import { TreeItemCollapsibleState } from "vscode";
 import { Utils } from "../../Utils";
-import { MavenProjectNode } from "./MavenProjectNode";
-import { NodeBase } from "./NodeBase";
+import { ITreeItem } from "./ITreeItem";
+import { MavenProject } from "./MavenProject";
 
-export class WorkspaceFolderNode extends NodeBase {
+const CONTEXT_VALUE: string = "WorkspaceFolder";
+
+export class WorkspaceFolder implements ITreeItem {
     private _workspaceFolder: vscode.WorkspaceFolder;
     private _pomPaths: string[];
-    private _children: MavenProjectNode[];
+    private _children: MavenProject[];
 
     constructor(workspaceFolder: vscode.WorkspaceFolder) {
-        super();
         this._workspaceFolder = workspaceFolder;
         this._children = [];
     }
@@ -22,18 +23,22 @@ export class WorkspaceFolderNode extends NodeBase {
         return this._pomPaths;
     }
 
-    public get children(): MavenProjectNode[] {
+    public get children(): MavenProject[] {
         return this._children;
     }
 
-    public async getChildren(): Promise<NodeBase[]> {
+    public getContextValue(): string {
+        return CONTEXT_VALUE;
+    }
+
+    public async getChildren(): Promise<ITreeItem[]> {
         await this._searchForPomPaths();
         this._children = [];
 
-        for ( const pomPath of this._pomPaths ) {
-            const projectNode: MavenProjectNode = new MavenProjectNode(pomPath);
+        for (const pomPath of this._pomPaths) {
+            const projectNode: MavenProject = new MavenProject(pomPath);
 
-            if ( await projectNode.hasValidPom() ) {
+            if (await projectNode.hasValidPom()) {
                 this._children.push(projectNode);
             }
         }
@@ -51,8 +56,8 @@ export class WorkspaceFolderNode extends NodeBase {
     }
 
     private _sortChildren(): void {
-        this._children.sort( (a, b) => {
-            return  a.mavenProject.name > b.mavenProject.name ? 1 : a.mavenProject.name < b.mavenProject.name ? -1 : 0;
-        } );
+        this._children.sort((a, b) => {
+            return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
+        });
     }
 }

@@ -3,31 +3,31 @@
 
 import { TreeDataProvider } from "vscode";
 import * as vscode from "vscode";
-import { MavenProjectNode } from "./model/MavenProjectNode";
-import { NodeBase } from "./model/NodeBase";
-import { WorkspaceFolderNode } from "./model/WorkspaceFolderNode";
+import { ITreeItem } from "./model/ITreeItem";
+import { MavenProject } from "./model/MavenProject";
+import { WorkspaceFolder } from "./model/WorkspaceFolder";
 
-export class MavenExplorerProvider implements TreeDataProvider<NodeBase> {
-    public readonly onDidChangeTreeData: vscode.Event<NodeBase>;
-    private _onDidChangeTreeData: vscode.EventEmitter<NodeBase>;
+export class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
+    public readonly onDidChangeTreeData: vscode.Event<ITreeItem>;
+    private _onDidChangeTreeData: vscode.EventEmitter<ITreeItem>;
 
-    private _workspaceFolderNodes: WorkspaceFolderNode[];
+    private _workspaceFolderNodes: WorkspaceFolder[];
 
     constructor() {
-        this._onDidChangeTreeData = new vscode.EventEmitter<NodeBase>();
+        this._onDidChangeTreeData = new vscode.EventEmitter<ITreeItem>();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
 
         this.refresh();
     }
 
-    public get mavenProjectNodes(): MavenProjectNode[] {
+    public get mavenProjectNodes(): MavenProject[] {
         return Array.prototype.concat.apply([], this._workspaceFolderNodes.map(ws => ws.children));
     }
 
-    public getTreeItem(element: NodeBase): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    public getTreeItem(element: ITreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element.getTreeItem();
     }
-    public getChildren(element?: NodeBase): vscode.ProviderResult<NodeBase[]> {
+    public getChildren(element?: ITreeItem): vscode.ProviderResult<ITreeItem[]> {
         if (element === undefined) {
             return this._workspaceFolderNodes;
         } else {
@@ -42,7 +42,7 @@ export class MavenExplorerProvider implements TreeDataProvider<NodeBase> {
 
     private _updateWorkspaceFolderNodes(): void {
         this._workspaceFolderNodes = vscode.workspace.workspaceFolders ?
-            vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolderNode(workspaceFolder)) :
+            vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolder(workspaceFolder)) :
             [];
     }
 }

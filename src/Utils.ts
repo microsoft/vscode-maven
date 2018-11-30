@@ -13,7 +13,7 @@ import { commands, ExtensionContext, extensions, Progress, ProgressLocation, Rel
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
-import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
+import { MavenProject } from "./explorer/model/MavenProject";
 import { Settings } from "./Settings";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -362,9 +362,9 @@ export namespace Utils {
 
     export async function executeMavenCommand(provider: MavenExplorerProvider): Promise<void> {
         // select a project(pomfile)
-        const item: MavenProjectNode = await VSCodeUI.getQuickPick<MavenProjectNode>(
+        const item: MavenProject = await VSCodeUI.getQuickPick<MavenProject>(
             provider.mavenProjectNodes,
-            node => `$(primitive-dot) ${node.mavenProject.name}`,
+            node => `$(primitive-dot) ${node.name}`,
             null,
             node => node.pomPath,
             { placeHolder: "Select a Maven project." }

@@ -8,7 +8,7 @@ import { dispose as disposeTelemetryWrapper, initializeFromJsonFile, instrumentO
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { OperationCanceledError } from "./Errors";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
-import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
+import { MavenProject } from "./explorer/model/MavenProject";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
@@ -59,7 +59,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProjectNode) => {
+        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => {
             Utils.executeInTerminal(goal, node.pomPath);
         });
     });
@@ -68,21 +68,21 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         provider.refresh();
     });
 
-    registerCommand(context, "maven.project.effectivePom", async (node: Uri | MavenProjectNode) => {
+    registerCommand(context, "maven.project.effectivePom", async (node: Uri | MavenProject) => {
         if (node instanceof Uri && node.fsPath) {
             await Utils.showEffectivePom(node.fsPath);
-        } else if (node instanceof MavenProjectNode && node.pomPath) {
+        } else if (node instanceof MavenProject && node.pomPath) {
             await Utils.showEffectivePom(node.pomPath);
         }
     });
 
-    registerCommand(context, "maven.goal.custom", async (node: MavenProjectNode) => {
+    registerCommand(context, "maven.goal.custom", async (node: MavenProject) => {
         if (node && node.pomPath) {
             await Utils.excuteCustomGoal(node.pomPath);
         }
     });
 
-    registerCommand(context, "maven.project.openPom", async (node: MavenProjectNode) => {
+    registerCommand(context, "maven.project.openPom", async (node: MavenProject) => {
         if (node && node.pomPath) {
             await VSCodeUI.openFileIfExists(node.pomPath);
         }
@@ -100,7 +100,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         });
     });
 
-    registerCommand(context, "maven.history", async (item: MavenProjectNode | undefined) => {
+    registerCommand(context, "maven.history", async (item: MavenProject | undefined) => {
         if (item) {
             await Utils.executeHistoricalGoals([item.pomPath]);
         } else {
