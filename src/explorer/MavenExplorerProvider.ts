@@ -7,7 +7,7 @@ import { ITreeItem } from "./model/ITreeItem";
 import { MavenProject } from "./model/MavenProject";
 import { WorkspaceFolder } from "./model/WorkspaceFolder";
 
-export class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
+class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: vscode.Event<ITreeItem>;
     private _onDidChangeTreeData: vscode.EventEmitter<ITreeItem>;
 
@@ -46,3 +46,6 @@ export class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
             [];
     }
 }
+
+// tslint:disable-next-line:export-name
+export const mavenExplorerProvider: MavenExplorerProvider = new MavenExplorerProvider();

@@ -12,7 +12,7 @@ import * as url from "url";
 import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, window, workspace, WorkspaceFolder } from 'vscode';
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
-import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { Settings } from "./Settings";
 import { VSCodeUI } from "./VSCodeUI";
@@ -360,10 +360,10 @@ export namespace Utils {
         }
     }
 
-    export async function executeMavenCommand(provider: MavenExplorerProvider): Promise<void> {
+    export async function executeMavenCommand(): Promise<void> {
         // select a project(pomfile)
         const item: MavenProject = await VSCodeUI.getQuickPick<MavenProject>(
-            provider.mavenProjectNodes,
+            mavenExplorerProvider.mavenProjectNodes,
             node => `$(primitive-dot) ${node.name}`,
             null,
             node => node.pomPath,

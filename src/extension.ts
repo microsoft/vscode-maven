@@ -7,7 +7,7 @@ import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initializeFromJsonFile, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { OperationCanceledError } from "./Errors";
-import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
@@ -47,14 +47,14 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
 
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     await vscode.commands.executeCommand("setContext", "mavenExtensionActivated", true);
-    const provider: MavenExplorerProvider = new MavenExplorerProvider();
-    context.subscriptions.push(vscode.window.registerTreeDataProvider("mavenProjects", provider));
+
+    context.subscriptions.push(vscode.window.registerTreeDataProvider("mavenProjects", mavenExplorerProvider));
 
     // pom.xml listener to refresh tree view
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
-    watcher.onDidCreate(() => provider.refresh());
-    watcher.onDidChange(() => provider.refresh());
-    watcher.onDidDelete(() => provider.refresh());
+    watcher.onDidCreate(() => mavenExplorerProvider.refresh());
+    watcher.onDidChange(() => mavenExplorerProvider.refresh());
+    watcher.onDidDelete(() => mavenExplorerProvider.refresh());
     context.subscriptions.push(watcher);
 
     // register commands.
@@ -65,7 +65,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     });
 
     registerCommand(context, "maven.project.refreshAll", (): void => {
-        provider.refresh();
+        mavenExplorerProvider.refresh();
     });
 
     registerCommand(context, "maven.project.effectivePom", async (node: Uri | MavenProject) => {
@@ -104,12 +104,12 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         if (item) {
             await Utils.executeHistoricalGoals([item.pomPath]);
         } else {
-            await Utils.executeHistoricalGoals(provider.mavenProjectNodes.map(_node => _node.pomPath));
+            await Utils.executeHistoricalGoals(mavenExplorerProvider.mavenProjectNodes.map(_node => _node.pomPath));
         }
     });
 
     registerCommand(context, "maven.goal.execute", async () => {
-        await Utils.executeMavenCommand(provider);
+        await Utils.executeMavenCommand();
     });
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
@@ -131,6 +131,6 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     // workspace folder change listener
     vscode.workspace.onDidChangeWorkspaceFolders((_e: vscode.WorkspaceFoldersChangeEvent) => {
-        provider.refresh();
+        mavenExplorerProvider.refresh();
     });
 }
