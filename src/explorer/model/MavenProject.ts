@@ -50,7 +50,7 @@ export class MavenProject implements ITreeItem {
             dark: Utils.getResourcePath("project.svg")
         };
         treeItem.contextValue = this.getContextValue();
-        treeItem.collapsibleState = this._hasModules ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
+        treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         treeItem.command = { title: "open pom", command: "maven.project.openPom", arguments: [this] };
         return treeItem;
     }

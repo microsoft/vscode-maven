@@ -9,11 +9,11 @@ import { MavenProject } from "./MavenProject";
 const CONTEXT_VALUE: string = "Menu";
 
 export abstract class Menu implements ITreeItem {
-    protected _projectNode: MavenProject;
+    protected _project: MavenProject;
     protected _name: string;
 
-    constructor(projectNode: MavenProject) {
-        this._projectNode = projectNode;
+    constructor(project: MavenProject) {
+        this._project = project;
     }
 
     public abstract getChildren(): vscode.ProviderResult<ITreeItem[]>;

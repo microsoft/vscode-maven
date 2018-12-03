@@ -193,13 +193,13 @@ export namespace Utils {
         }
     }
 
-    export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder): Promise<{}> {
+    export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder): Promise<any> {
         if (!workspaceFolder) {
             workspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
         }
         const mvnExecutable: string = await getMaven(workspaceFolder);
         const mvnString: string = wrappedWithQuotes(mvnExecutable);
-        const commandCwd: string = path.resolve(workspaceFolder.uri.fsPath, mvnExecutable, "..");
+        const commandCwd: string = path.resolve(workspaceFolder.uri.fsPath, mvnExecutable, ".."); // TODO: pomfile and workspacefolde = undefined, error
 
         const fullCommand: string = [
             mvnString,
@@ -213,14 +213,14 @@ export namespace Utils {
             cwd: commandCwd,
             env: Object.assign({}, process.env, customEnv)
         };
-        return new Promise<{}>((resolve: (value: {}) => void, reject: (e: Error) => void): void => {
+        return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {
             VSCodeUI.outputChannel.appendLine(fullCommand, "Background Command");
             child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
                 if (error) {
                     VSCodeUI.outputChannel.appendLine(error);
                     reject(error);
                 } else {
-                    resolve({ stdout });
+                    resolve(stdout);
                 }
             });
         });
