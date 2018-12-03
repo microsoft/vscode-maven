@@ -6,6 +6,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { Utils } from "../../Utils";
 import { ITreeItem } from "./ITreeItem";
+import { MavenPlugin } from "./MavenPlugin";
 import { ModulesMenu } from "./ModulesMenu";
 import { PluginsMenu } from "./PluginsMenu";
 
@@ -13,11 +14,14 @@ const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
 
+    private _rawEffectivePom: string;
+    private _effectivePom: any;
     private _pom: any;
     private _pomPath: string;
 
     constructor(pomPath: string) {
         this._pomPath = pomPath;
+        this.calculateEffectivePom();
     }
 
     public get name(): string {
@@ -26,6 +30,27 @@ export class MavenProject implements ITreeItem {
 
     public get moduleNames(): string[] {
         return _.get(this._pom, "project.modules[0].module") || [];
+    }
+
+    public async plugins(): Promise<MavenPlugin[]> {
+        await this.calculateEffectivePom();
+        if (_.get(this._effectivePom, "projects")) {
+            // multi-modules
+            return [];
+        } else {
+            // single-project
+            const plugins: any[] = _.get(this._effectivePom, "project.build[0].plugins[0].plugin");
+            if (plugins && plugins.length > 0) {
+                return plugins.map(p => new MavenPlugin(
+                    this,
+                    _.get(p, "groupId[0]") || "org.apache.maven.plugins",
+                    _.get(p, "artifactId[0]"),
+                    _.get(p, "version[0]")
+                ));
+            } else {
+                return [];
+            }
+        }
     }
 
     /**
@@ -49,7 +74,6 @@ export class MavenProject implements ITreeItem {
             light: Utils.getResourcePath("project.svg"),
             dark: Utils.getResourcePath("project.svg")
         };
-        treeItem.contextValue = this.getContextValue();
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         treeItem.command = { title: "open pom", command: "maven.project.openPom", arguments: [this] };
         return treeItem;
@@ -69,18 +93,37 @@ export class MavenProject implements ITreeItem {
     }
 
     public async hasValidPom(): Promise<boolean> {
-        await this._parseMavenProject();
+        await this._parsePom();
         return !!this._pom;
+    }
+
+    public async calculateEffectivePom(force?: boolean): Promise<void> {
+        if (!force && this._rawEffectivePom) {
+            return;
+        }
+
+        this._rawEffectivePom = await Utils.generateEffectivePom(this._pomPath);
+        await this._parseEffectivePom();
     }
 
     private get _hasModules(): boolean {
         return this.moduleNames.length > 0;
     }
 
-    private async _parseMavenProject(): Promise<void> {
+    private async _parsePom(): Promise<void> {
         if (!this._pom) {
             try {
                 this._pom = await Utils.parseXmlFile(this._pomPath);
+            } catch (error) {
+                // Error parsing pom.xml file
+            }
+        }
+    }
+
+    private async _parseEffectivePom(): Promise<void> {
+        if (!this._effectivePom) {
+            try {
+                this._effectivePom = await Utils.parseXmlContent(this._rawEffectivePom);
             } catch (error) {
                 // Error parsing pom.xml file
             }

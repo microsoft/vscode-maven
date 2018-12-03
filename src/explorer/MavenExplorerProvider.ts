@@ -25,7 +25,10 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     }
 
     public getTreeItem(element: ITreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        return element.getTreeItem();
+        return Promise.resolve(element.getTreeItem()).then(item => {
+            item.contextValue = element.getContextValue();
+            return item;
+        });
     }
     public getChildren(element?: ITreeItem): vscode.ProviderResult<ITreeItem[]> {
         if (element === undefined) {

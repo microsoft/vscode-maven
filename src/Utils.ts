@@ -310,24 +310,33 @@ export namespace Utils {
     }
 
     export async function showEffectivePom(pomPath: string): Promise<void> {
-        const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
-        await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+        const pomxml: string = await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
                 p.report({ message: "Generating effective pom ... " });
                 try {
-                    await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
-                    resolve();
+                    return resolve(Utils.generateEffectivePom(pomPath));
                 } catch (error) {
                     setUserError(error);
-                    reject(error);
+                    return reject(error);
                 }
             }
         ));
-        const pomxml: string = await Utils.readFileIfExists(outputPath);
-        fse.remove(outputPath);
         if (pomxml) {
             const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
             window.showTextDocument(document);
+        }
+    }
+
+    export async function generateEffectivePom(pomPath: string): Promise<string> {
+        const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
+        try {
+            await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
+            const pomxml: string = await Utils.readFileIfExists(outputPath);
+            fse.remove(outputPath);
+            return pomxml;
+        } catch (error) {
+            setUserError(error);
+            return Promise.reject(error);
         }
     }
 
