@@ -343,7 +343,7 @@ export namespace Utils {
         }
     }
 
-    export async function describePlugin(pluginId: string, pomPath: string): Promise<string> {
+    export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
         const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pomPath), pluginId);
         try {
             await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);

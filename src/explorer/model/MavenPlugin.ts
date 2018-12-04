@@ -52,7 +52,7 @@ export class MavenPlugin implements ITreeItem {
             return;
         }
 
-        const rawOutput: string = await Utils.describePlugin(this.pluginId, this.project.pomPath);
+        const rawOutput: string = await Utils.getPluginDescription(this.pluginId, this.project.pomPath);
         // find version
         if (this.version === undefined) {
             const versionRegExp: RegExp = /^Version: (.*)/m;
