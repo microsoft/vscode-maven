@@ -33,26 +33,32 @@ export class MavenProject implements ITreeItem {
     }
 
     public async plugins(): Promise<MavenPlugin[]> {
+        let plugins: any[];
         await this.calculateEffectivePom();
-        if (_.get(this._effectivePom, "projects")) {
-            // multi-modules
-            return [];
+        if (_.get(this._effectivePom, "projects.project")) {
+            // multi-module project
+            const project: any = (<any[]>this._effectivePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
+            if (project) {
+                plugins = _.get(project, "build[0].plugins[0].plugin");
+            }
         } else {
             // single-project
-            const plugins: any[] = _.get(this._effectivePom, "project.build[0].plugins[0].plugin");
-            if (plugins && plugins.length > 0) {
-                return plugins.map(p => new MavenPlugin(
-                    this,
-                    _.get(p, "groupId[0]") || "org.apache.maven.plugins",
-                    _.get(p, "artifactId[0]"),
-                    _.get(p, "version[0]")
-                ));
-            } else {
-                return [];
-            }
+            plugins = _.get(this._effectivePom, "project.build[0].plugins[0].plugin");
         }
+        return this.convertXmlPlugin(plugins);
     }
 
+    private convertXmlPlugin(plugins: any[]): MavenPlugin[] {
+        if (plugins && plugins.length > 0) {
+            return plugins.map(p => new MavenPlugin(
+                this,
+                _.get(p, "groupId[0]") || "org.apache.maven.plugins",
+                _.get(p, "artifactId[0]"),
+                _.get(p, "version[0]")
+            ));
+        }
+        return [];
+    }
     /**
      * @return list of absolute path of modules pom.xml.
      */

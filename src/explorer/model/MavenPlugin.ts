@@ -35,12 +35,12 @@ export class MavenPlugin implements ITreeItem {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        return new vscode.TreeItem(`${this.prefix}(${this.pluginId})`, vscode.TreeItemCollapsibleState.Collapsed);
+        return new vscode.TreeItem(this.pluginId, vscode.TreeItemCollapsibleState.Collapsed);
     }
 
     public async getChildren(): Promise<PluginGoal[]> {
         await this.loadMetadata();
-        return this.goals.map(goal => new PluginGoal(goal));
+        return this.goals.map(goal => new PluginGoal(this, goal));
     }
 
     private async loadMetadata(): Promise<void> {

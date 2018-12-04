@@ -9,6 +9,7 @@ import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { OperationCanceledError } from "./Errors";
 import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProject } from "./explorer/model/MavenProject";
+import { PluginGoal } from "./explorer/model/PluginGoal";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
@@ -90,7 +91,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
         await ArchetypeModule.generateFromArchetype(entry, operationId);
-    },              true);
+    }, true);
 
     registerCommand(context, "maven.archetype.update", async () => {
         await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: Progress<{}>) => {
@@ -110,6 +111,14 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     registerCommand(context, "maven.goal.execute", async () => {
         await Utils.executeMavenCommand();
+    });
+
+    registerCommand(context, "maven.plugin.execute", async (node: PluginGoal) => {
+        if (node &&
+            node.name &&
+            node.plugin && node.plugin.project && node.plugin.project.pomPath) {
+                Utils.executeInTerminal(node.name, node.plugin.project.pomPath);
+        }
     });
 
     context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {

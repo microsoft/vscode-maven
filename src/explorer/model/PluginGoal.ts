@@ -3,10 +3,14 @@
 
 import * as vscode from "vscode";
 import { ITreeItem } from "./ITreeItem";
+import { MavenPlugin } from "./MavenPlugin";
 
 export class PluginGoal implements ITreeItem {
+    public plugin: MavenPlugin;
     public name: string;
-    constructor(name: string) {
+
+    constructor(plugin: MavenPlugin, name: string) {
+        this.plugin = plugin;
         this.name = name;
     }
 

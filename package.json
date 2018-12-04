@@ -41,7 +41,8 @@
     "onCommand:maven.project.openPom",
     "onCommand:maven.archetype.generate",
     "onCommand:maven.archetype.update",
-    "onCommand:maven.history"
+    "onCommand:maven.history",
+    "onCommand:maven.plugin.execute"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -133,6 +134,11 @@
       {
         "command": "maven.goal.execute",
         "title": "%contributes.commands.maven.goal.execute%",
+        "category": "Maven"
+      },
+      {
+        "command": "maven.plugin.execute",
+        "title": "%contributes.commands.maven.plugin.execute%",
         "category": "Maven"
       }
     ],
@@ -278,6 +284,11 @@
           "command": "maven.project.effectivePom",
           "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "0-pom@1"
+        },
+        {
+          "command": "maven.plugin.execute",
+          "when": "view == mavenProjects && viewItem == PluginGoal",
+          "group": "1@1"
         }
       ]
     },
