@@ -41,7 +41,8 @@
     "onCommand:maven.project.openPom",
     "onCommand:maven.archetype.generate",
     "onCommand:maven.archetype.update",
-    "onCommand:maven.history"
+    "onCommand:maven.history",
+    "onCommand:maven.plugin.execute"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -134,6 +135,11 @@
         "command": "maven.goal.execute",
         "title": "%contributes.commands.maven.goal.execute%",
         "category": "Maven"
+      },
+      {
+        "command": "maven.plugin.execute",
+        "title": "%contributes.commands.maven.plugin.execute%",
+        "category": "Maven"
       }
     ],
     "views": {
@@ -221,63 +227,68 @@
       "view/item/context": [
         {
           "command": "maven.goal.custom",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@5"
         },
         {
           "command": "maven.history",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@0"
         },
         {
           "command": "maven.goal.clean",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@10"
         },
         {
           "command": "maven.goal.package",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@20"
         },
         {
           "command": "maven.goal.install",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@30"
         },
         {
           "command": "maven.goal.compile",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@40"
         },
         {
           "command": "maven.goal.validate",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@50"
         },
         {
           "command": "maven.goal.verify",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@60"
         },
         {
           "command": "maven.goal.test",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@70"
         },
         {
           "command": "maven.goal.site",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@80"
         },
         {
           "command": "maven.goal.deploy",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@90"
         },
         {
           "command": "maven.project.effectivePom",
-          "when": "view == mavenProjects && viewItem == ProjectItem",
+          "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "0-pom@1"
+        },
+        {
+          "command": "maven.plugin.execute",
+          "when": "view == mavenProjects && viewItem == PluginGoal",
+          "group": "1@1"
         }
       ]
     },
@@ -365,7 +376,9 @@
     "vscode": "^1.1.22"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.118",
     "fs-extra": "^4.0.3",
+    "lodash": "^4.17.11",
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
     "vscode-extension-telemetry-wrapper": "0.3.6",

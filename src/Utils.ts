@@ -12,8 +12,8 @@ import * as url from "url";
 import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, window, workspace, WorkspaceFolder } from 'vscode';
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
-import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
-import { MavenProjectNode } from "./explorer/model/MavenProjectNode";
+import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { MavenProject } from "./explorer/model/MavenProject";
 import { Settings } from "./Settings";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -193,12 +193,15 @@ export namespace Utils {
         }
     }
 
-    export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder): Promise<{}> {
+    export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder): Promise<any> {
         if (!workspaceFolder) {
             workspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
         }
         const mvnExecutable: string = await getMaven(workspaceFolder);
         const mvnString: string = wrappedWithQuotes(mvnExecutable);
+        // Todo with following line:
+        // 1. pomfile and workspacefolde = undefined, error
+        // 2. non-readable
         const commandCwd: string = path.resolve(workspaceFolder.uri.fsPath, mvnExecutable, "..");
 
         const fullCommand: string = [
@@ -213,14 +216,14 @@ export namespace Utils {
             cwd: commandCwd,
             env: Object.assign({}, process.env, customEnv)
         };
-        return new Promise<{}>((resolve: (value: {}) => void, reject: (e: Error) => void): void => {
+        return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {
             VSCodeUI.outputChannel.appendLine(fullCommand, "Background Command");
             child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
                 if (error) {
                     VSCodeUI.outputChannel.appendLine(error);
                     reject(error);
                 } else {
-                    resolve({ stdout });
+                    resolve(stdout);
                 }
             });
         });
@@ -310,24 +313,46 @@ export namespace Utils {
     }
 
     export async function showEffectivePom(pomPath: string): Promise<void> {
-        const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
-        await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+        const pomxml: string = await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
                 p.report({ message: "Generating effective pom ... " });
                 try {
-                    await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
-                    resolve();
+                    return resolve(Utils.getEffectivePom(pomPath));
                 } catch (error) {
                     setUserError(error);
-                    reject(error);
+                    return reject(error);
                 }
             }
         ));
-        const pomxml: string = await Utils.readFileIfExists(outputPath);
-        fse.remove(outputPath);
         if (pomxml) {
             const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
             window.showTextDocument(document);
+        }
+    }
+
+    export async function getEffectivePom(pomPath: string): Promise<string> {
+        const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
+        try {
+            await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
+            const pomxml: string = await Utils.readFileIfExists(outputPath);
+            fse.remove(outputPath);
+            return pomxml;
+        } catch (error) {
+            setUserError(error);
+            return Promise.reject(error);
+        }
+    }
+
+    export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
+        const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pomPath), pluginId);
+        try {
+            await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
+            const content: string = await Utils.readFileIfExists(outputPath);
+            fse.remove(outputPath);
+            return content;
+        } catch (error) {
+            setUserError(error);
+            return Promise.reject(error);
         }
     }
 
@@ -360,11 +385,11 @@ export namespace Utils {
         }
     }
 
-    export async function executeMavenCommand(provider: MavenExplorerProvider): Promise<void> {
+    export async function executeMavenCommand(): Promise<void> {
         // select a project(pomfile)
-        const item: MavenProjectNode = await VSCodeUI.getQuickPick<MavenProjectNode>(
-            provider.mavenProjectNodes,
-            node => `$(primitive-dot) ${node.mavenProject.name}`,
+        const item: MavenProject = await VSCodeUI.getQuickPick<MavenProject>(
+            mavenExplorerProvider.mavenProjectNodes,
+            node => `$(primitive-dot) ${node.name}`,
             null,
             node => node.pomPath,
             { placeHolder: "Select a Maven project." }
