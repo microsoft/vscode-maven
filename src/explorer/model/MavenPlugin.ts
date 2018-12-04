@@ -25,21 +25,25 @@ export class MavenPlugin implements ITreeItem {
         this.version = version;
     }
 
-    public async getGoals(): Promise<string[]> {
-        await this.loadMetadata();
-        return this.goals;
-    }
-
     public getContextValue(): string {
         return CONTEXT_VALUE;
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        return new vscode.TreeItem(this.pluginId, vscode.TreeItemCollapsibleState.Collapsed);
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.pluginId, vscode.TreeItemCollapsibleState.Collapsed);
+        treeItem.iconPath = {
+            light: Utils.getResourcePath("light/plugin.svg"),
+            dark: Utils.getResourcePath("dark/plugin.svg")
+        };
+        return treeItem;
     }
 
     public async getChildren(): Promise<PluginGoal[]> {
-        await this.loadMetadata();
+        try {
+            await this.loadMetadata();
+        } catch (error) {
+            return [];
+        }
         return this.goals.map(goal => new PluginGoal(this, goal));
     }
 
@@ -48,7 +52,7 @@ export class MavenPlugin implements ITreeItem {
             return;
         }
 
-        const rawOutput: string = await Utils.executeInBackground(`help:describe -Dplugin=${this.pluginId}`, this.project.pomPath);
+        const rawOutput: string = await Utils.describePlugin(this.pluginId, this.project.pomPath);
         // find version
         if (this.version === undefined) {
             const versionRegExp: RegExp = /^Version: (.*)/m;

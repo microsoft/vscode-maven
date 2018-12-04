@@ -317,7 +317,7 @@ export namespace Utils {
             async (resolve, reject): Promise<void> => {
                 p.report({ message: "Generating effective pom ... " });
                 try {
-                    return resolve(Utils.generateEffectivePom(pomPath));
+                    return resolve(Utils.getEffectivePom(pomPath));
                 } catch (error) {
                     setUserError(error);
                     return reject(error);
@@ -330,13 +330,26 @@ export namespace Utils {
         }
     }
 
-    export async function generateEffectivePom(pomPath: string): Promise<string> {
+    export async function getEffectivePom(pomPath: string): Promise<string> {
         const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
         try {
             await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
             const pomxml: string = await Utils.readFileIfExists(outputPath);
             fse.remove(outputPath);
             return pomxml;
+        } catch (error) {
+            setUserError(error);
+            return Promise.reject(error);
+        }
+    }
+
+    export async function describePlugin(pluginId: string, pomPath: string): Promise<string> {
+        const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pomPath), pluginId);
+        try {
+            await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
+            const content: string = await Utils.readFileIfExists(outputPath);
+            fse.remove(outputPath);
+            return content;
         } catch (error) {
             setUserError(error);
             return Promise.reject(error);

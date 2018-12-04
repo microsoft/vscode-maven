@@ -8,6 +8,7 @@
     "contributes.commands.maven.archetype.update": "更新Maven原型目录",
     "contributes.commands.maven.history": "历史 ...",
     "contributes.commands.maven.goal.execute": "执行命令",
+    "contributes.commands.maven.plugin.execute": "执行",
     "contributes.views.explorer.mavenProjects": "Maven项目",
 
     "configuration.maven.excludedFolders": "指定搜索Maven项目时要排除的文件夹。",

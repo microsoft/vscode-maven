@@ -48,17 +48,6 @@ export class MavenProject implements ITreeItem {
         return this.convertXmlPlugin(plugins);
     }
 
-    private convertXmlPlugin(plugins: any[]): MavenPlugin[] {
-        if (plugins && plugins.length > 0) {
-            return plugins.map(p => new MavenPlugin(
-                this,
-                _.get(p, "groupId[0]") || "org.apache.maven.plugins",
-                _.get(p, "artifactId[0]"),
-                _.get(p, "version[0]")
-            ));
-        }
-        return [];
-    }
     /**
      * @return list of absolute path of modules pom.xml.
      */
@@ -108,7 +97,7 @@ export class MavenProject implements ITreeItem {
             return;
         }
 
-        this._rawEffectivePom = await Utils.generateEffectivePom(this._pomPath);
+        this._rawEffectivePom = await Utils.getEffectivePom(this._pomPath);
         await this._parseEffectivePom();
     }
 
@@ -134,5 +123,17 @@ export class MavenProject implements ITreeItem {
                 // Error parsing pom.xml file
             }
         }
+    }
+
+    private convertXmlPlugin(plugins: any[]): MavenPlugin[] {
+        if (plugins && plugins.length > 0) {
+            return plugins.map(p => new MavenPlugin(
+                this,
+                _.get(p, "groupId[0]") || "org.apache.maven.plugins",
+                _.get(p, "artifactId[0]"),
+                _.get(p, "version[0]")
+            ));
+        }
+        return [];
     }
 }
