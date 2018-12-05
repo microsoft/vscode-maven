@@ -12,7 +12,7 @@ export class PluginsMenu extends Menu implements ITreeItem {
         this._name = "Plugins";
     }
 
-    public async getChildren() : Promise<MavenPlugin[]> {
-        return await this._project.plugins();
+    public getChildren() : MavenPlugin[] {
+        return this._project.plugins;
     }
 }

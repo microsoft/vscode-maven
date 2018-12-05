@@ -6,7 +6,6 @@ import * as vscode from "vscode";
 import { ITreeItem } from "./model/ITreeItem";
 import { MavenProject } from "./model/MavenProject";
 import { WorkspaceFolder } from "./model/WorkspaceFolder";
-import { PluginsMenu } from "./model/PluginsMenu";
 
 class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: vscode.Event<ITreeItem>;

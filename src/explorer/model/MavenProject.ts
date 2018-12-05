@@ -5,10 +5,10 @@ import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Utils } from "../../Utils";
+import { mavenExplorerProvider } from "../MavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
-import { mavenExplorerProvider } from "../MavenExplorerProvider";
 
 const CONTEXT_VALUE: string = "MavenProject";
 
@@ -36,7 +36,7 @@ export class MavenProject implements ITreeItem {
         return this._rawEffectivePom;
     }
 
-    public async plugins(): Promise<MavenPlugin[]> {
+    public get plugins(): MavenPlugin[] {
         let plugins: any[];
         if (_.get(this._effectivePom, "projects.project")) {
             // multi-module project
@@ -48,7 +48,7 @@ export class MavenProject implements ITreeItem {
             // single-project
             plugins = _.get(this._effectivePom, "project.build[0].plugins[0].plugin");
         }
-        return this.convertXmlPlugin(plugins);
+        return this._convertXmlPlugin(plugins);
     }
 
     /**
@@ -94,10 +94,6 @@ export class MavenProject implements ITreeItem {
         mavenExplorerProvider.refresh(this);
     }
 
-    private get _hasModules(): boolean {
-        return this.moduleNames.length > 0;
-    }
-
     private async _parsePom(): Promise<void> {
         this._pom = undefined;
         try {
@@ -116,7 +112,7 @@ export class MavenProject implements ITreeItem {
         }
     }
 
-    private convertXmlPlugin(plugins: any[]): MavenPlugin[] {
+    private _convertXmlPlugin(plugins: any[]): MavenPlugin[] {
         if (plugins && plugins.length > 0) {
             return plugins.map(p => new MavenPlugin(
                 this,
