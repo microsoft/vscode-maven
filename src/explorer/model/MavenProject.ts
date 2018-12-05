@@ -63,7 +63,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        await this._parsePom();
+        await this.parsePom();
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name || "[Corrupted]");
         treeItem.iconPath = {
             light: Utils.getResourcePath("project.svg"),
@@ -94,7 +94,7 @@ export class MavenProject implements ITreeItem {
         mavenExplorerProvider.refresh(this);
     }
 
-    private async _parsePom(): Promise<void> {
+    public async parsePom(): Promise<void> {
         this._pom = undefined;
         try {
             this._pom = await Utils.parseXmlFile(this._pomPath);

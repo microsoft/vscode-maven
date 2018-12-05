@@ -29,6 +29,7 @@ export class WorkspaceFolder implements ITreeItem {
             children.push(projectNode);
         }
         mavenExplorerProvider.updateProjects(...children);
+        await Promise.all(children.map(elem => elem.parsePom()));
         this.sortByName(children);
         return children;
     }
