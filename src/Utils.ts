@@ -317,6 +317,11 @@ export namespace Utils {
             async (resolve, reject): Promise<void> => {
                 p.report({ message: "Generating effective pom ... " });
                 try {
+                    const project: MavenProject = mavenExplorerProvider.mavenProjectNodes.find(e => e.pomPath === pomPath);
+                    if (project) {
+                        await project.calculateEffectivePom();
+                        return resolve(project.rawEffectivePom);
+                    }
                     return resolve(Utils.getEffectivePom(pomPath));
                 } catch (error) {
                     setUserError(error);

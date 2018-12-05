@@ -32,6 +32,10 @@ export class MavenProject implements ITreeItem {
         return _.get(this._pom, "project.modules[0].module") || [];
     }
 
+    public get rawEffectivePom(): string {
+        return this._rawEffectivePom;
+    }
+
     public async plugins(): Promise<MavenPlugin[]> {
         let plugins: any[];
         await this.calculateEffectivePom();
