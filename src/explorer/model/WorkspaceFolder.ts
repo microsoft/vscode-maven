@@ -25,10 +25,10 @@ export class WorkspaceFolder implements ITreeItem {
         const children: MavenProject[] = [];
 
         for (const pomPath of await Utils.getAllPomPaths(this._workspaceFolder)) {
-            const projectNode: MavenProject = new MavenProject(pomPath);
+            const projectNode: MavenProject = mavenExplorerProvider.getMavenProject(pomPath) || new MavenProject(pomPath);
             children.push(projectNode);
         }
-        mavenExplorerProvider.storeItems(...children);
+        mavenExplorerProvider.updateProjects(...children);
         this.sortByName(children);
         return children;
     }

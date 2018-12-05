@@ -24,11 +24,24 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         return Array.from(this._projectMap.values());
     }
 
-    public storeItems(...items: MavenProject[]): void {
+    public updateProjects(...items: MavenProject[]): void {
         for (const item of items) {
             this._projectMap.set(item.pomPath, item);
         }
     }
+
+    public addProject(pomPath: string): void {
+        this._projectMap.set(pomPath, new MavenProject(pomPath));
+        this.refresh();
+    }
+
+    public removeProject(pomPath: string): void {
+        if (this._projectMap.has(pomPath)) {
+            this._projectMap.delete(pomPath);
+            this.refresh();
+        }
+    }
+
     public getMavenProject(pomPath: string): MavenProject {
         return this._projectMap.get(pomPath);
     }
