@@ -8,6 +8,7 @@ import { dispose as disposeTelemetryWrapper, initializeFromJsonFile, instrumentO
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { OperationCanceledError } from "./Errors";
 import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { Settings } from "./Settings";
@@ -65,8 +66,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         });
     });
 
-    registerCommand(context, "maven.project.refreshAll", (): void => {
-        mavenExplorerProvider.refresh();
+    registerCommand(context, "maven.explorer.refresh", (item?: ITreeItem): void => {
+        mavenExplorerProvider.refresh(item);
     });
 
     registerCommand(context, "maven.project.effectivePom", async (node: Uri | MavenProject) => {

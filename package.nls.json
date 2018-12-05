@@ -1,6 +1,6 @@
 {
     "description": "Manage Maven projects, execute goals, generate project from archetype, improve user experience for Java developers.",
-    "contributes.commands.maven.project.refreshAll": "Refresh",
+    "contributes.commands.maven.explorer.refresh": "Refresh",
     "contributes.commands.maven.goal.custom": "Custom goals ... ",
     "contributes.commands.maven.project.effectivePom": "Effective POM",
     "contributes.commands.maven.project.openPom": "Open POM file",

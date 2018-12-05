@@ -344,7 +344,7 @@ export namespace Utils {
     }
 
     export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
-        const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pomPath), pluginId);
+        const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pluginId));
         try {
             await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
             const content: string = await Utils.readFileIfExists(outputPath);

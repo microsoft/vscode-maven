@@ -34,13 +34,16 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         if (element === undefined) {
             return this._workspaceFolderNodes;
         } else {
-            return element.getChildren();
+            return element.getChildren && element.getChildren();
         }
     }
 
-    public refresh(): void {
+    public refresh(item?: ITreeItem): void {
         this._updateWorkspaceFolderNodes();
-        this._onDidChangeTreeData.fire();
+        if (item && item.removeChildren) {
+            item.removeChildren();
+        }
+        this._onDidChangeTreeData.fire(item);
     }
 
     private _updateWorkspaceFolderNodes(): void {
