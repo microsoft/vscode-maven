@@ -313,22 +313,15 @@ export namespace Utils {
     }
 
     export async function showEffectivePom(pomPath: string): Promise<void> {
-        const pomxml: string = await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
-            async (resolve, reject): Promise<void> => {
-                p.report({ message: "Generating effective pom ... " });
-                try {
-                    const project: MavenProject = mavenExplorerProvider.mavenProjectNodes.find(e => e.pomPath === pomPath);
-                    if (project) {
-                        await project.calculateEffectivePom();
-                        return resolve(project.rawEffectivePom);
-                    }
-                    return resolve(Utils.getEffectivePom(pomPath));
-                } catch (error) {
-                    setUserError(error);
-                    return reject(error);
-                }
-            }
-        ));
+        let pomxml: string;
+        const project: MavenProject = mavenExplorerProvider.getMavenProject(pomPath);
+        if (project) {
+            await project.calculateEffectivePom();
+            pomxml = project.rawEffectivePom;
+        } else {
+            pomxml = await Utils.getEffectivePom(pomPath);
+        }
+
         if (pomxml) {
             const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
             window.showTextDocument(document);
@@ -336,16 +329,21 @@ export namespace Utils {
     }
 
     export async function getEffectivePom(pomPath: string): Promise<string> {
-        const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
-        try {
-            await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
-            const pomxml: string = await Utils.readFileIfExists(outputPath);
-            fse.remove(outputPath);
-            return pomxml;
-        } catch (error) {
-            setUserError(error);
-            return Promise.reject(error);
-        }
+        return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+            async (resolve, reject): Promise<void> => {
+                p.report({ message: "Maven: Generating Effective POM ... " });
+                try {
+                    const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
+                    await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
+                    const pomxml: string = await Utils.readFileIfExists(outputPath);
+                    fse.remove(outputPath);
+                    return resolve(pomxml);
+                } catch (error) {
+                    setUserError(error);
+                    return reject(error);
+                }
+            }
+        ));
     }
 
     export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {

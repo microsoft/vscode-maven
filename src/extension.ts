@@ -54,9 +54,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     // pom.xml listener to refresh tree view
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
-    watcher.onDidCreate(() => mavenExplorerProvider.refresh());
-    watcher.onDidChange(() => mavenExplorerProvider.refresh());
-    watcher.onDidDelete(() => mavenExplorerProvider.refresh());
+    watcher.onDidCreate((e: Uri) => mavenExplorerProvider.refresh()); // TODO
+    watcher.onDidChange((e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).calculateEffectivePom(true));
+    watcher.onDidDelete((e: Uri) => mavenExplorerProvider.refresh()); // TODO
     context.subscriptions.push(watcher);
 
     // register commands.

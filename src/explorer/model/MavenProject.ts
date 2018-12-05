@@ -7,8 +7,8 @@ import * as vscode from "vscode";
 import { Utils } from "../../Utils";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
-import { ModulesMenu } from "./ModulesMenu";
 import { PluginsMenu } from "./PluginsMenu";
+import { mavenExplorerProvider } from "../MavenExplorerProvider";
 
 const CONTEXT_VALUE: string = "MavenProject";
 
@@ -38,7 +38,6 @@ export class MavenProject implements ITreeItem {
 
     public async plugins(): Promise<MavenPlugin[]> {
         let plugins: any[];
-        await this.calculateEffectivePom();
         if (_.get(this._effectivePom, "projects.project")) {
             // multi-module project
             const project: any = (<any[]>this._effectivePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
@@ -64,11 +63,8 @@ export class MavenProject implements ITreeItem {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        if (! await this.hasValidPom()) {
-            return undefined;
-        }
-
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name);
+        await this._parsePom();
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name || "[Corrupted]");
         treeItem.iconPath = {
             light: Utils.getResourcePath("project.svg"),
             dark: Utils.getResourcePath("project.svg")
@@ -84,16 +80,8 @@ export class MavenProject implements ITreeItem {
 
     public getChildren(): vscode.ProviderResult<ITreeItem[]> {
         const ret: ITreeItem[] = [];
-        if (this._hasModules) {
-            ret.push(new ModulesMenu(this));
-        }
         ret.push(new PluginsMenu(this));
         return ret;
-    }
-
-    public async hasValidPom(): Promise<boolean> {
-        await this._parsePom();
-        return !!this._pom;
     }
 
     public async calculateEffectivePom(force?: boolean): Promise<void> {
@@ -103,6 +91,7 @@ export class MavenProject implements ITreeItem {
 
         this._rawEffectivePom = await Utils.getEffectivePom(this._pomPath);
         await this._parseEffectivePom();
+        mavenExplorerProvider.refresh(this);
     }
 
     private get _hasModules(): boolean {
@@ -110,22 +99,20 @@ export class MavenProject implements ITreeItem {
     }
 
     private async _parsePom(): Promise<void> {
-        if (!this._pom) {
-            try {
-                this._pom = await Utils.parseXmlFile(this._pomPath);
-            } catch (error) {
-                // Error parsing pom.xml file
-            }
+        this._pom = undefined;
+        try {
+            this._pom = await Utils.parseXmlFile(this._pomPath);
+        } catch (error) {
+            // Error parsing pom.xml file
         }
     }
 
     private async _parseEffectivePom(): Promise<void> {
-        if (!this._effectivePom) {
-            try {
-                this._effectivePom = await Utils.parseXmlContent(this._rawEffectivePom);
-            } catch (error) {
-                // Error parsing pom.xml file
-            }
+        this._effectivePom = undefined;
+        try {
+            this._effectivePom = await Utils.parseXmlContent(this._rawEffectivePom);
+        } catch (error) {
+            // Error parsing effective-pom file
         }
     }
 

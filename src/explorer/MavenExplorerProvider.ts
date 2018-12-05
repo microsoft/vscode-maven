@@ -6,12 +6,13 @@ import * as vscode from "vscode";
 import { ITreeItem } from "./model/ITreeItem";
 import { MavenProject } from "./model/MavenProject";
 import { WorkspaceFolder } from "./model/WorkspaceFolder";
+import { PluginsMenu } from "./model/PluginsMenu";
 
 class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: vscode.Event<ITreeItem>;
     private _onDidChangeTreeData: vscode.EventEmitter<ITreeItem>;
 
-    private _workspaceFolderNodes: WorkspaceFolder[];
+    private _projectMap: Map<string, MavenProject> = new Map();
 
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter<ITreeItem>();
@@ -21,35 +22,39 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     }
 
     public get mavenProjectNodes(): MavenProject[] {
-        return Array.prototype.concat.apply([], this._workspaceFolderNodes.map(ws => ws.children));
+        return Array.from(this._projectMap.values());
     }
 
+    public storeItems(...items: MavenProject[]): void {
+        for (const item of items) {
+            this._projectMap.set(item.pomPath, item);
+        }
+    }
+    public getMavenProject(pomPath: string): MavenProject {
+        return this._projectMap.get(pomPath);
+    }
     public getTreeItem(element: ITreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return Promise.resolve(element.getTreeItem()).then(item => {
             item.contextValue = element.getContextValue();
             return item;
         });
     }
-    public getChildren(element?: ITreeItem): vscode.ProviderResult<ITreeItem[]> {
+    public async getChildren(element?: ITreeItem): Promise<ITreeItem[]> {
         if (element === undefined) {
-            return this._workspaceFolderNodes;
+            if (!vscode.workspace.workspaceFolders) {
+                return undefined;
+            }
+            if (vscode.workspace.workspaceFolders.length === 1) {
+                return await new WorkspaceFolder(vscode.workspace.workspaceFolders[0]).getChildren();
+            }
+            return vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolder(workspaceFolder));
         } else {
             return element.getChildren && element.getChildren();
         }
     }
 
     public refresh(item?: ITreeItem): void {
-        this._updateWorkspaceFolderNodes();
-        if (item && item.removeChildren) {
-            item.removeChildren();
-        }
-        this._onDidChangeTreeData.fire(item);
-    }
-
-    private _updateWorkspaceFolderNodes(): void {
-        this._workspaceFolderNodes = vscode.workspace.workspaceFolders ?
-            vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolder(workspaceFolder)) :
-            [];
+        return this._onDidChangeTreeData.fire(item);
     }
 }
 
