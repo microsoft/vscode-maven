@@ -25,7 +25,7 @@
   },
   "activationEvents": [
     "workspaceContains:**/pom.xml",
-    "onCommand:maven.project.refreshAll",
+    "onCommand:maven.explorer.refresh",
     "onCommand:maven.goal.clean",
     "onCommand:maven.goal.validate",
     "onCommand:maven.goal.compile",
@@ -48,8 +48,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "maven.project.refreshAll",
-        "title": "%contributes.commands.maven.project.refreshAll%",
+        "command": "maven.explorer.refresh",
+        "title": "%contributes.commands.maven.explorer.refresh%",
         "category": "Maven",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -198,7 +198,7 @@
           "when": "never"
         },
         {
-          "command": "maven.project.refreshAll",
+          "command": "maven.explorer.refresh",
           "when": "never"
         },
         {
@@ -219,7 +219,7 @@
       ],
       "view/title": [
         {
-          "command": "maven.project.refreshAll",
+          "command": "maven.explorer.refresh",
           "when": "view == mavenProjects",
           "group": "navigation@2"
         }
@@ -288,6 +288,16 @@
         {
           "command": "maven.plugin.execute",
           "when": "view == mavenProjects && viewItem == PluginGoal",
+          "group": "1@1"
+        },
+        {
+          "command": "maven.explorer.refresh",
+          "when": "view == mavenProjects && viewItem == MavenPlugin",
+          "group": "1@1"
+        },
+        {
+          "command": "maven.explorer.refresh",
+          "when": "view == mavenProjects && viewItem == Menu",
           "group": "1@1"
         }
       ]

@@ -1,6 +1,6 @@
 {
     "description": "管理Maven项目，执行命令，从原型生成项目，改善Java开发人员的用户体验。",
-    "contributes.commands.maven.project.refreshAll": "刷新",
+    "contributes.commands.maven.explorer.refresh": "刷新",
     "contributes.commands.maven.goal.custom": "自定义 ... ",
     "contributes.commands.maven.project.effectivePom": "有效的POM",
     "contributes.commands.maven.project.openPom": "打开POM文件",
