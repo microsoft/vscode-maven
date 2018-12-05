@@ -47,6 +47,10 @@ export class MavenPlugin implements ITreeItem {
         return this.goals.map(goal => new PluginGoal(this, goal));
     }
 
+    public removeChildren(): void {
+        this.goals = undefined;
+    }
+
     private async loadMetadata(): Promise<void> {
         if (this.prefix !== undefined && this.goals !== undefined) {
             return;

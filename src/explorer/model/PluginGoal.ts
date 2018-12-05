@@ -20,8 +20,4 @@ export class PluginGoal implements ITreeItem {
     public getTreeItem(): vscode.TreeItem {
         return new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.None);
     }
-    public getChildren(): ITreeItem[] {
-        return null;
-    }
-
 }
