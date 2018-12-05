@@ -66,7 +66,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         });
     });
 
-    registerCommand(context, "maven.project.refreshAll", (item?: ITreeItem): void => {
+    registerCommand(context, "maven.explorer.refresh", (item?: ITreeItem): void => {
         mavenExplorerProvider.refresh(item);
     });
 
