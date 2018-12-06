@@ -28,6 +28,10 @@ export class MavenProject implements ITreeItem {
         return _.get(this._pom, "project.artifactId[0]");
     }
 
+    public get packaging(): string {
+        return _.get(this._pom, "project.packaging[0]");
+    }
+
     public get moduleNames(): string[] {
         return _.get(this._pom, "project.modules[0].module") || [];
     }
@@ -64,7 +68,12 @@ export class MavenProject implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         await this.parsePom();
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name || "[Corrupted]");
+        let label: string = this.name || "[Corrupted]";
+        // Mark root POM for awareness. An alternative is to use different icons.
+        if (this.packaging === "pom") {
+            label += " (root)";
+        }
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
             light: Utils.getResourcePath("project.svg"),
             dark: Utils.getResourcePath("project.svg")
