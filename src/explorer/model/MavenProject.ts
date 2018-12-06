@@ -5,9 +5,9 @@ import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Utils } from "../../Utils";
+import { mavenExplorerProvider } from "../MavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
-import { ModulesMenu } from "./ModulesMenu";
 import { PluginsMenu } from "./PluginsMenu";
 
 const CONTEXT_VALUE: string = "MavenProject";
@@ -32,9 +32,12 @@ export class MavenProject implements ITreeItem {
         return _.get(this._pom, "project.modules[0].module") || [];
     }
 
-    public async plugins(): Promise<MavenPlugin[]> {
+    public get rawEffectivePom(): string {
+        return this._rawEffectivePom;
+    }
+
+    public get plugins(): MavenPlugin[] {
         let plugins: any[];
-        await this.calculateEffectivePom();
         if (_.get(this._effectivePom, "projects.project")) {
             // multi-module project
             const project: any = (<any[]>this._effectivePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
@@ -45,7 +48,7 @@ export class MavenProject implements ITreeItem {
             // single-project
             plugins = _.get(this._effectivePom, "project.build[0].plugins[0].plugin");
         }
-        return this.convertXmlPlugin(plugins);
+        return this._convertXmlPlugin(plugins);
     }
 
     /**
@@ -60,11 +63,8 @@ export class MavenProject implements ITreeItem {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        if (! await this.hasValidPom()) {
-            return undefined;
-        }
-
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name);
+        await this.parsePom();
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name || "[Corrupted]");
         treeItem.iconPath = {
             light: Utils.getResourcePath("project.svg"),
             dark: Utils.getResourcePath("project.svg")
@@ -80,16 +80,8 @@ export class MavenProject implements ITreeItem {
 
     public getChildren(): vscode.ProviderResult<ITreeItem[]> {
         const ret: ITreeItem[] = [];
-        if (this._hasModules) {
-            ret.push(new ModulesMenu(this));
-        }
         ret.push(new PluginsMenu(this));
         return ret;
-    }
-
-    public async hasValidPom(): Promise<boolean> {
-        await this._parsePom();
-        return !!this._pom;
     }
 
     public async calculateEffectivePom(force?: boolean): Promise<void> {
@@ -99,33 +91,38 @@ export class MavenProject implements ITreeItem {
 
         this._rawEffectivePom = await Utils.getEffectivePom(this._pomPath);
         await this._parseEffectivePom();
+        mavenExplorerProvider.refresh(this);
     }
 
-    private get _hasModules(): boolean {
-        return this.moduleNames.length > 0;
+    public async refreshPom(): Promise<void> {
+        await this.parsePom();
+        mavenExplorerProvider.refresh(this);
     }
 
-    private async _parsePom(): Promise<void> {
-        if (!this._pom) {
-            try {
-                this._pom = await Utils.parseXmlFile(this._pomPath);
-            } catch (error) {
-                // Error parsing pom.xml file
-            }
+    public async refresh(): Promise<void> {
+        await this.refreshPom();
+        await this.calculateEffectivePom(true);
+    }
+
+    public async parsePom(): Promise<void> {
+        this._pom = undefined;
+        try {
+            this._pom = await Utils.parseXmlFile(this._pomPath);
+        } catch (error) {
+            // Error parsing pom.xml file
         }
     }
 
     private async _parseEffectivePom(): Promise<void> {
-        if (!this._effectivePom) {
-            try {
-                this._effectivePom = await Utils.parseXmlContent(this._rawEffectivePom);
-            } catch (error) {
-                // Error parsing pom.xml file
-            }
+        this._effectivePom = undefined;
+        try {
+            this._effectivePom = await Utils.parseXmlContent(this._rawEffectivePom);
+        } catch (error) {
+            // Error parsing effective-pom file
         }
     }
 
-    private convertXmlPlugin(plugins: any[]): MavenPlugin[] {
+    private _convertXmlPlugin(plugins: any[]): MavenPlugin[] {
         if (plugins && plugins.length > 0) {
             return plugins.map(p => new MavenPlugin(
                 this,

@@ -6,6 +6,9 @@ import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
 
+/**
+ * @deprecated
+ */
 export class ModulesMenu extends Menu implements ITreeItem {
     constructor(projectNode: MavenProject) {
         super(projectNode);
@@ -14,7 +17,7 @@ export class ModulesMenu extends Menu implements ITreeItem {
 
     public getChildren() : MavenProject[] {
         return this._project.modules.map(modulePomPath => {
-            return mavenExplorerProvider.mavenProjectNodes.find(elem => elem.pomPath === modulePomPath) || new MavenProject(modulePomPath);
+            return mavenExplorerProvider.getMavenProject(modulePomPath) || new MavenProject(modulePomPath);
         });
     }
 }

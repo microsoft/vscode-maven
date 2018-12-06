@@ -9,7 +9,7 @@ import * as md5 from "md5";
 import * as os from "os";
 import * as path from "path";
 import * as url from "url";
-import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, window, workspace, WorkspaceFolder } from 'vscode';
+import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from 'vscode';
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
@@ -313,34 +313,37 @@ export namespace Utils {
     }
 
     export async function showEffectivePom(pomPath: string): Promise<void> {
-        const pomxml: string = await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+        let pomxml: string;
+        const project: MavenProject = mavenExplorerProvider.getMavenProject(pomPath);
+        if (project) {
+            await project.calculateEffectivePom();
+            pomxml = project.rawEffectivePom;
+        } else {
+            pomxml = await Utils.getEffectivePom(pomPath);
+        }
+
+        if (pomxml) {
+            const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
+            window.showTextDocument(document, ViewColumn.Active);
+        }
+    }
+
+    export async function getEffectivePom(pomPath: string): Promise<string> {
+        return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
-                p.report({ message: "Generating effective pom ... " });
+                p.report({ message: "Maven: Generating Effective POM ... " });
                 try {
-                    return resolve(Utils.getEffectivePom(pomPath));
+                    const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
+                    await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
+                    const pomxml: string = await Utils.readFileIfExists(outputPath);
+                    fse.remove(outputPath);
+                    return resolve(pomxml);
                 } catch (error) {
                     setUserError(error);
                     return reject(error);
                 }
             }
         ));
-        if (pomxml) {
-            const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
-            window.showTextDocument(document);
-        }
-    }
-
-    export async function getEffectivePom(pomPath: string): Promise<string> {
-        const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
-        try {
-            await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
-            const pomxml: string = await Utils.readFileIfExists(outputPath);
-            fse.remove(outputPath);
-            return pomxml;
-        } catch (error) {
-            setUserError(error);
-            return Promise.reject(error);
-        }
     }
 
     export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
