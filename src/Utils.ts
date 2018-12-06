@@ -9,7 +9,7 @@ import * as md5 from "md5";
 import * as os from "os";
 import * as path from "path";
 import * as url from "url";
-import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, window, workspace, WorkspaceFolder } from 'vscode';
+import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, window, workspace, WorkspaceFolder, ViewColumn } from 'vscode';
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
@@ -324,7 +324,7 @@ export namespace Utils {
 
         if (pomxml) {
             const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
-            window.showTextDocument(document);
+            window.showTextDocument(document, ViewColumn.Active);
         }
     }
 
