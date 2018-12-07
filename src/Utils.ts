@@ -303,7 +303,7 @@ export namespace Utils {
     }
 
     export function getResourcePath(...args: string[]): string {
-        return path.join(__filename, "..", "..", "resources", ...args);
+        return getPathToExtensionRoot("resources", ...args);
     }
 
     export async function getAllPomPaths(workspaceFolder: WorkspaceFolder): Promise<string[]> {
