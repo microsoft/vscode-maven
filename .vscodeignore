@@ -1,7 +1,6 @@
 .vscode/**
 .vscode-test/**
-out/test/**
-out/**/*.map
+dist/**/*.map
 src/**
 images/**
 .gitignore
@@ -9,3 +8,6 @@ tsconfig.json
 TestPlan.md
 .github/**
 .travis.yml
+webpack.*.js
+node_modules
+out/**

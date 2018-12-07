@@ -44,7 +44,7 @@
     "onCommand:maven.history",
     "onCommand:maven.plugin.execute"
   ],
-  "main": "./out/extension",
+  "main": "./dist/extension",
   "contributes": {
     "commands": [
       {
@@ -366,12 +366,14 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "webpack --mode production",
     "compile": "tsc -p ./",
     "tslint": "tslint -t verbose src/*.ts",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "webpack": "webpack --mode development",
+    "webpack-dev": "webpack --mode development --watch"
   },
   "devDependencies": {
     "@types/fs-extra": "^4.0.5",
@@ -384,7 +386,10 @@
     "tslint": "^5.8.0",
     "tslint-microsoft-contrib": "^5.0.1",
     "typescript": "^2.9.2",
-    "vscode": "^1.1.22"
+    "vscode": "^1.1.22",
+    "ts-loader": "^4.4.2",
+    "webpack": "^4.19.1",
+    "webpack-cli": "^3.1.0"
   },
   "dependencies": {
     "fs-extra": "^4.0.3",
