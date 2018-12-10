@@ -4,7 +4,7 @@
 "use strict";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
-import { dispose as disposeTelemetryWrapper, initializeFromJsonFile, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
+import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { OperationCanceledError } from "./Errors";
 import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
@@ -20,7 +20,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // Usage data statistics.
     if (Utils.getAiKey()) {
         TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
-        await initializeFromJsonFile(context.asAbsolutePath("./package.json"));
+        await initialize(Utils.getExtensionId(), Utils.getExtensionVersion(), Utils.getAiKey());
     }
     await instrumentOperation("activation", doActivate)(context);
 }
@@ -118,7 +118,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         if (node &&
             node.name &&
             node.plugin && node.plugin.project && node.plugin.project.pomPath) {
-                Utils.executeInTerminal(node.name, node.plugin.project.pomPath);
+            Utils.executeInTerminal(node.name, node.plugin.project.pomPath);
         }
     });
 

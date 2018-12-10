@@ -7,3 +7,4 @@ yarn.lock
 .gradle/
 .DS_Store
 .test
+dist
