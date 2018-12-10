@@ -3,6 +3,8 @@
 
 import * as vscode from "vscode";
 import { Utils } from "../../Utils";
+import { mavenExplorerProvider } from "../MavenExplorerProvider";
+import { pluginInfoProvider } from "../PluginInfoProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { PluginGoal } from "./PluginGoal";
@@ -23,6 +25,7 @@ export class MavenPlugin implements ITreeItem {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
+        this.loadMetadata();
     }
 
     public getContextValue(): string {
@@ -30,7 +33,8 @@ export class MavenPlugin implements ITreeItem {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.pluginId, vscode.TreeItemCollapsibleState.Collapsed);
+        const label: string = this.prefix ? `${this.prefix} (${this.pluginId})` : this.pluginId;
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {
             light: Utils.getResourcePath("light/plug.svg"),
             dark: Utils.getResourcePath("dark/plug.svg")
@@ -56,33 +60,10 @@ export class MavenPlugin implements ITreeItem {
             return;
         }
 
-        const rawOutput: string = await Utils.getPluginDescription(this.pluginId, this.project.pomPath);
-        // find version
-        if (this.version === undefined) {
-            const versionRegExp: RegExp = /^Version: (.*)/m;
-            const versionMatch: string[] = rawOutput.match(versionRegExp);
-            if (versionMatch && versionMatch.length === 2) {
-                this.version = versionMatch[1];
-            }
-        }
-
-        // find prefix
-        const prefixRegExp: RegExp = /^Goal Prefix: (.*)/m;
-        const prefixMatch: string[] = rawOutput.match(prefixRegExp);
-        if (prefixMatch && prefixMatch.length === 2) {
-            this.prefix = prefixMatch[1];
-        }
-
-        // find goals
-        if (this.version && this.prefix) {
-            const goalRegExp: RegExp = new RegExp(`^${this.prefix}:(.*)`, "gm");
-            const goals: string[] = rawOutput.match(goalRegExp);
-            if (goals) {
-                this.goals = goals || [];
-            }
-        } else {
-            this.goals = [];
-        }
+        const { prefix, goals } = await pluginInfoProvider.getPluginInfo(this.project.pomPath, this.groupId, this.artifactId, this.version);
+        this.prefix = prefix;
+        this.goals = goals;
+        mavenExplorerProvider.refresh(this);
     }
 
     private get pluginId(): string {
