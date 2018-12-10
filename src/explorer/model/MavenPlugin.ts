@@ -32,8 +32,8 @@ export class MavenPlugin implements ITreeItem {
     public async getTreeItem(): Promise<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.pluginId, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {
-            light: Utils.getResourcePath("light/plugin.svg"),
-            dark: Utils.getResourcePath("dark/plugin.svg")
+            light: Utils.getResourcePath("light/plug.svg"),
+            dark: Utils.getResourcePath("dark/plug.svg")
         };
         return treeItem;
     }

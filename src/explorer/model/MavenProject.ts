@@ -68,15 +68,12 @@ export class MavenProject implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         await this.parsePom();
-        let label: string = this.name || "[Corrupted]";
-        // Mark root POM for awareness. An alternative is to use different icons.
-        if (this.packaging === "pom") {
-            label += " (root)";
-        }
+        const label: string = this.name || "[Corrupted]";
+        const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
-            light: Utils.getResourcePath("project.svg"),
-            dark: Utils.getResourcePath("project.svg")
+            light: Utils.getResourcePath("light", iconFile),
+            dark: Utils.getResourcePath("dark", iconFile)
         };
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         treeItem.command = { title: "open pom", command: "maven.project.openPom", arguments: [this] };
