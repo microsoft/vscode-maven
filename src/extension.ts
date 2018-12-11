@@ -11,7 +11,7 @@ import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
-import { pluginInfoProvider } from "./explorer/PluginInfoProvider";
+import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";

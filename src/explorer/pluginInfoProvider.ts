@@ -53,7 +53,7 @@ class PluginInfoProvider {
     private async fetchFromRepository(projectBasePath: string, gid: string, aid: string, version?: string): Promise<IPluginInfo> {
         let prefix: string;
         const goals: string[] = [];
-        const rawOutput: string = await Utils.getPluginDescription(this.pluginId(gid, aid, version), projectBasePath);
+        const rawOutput: string = await Utils.getPluginDescription(this.getPluginId(gid, aid, version), projectBasePath);
 
         const versionRegExp: RegExp = /^Version: (.*)/m;
         const versionMatch: string[] = rawOutput.match(versionRegExp);
@@ -80,10 +80,9 @@ class PluginInfoProvider {
         return { prefix, goals };
     }
 
-    private pluginId(gid: string, aid: string, version?: string): string {
+    private getPluginId(gid: string, aid: string, version?: string): string {
         return `${gid}:${aid}${version ? `:${version}` : ""}`;
     }
 }
 
-// tslint:disable-next-line:export-name
 export const pluginInfoProvider: PluginInfoProvider = new PluginInfoProvider();
