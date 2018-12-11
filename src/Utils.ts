@@ -10,7 +10,7 @@ import * as os from "os";
 import * as path from "path";
 import * as url from "url";
 import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from 'vscode';
-import { setUserError } from "vscode-extension-telemetry-wrapper";
+import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProject } from "./explorer/model/MavenProject";
@@ -89,7 +89,7 @@ export namespace Utils {
     }
 
     export function getEffectivePomOutputPath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), "effective-pom.xml");
+        return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), createUuid());
     }
 
     export function getCommandHistoryCachePath(pomXmlFilePath: string): string {
@@ -336,7 +336,7 @@ export namespace Utils {
                     const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
                     await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
                     const pomxml: string = await Utils.readFileIfExists(outputPath);
-                    fse.remove(outputPath);
+                    await fse.remove(outputPath);
                     return resolve(pomxml);
                 } catch (error) {
                     setUserError(error);
