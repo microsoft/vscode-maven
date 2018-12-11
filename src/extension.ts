@@ -66,9 +66,12 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             Utils.executeInTerminal(goal, node.pomPath);
         });
     });
-
-    registerCommand(context, "maven.explorer.refresh", (item?: ITreeItem): void => {
-        mavenExplorerProvider.refresh(item);
+    registerCommand(context, "maven.explorer.refresh", async (item?: ITreeItem): Promise<void> => {
+        if (item && item.refresh) {
+            await item.refresh();
+        } else {
+            mavenExplorerProvider.refresh(item);
+        }
     });
 
     registerCommand(context, "maven.project.effectivePom", async (node: Uri | MavenProject) => {
