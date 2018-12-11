@@ -11,6 +11,7 @@ import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
+import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
@@ -49,7 +50,7 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
 
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     await vscode.commands.executeCommand("setContext", "mavenExtensionActivated", true);
-
+    pluginInfoProvider.initialize(context);
     context.subscriptions.push(vscode.window.registerTreeDataProvider("mavenProjects", mavenExplorerProvider));
 
     // pom.xml listener to refresh tree view
