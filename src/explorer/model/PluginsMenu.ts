@@ -26,4 +26,8 @@ export class PluginsMenu extends Menu implements ITreeItem {
         };
         return treeItem;
     }
+
+    public async refresh(): Promise<void> {
+        await this._project.calculateEffectivePom(true);
+    }
 }

@@ -68,7 +68,7 @@ export class MavenProject implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         await this.parsePom();
-        const label: string = this.name || "[Corrupted]";
+        const label: string = `${this.name || "[Corrupted]"}${this._effectivePom === undefined ? " (Out of Sync)" : ""}`;
         const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
@@ -111,20 +111,18 @@ export class MavenProject implements ITreeItem {
     }
 
     public async parsePom(): Promise<void> {
-        this._pom = undefined;
         try {
             this._pom = await Utils.parseXmlFile(this._pomPath);
         } catch (error) {
-            // Error parsing pom.xml file
+            this._pom = undefined;
         }
     }
 
     private async _parseEffectivePom(): Promise<void> {
-        this._effectivePom = undefined;
         try {
             this._effectivePom = await Utils.parseXmlContent(this._rawEffectivePom);
         } catch (error) {
-            // Error parsing effective-pom file
+            this._effectivePom = undefined;
         }
     }
 

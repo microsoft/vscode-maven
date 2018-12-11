@@ -11,4 +11,8 @@ export interface ITreeItem {
      * If implemented, it will be triggered to get children items.
      */
     getChildren?(): vscode.ProviderResult<ITreeItem[]>;
+    /**
+     * If implemented, it will be triggered to refresh tree item.
+     */
+    refresh?(): void | Promise<void>;
 }

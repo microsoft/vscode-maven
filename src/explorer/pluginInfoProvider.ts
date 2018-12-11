@@ -30,23 +30,18 @@ class PluginInfoProvider {
         return latestResult;
     }
 
+    public async clearPluginInfo(gid: string, aid: string, version: string): Promise<void> {
+        await this.saveToLocalCache(gid, aid, version, undefined);
+    }
+
     private async getFromLocalCache(gid: string, aid: string, version: string): Promise<IPluginInfo> {
         const plugins: any = this._context.globalState.get(KEY_PLUGINS);
         return _.get(plugins, [gid, aid, version]);
     }
 
     private async saveToLocalCache(gid: string, aid: string, version: string, pluginInfo: IPluginInfo): Promise<void> {
-        let plugins: any = this._context.globalState.get(KEY_PLUGINS);
-        if (!plugins) {
-            plugins = {};
-        }
-        if (!plugins[gid]) {
-            plugins[gid] = {};
-        }
-        if (!plugins[gid][aid]) {
-            plugins[gid][aid] = {};
-        }
-        plugins[gid][aid][version] = pluginInfo;
+        const plugins: any = this._context.globalState.get(KEY_PLUGINS) || {};
+        _.set(plugins, [gid, aid, version], pluginInfo);
         await this._context.globalState.update(KEY_PLUGINS, plugins);
     }
 
