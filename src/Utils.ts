@@ -347,16 +347,21 @@ export namespace Utils {
     }
 
     export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
-        const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pluginId));
-        try {
-            await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
-            const content: string = await Utils.readFileIfExists(outputPath);
-            fse.remove(outputPath);
-            return content;
-        } catch (error) {
-            setUserError(error);
-            return Promise.reject(error);
-        }
+        return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+            async (resolve, reject): Promise<void> => {
+                p.report({ message: `Maven: Analyzing ${pluginId} ... ` });
+                const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pluginId), createUuid());
+                try {
+                    await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
+                    const content: string = await Utils.readFileIfExists(outputPath);
+                    await fse.remove(outputPath);
+                    return resolve(content);
+                } catch (error) {
+                    setUserError(error);
+                    return reject(error);
+                }
+            }
+        ));
     }
 
     export async function excuteCustomGoal(pomPath: string): Promise<void> {
