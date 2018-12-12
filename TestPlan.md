@@ -1,10 +1,15 @@
 # Test Plan
 
-### Basic view
+## Basic view
+### Explore Items
 1. Clone code from https://github.com/Microsoft/todo-app-java-on-azure.git
 2. Open the cloned project.
 3. Verify: 
     1. The project item is listed in sidebar.
+    2. Expand the project node, it's a "Plugins" node.
+    3. Expand "Plugins" node, plguins are listed.
+    4. Expand a plugin node, plugin specified goals are listed.
+    5. Right click a goal, choose "Execute", it can execute the corresponding command in the terminal.
 
 ### Open corresponding POM file
 1. Click on project item
