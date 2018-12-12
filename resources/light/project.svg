@@ -1,6 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48" version="1.1" width="50px" height="50px">
-<g id="surface1">
-<path style=" fill:#656565;" d="M 5 8 L 9 15 L 4 40 L 11 40 L 16 15 L 23 15 L 18 40 L 25 40 L 30 15 L 37 15 L 32 40 L 39 40 L 43.800781 17.699219 C 44.800781 12.699219 41 8 35.898438 8 Z "/>
-</g>
-</svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid meet" viewBox="0 0 512 512" width="512" height="512"><defs><path d="M28.13 100.34L85.05 169.82L28.13 400.08C38.91 407.8 50.95 411.66 64.23 411.66C77.51 411.66 89.05 407.8 98.83 400.08L164.74 169.82L244.43 169.82L182.52 400.08C196.54 407.8 210.02 411.66 222.97 411.66C235.92 411.66 248.33 407.8 260.21 400.08L324.12 169.82L408.81 169.82L342.9 400.08C359.32 407.8 374.25 411.66 387.7 411.66C401.15 411.66 413.11 407.8 423.59 400.08C458.38 280.46 477.59 212.98 481.24 197.65C492.62 146.1 466.88 100.34 408.81 100.34C361.9 100.34 235.01 100.34 28.13 100.34Z" id="d1nYU9o9Ru"></path></defs><g><g><g><use xlink:href="#d1nYU9o9Ru" opacity="1" fill="#656565" fill-opacity="1"></use><g><use xlink:href="#d1nYU9o9Ru" opacity="1" fill-opacity="0" stroke="#000000" stroke-width="1" stroke-opacity="0"></use></g></g></g></g></svg>
