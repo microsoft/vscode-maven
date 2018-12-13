@@ -16,6 +16,7 @@ import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { Settings } from "./Settings";
 import { VSCodeUI } from "./VSCodeUI";
+import { mavenOutputChannel } from "./mavenOutputChannel";
 
 interface ICommandHistory {
     pomPath: string;
@@ -217,10 +218,10 @@ export namespace Utils {
             env: Object.assign({}, process.env, customEnv)
         };
         return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {
-            VSCodeUI.outputChannel.appendLine(fullCommand, "Background Command");
+            mavenOutputChannel.appendLine(fullCommand, "Background Command");
             child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
                 if (error) {
-                    VSCodeUI.outputChannel.appendLine(error);
+                    mavenOutputChannel.appendLine(error);
                     reject(error);
                 } else {
                     resolve(stdout);

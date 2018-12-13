@@ -3,36 +3,12 @@
 
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
-import { InputBoxOptions, OpenDialogOptions, OutputChannel, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
+import { InputBoxOptions, OpenDialogOptions, QuickPickItem, QuickPickOptions, Terminal, Uri, window } from "vscode";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 
 export namespace VSCodeUI {
     const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
-
-    // output channel
-    class MavenOutputChannel {
-        private readonly channel: OutputChannel = window.createOutputChannel("Maven for Java");
-
-        public appendLine(message: any, title?: string): void {
-            if (title) {
-                const simplifiedTime: string = (new Date()).toISOString().replace(/z|t/gi, " ").trim(); // YYYY-MM-DD HH:mm:ss.sss
-                const hightlightingTitle: string = `[${title} ${simplifiedTime}]`;
-                this.channel.appendLine(hightlightingTitle);
-            }
-            this.channel.appendLine(message);
-        }
-
-        public append(message: any): void {
-            this.channel.append(message);
-        }
-
-        public show(): void {
-            this.channel.show();
-        }
-    }
-
-    export const outputChannel: MavenOutputChannel = new MavenOutputChannel();
 
     // terminal
     class MavenTerminal {
