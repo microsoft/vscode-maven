@@ -12,7 +12,7 @@ import * as url from "url";
 import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from 'vscode';
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
-import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
