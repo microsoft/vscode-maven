@@ -14,6 +14,8 @@ import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { MavenProject } from "./explorer/model/MavenProject";
+import { mavenOutputChannel } from "./mavenOutputChannel";
+import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -179,15 +181,15 @@ export namespace Utils {
 
     export async function executeInTerminal(command: string, pomfile?: string, options?: {}): Promise<void> {
         const workspaceFolder: WorkspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
-        const mvnString: string = wrappedWithQuotes(formattedPathForTerminal(await getMaven(workspaceFolder)));
+        const mvnString: string = wrappedWithQuotes(mavenTerminal.formattedPathForTerminal(await getMaven(workspaceFolder)));
         const fullCommand: string = [
             mvnString,
             command.trim(),
-            pomfile && `-f "${formattedPathForTerminal(pomfile)}"`,
+            pomfile && `-f "${mavenTerminal.formattedPathForTerminal(pomfile)}"`,
             Settings.Executable.options(pomfile && Uri.file(pomfile))
         ].filter(Boolean).join(" ");
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
-        VSCodeUI.mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
+        mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
         if (pomfile) {
             updateLRUCommands(command, pomfile);
         }
@@ -211,22 +213,47 @@ export namespace Utils {
             Settings.Executable.options(pomfile && Uri.file(pomfile))
         ].filter(Boolean).join(" ");
 
-        const customEnv: {} = VSCodeUI.setupEnvironment();
+        const customEnv: {} = getEnvironment();
         const execOptions: child_process.ExecOptions = {
             cwd: commandCwd,
             env: Object.assign({}, process.env, customEnv)
         };
         return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {
-            VSCodeUI.outputChannel.appendLine(fullCommand, "Background Command");
+            mavenOutputChannel.appendLine(fullCommand, "Background Command");
             child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
                 if (error) {
-                    VSCodeUI.outputChannel.appendLine(error);
+                    mavenOutputChannel.appendLine(error);
                     reject(error);
                 } else {
                     resolve(stdout);
                 }
             });
         });
+    }
+
+    export function getEnvironment(): {} {
+        const customEnv: any = getJavaHomeEnvIfAvailable();
+        type EnvironmentSetting = {
+            environmentVariable: string;
+            value: string;
+        };
+        const environmentSettings: EnvironmentSetting[] = Settings.Terminal.customEnv();
+        environmentSettings.forEach((s: EnvironmentSetting) => {
+            customEnv[s.environmentVariable] = s.value;
+        });
+        return customEnv;
+    }
+
+    function getJavaHomeEnvIfAvailable(): {} {
+        // Look for the java.home setting from the redhat.java extension.  We can reuse it
+        // if it exists to avoid making the user configure it in two places.
+        const javaHome: string = Settings.External.javaHome();
+        const useJavaHome: boolean = Settings.Terminal.useJavaHome();
+        if (useJavaHome && javaHome) {
+            return { JAVA_HOME: javaHome };
+        } else {
+            return {};
+        }
     }
 
     export async function getLRUCommands(pomPath: string): Promise<{}[]> {
@@ -260,46 +287,6 @@ export namespace Utils {
             historyObject.timestamps[command] = Date.now();
         }
         await fse.writeFile(historyFilePath, JSON.stringify(historyObject));
-    }
-
-    export function currentWindowsShell(): string {
-        const currentWindowsShellPath: string = Settings.External.defaultWindowsShell();
-        if (currentWindowsShellPath.endsWith("cmd.exe")) {
-            return 'Command Prompt';
-        } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
-            return 'PowerShell';
-        } else if (currentWindowsShellPath.endsWith("bash.exe") || currentWindowsShellPath.endsWith("wsl.exe")) {
-            if (currentWindowsShellPath.includes("Git")) {
-                return 'Git Bash';
-            }
-            return 'WSL Bash';
-        } else {
-            return 'Others';
-        }
-    }
-
-    export function toWSLPath(p: string): string {
-        const arr: string[] = p.split(":\\");
-        if (arr.length === 2) {
-            const drive: string = arr[0].toLowerCase();
-            const dir: string = arr[1].replace(/\\/g, "/");
-            return `/mnt/${drive}/${dir}`;
-        } else {
-            return p.replace(/\\/g, '/');
-        }
-    }
-
-    export function formattedPathForTerminal(filepath: string): string {
-        if (process.platform === "win32") {
-            switch (currentWindowsShell()) {
-                case "WSL Bash":
-                    return toWSLPath(filepath);
-                default:
-                    return filepath;
-            }
-        } else {
-            return filepath;
-        }
     }
 
     export function getResourcePath(...args: string[]): string {
