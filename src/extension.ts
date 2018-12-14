@@ -12,6 +12,7 @@ import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
+import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
@@ -29,6 +30,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 export async function deactivate(): Promise<void> {
     await disposeTelemetryWrapper();
+    await mavenOutputChannel.dispose();
 }
 
 function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
