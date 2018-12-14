@@ -369,11 +369,10 @@
     "vscode:prepublish": "webpack --mode production",
     "compile": "tsc -p ./",
     "tslint": "tslint -t verbose src/*.ts",
-    "watch": "tsc -watch -p ./",
+    "watch": "webpack --mode development --watch --info-verbosity verbose",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
-    "webpack": "webpack --mode development",
-    "webpack-dev": "webpack --mode development --watch"
+    "webpack": "webpack --mode development"
   },
   "devDependencies": {
     "@types/fs-extra": "^4.0.8",
