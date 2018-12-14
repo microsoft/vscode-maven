@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import { Disposable } from "vscode";
+
 class Queue<T> {
     private _store: T[] = [];
     public push(val: T): void {
@@ -11,7 +13,7 @@ class Queue<T> {
     }
 }
 
-class TaskExecutor {
+class TaskExecutor implements Disposable {
     private _tasks: Queue<any> = new Queue();
     private _isExecuting: boolean = false;
 

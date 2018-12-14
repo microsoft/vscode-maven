@@ -11,7 +11,7 @@ interface ITerminalOptions {
     cwd?: string;
 }
 
-class MavenTerminal {
+class MavenTerminal implements vscode.Disposable {
     private readonly terminals: { [id: string]: vscode.Terminal } = {};
 
     public runInTerminal(command: string, options?: ITerminalOptions): void {
@@ -55,6 +55,10 @@ class MavenTerminal {
         } else {
             return filepath;
         }
+    }
+
+    public dispose(): void {
+        this.closeAllTerminals();
     }
 }
 

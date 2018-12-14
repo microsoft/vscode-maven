@@ -31,8 +31,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 export async function deactivate(): Promise<void> {
     await disposeTelemetryWrapper();
-    await mavenOutputChannel.dispose();
-    await taskExecutor.dispose();
 }
 
 function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
@@ -64,7 +62,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     watcher.onDidChange((e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh());
     watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath));
     context.subscriptions.push(watcher);
-
+    context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
         registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => {
