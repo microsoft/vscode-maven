@@ -26,6 +26,7 @@ export class MavenPlugin implements ITreeItem {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
+        taskExecutor.execute(async () => await this.loadMetadata());
     }
 
     public getContextValue(): string {
@@ -33,7 +34,6 @@ export class MavenPlugin implements ITreeItem {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        taskExecutor.execute(async () => await this.loadMetadata());
         const label: string = this.prefix ? `${this.prefix} (${this.pluginId})` : this.pluginId;
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {
