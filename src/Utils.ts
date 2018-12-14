@@ -318,7 +318,7 @@ export namespace Utils {
     export async function getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string> {
         let pomPath: string;
         let name: string;
-        if (pomPathOrMavenProject instanceof MavenProject) {
+        if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
             const mavenProject: MavenProject = <MavenProject>pomPathOrMavenProject;
             pomPath = mavenProject.pomPath;
             name = mavenProject.name;

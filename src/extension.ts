@@ -15,6 +15,7 @@ import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
+import { taskExecutor } from "./taskExecutor";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -31,6 +32,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 export async function deactivate(): Promise<void> {
     await disposeTelemetryWrapper();
     await mavenOutputChannel.dispose();
+    await taskExecutor.dispose();
 }
 
 function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
