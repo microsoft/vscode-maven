@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { taskExecutor } from "../../taskExecutor";
 import { Utils } from "../../Utils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { pluginInfoProvider } from "../pluginInfoProvider";
@@ -32,7 +33,7 @@ export class MavenPlugin implements ITreeItem {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        this.loadMetadata();
+        taskExecutor.execute(async () => await this.loadMetadata());
         const label: string = this.prefix ? `${this.prefix} (${this.pluginId})` : this.pluginId;
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {

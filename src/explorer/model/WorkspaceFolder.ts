@@ -3,6 +3,7 @@
 
 import * as vscode from "vscode";
 import { TreeItemCollapsibleState } from "vscode";
+import { taskExecutor } from "../../taskExecutor";
 import { Utils } from "../../Utils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
@@ -31,6 +32,9 @@ export class WorkspaceFolder implements ITreeItem {
         mavenExplorerProvider.updateProjects(...children);
         await Promise.all(children.map(elem => elem.parsePom()));
         this.sortByName(children);
+        children.forEach(element => {
+            taskExecutor.execute(async () => await element.calculateEffectivePom());
+        });
         return children;
     }
 

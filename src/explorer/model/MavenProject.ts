@@ -21,7 +21,6 @@ export class MavenProject implements ITreeItem {
 
     constructor(pomPath: string) {
         this._pomPath = pomPath;
-        this.calculateEffectivePom();
     }
 
     public get name(): string {
@@ -95,7 +94,7 @@ export class MavenProject implements ITreeItem {
             return;
         }
 
-        this._rawEffectivePom = await Utils.getEffectivePom(this._pomPath);
+        this._rawEffectivePom = await Utils.getEffectivePom(this);
         await this._parseEffectivePom();
         mavenExplorerProvider.refresh(this);
     }
