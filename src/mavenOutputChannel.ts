@@ -3,7 +3,7 @@
 
 import * as vscode from "vscode";
 
-class MavenOutputChannel {
+class MavenOutputChannel implements vscode.Disposable {
     private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("Maven for Java");
 
     public appendLine(message: any, title?: string): void {

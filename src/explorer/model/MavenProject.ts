@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Utils } from "../../Utils";
-import { mavenExplorerProvider } from "../MavenExplorerProvider";
+import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
@@ -21,7 +21,6 @@ export class MavenProject implements ITreeItem {
 
     constructor(pomPath: string) {
         this._pomPath = pomPath;
-        this.calculateEffectivePom();
     }
 
     public get name(): string {
@@ -95,7 +94,7 @@ export class MavenProject implements ITreeItem {
             return;
         }
 
-        this._rawEffectivePom = await Utils.getEffectivePom(this._pomPath);
+        this._rawEffectivePom = await Utils.getEffectivePom(this);
         await this._parseEffectivePom();
         mavenExplorerProvider.refresh(this);
     }

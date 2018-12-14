@@ -14,7 +14,8 @@ export class PluginsMenu extends Menu implements ITreeItem {
         this._name = "Plugins";
     }
 
-    public getChildren() : MavenPlugin[] {
+    public async getChildren() : Promise<MavenPlugin[]> {
+        await this._project.calculateEffectivePom();
         return this._project.plugins;
     }
 

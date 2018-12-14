@@ -7,7 +7,7 @@ import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { OperationCanceledError } from "./Errors";
-import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
@@ -15,6 +15,7 @@ import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
+import { taskExecutor } from "./taskExecutor";
 import { Utils } from "./Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -30,7 +31,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 export async function deactivate(): Promise<void> {
     await disposeTelemetryWrapper();
-    await mavenOutputChannel.dispose();
 }
 
 function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
@@ -62,7 +62,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     watcher.onDidChange((e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh());
     watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath));
     context.subscriptions.push(watcher);
-
+    context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
         registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => {

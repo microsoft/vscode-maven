@@ -12,7 +12,7 @@ import * as url from "url";
 import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from 'vscode';
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
-import { mavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
@@ -315,10 +315,22 @@ export namespace Utils {
         }
     }
 
-    export async function getEffectivePom(pomPath: string): Promise<string> {
+    export async function getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string> {
+        let pomPath: string;
+        let name: string;
+        if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
+            const mavenProject: MavenProject = <MavenProject>pomPathOrMavenProject;
+            pomPath = mavenProject.pomPath;
+            name = mavenProject.name;
+        } else if (typeof pomPathOrMavenProject === "string") {
+            pomPath = pomPathOrMavenProject;
+            name = pomPath;
+        } else {
+            return undefined;
+        }
         return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
-                p.report({ message: "Maven: Generating Effective POM ... " });
+                p.report({ message: `Generating Effective POM: ${name}` });
                 try {
                     const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
                     await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
@@ -336,7 +348,7 @@ export namespace Utils {
     export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
         return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
-                p.report({ message: `Maven: Analyzing ${pluginId} ... ` });
+                p.report({ message: `Retrieving Plugin Info: ${pluginId}` });
                 const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pluginId), createUuid());
                 try {
                     await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
