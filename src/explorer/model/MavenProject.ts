@@ -106,7 +106,7 @@ export class MavenProject implements ITreeItem {
 
     public async refresh(): Promise<void> {
         await this.refreshPom();
-        await this.calculateEffectivePom(true);
+        this._rawEffectivePom = undefined;
     }
 
     public async parsePom(): Promise<void> {
