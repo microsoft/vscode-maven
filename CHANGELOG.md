@@ -1,6 +1,7 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
+  - [0.12.1](#0121)
   - [0.12.0](#0120)
   - [0.11.3](#0113)
   - [0.11.2](#0112)
@@ -17,6 +18,8 @@ All notable changes to the "vscode-maven" extension will be documented in this f
   - [0.5.1](#051)
   - [0.5.0](#050)
   - [Early Versions](#early-versions)
+## 0.12.1
+- Chinese localization: Add a whitespace between English and Chinese characters. [#184](https://github.com/Microsoft/vscode-maven/issues/184)
 
 ## 0.12.0
 - Support to view and execute plugin goals. [#126](https://github.com/Microsoft/vscode-maven/issues/126)
