@@ -52,7 +52,6 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
 }
 
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
-    await vscode.commands.executeCommand("setContext", "mavenExtensionActivated", true);
     pluginInfoProvider.initialize(context);
     context.subscriptions.push(vscode.window.registerTreeDataProvider("mavenProjects", mavenExplorerProvider));
 
