@@ -120,7 +120,11 @@
       {
         "command": "maven.archetype.generate",
         "title": "%contributes.commands.maven.archetype.generate%",
-        "category": "Maven"
+        "category": "Maven",
+        "icon":{
+          "light": "resources/light/add.svg",
+          "dark": "resources/dark/add.svg"
+        }
       },
       {
         "command": "maven.archetype.update",
@@ -218,6 +222,11 @@
         }
       ],
       "view/title": [
+        {
+          "command": "maven.archetype.generate",
+          "when": "view == mavenProjects",
+          "group": "navigation@1"
+        },
         {
           "command": "maven.explorer.refresh",
           "when": "view == mavenProjects",

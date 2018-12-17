@@ -28,6 +28,13 @@ export class WorkspaceFolder implements ITreeItem {
             const projectNode: MavenProject = mavenExplorerProvider.getMavenProject(pomPath) || new MavenProject(pomPath);
             children.push(projectNode);
         }
+        if (children.length === 0) {
+            return [{
+                getTreeItem: () => new vscode.TreeItem("No Maven project found."),
+                getContextValue: () => "EmptyNode"
+            }];
+        }
+
         mavenExplorerProvider.updateProjects(...children);
         await Promise.all(children.map(elem => elem.parsePom()));
         this.sortByName(children);

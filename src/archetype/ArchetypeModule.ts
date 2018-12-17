@@ -64,7 +64,6 @@ export namespace ArchetypeModule {
     }
 
     async function chooseTargetFolder(entry: Uri | undefined): Promise<string> {
-
         const result: Uri = await VSCodeUI.openDialogForFolder({
             defaultUri: entry && entry.fsPath ? Uri.file(entry.fsPath) : undefined,
             openLabel: "Select Destination Folder"
