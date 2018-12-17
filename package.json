@@ -42,7 +42,8 @@
     "onCommand:maven.archetype.generate",
     "onCommand:maven.archetype.update",
     "onCommand:maven.history",
-    "onCommand:maven.plugin.execute"
+    "onCommand:maven.plugin.execute",
+    "onView:mavenProjects"
   ],
   "main": "./dist/extension",
   "contributes": {
@@ -146,8 +147,7 @@
       "explorer": [
         {
           "id": "mavenProjects",
-          "name": "%contributes.views.explorer.mavenProjects%",
-          "when": "mavenExtensionActivated"
+          "name": "%contributes.views.explorer.mavenProjects%"
         }
       ]
     },
