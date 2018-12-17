@@ -18,8 +18,10 @@ All notable changes to the "vscode-maven" extension will be documented in this f
   - [0.5.1](#051)
   - [0.5.0](#050)
   - [Early Versions](#early-versions)
+
 ## 0.12.1
 - Chinese localization: Add a whitespace between English and Chinese characters. [#184](https://github.com/Microsoft/vscode-maven/issues/184)
+- Add a shortcut in Maven explorer to generate projects. [PR#190](https://github.com/Microsoft/vscode-maven/pull/190)
 
 ## 0.12.0
 - Support to view and execute plugin goals. [#126](https://github.com/Microsoft/vscode-maven/issues/126)
