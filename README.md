@@ -11,7 +11,7 @@ Maven extension for VS Code. It provides a project explorer and shortcuts to exe
 
 * Support to generate projects from Maven Archetype.
 * Support to generate effective POM.
-* Provide shortcuts to common goals, namely `clean`, `validate`, `compile`, `test`, `package`, `verify`, `install`, `site`, `deploy`.
+* Provide shortcuts to common goals, plugin goals and customized commands.
 * Preserve command history to fast re-run.
 
 
@@ -28,6 +28,15 @@ For troubleshooting, please refer to the page [HERE](Troubleshooting.md).
 The extension scans `pom.xml` in your workspace, and displays all Maven projects and their modules in the sidebar.
 
 ![Screenshot](images/explorer.png)
+
+</details>
+
+<details>
+<summary>Run Plugin Goals</summary>
+
+The extension parse effective-pom of maven projects, and displays all plugins and plugin goals hierarchically.
+
+![Screenshot](images/plugin.gif)
 
 </details>
 
