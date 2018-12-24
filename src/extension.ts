@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
+import { completionProvider } from "./completionProvider";
 import { OperationCanceledError } from "./Errors";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
@@ -57,16 +58,14 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     // pom.xml listener to refresh tree view
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
-    watcher.onDidCreate((e: Uri) => mavenExplorerProvider.addProject(e.fsPath));
-    watcher.onDidChange((e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh());
-    watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath));
+    watcher.onDidCreate((e: Uri) => mavenExplorerProvider.addProject(e.fsPath), null, context.subscriptions);
+    watcher.onDidChange((e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh(), null, context.subscriptions);
+    watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath), null, context.subscriptions);
     context.subscriptions.push(watcher);
     context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => {
-            Utils.executeInTerminal(goal, node.pomPath);
-        });
+        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => Utils.executeInTerminal(goal, node.pomPath));
     });
     registerCommand(context, "maven.explorer.refresh", async (item?: ITreeItem): Promise<void> => {
         if (item && item.refresh) {
@@ -116,9 +115,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         }
     });
 
-    registerCommand(context, "maven.goal.execute", async () => {
-        await Utils.executeMavenCommand();
-    });
+    registerCommand(context, "maven.goal.execute", async () => await Utils.executeMavenCommand());
 
     registerCommand(context, "maven.plugin.execute", async (node: PluginGoal) => {
         if (node &&
@@ -128,25 +125,27 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         }
     });
 
-    context.subscriptions.push(vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
-        mavenTerminal.onDidCloseTerminal(closedTerminal);
-    }));
-
-    // configuration change listener
-    vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
-        // close all terminals with outdated JAVA related Envs
-        if (e.affectsConfiguration("maven.terminal.useJavaHome") || e.affectsConfiguration("maven.terminal.customEnv")) {
-            mavenTerminal.closeAllTerminals();
-        } else {
-            const useJavaHome: boolean = Settings.Terminal.useJavaHome();
-            if (useJavaHome && e.affectsConfiguration("java.home")) {
+    context.subscriptions.push(
+        vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
+            mavenTerminal.onDidCloseTerminal(closedTerminal);
+        }),
+        // configuration change listener
+        vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
+            // close all terminals with outdated JAVA related Envs
+            if (e.affectsConfiguration("maven.terminal.useJavaHome") || e.affectsConfiguration("maven.terminal.customEnv")) {
                 mavenTerminal.closeAllTerminals();
+            } else {
+                const useJavaHome: boolean = Settings.Terminal.useJavaHome();
+                if (useJavaHome && e.affectsConfiguration("java.home")) {
+                    mavenTerminal.closeAllTerminals();
+                }
             }
-        }
-    });
-
-    // workspace folder change listener
-    vscode.workspace.onDidChangeWorkspaceFolders((_e: vscode.WorkspaceFoldersChangeEvent) => {
-        mavenExplorerProvider.refresh();
-    });
+        }),
+        // workspace folder change listener
+        vscode.workspace.onDidChangeWorkspaceFolders((_e: vscode.WorkspaceFoldersChangeEvent) => {
+            mavenExplorerProvider.refresh();
+        }),
+        // completion item provider
+        vscode.languages.registerCompletionItemProvider([{ language: 'xml', pattern: '**/pom.xml' }], completionProvider)
+    );
 }
