@@ -245,8 +245,8 @@
             "check-whitespace"
         ],
         "quotemark": [
-            false,
-            "single"
+            true,
+            "double"
         ],
         "react-tsx-curly-spacing": true,
         "semicolon": [

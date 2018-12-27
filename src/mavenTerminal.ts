@@ -65,7 +65,7 @@ class MavenTerminal implements vscode.Disposable {
 function getCommand(cmd: string): string {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
-            case 'PowerShell':
+            case "PowerShell":
                 return `cmd /c ${cmd}`; // PowerShell
             default:
                 return cmd; // others, try using common one.
@@ -78,13 +78,13 @@ function getCommand(cmd: string): string {
 function getCDCommand(cwd: string): string {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
-            case 'Git Bash':
+            case "Git Bash":
                 return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
-            case 'PowerShell':
+            case "PowerShell":
                 return `cd "${cwd}"`; // PowerShell
-            case 'Command Prompt':
+            case "Command Prompt":
                 return `cd /d "${cwd}"`; // CMD
-            case 'WSL Bash':
+            case "WSL Bash":
                 return `cd "${toWSLPath(cwd)}"`; // WSL
             default:
                 return `cd "${cwd}"`; // Unknown, try using common one.
@@ -107,12 +107,12 @@ function setupEnvironment(terminal?: vscode.Terminal): void {
 function composeSetEnvironmentVariableCommand(variable: string, value: string): string {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
-            case 'Git Bash':
-            case 'WSL Bash':
+            case "Git Bash":
+            case "WSL Bash":
                 return `export ${variable}="${value}"`; // Git Bash
-            case 'PowerShell':
+            case "PowerShell":
                 return `$Env:${variable}="${value}"`; // PowerShell
-            case 'Command Prompt':
+            case "Command Prompt":
                 return `set ${variable}=${value}`; // CMD
             default:
                 return `set ${variable}=${value}`; // Unknown, try using common one.
@@ -125,16 +125,16 @@ function composeSetEnvironmentVariableCommand(variable: string, value: string): 
 function currentWindowsShell(): string {
     const currentWindowsShellPath: string = Settings.External.defaultWindowsShell();
     if (currentWindowsShellPath.endsWith("cmd.exe")) {
-        return 'Command Prompt';
+        return "Command Prompt";
     } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
-        return 'PowerShell';
+        return "PowerShell";
     } else if (currentWindowsShellPath.endsWith("bash.exe") || currentWindowsShellPath.endsWith("wsl.exe")) {
         if (currentWindowsShellPath.includes("Git")) {
-            return 'Git Bash';
+            return "Git Bash";
         }
-        return 'WSL Bash';
+        return "WSL Bash";
     } else {
-        return 'Others';
+        return "Others";
     }
 }
 
@@ -145,7 +145,7 @@ function toWSLPath(p: string): string {
         const dir: string = arr[1].replace(/\\/g, "/");
         return `/mnt/${drive}/${dir}`;
     } else {
-        return p.replace(/\\/g, '/');
+        return p.replace(/\\/g, "/");
     }
 }
 

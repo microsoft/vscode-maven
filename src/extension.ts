@@ -74,7 +74,6 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             mavenExplorerProvider.refresh(item);
         }
     });
-
     registerCommand(context, "maven.project.effectivePom", async (node: Uri | MavenProject) => {
         if (node instanceof Uri && node.fsPath) {
             await Utils.showEffectivePom(node.fsPath);
@@ -82,23 +81,19 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             await Utils.showEffectivePom(node.pomPath);
         }
     });
-
     registerCommand(context, "maven.goal.custom", async (node: MavenProject) => {
         if (node && node.pomPath) {
             await Utils.excuteCustomGoal(node.pomPath);
         }
     });
-
     registerCommand(context, "maven.project.openPom", async (node: MavenProject) => {
         if (node && node.pomPath) {
             await VSCodeUI.openFileIfExists(node.pomPath);
         }
     });
-
     registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
         await ArchetypeModule.generateFromArchetype(entry, operationId);
     }, true);
-
     registerCommand(context, "maven.archetype.update", async () => {
         await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: Progress<{}>) => {
             p.report({ message: "updating archetype catalog ..." });
@@ -106,7 +101,6 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             p.report({ message: "finished." });
         });
     });
-
     registerCommand(context, "maven.history", async (item: MavenProject | undefined) => {
         if (item) {
             await Utils.executeHistoricalGoals([item.pomPath]);
@@ -114,9 +108,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             await Utils.executeHistoricalGoals(mavenExplorerProvider.mavenProjectNodes.map(_node => _node.pomPath));
         }
     });
-
     registerCommand(context, "maven.goal.execute", async () => await Utils.executeMavenCommand());
-
     registerCommand(context, "maven.plugin.execute", async (node: PluginGoal) => {
         if (node &&
             node.name &&
@@ -124,7 +116,6 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             Utils.executeInTerminal(node.name, node.plugin.project.pomPath);
         }
     });
-
     context.subscriptions.push(
         vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
             mavenTerminal.onDidCloseTerminal(closedTerminal);
@@ -148,4 +139,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         // completion item provider
         vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider)
     );
+    vscode.window.withProgress({location: vscode.ProgressLocation.Window}, (progress) => {
+        progress.report({message: "Updating local Maven repository indices"});
+        return completionProvider.initialize();
+    });
 }

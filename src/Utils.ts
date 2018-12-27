@@ -9,7 +9,7 @@ import * as md5 from "md5";
 import * as os from "os";
 import * as path from "path";
 import * as url from "url";
-import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from 'vscode';
+import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
@@ -114,7 +114,7 @@ export namespace Utils {
 
         return await new Promise((resolve: (res: string) => void, reject: (e: Error) => void): void => {
             const urlObj: url.Url = url.parse(targetUrl);
-            const options: Object = Object.assign({ headers: Object.assign({}, customHeaders, { 'User-Agent': `vscode/${getExtensionVersion()}` }) }, urlObj);
+            const options: Object = Object.assign({ headers: Object.assign({}, customHeaders, { "User-Agent": `vscode/${getExtensionVersion()}` }) }, urlObj);
             let client: any;
             if (urlObj.protocol === "https:") {
                 client = https;
@@ -132,14 +132,14 @@ export namespace Utils {
                 } else {
                     ws = fse.createWriteStream(tempFilePath);
                 }
-                res.on('data', (chunk: string | Buffer) => {
+                res.on("data", (chunk: string | Buffer) => {
                     if (readContent) {
                         rawData += chunk;
                     } else {
                         ws.write(chunk);
                     }
                 });
-                res.on('end', () => {
+                res.on("end", () => {
                     if (readContent) {
                         resolve(rawData);
                     } else {
