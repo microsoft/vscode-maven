@@ -6,7 +6,7 @@ import * as _ from "lodash";
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
-import Lexx from 'xml-zero-lexer';
+import Lexx from "xml-zero-lexer";
 
 type Artifact = {
     groupId: string;
@@ -30,7 +30,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         this.metadata = {};
         this.localRepository = repo || path.join(os.homedir(), ".m2", "repository");
         return new Promise<void>((resolve, reject) => {
-            fg.stream(['**/*.pom'], { cwd: this.localRepository })
+            fg.stream(["**/*.pom"], { cwd: this.localRepository })
                 .on("data", (chunk: string) => {
                     const segs: string[] = chunk.split("/");
                     if (segs.length > 3) {
