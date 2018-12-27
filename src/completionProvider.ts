@@ -1,11 +1,58 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as fg from "fast-glob";
+import * as _ from "lodash";
+import * as os from "os";
+import * as path from "path";
 import * as vscode from "vscode";
-import Lexx from "xml-zero-lexer";
+import Lexx from 'xml-zero-lexer';
 
+type Artifact = {
+    groupId: string;
+    artifactId: string;
+    version: string;
+    pom: string;
+};
 class CompletionProvider implements vscode.CompletionItemProvider {
+    public localRepository: string;
+    public metadata: {
+        [groupId: string]: {
+            [artifactId: string]: Artifact[]
+        }[]
+    };
+
+    public async initialize(repo?: string): Promise<void> {
+        if (this.metadata !== undefined) {
+            return;
+        }
+
+        this.metadata = {};
+        this.localRepository = repo || path.join(os.homedir(), ".m2", "repository");
+        return new Promise<void>((resolve, reject) => {
+            fg.stream(['**/*.pom'], { cwd: this.localRepository })
+                .on("data", (chunk: string) => {
+                    const segs: string[] = chunk.split("/");
+                    if (segs.length > 3) {
+                        const pom: string = segs[segs.length - 1];
+                        const version: string = segs[segs.length - 2];
+                        const artifactId: string = segs[segs.length - 3];
+                        const groupId: string = segs.slice(0, segs.length - 3).join(".");
+                        _.set(this.metadata, [groupId, artifactId, version], {
+                            groupId, artifactId, version, pom
+                        });
+                    }
+                })
+                .on("error", reject)
+                .on("end", resolve);
+        });
+    }
+
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
+        if (!this.metadata) {
+            return null;
+        }
+
         const range: vscode.Range = new vscode.Range(new vscode.Position(0, 0), position);
         const text: string = document.getText(range);
         const tokens: number[][] = Lexx(text);
@@ -22,14 +69,16 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     private completeForGroupId(): vscode.CompletionList {
-        // To implement
-        return new vscode.CompletionList([new vscode.CompletionItem("placeholder")]);
+        return new vscode.CompletionList(Object.keys(this.metadata).map(gid => new vscode.CompletionItem(gid)), false);
     }
 
     private completeForArtifactId(groupId: string): vscode.CompletionList {
-        // To implement
-        return new vscode.CompletionList([new vscode.CompletionItem(`placeholder for ${groupId}`)]);
+        if (!this.metadata[groupId]) {
+            return null;
+        }
+        return new vscode.CompletionList(Object.keys(this.metadata[groupId]).map(aid => new vscode.CompletionItem(aid), false));
     }
+
 }
 
 class ElementNode {
@@ -53,7 +102,7 @@ class ElementNode {
      *      <artifactId>test-aid</artifactId>
      * </dependency>
      * ```
-     * For node `dependeny`, it has two children.
+     * For node `dependency`, it has two children.
      * For node `groupId`, it has value of `test-gid`.
      *
      * @param child the child element node.
