@@ -146,6 +146,6 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             mavenExplorerProvider.refresh();
         }),
         // completion item provider
-        vscode.languages.registerCompletionItemProvider([{ language: 'xml', pattern: '**/pom.xml' }], completionProvider)
+        vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider)
     );
 }
