@@ -121,7 +121,7 @@
         "command": "maven.archetype.generate",
         "title": "%contributes.commands.maven.archetype.generate%",
         "category": "Maven",
-        "icon":{
+        "icon": {
           "light": "resources/light/add.svg",
           "dark": "resources/dark/add.svg"
         }
@@ -405,6 +405,7 @@
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
     "vscode-extension-telemetry-wrapper": "0.3.8",
+    "xml-zero-lexer": "^2.0.5",
     "xml2js": "^0.4.19"
   }
 }
