@@ -8,18 +8,14 @@ import * as path from "path";
 import * as vscode from "vscode";
 import Lexx from "xml-zero-lexer";
 
-type Artifact = {
-    groupId: string;
-    artifactId: string;
-    version: string;
-    pom: string;
-};
 class CompletionProvider implements vscode.CompletionItemProvider {
     public localRepository: string;
     public metadata: {
         [groupId: string]: {
-            [artifactId: string]: Artifact[]
-        }[]
+            [artifactId: string]: {
+                [version: string]: true
+            }
+        }
     };
 
     public async initialize(repo?: string): Promise<void> {
@@ -34,13 +30,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 .on("data", (chunk: string) => {
                     const segs: string[] = chunk.split("/");
                     if (segs.length > 3) {
-                        const pom: string = segs[segs.length - 1];
                         const version: string = segs[segs.length - 2];
                         const artifactId: string = segs[segs.length - 3];
                         const groupId: string = segs.slice(0, segs.length - 3).join(".");
-                        _.set(this.metadata, [groupId, artifactId, version], {
-                            groupId, artifactId, version, pom
-                        });
+                        _.set(this.metadata, [groupId, artifactId, version], true);
                     }
                 })
                 .on("error", reject)
@@ -99,7 +92,7 @@ class ElementNode {
      * ```xml
      * <dependency>
      *     <groupId>test-gid</groupId>
-     *      <artifactId>test-aid</artifactId>
+     *     <artifactId>test-aid</artifactId>
      * </dependency>
      * ```
      * For node `dependency`, it has two children.
