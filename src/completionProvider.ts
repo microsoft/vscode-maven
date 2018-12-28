@@ -52,11 +52,15 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         const currentNode: ElementNode = getElementHierarchy(text, tokens);
         if (currentNode.tag === "artifactId" && currentNode.parent && currentNode.parent.tag === "dependency") {
             const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
-            return this.completeForArtifactId(groupIdNode.value);
+            return this.completeForArtifactId(groupIdNode && groupIdNode.value);
         }
-
         if (currentNode.tag === "groupId" && currentNode.parent && currentNode.parent.tag === "dependency") {
             return this.completeForGroupId();
+        }
+        if (currentNode.tag === "version" && currentNode.parent && currentNode.parent.tag === "dependency") {
+            const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
+            const artifactIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "artifactId");
+            return this.completeForVersion(groupIdNode && groupIdNode.value, artifactIdNode && artifactIdNode.value);
         }
         return null;
     }
@@ -66,10 +70,24 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     private completeForArtifactId(groupId: string): vscode.CompletionList {
-        if (!this.metadata[groupId]) {
+        if (!groupId) {
             return null;
         }
-        return new vscode.CompletionList(Object.keys(this.metadata[groupId]).map(aid => new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field), false));
+
+        const artifactIdMap: {} = this.metadata[groupId];
+        if (!artifactIdMap) {
+            return null;
+        }
+
+        return new vscode.CompletionList(Object.keys(artifactIdMap).map(aid => new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field), false));
+    }
+
+    private completeForVersion(groupId: string, artifactId: string): vscode.CompletionList {
+        if (!groupId || !artifactId) {
+            return null;
+        }
+        const versionMap: {} = _.get(this.metadata, [groupId, artifactId]);
+        return new vscode.CompletionList(Object.keys(versionMap).map(v => new vscode.CompletionItem(v, vscode.CompletionItemKind.Constant), false));
     }
 
 }
