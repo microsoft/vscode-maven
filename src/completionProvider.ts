@@ -62,14 +62,14 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     private completeForGroupId(): vscode.CompletionList {
-        return new vscode.CompletionList(Object.keys(this.metadata).map(gid => new vscode.CompletionItem(gid)), false);
+        return new vscode.CompletionList(Object.keys(this.metadata).map(gid => new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module)), false);
     }
 
     private completeForArtifactId(groupId: string): vscode.CompletionList {
         if (!this.metadata[groupId]) {
             return null;
         }
-        return new vscode.CompletionList(Object.keys(this.metadata[groupId]).map(aid => new vscode.CompletionItem(aid), false));
+        return new vscode.CompletionList(Object.keys(this.metadata[groupId]).map(aid => new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field), false));
     }
 
 }
