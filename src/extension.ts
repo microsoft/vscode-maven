@@ -135,12 +135,15 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         // workspace folder change listener
         vscode.workspace.onDidChangeWorkspaceFolders((_e: vscode.WorkspaceFoldersChangeEvent) => {
             mavenExplorerProvider.refresh();
-        }),
-        // completion item provider
-        vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider)
+        })
+
     );
-    vscode.window.withProgress({location: vscode.ProgressLocation.Window}, (progress) => {
-        progress.report({message: "Updating local Maven repository indices"});
-        return completionProvider.initialize();
-    });
+    // completion item provider
+    if (vscode.workspace.getConfiguration("maven", null).get<boolean>("completion.enabled")) {
+        context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider));
+        vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, (progress) => {
+            progress.report({ message: "Updating local Maven repository indices" });
+            return completionProvider.initialize();
+        });
+    }
 }
