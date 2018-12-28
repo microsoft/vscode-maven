@@ -19,5 +19,6 @@
     "configuration.maven.terminal.customEnv":"自定义环境变量。在首次执行 Maven 之前，这些环境变量值将被添加到终端会话中。",
     "configuration.maven.terminal.customEnv.environmentVariable":"要设置的环境变量的名称。",
     "configuration.maven.terminal.customEnv.value":"要设置的环境变量的值。",
-    "configuration.maven.completion.enabled":"指定是否要为 POM 文件启用补全功能。"
+    "configuration.maven.completion.enabled":"指定是否要为 POM 文件启用补全功能。",
+    "configuration.maven.view":"指定 Maven 项目的展示方式。"
 }

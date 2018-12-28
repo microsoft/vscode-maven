@@ -375,6 +375,16 @@
             "default": false,
             "scope": "window",
             "description": "%configuration.maven.completion.enabled%"
+          },
+          "maven.view": {
+            "type": "string",
+            "enum": [
+              "flat",
+              "hierarchical"
+            ],
+            "default": "flat",
+            "scope": "resourec",
+            "description": "%configuration.maven.view%"
           }
         }
       }
