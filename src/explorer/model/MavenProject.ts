@@ -4,6 +4,7 @@
 import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
+import { Settings } from "../../Settings";
 import { Utils } from "../../Utils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
@@ -13,7 +14,7 @@ import { PluginsMenu } from "./PluginsMenu";
 const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
-
+    public parent?: MavenProject;
     private _rawEffectivePom: string;
     private _effectivePom: any;
     private _pom: any;
@@ -86,6 +87,9 @@ export class MavenProject implements ITreeItem {
     public getChildren(): vscode.ProviderResult<ITreeItem[]> {
         const ret: ITreeItem[] = [];
         ret.push(new PluginsMenu(this));
+        if (this.moduleNames.length > 0 && Settings.viewType(vscode.Uri.file(this._pomPath)) === "hierarchical" ) {
+            ret.push(...this.modules.map(m => mavenExplorerProvider.getMavenProject(m)));
+        }
         return ret;
     }
 

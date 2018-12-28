@@ -7,16 +7,22 @@ import { ITreeItem } from "./model/ITreeItem";
 import { MavenProject } from "./model/MavenProject";
 import { WorkspaceFolder } from "./model/WorkspaceFolder";
 
+enum ViewType {
+    HIERARCHICAL,
+    FLAT
+}
+
 class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: vscode.Event<ITreeItem>;
-    private _onDidChangeTreeData: vscode.EventEmitter<ITreeItem>;
+    public viewType: ViewType;
 
+    private _onDidChangeTreeData: vscode.EventEmitter<ITreeItem>;
     private _projectMap: Map<string, MavenProject> = new Map();
 
     constructor() {
         this._onDidChangeTreeData = new vscode.EventEmitter<ITreeItem>();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-
+        this.viewType = ViewType.HIERARCHICAL;
         this.refresh();
     }
 
