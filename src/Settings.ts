@@ -12,6 +12,14 @@ export namespace Settings {
         return _getMavenSection("view", resource);
     }
 
+    export function changeToFlatView(): void {
+        workspace.getConfiguration().update("maven.view", "flat", false);
+    }
+
+    export function changeToHierarchicalView(): void {
+        workspace.getConfiguration().update("maven.view", "hierarchical", false);
+    }
+
     export namespace External {
         export function javaHome(): string {
             return workspace.getConfiguration("java").get<string>("home");
