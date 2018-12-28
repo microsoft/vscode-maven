@@ -4,6 +4,22 @@
 import { Uri, workspace } from "vscode";
 
 export namespace Settings {
+    export function excludedFolders(resource: Uri): string[] {
+        return _getMavenSection("excludedFolders", resource);
+    }
+
+    export function viewType(resource: Uri): string {
+        return _getMavenSection("view", resource);
+    }
+
+    export function changeToFlatView(): void {
+        workspace.getConfiguration().update("maven.view", "flat", false);
+    }
+
+    export function changeToHierarchicalView(): void {
+        workspace.getConfiguration().update("maven.view", "hierarchical", false);
+    }
+
     export namespace External {
         export function javaHome(): string {
             return workspace.getConfiguration("java").get<string>("home");
@@ -12,10 +28,6 @@ export namespace Settings {
         export function defaultWindowsShell(): string {
             return workspace.getConfiguration("terminal").get<string>("integrated.shell.windows");
         }
-    }
-
-    export function excludedFolders(resource: Uri): string[] {
-        return _getMavenSection("excludedFolders", resource);
     }
 
     export namespace Terminal {

@@ -145,6 +145,24 @@
         "command": "maven.plugin.execute",
         "title": "%contributes.commands.maven.plugin.execute%",
         "category": "Maven"
+      },
+      {
+        "command": "maven.view.flat",
+        "title": "%contributes.commands.maven.view.flat%",
+        "category": "Maven",
+        "icon": {
+          "light": "resources/light/view-flat.svg",
+          "dark": "resources/dark/view-flat.svg"
+        }
+      },
+      {
+        "command": "maven.view.hierarchical",
+        "title": "%contributes.commands.maven.view.hierarchical%",
+        "category": "Maven",
+        "icon": {
+          "light": "resources/light/view-hierarchical.svg",
+          "dark": "resources/dark/view-hierarchical.svg"
+        }
       }
     ],
     "views": {
@@ -222,6 +240,16 @@
         }
       ],
       "view/title": [
+        {
+          "command": "maven.view.flat",
+          "when": "view == mavenProjects && config.maven.view != flat",
+          "group": "navigation@0a"
+        },
+        {
+          "command": "maven.view.hierarchical",
+          "when": "view == mavenProjects && config.maven.view != hierarchical",
+          "group": "navigation@0b"
+        },
         {
           "command": "maven.archetype.generate",
           "when": "view == mavenProjects",
@@ -375,6 +403,16 @@
             "default": false,
             "scope": "window",
             "description": "%configuration.maven.completion.enabled%"
+          },
+          "maven.view": {
+            "type": "string",
+            "enum": [
+              "flat",
+              "hierarchical"
+            ],
+            "default": "flat",
+            "scope": "resourec",
+            "description": "%configuration.maven.view%"
           }
         }
       }
