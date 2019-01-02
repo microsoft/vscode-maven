@@ -50,26 +50,49 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         const text: string = document.getText(range);
         const tokens: number[][] = Lexx(text);
         const currentNode: ElementNode = getElementHierarchy(text, tokens);
+        if (!currentNode) {
+            return null;
+        }
+
+        if (currentNode.tag === "groupId" && currentNode.parent && currentNode.parent.tag === "dependency") {
+            return this.completeForGroupId(document, position, currentNode);
+        }
         if (currentNode.tag === "artifactId" && currentNode.parent && currentNode.parent.tag === "dependency") {
             const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
-            return this.completeForArtifactId(groupIdNode && groupIdNode.value);
-        }
-        if (currentNode.tag === "groupId" && currentNode.parent && currentNode.parent.tag === "dependency") {
-            return this.completeForGroupId();
+            if (!groupIdNode) {
+                return null;
+            }
+
+            return this.completeForArtifactId(document, position, currentNode, groupIdNode.text);
         }
         if (currentNode.tag === "version" && currentNode.parent && currentNode.parent.tag === "dependency") {
             const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
+            if (!groupIdNode) {
+                return null;
+            }
+
             const artifactIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "artifactId");
-            return this.completeForVersion(groupIdNode && groupIdNode.value, artifactIdNode && artifactIdNode.value);
+            if (!artifactIdNode) {
+                return null;
+            }
+
+            return this.completeForVersion(document, position, currentNode, groupIdNode.text, artifactIdNode.text);
         }
         return null;
     }
 
-    private completeForGroupId(): vscode.CompletionList {
-        return new vscode.CompletionList(Object.keys(this.metadata).map(gid => new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module)), false);
+    private completeForGroupId(document: vscode.TextDocument, position: vscode.Position, groupIdNode: ElementNode): vscode.CompletionList {
+        const validGroupIds: string[] = Object.keys(this.metadata);
+        const targetRange: vscode.Range = new vscode.Range(document.positionAt(groupIdNode.offset), position);
+        const groupIdItems: vscode.CompletionItem[] = validGroupIds.map(gid => {
+            const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
+            item.textEdit = new vscode.TextEdit(targetRange, gid);
+            return item;
+        });
+        return new vscode.CompletionList(groupIdItems, false);
     }
 
-    private completeForArtifactId(groupId: string): vscode.CompletionList {
+    private completeForArtifactId(document: vscode.TextDocument, position: vscode.Position, artifactIdNode: ElementNode, groupId: string): vscode.CompletionList {
         if (!groupId) {
             return null;
         }
@@ -79,15 +102,30 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             return null;
         }
 
-        return new vscode.CompletionList(Object.keys(artifactIdMap).map(aid => new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field), false));
+        const validArtifactIds: string[] = Object.keys(artifactIdMap);
+        const targetRange: vscode.Range = new vscode.Range(document.positionAt(artifactIdNode.offset), position);
+        const artifactIdItems: vscode.CompletionItem[] = validArtifactIds.map(aid => {
+            const item: vscode.CompletionItem = new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field);
+            item.textEdit = new vscode.TextEdit(targetRange, aid);
+            return item;
+        });
+        return new vscode.CompletionList(artifactIdItems, false);
     }
 
-    private completeForVersion(groupId: string, artifactId: string): vscode.CompletionList {
+    private completeForVersion(document: vscode.TextDocument, position: vscode.Position, versionNode: ElementNode, groupId: string, artifactId: string): vscode.CompletionList {
         if (!groupId || !artifactId) {
             return null;
         }
+
         const versionMap: {} = _.get(this.metadata, [groupId, artifactId]);
-        return new vscode.CompletionList(Object.keys(versionMap).map(v => new vscode.CompletionItem(v, vscode.CompletionItemKind.Constant), false));
+        const validVersions: string[] = Object.keys(versionMap);
+        const targetRange: vscode.Range = new vscode.Range(document.positionAt(versionNode.offset), position);
+        const versionItems: vscode.CompletionItem[] = validVersions.map(v => {
+            const item: vscode.CompletionItem = new vscode.CompletionItem(v, vscode.CompletionItemKind.Constant);
+            item.textEdit = new vscode.TextEdit(targetRange, v);
+            return item;
+        });
+        return new vscode.CompletionList(versionItems, false);
     }
 
 }
@@ -95,7 +133,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
 class ElementNode {
     public parent: ElementNode;
     public tag: string;
-    public value?: string;
+    public text?: string;
+    public offset?: number; // global offset of the text part.
     public children?: ElementNode[];
 
     constructor(parent: ElementNode, tag: string) {
@@ -119,8 +158,8 @@ class ElementNode {
      * @param child the child element node.
      */
     public addChild(child: ElementNode): void {
-        if (this.value !== undefined) {
-            this.value = undefined; // value cannot exist with children.
+        if (this.text !== undefined) {
+            this.text = undefined; // value cannot exist with children.
         }
         if (this.children === undefined) {
             this.children = [];
@@ -146,7 +185,8 @@ function getElementHierarchy(text: string, tokens: number[][]): ElementNode {
                 break;
             case 3: // TEXT_NODE
                 if (current) {
-                    current.value = text.substring(token[1], token[2]);
+                    current.text = text.substring(token[1], token[2]);
+                    current.offset = token[1];
                 }
                 break;
             case 13: // CLOSE_ELEMENT
