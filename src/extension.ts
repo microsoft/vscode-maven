@@ -141,7 +141,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     );
     // completion item provider
     if (vscode.workspace.getConfiguration("maven", null).get<boolean>("completion.enabled")) {
-        context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider));
+        context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider, "."));
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, (progress) => {
             progress.report({ message: "Updating local Maven repository indices" });
             return completionProvider.initialize();
