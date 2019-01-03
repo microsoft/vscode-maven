@@ -8,8 +8,8 @@ export namespace Settings {
         return _getMavenSection("excludedFolders", resource);
     }
 
-    export function viewType(resource: Uri): string {
-        return _getMavenSection("view", resource);
+    export function viewType(): string {
+        return _getMavenSection("view");
     }
 
     export function changeToFlatView(): void {
