@@ -1,6 +1,7 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 - [Change Log](#change-log)
+  - [0.13.0](#0130)
   - [0.12.1](#0121)
   - [0.12.0](#0120)
   - [0.11.3](#0113)
@@ -18,6 +19,12 @@ All notable changes to the "vscode-maven" extension will be documented in this f
   - [0.5.1](#051)
   - [0.5.0](#050)
   - [Early Versions](#early-versions)
+
+## 0.13.0
+- Support to switch between hierarchical and flat view of modules. [#193](https://github.com/Microsoft/vscode-maven/issues/193)
+- Support to complete dependencies when editing pom.xml file. [#195](https://github.com/Microsoft/vscode-maven/issues/195)
+  - It is disabled by default, enable it by setting the value of `maven.completion.enabled` to `true`.
+  - The dependency candidates are from the local Maven repository.
 
 ## 0.12.1
 - Chinese localization: Add a whitespace between English and Chinese characters. [#184](https://github.com/Microsoft/vscode-maven/issues/184)
