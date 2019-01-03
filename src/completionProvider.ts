@@ -8,6 +8,8 @@ import * as path from "path";
 import * as vscode from "vscode";
 import Lexx from "xml-zero-lexer";
 
+const dependencySnippet: vscode.SnippetString = new vscode.SnippetString(["<dependency>", "\t<groupId>$1</groupId>", "\t<artifactId>$2</artifactId>", "</dependency>$0"].join("\n"));
+
 class CompletionProvider implements vscode.CompletionItemProvider {
     public localRepository: string;
     public metadata: {
@@ -77,6 +79,11 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             }
 
             return this.completeForVersion(document, position, currentNode, groupIdNode.text, artifactIdNode.text);
+        }
+        if (currentNode.tag === "dependencies") {
+            const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("dependency", vscode.CompletionItemKind.Snippet);
+            snippetItem.insertText = dependencySnippet;
+            return new vscode.CompletionList([snippetItem], false);
         }
         return null;
     }
