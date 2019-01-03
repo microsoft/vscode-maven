@@ -49,7 +49,7 @@ export class WorkspaceFolder implements ITreeItem {
             }];
         }
 
-        switch (Settings.viewType(this._workspaceFolder.uri)) {
+        switch (Settings.viewType()) {
             case "hierarchical":
                 return this.sortByName(allProjectNodes.filter(m => !m.parent));
             case "flat":
