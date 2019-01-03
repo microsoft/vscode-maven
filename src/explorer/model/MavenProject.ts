@@ -87,7 +87,7 @@ export class MavenProject implements ITreeItem {
     public getChildren(): vscode.ProviderResult<ITreeItem[]> {
         const ret: ITreeItem[] = [];
         ret.push(new PluginsMenu(this));
-        if (this.moduleNames.length > 0 && Settings.viewType(vscode.Uri.file(this._pomPath)) === "hierarchical" ) {
+        if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical" ) {
             ret.push(...this.modules.map(m => mavenExplorerProvider.getMavenProject(m)));
         }
         return ret;
