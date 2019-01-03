@@ -93,7 +93,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         const targetRange: vscode.Range = new vscode.Range(document.positionAt(groupIdNode.offset), position);
         const groupIdItems: vscode.CompletionItem[] = validGroupIds.map(gid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
-            item.textEdit = new vscode.TextEdit(targetRange, gid);
+            item.insertText = gid;
+            item.range = targetRange;
             return item;
         });
         return new vscode.CompletionList(groupIdItems, false);
@@ -113,7 +114,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         const targetRange: vscode.Range = new vscode.Range(document.positionAt(artifactIdNode.offset), position);
         const artifactIdItems: vscode.CompletionItem[] = validArtifactIds.map(aid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field);
-            item.textEdit = new vscode.TextEdit(targetRange, aid);
+            item.insertText = aid;
+            item.range = targetRange;
             return item;
         });
         return new vscode.CompletionList(artifactIdItems, false);
@@ -129,7 +131,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         const targetRange: vscode.Range = new vscode.Range(document.positionAt(versionNode.offset), position);
         const versionItems: vscode.CompletionItem[] = validVersions.map(v => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(v, vscode.CompletionItemKind.Constant);
-            item.textEdit = new vscode.TextEdit(targetRange, v);
+            item.insertText = v;
+            item.range = targetRange;
             return item;
         });
         return new vscode.CompletionList(versionItems, false);
