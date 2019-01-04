@@ -53,10 +53,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             return null;
         }
 
-        if (currentNode.tag === "groupId" && currentNode.parent && currentNode.parent.tag === "dependency") {
+        if (currentNode.tag === "groupId") {
             return this.completeForGroupId(document, position, currentNode);
         }
-        if (currentNode.tag === "artifactId" && currentNode.parent && currentNode.parent.tag === "dependency") {
+        if (currentNode.tag === "artifactId" && currentNode.parent) {
             const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
             if (!groupIdNode) {
                 return null;
@@ -64,7 +64,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
 
             return this.completeForArtifactId(document, position, currentNode, groupIdNode.text);
         }
-        if (currentNode.tag === "version" && currentNode.parent && currentNode.parent.tag === "dependency") {
+        if (currentNode.tag === "version" && currentNode.parent) {
             const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
             if (!groupIdNode) {
                 return null;
@@ -91,6 +91,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     private completeForGroupId(document: vscode.TextDocument, position: vscode.Position, groupIdNode: ElementNode): vscode.CompletionList {
+        if (!this.metadata) {
+            return null;
+        }
+
         const validGroupIds: string[] = Object.keys(this.metadata);
         const targetRange: vscode.Range = new vscode.Range(document.positionAt(groupIdNode.offset), position);
         const groupIdItems: vscode.CompletionItem[] = validGroupIds.map(gid => {
@@ -103,7 +107,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     private completeForArtifactId(document: vscode.TextDocument, position: vscode.Position, artifactIdNode: ElementNode, groupId: string): vscode.CompletionList {
-        if (!groupId) {
+        if (!this.metadata || !groupId) {
             return null;
         }
 
@@ -124,7 +128,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     private completeForVersion(document: vscode.TextDocument, position: vscode.Position, versionNode: ElementNode, groupId: string, artifactId: string): vscode.CompletionList {
-        if (!groupId || !artifactId) {
+        if (!this.metadata || !groupId || !artifactId) {
             return null;
         }
 
