@@ -24,12 +24,17 @@ export class WorkspaceFolder implements ITreeItem {
 
     public async getChildren(): Promise<ITreeItem[]> {
         const newProjects: MavenProject[] = [];
+        const allProjects: MavenProject[] = [];
         const pomPaths: string[] = await Utils.getAllPomPaths(this._workspaceFolder);
         for (const pomPath of pomPaths) {
-            if (!mavenExplorerProvider.getMavenProject(pomPath)) {
-                newProjects.push(new MavenProject(pomPath));
+            let currentProject: MavenProject = mavenExplorerProvider.getMavenProject(pomPath);
+            if (!currentProject) {
+                currentProject = new MavenProject(pomPath);
+                newProjects.push(currentProject);
             }
+            allProjects.push(currentProject);
         }
+
         await Promise.all(newProjects.map(elem => elem.parsePom()));
         mavenExplorerProvider.updateProjects(...newProjects);
         newProjects.forEach(p => {
@@ -41,8 +46,7 @@ export class WorkspaceFolder implements ITreeItem {
             });
         });
 
-        const allProjectNodes: MavenProject[] = mavenExplorerProvider.mavenProjectNodes;
-        if (allProjectNodes.length === 0) {
+        if (allProjects.length === 0) {
             return [{
                 getTreeItem: () => new vscode.TreeItem("No Maven project found."),
                 getContextValue: () => "EmptyNode"
@@ -51,9 +55,9 @@ export class WorkspaceFolder implements ITreeItem {
 
         switch (Settings.viewType()) {
             case "hierarchical":
-                return this.sortByName(allProjectNodes.filter(m => !m.parent));
+                return this.sortByName(allProjects.filter(m => !m.parent));
             case "flat":
-                return this.sortByName(allProjectNodes);
+                return this.sortByName(allProjects);
             default: return null;
         }
     }
