@@ -9,6 +9,7 @@ import * as vscode from "vscode";
 import Lexx from "xml-zero-lexer";
 
 const dependencySnippet: vscode.SnippetString = new vscode.SnippetString(["<dependency>", "\t<groupId>$1</groupId>", "\t<artifactId>$2</artifactId>", "</dependency>$0"].join("\n"));
+const pluginSnippet: vscode.SnippetString = new vscode.SnippetString(["<plugin>", "\t<groupId>$1</groupId>", "\t<artifactId>$2</artifactId>", "</plugin>$0"].join("\n"));
 
 class CompletionProvider implements vscode.CompletionItemProvider {
     public localRepository: string;
@@ -44,10 +45,6 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
-        if (!this.metadata) {
-            return null;
-        }
-
         const range: vscode.Range = new vscode.Range(new vscode.Position(0, 0), position);
         const text: string = document.getText(range);
         const tokens: number[][] = Lexx(text);
@@ -83,6 +80,11 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         if (currentNode.tag === "dependencies") {
             const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("dependency", vscode.CompletionItemKind.Snippet);
             snippetItem.insertText = dependencySnippet;
+            return new vscode.CompletionList([snippetItem], false);
+        }
+        if (currentNode.tag === "plugins") {
+            const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
+            snippetItem.insertText = pluginSnippet;
             return new vscode.CompletionList([snippetItem], false);
         }
         return null;
