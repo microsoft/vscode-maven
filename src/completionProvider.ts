@@ -9,6 +9,7 @@ import * as vscode from "vscode";
 import Lexx from "xml-zero-lexer";
 
 const dependencySnippet: vscode.SnippetString = new vscode.SnippetString(["<dependency>", "\t<groupId>$1</groupId>", "\t<artifactId>$2</artifactId>", "</dependency>$0"].join("\n"));
+const pluginSnippet: vscode.SnippetString = new vscode.SnippetString(["<plugin>", "\t<groupId>$1</groupId>", "\t<artifactId>$2</artifactId>", "</plugin>$0"].join("\n"));
 
 class CompletionProvider implements vscode.CompletionItemProvider {
     public localRepository: string;
@@ -44,10 +45,6 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
-        if (!this.metadata) {
-            return null;
-        }
-
         const range: vscode.Range = new vscode.Range(new vscode.Position(0, 0), position);
         const text: string = document.getText(range);
         const tokens: number[][] = Lexx(text);
@@ -56,10 +53,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             return null;
         }
 
-        if (currentNode.tag === "groupId" && currentNode.parent && currentNode.parent.tag === "dependency") {
+        if (currentNode.tag === "groupId") {
             return this.completeForGroupId(document, position, currentNode);
         }
-        if (currentNode.tag === "artifactId" && currentNode.parent && currentNode.parent.tag === "dependency") {
+        if (currentNode.tag === "artifactId" && currentNode.parent) {
             const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
             if (!groupIdNode) {
                 return null;
@@ -67,7 +64,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
 
             return this.completeForArtifactId(document, position, currentNode, groupIdNode.text);
         }
-        if (currentNode.tag === "version" && currentNode.parent && currentNode.parent.tag === "dependency") {
+        if (currentNode.tag === "version" && currentNode.parent) {
             const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
             if (!groupIdNode) {
                 return null;
@@ -85,10 +82,19 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             snippetItem.insertText = dependencySnippet;
             return new vscode.CompletionList([snippetItem], false);
         }
+        if (currentNode.tag === "plugins") {
+            const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
+            snippetItem.insertText = pluginSnippet;
+            return new vscode.CompletionList([snippetItem], false);
+        }
         return null;
     }
 
     private completeForGroupId(document: vscode.TextDocument, position: vscode.Position, groupIdNode: ElementNode): vscode.CompletionList {
+        if (!this.metadata) {
+            return null;
+        }
+
         const validGroupIds: string[] = Object.keys(this.metadata);
         const targetRange: vscode.Range = new vscode.Range(document.positionAt(groupIdNode.offset), position);
         const groupIdItems: vscode.CompletionItem[] = validGroupIds.map(gid => {
@@ -101,7 +107,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     private completeForArtifactId(document: vscode.TextDocument, position: vscode.Position, artifactIdNode: ElementNode, groupId: string): vscode.CompletionList {
-        if (!groupId) {
+        if (!this.metadata || !groupId) {
             return null;
         }
 
@@ -122,7 +128,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     }
 
     private completeForVersion(document: vscode.TextDocument, position: vscode.Position, versionNode: ElementNode, groupId: string, artifactId: string): vscode.CompletionList {
-        if (!groupId || !artifactId) {
+        if (!this.metadata || !groupId || !artifactId) {
             return null;
         }
 
