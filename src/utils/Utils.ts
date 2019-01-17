@@ -6,18 +6,18 @@ import * as fse from "fs-extra";
 import * as http from "http";
 import * as https from "https";
 import * as md5 from "md5";
-import * as os from "os";
 import * as path from "path";
 import * as url from "url";
-import { commands, ExtensionContext, extensions, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from "vscode";
+import { commands, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
-import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
-import { MavenProject } from "./explorer/model/MavenProject";
-import { mavenOutputChannel } from "./mavenOutputChannel";
-import { mavenTerminal } from "./mavenTerminal";
-import { Settings } from "./Settings";
-import { VSCodeUI } from "./VSCodeUI";
+import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
+import { MavenProject } from "../explorer/model/MavenProject";
+import { mavenOutputChannel } from "../mavenOutputChannel";
+import { mavenTerminal } from "../mavenTerminal";
+import { Settings } from "../Settings";
+import { VSCodeUI } from "../VSCodeUI";
+import { getExtensionName, getExtensionVersion, getPathToTempFolder } from "./contextUtils";
 
 interface ICommandHistory {
     pomPath: string;
@@ -25,46 +25,6 @@ interface ICommandHistory {
 }
 
 export namespace Utils {
-    let EXTENSION_PUBLISHER: string;
-    let EXTENSION_NAME: string;
-    let EXTENSION_VERSION: string;
-    let EXTENSION_AI_KEY: string;
-
-    export async function loadPackageInfo(context: ExtensionContext): Promise<void> {
-        const { publisher, name, version, aiKey } = await fse.readJSON(context.asAbsolutePath("./package.json"));
-        EXTENSION_AI_KEY = aiKey;
-        EXTENSION_PUBLISHER = publisher;
-        EXTENSION_NAME = name;
-        EXTENSION_VERSION = version;
-    }
-
-    export function getExtensionPublisher(): string {
-        return EXTENSION_PUBLISHER;
-    }
-
-    export function getExtensionName(): string {
-        return EXTENSION_NAME;
-    }
-
-    export function getExtensionId(): string {
-        return `${EXTENSION_PUBLISHER}.${EXTENSION_NAME}`;
-    }
-
-    export function getExtensionVersion(): string {
-        return EXTENSION_VERSION;
-    }
-
-    export function getAiKey(): string {
-        return EXTENSION_AI_KEY;
-    }
-
-    export function getTempFolder(): string {
-        return path.join(os.tmpdir(), getExtensionId());
-    }
-
-    export function getPathToExtensionRoot(...args: string[]): string {
-        return path.join(extensions.getExtension(getExtensionId()).extensionPath, ...args);
-    }
 
     export async function parseXmlFile(xmlFilePath: string, options?: xml2js.OptionsV2): Promise<{}> {
         if (await fse.pathExists(xmlFilePath)) {
@@ -90,12 +50,12 @@ export namespace Utils {
         );
     }
 
-    export function getEffectivePomOutputPath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), createUuid());
+    function getTempOutputPath(key: string): string {
+        return getPathToTempFolder(getExtensionName(), md5(key), createUuid());
     }
 
-    export function getCommandHistoryCachePath(pomXmlFilePath: string): string {
-        return path.join(os.tmpdir(), EXTENSION_NAME, md5(pomXmlFilePath), "commandHistory.json");
+    function getCommandHistoryCachePath(pomXmlFilePath: string): string {
+        return getPathToTempFolder(getExtensionName(), md5(pomXmlFilePath), "commandHistory.json");
     }
 
     export async function readFileIfExists(filepath: string): Promise<string> {
@@ -106,11 +66,8 @@ export namespace Utils {
     }
 
     export async function downloadFile(targetUrl: string, readContent?: boolean, customHeaders?: {}): Promise<string> {
-        const tempFilePath: string = path.join(getTempFolder(), md5(targetUrl));
-        await fse.ensureDir(getTempFolder());
-        if (await fse.pathExists(tempFilePath)) {
-            await fse.remove(tempFilePath);
-        }
+        const tempFilePath: string = getTempOutputPath(targetUrl);
+        await fse.ensureFile(tempFilePath);
 
         return await new Promise((resolve: (res: string) => void, reject: (e: Error) => void): void => {
             const urlObj: url.Url = url.parse(targetUrl);
@@ -181,15 +138,15 @@ export namespace Utils {
 
     export async function executeInTerminal(command: string, pomfile?: string, options?: {}): Promise<void> {
         const workspaceFolder: WorkspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
-        const mvnString: string = wrappedWithQuotes(mavenTerminal.formattedPathForTerminal(await getMaven(workspaceFolder)));
+        const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(await getMaven(workspaceFolder)));
         const fullCommand: string = [
             mvnString,
             command.trim(),
-            pomfile && `-f "${mavenTerminal.formattedPathForTerminal(pomfile)}"`,
+            pomfile && `-f "${await mavenTerminal.formattedPathForTerminal(pomfile)}"`,
             Settings.Executable.options(pomfile && Uri.file(pomfile))
         ].filter(Boolean).join(" ");
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
-        mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
+        await mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
         if (pomfile) {
             updateLRUCommands(command, pomfile);
         }
@@ -289,10 +246,6 @@ export namespace Utils {
         await fse.writeFile(historyFilePath, JSON.stringify(historyObject));
     }
 
-    export function getResourcePath(...args: string[]): string {
-        return getPathToExtensionRoot("resources", ...args);
-    }
-
     export async function getAllPomPaths(workspaceFolder: WorkspaceFolder): Promise<string[]> {
         const exclusions: string[] = Settings.excludedFolders(workspaceFolder.uri);
         const pomFileUris: Uri[] = await workspace.findFiles(new RelativePattern(workspaceFolder, "**/pom.xml"), `{${exclusions.join(",")}}`);
@@ -332,7 +285,7 @@ export namespace Utils {
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Generating Effective POM: ${name}` });
                 try {
-                    const outputPath: string = Utils.getEffectivePomOutputPath(pomPath);
+                    const outputPath: string = getTempOutputPath(pomPath);
                     await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
                     const pomxml: string = await Utils.readFileIfExists(outputPath);
                     await fse.remove(outputPath);
@@ -349,7 +302,7 @@ export namespace Utils {
         return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Retrieving Plugin Info: ${pluginId}` });
-                const outputPath: string = path.join(os.tmpdir(), EXTENSION_NAME, md5(pluginId), createUuid());
+                const outputPath: string = getTempOutputPath(pluginId);
                 try {
                     await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
                     const content: string = await Utils.readFileIfExists(outputPath);

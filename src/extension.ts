@@ -17,15 +17,16 @@ import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
-import { Utils } from "./Utils";
+import { getAiKey, getExtensionId, getExtensionName, getExtensionPublisher, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
+import { Utils } from "./utils/Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-    await Utils.loadPackageInfo(context);
+    await loadPackageInfo(context);
     // Usage data statistics.
-    if (Utils.getAiKey()) {
-        TelemetryWrapper.initilize(Utils.getExtensionPublisher(), Utils.getExtensionName(), Utils.getExtensionVersion(), Utils.getAiKey());
-        await initialize(Utils.getExtensionId(), Utils.getExtensionVersion(), Utils.getAiKey());
+    if (getAiKey()) {
+        TelemetryWrapper.initilize(getExtensionPublisher(), getExtensionName(), getExtensionVersion(), getAiKey());
+        await initialize(getExtensionId(), getExtensionVersion(), getAiKey());
     }
     await instrumentOperation("activation", doActivate)(context);
 }

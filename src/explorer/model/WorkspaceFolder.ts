@@ -4,7 +4,7 @@
 import * as vscode from "vscode";
 import { TreeItemCollapsibleState } from "vscode";
 import { Settings } from "../../Settings";
-import { Utils } from "../../Utils";
+import { Utils } from "../../utils/Utils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";

@@ -7,11 +7,12 @@ import * as path from "path";
 import { Uri } from "vscode";
 import { instrumentOperationStep, sendInfo, Session, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
-import { Utils } from "../Utils";
+import { getPathToExtensionRoot } from "../utils/contextUtils";
+import { Utils } from "../utils/Utils";
 import { VSCodeUI } from "../VSCodeUI";
 import { Archetype } from "./Archetype";
-// tslint:disable-next-line:no-http-string
-const REMOTE_ARCHETYPE_CATALOG_URL: string = "http://repo.maven.apache.org/maven2/archetype-catalog.xml";
+
+const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
 const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
 
 // TO REMOVE
@@ -102,7 +103,7 @@ export namespace ArchetypeModule {
     export async function updateArchetypeCatalog(): Promise<void> {
         const xml: string = await Utils.downloadFile(REMOTE_ARCHETYPE_CATALOG_URL, true);
         const archetypes: Archetype[] = await listArchetypeFromXml(xml);
-        const targetFilePath: string = path.join(Utils.getPathToExtensionRoot(), "resources", "archetypes.json");
+        const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
         await fse.ensureFile(targetFilePath);
         await fse.writeJSON(targetFilePath, archetypes);
     }
@@ -183,7 +184,7 @@ export namespace ArchetypeModule {
     }
 
     async function getCachedRemoteArchetypeItems(): Promise<Archetype[]> {
-        const contentPath: string = Utils.getPathToExtensionRoot("resources", "archetypes.json");
+        const contentPath: string = getPathToExtensionRoot("resources", "archetypes.json");
         if (await fse.pathExists(contentPath)) {
             return (await fse.readJSON(contentPath)).map(
                 (rawItem: Archetype) => new Archetype(

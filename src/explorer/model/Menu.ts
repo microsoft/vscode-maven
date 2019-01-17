@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { Utils } from "../../Utils";
+import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 
@@ -25,8 +25,8 @@ export abstract class Menu implements ITreeItem {
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this._name, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {
-            light: Utils.getResourcePath("light", "folder.svg"),
-            dark: Utils.getResourcePath("dark", "folder.svg")
+            light: getPathToExtensionRoot("resources", "light", "folder.svg"),
+            dark: getPathToExtensionRoot("resources", "dark", "folder.svg")
         };
         return treeItem;
     }
