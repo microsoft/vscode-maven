@@ -2,10 +2,10 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { executeCommand } from "./cpUtils";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
-import { Utils } from "./Utils";
+import { executeCommand } from "./utils/cpUtils";
+import { Utils } from "./utils/Utils";
 
 interface ITerminalOptions {
     addNewLine?: boolean;

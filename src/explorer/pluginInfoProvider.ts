@@ -3,7 +3,7 @@
 
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { Utils } from "../Utils";
+import { Utils } from "../utils/Utils";
 
 const KEY_PLUGINS: string = "plugins";
 

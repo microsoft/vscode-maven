@@ -5,7 +5,8 @@ import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Settings } from "../../Settings";
-import { Utils } from "../../Utils";
+import { getPathToExtensionRoot } from "../../utils/contextUtils";
+import { Utils } from "../../utils/Utils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
@@ -72,8 +73,8 @@ export class MavenProject implements ITreeItem {
         const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
-            light: Utils.getResourcePath("light", iconFile),
-            dark: Utils.getResourcePath("dark", iconFile)
+            light: getPathToExtensionRoot("resources", "light", iconFile),
+            dark: getPathToExtensionRoot("resources", "dark", iconFile)
         };
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         treeItem.command = { title: "open pom", command: "maven.project.openPom", arguments: [this] };
