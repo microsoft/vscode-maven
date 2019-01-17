@@ -181,15 +181,15 @@ export namespace Utils {
 
     export async function executeInTerminal(command: string, pomfile?: string, options?: {}): Promise<void> {
         const workspaceFolder: WorkspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
-        const mvnString: string = wrappedWithQuotes(mavenTerminal.formattedPathForTerminal(await getMaven(workspaceFolder)));
+        const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(await getMaven(workspaceFolder)));
         const fullCommand: string = [
             mvnString,
             command.trim(),
-            pomfile && `-f "${mavenTerminal.formattedPathForTerminal(pomfile)}"`,
+            pomfile && `-f "${await mavenTerminal.formattedPathForTerminal(pomfile)}"`,
             Settings.Executable.options(pomfile && Uri.file(pomfile))
         ].filter(Boolean).join(" ");
         const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
-        mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
+        await mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
         if (pomfile) {
             updateLRUCommands(command, pomfile);
         }

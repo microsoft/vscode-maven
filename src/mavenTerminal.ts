@@ -2,6 +2,8 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { executeCommand } from "./cpUtils";
+import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
 import { Utils } from "./Utils";
 
@@ -14,7 +16,7 @@ interface ITerminalOptions {
 class MavenTerminal implements vscode.Disposable {
     private readonly terminals: { [id: string]: vscode.Terminal } = {};
 
-    public runInTerminal(command: string, options?: ITerminalOptions): void {
+    public async runInTerminal(command: string, options?: ITerminalOptions): Promise<void> {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
         const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
         if (this.terminals[name] === undefined) {
@@ -23,7 +25,7 @@ class MavenTerminal implements vscode.Disposable {
         }
         this.terminals[name].show();
         if (cwd) {
-            this.terminals[name].sendText(getCDCommand(cwd), true);
+            this.terminals[name].sendText(await getCDCommand(cwd), true);
         }
         this.terminals[name].sendText(getCommand(command), addNewLine);
     }
@@ -44,11 +46,11 @@ class MavenTerminal implements vscode.Disposable {
     }
 
     // To Refactor: remove from here.
-    public formattedPathForTerminal(filepath: string): string {
+    public async formattedPathForTerminal(filepath: string): Promise<string> {
         if (process.platform === "win32") {
             switch (currentWindowsShell()) {
                 case "WSL Bash":
-                    return toWSLPath(filepath);
+                    return await toWslPath(filepath);
                 default:
                     return filepath;
             }
@@ -75,7 +77,7 @@ function getCommand(cmd: string): string {
     }
 }
 
-function getCDCommand(cwd: string): string {
+async function getCDCommand(cwd: string): Promise<string> {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
             case "Git Bash":
@@ -85,7 +87,7 @@ function getCDCommand(cwd: string): string {
             case "Command Prompt":
                 return `cd /d "${cwd}"`; // CMD
             case "WSL Bash":
-                return `cd "${toWSLPath(cwd)}"`; // WSL
+                return `cd "${await toWslPath(cwd)}"`; // WSL
             default:
                 return `cd "${cwd}"`; // Unknown, try using common one.
         }
@@ -138,7 +140,7 @@ function currentWindowsShell(): string {
     }
 }
 
-function toWSLPath(p: string): string {
+function toDefaultWslPath(p: string): string {
     const arr: string[] = p.split(":\\");
     if (arr.length === 2) {
         const drive: string = arr[0].toLowerCase();
@@ -147,6 +149,19 @@ function toWSLPath(p: string): string {
     } else {
         return p.replace(/\\/g, "/");
     }
+}
+
+export async function toWslPath(path: string): Promise<string> {
+    try {
+        return (await executeCommand("wsl", ["wslpath", "-u", `"${path.replace(/\\/g, "/")}"`])).trim();
+    } catch (error) {
+        mavenOutputChannel.appendLine(error, "WSL");
+        return toDefaultWslPath(path);
+    }
+}
+
+export async function toWinPath(path: string): Promise<string> {
+    return (await executeCommand("wsl", ["wslpath", "-w", `"${path}"`])).trim();
 }
 
 export const mavenTerminal: MavenTerminal = new MavenTerminal();
