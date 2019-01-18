@@ -304,7 +304,8 @@ export namespace Utils {
                 p.report({ message: `Retrieving Plugin Info: ${pluginId}` });
                 const outputPath: string = getTempOutputPath(pluginId);
                 try {
-                    await Utils.executeInBackground(`help:describe -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
+                    // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock
+                    await Utils.executeInBackground(`help:describe -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
                     const content: string = await Utils.readFileIfExists(outputPath);
                     await fse.remove(outputPath);
                     return resolve(content);
