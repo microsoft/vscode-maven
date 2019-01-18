@@ -5,7 +5,7 @@ import * as fse from "fs-extra";
 import * as os from "os";
 import * as path from "path";
 import { Uri } from "vscode";
-import { instrumentOperationStep, sendInfo, Session, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
+import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
 import { Utils } from "../utils/Utils";
@@ -15,51 +15,15 @@ import { Archetype } from "./Archetype";
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
 const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
 
-// TO REMOVE
-class Step {
-    public readonly name: string;
-    public readonly info: string;
-    constructor(name: string, info: string) {
-        this.name = name;
-        this.info = info;
-    }
-}
-
-const stepTargetFolder: Step = new Step("TargetFolder", "Target folder selected.");
-const stepListMore: Step = new Step("ListMore", "All archetypes listed.");
-const stepArchetype: Step = new Step("Archetype", "Archetype selected.");
-
-function finishStep(step: Step): void {
-    const session: Session = TelemetryWrapper.currentSession();
-    if (session && session.extraProperties) {
-        if (!session.extraProperties.finishedSteps) {
-            session.extraProperties.finishedSteps = [];
-        }
-        session.extraProperties.finishedSteps.push(step.name);
-    }
-    TelemetryWrapper.info(step.info);
-}
-
-// UNTIL HERE
 export namespace ArchetypeModule {
     async function selectArchetype(): Promise<Archetype> {
         let selectedArchetype: Archetype = await showQuickPickForArchetypes();
         if (selectedArchetype && !selectedArchetype.artifactId) {
-            finishStep(stepListMore);
             selectedArchetype = await showQuickPickForArchetypes({ all: true });
         }
         if (!selectedArchetype) {
             throw new OperationCanceledError("Archeype not selected.");
         }
-        // TO REMOVE
-        const { artifactId, groupId } = selectedArchetype;
-        const session: Session = TelemetryWrapper.currentSession();
-        if (session && session.extraProperties) {
-            session.extraProperties.artifactId = artifactId;
-            session.extraProperties.groupId = groupId;
-        }
-        finishStep(stepArchetype);
-        // UNTIL HERE
 
         return selectedArchetype;
     }
@@ -73,9 +37,6 @@ export namespace ArchetypeModule {
         if (!cwd) {
             throw new OperationCanceledError("Target folder not selected.");
         }
-        // TO REMOVE
-        finishStep(stepTargetFolder);
-        // UNTIL HERE
         return cwd;
     }
 
