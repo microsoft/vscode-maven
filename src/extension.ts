@@ -4,7 +4,7 @@
 "use strict";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
-import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, TelemetryWrapper } from "vscode-extension-telemetry-wrapper";
+import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { completionProvider } from "./completionProvider";
 import { OperationCanceledError } from "./Errors";
@@ -17,7 +17,7 @@ import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
-import { getAiKey, getExtensionId, getExtensionName, getExtensionPublisher, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
+import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
 import { Utils } from "./utils/Utils";
 import { VSCodeUI } from "./VSCodeUI";
 
@@ -25,7 +25,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await loadPackageInfo(context);
     // Usage data statistics.
     if (getAiKey()) {
-        TelemetryWrapper.initilize(getExtensionPublisher(), getExtensionName(), getExtensionVersion(), getAiKey());
         await initialize(getExtensionId(), getExtensionVersion(), getAiKey());
     }
     await instrumentOperation("activation", doActivate)(context);
@@ -48,9 +47,7 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
             throw error;
         }
     });
-    // tslint:disable-next-line:no-suspicious-comment
-    // TODO: replace TelemetryWrapper.registerCommand with vscode.commands.registerCommand.
-    context.subscriptions.push(TelemetryWrapper.registerCommand(commandName, callbackWithTroubleshooting));
+    context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
 }
 
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
