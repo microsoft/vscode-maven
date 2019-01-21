@@ -432,7 +432,7 @@
     "@types/lodash": "^4.14.119",
     "@types/md5": "^2.1.33",
     "@types/minimatch": "^3.0.3",
-    "@types/node": "^7.10.2",
+    "@types/node": "^8.10.39",
     "@types/xml2js": "^0.4.3",
     "ts-loader": "^4.4.2",
     "tslint": "^5.12.0",
@@ -440,7 +440,7 @@
     "typescript": "^2.9.2",
     "vscode": "^1.1.26",
     "webpack": "^4.28.2",
-    "webpack-cli": "^3.1.0"
+    "webpack-cli": "^3.2.1"
   },
   "dependencies": {
     "fast-glob": "^2.2.4",
