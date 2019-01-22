@@ -20,6 +20,6 @@
     "configuration.maven.terminal.customEnv": "Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed.",
     "configuration.maven.terminal.customEnv.environmentVariable": "Name of the environment variable to set.",
     "configuration.maven.terminal.customEnv.value": "Value of the environment variable to set.",
-    "configuration.maven.completion.enabled": "Specifies whether to enable completion for POM files. (Reload Window to take effect)",
+    "configuration.maven.completion.local.enabled": "Specifies whether to index local Maven repository for POM completion. (Reload Window to take effect, indexing takes time according to the size of your repository)",
     "configuration.maven.view": "Specifies the way of viewing Maven projects."
 }

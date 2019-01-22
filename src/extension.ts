@@ -6,7 +6,8 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
-import { completionProvider } from "./completionProvider";
+import { centralProvider } from "./completion/centralProvider";
+import { localProvider } from "./completion/localProvider";
 import { OperationCanceledError } from "./Errors";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
@@ -138,11 +139,12 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         })
     );
     // completion item provider
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider, "."));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], centralProvider, ".", "-"));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], localProvider, "."));
     if (vscode.workspace.getConfiguration("maven", null).get<boolean>("completion.enabled")) {
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, (progress) => {
             progress.report({ message: "Updating local Maven repository indices" });
-            return completionProvider.initialize();
+            return localProvider.initialize();
         });
     }
 }
