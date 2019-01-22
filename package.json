@@ -398,11 +398,11 @@
             "description": "%configuration.maven.terminal.customEnv%",
             "scope": "window"
           },
-          "maven.completion.enabled": {
+          "maven.completion.local.enabled": {
             "type": "boolean",
             "default": false,
             "scope": "window",
-            "description": "%configuration.maven.completion.enabled%"
+            "description": "%configuration.maven.local.completion.enabled%"
           },
           "maven.view": {
             "type": "string",

@@ -101,6 +101,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
             item.insertText = gid;
             item.range = targetRange;
+            item.detail = "local";
             return item;
         });
         return new vscode.CompletionList(groupIdItems, false);
