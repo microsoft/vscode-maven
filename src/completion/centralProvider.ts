@@ -63,7 +63,7 @@ class RemoteProvider implements vscode.CompletionItemProvider {
                     const item: vscode.CompletionItem = new vscode.CompletionItem(doc.a, vscode.CompletionItemKind.Field);
                     item.insertText = doc.a;
                     item.range = targetRange;
-                    item.detail = `g:${doc.g}`;
+                    item.detail = doc.g;
                     return item;
                 });
                 return new vscode.CompletionList(artifactIdItems, false);
