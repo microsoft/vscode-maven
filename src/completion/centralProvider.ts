@@ -49,10 +49,20 @@ class RemoteProvider implements vscode.CompletionItemProvider {
                 return new vscode.CompletionList(groupIdItems, false);
             }
             case XmlTagName.ArtifactId: {
-                // const body: any = await getArtifacts(currentNode.text);
-                // const docs: any[] = _.get(body, "response.docs", []);
+                const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
+                const groupIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
+                const query: string = _.isEmpty(groupIdNode && groupIdNode.text) ? currentNode.text : `${currentNode.text} ${groupIdNode.text}`;
+                const body: any = await getArtifacts(query);
+                const docs: any[] = _.get(body, "response.docs", []);
+                const artifactIdItems: vscode.CompletionItem[] = docs.map(doc => {
+                    const item: vscode.CompletionItem = new vscode.CompletionItem(doc.a, vscode.CompletionItemKind.Field);
+                    item.insertText = doc.a;
+                    item.range = targetRange;
+                    item.detail = `g:${doc.g}`;
+                    return item;
+                });
+                return new vscode.CompletionList(artifactIdItems, false);
 
-                return null;
             }
 
             case XmlTagName.Version:

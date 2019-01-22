@@ -139,7 +139,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         })
     );
     // completion item provider
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], centralProvider, "."));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], centralProvider, ".", "-"));
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider, "."));
     if (vscode.workspace.getConfiguration("maven", null).get<boolean>("completion.enabled")) {
         vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, (progress) => {
