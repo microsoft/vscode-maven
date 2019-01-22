@@ -22,6 +22,7 @@ export class ElementNode {
     constructor(parent: ElementNode, tag: string) {
         this.parent = parent;
         this.tag = tag;
+        this.text = "";
     }
 
     /**
@@ -61,6 +62,7 @@ function getElementHierarchy(text: string, tokens: number[][], cursorOffset: num
     const n: number = tokens.length;
     let cursorNode: ElementNode = null;
     let iter: ElementNode = null;
+    let iterPrev: ElementNode = null;
     let i: number = 0;
     while (i < n) {
         const token: number[] = tokens[i];
@@ -79,13 +81,18 @@ function getElementHierarchy(text: string, tokens: number[][], cursorOffset: num
                 }
                 break;
             case 13: // CLOSE_ELEMENT
+                iterPrev = iter;
                 iter = iter.parent;
                 break;
             default:
                 break;
         }
-        if (!cursorNode && cursorOffset <= token[2]) {
-            cursorNode = iter;
+        if (!cursorNode) {
+            if (cursorOffset <= token[1]) {
+                cursorNode = iterPrev;
+            } else if (cursorOffset <= token[2]) {
+                cursorNode = iter;
+            }
         }
         i += 1;
     }

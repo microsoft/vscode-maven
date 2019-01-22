@@ -5,14 +5,23 @@ import * as http from "http";
 import * as https from "https";
 import * as url from "url";
 
-const MAX_ROWS: number = 20;
 const URL_BASIC_SEARCH: string = "https://search.maven.org/solrsearch/select";
 
-// tslint:disable-next-line:export-name
 export async function getArtifacts(keyword: string): Promise<{}> {
     const params: any = {
         q: keyword,
-        rows: MAX_ROWS,
+        rows: 20,
+        wt: "json"
+    };
+    const raw: string = await httpGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
+    return JSON.parse(raw);
+}
+
+export async function getVersions(gid: string, aid: string): Promise<{}> {
+    const params: any = {
+        q: `g:"${gid}" AND a:"${aid}"`,
+        core: "gav",
+        rows: 50,
         wt: "json"
     };
     const raw: string = await httpGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);

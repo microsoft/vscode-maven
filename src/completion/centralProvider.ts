@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import * as vscode from "vscode";
 
 import { ElementNode, getCurrentNode, XmlTagName } from "./lexerUtils";
-import { getArtifacts } from "./requestUtils";
+import { getArtifacts, getVersions } from "./requestUtils";
 
 const artifactSegements: string[] = [
     "\t<groupId>$1</groupId>",
@@ -31,7 +31,10 @@ class RemoteProvider implements vscode.CompletionItemProvider {
             return null;
         }
 
-        const targetRange: vscode.Range = new vscode.Range(document.positionAt(currentNode.offset), position);
+        const targetRange: vscode.Range = new vscode.Range(
+            currentNode.offset ? document.positionAt(currentNode.offset) : position,
+            position
+        );
         switch (currentNode.tag) {
             case XmlTagName.GroupId: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
@@ -62,22 +65,36 @@ class RemoteProvider implements vscode.CompletionItemProvider {
                     return item;
                 });
                 return new vscode.CompletionList(artifactIdItems, false);
-
             }
+            case XmlTagName.Version: {
+                const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
+                const groupIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
+                const artifactIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
+                if (!groupIdNode && !artifactIdNode) {
+                    return null;
+                }
 
-            case XmlTagName.Version:
-
-                return null;
+                const body: any = await getVersions(groupIdNode.text, artifactIdNode.text);
+                const docs: any[] = _.get(body, "response.docs", []);
+                const versionItems: vscode.CompletionItem[] = docs.map((doc, index) => {
+                    const item: vscode.CompletionItem = new vscode.CompletionItem(doc.v, vscode.CompletionItemKind.Constant);
+                    item.insertText = doc.v;
+                    item.sortText = _.padStart(index.toString(), 3, "0");
+                    item.range = targetRange;
+                    return item;
+                });
+                return new vscode.CompletionList(versionItems, false);
+            }
             case XmlTagName.Dependencies: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("dependency", vscode.CompletionItemKind.Snippet);
                 snippetItem.insertText = dependencySnippet;
-                snippetItem.detail = "Provided by central provider";
+                snippetItem.detail = "Maven Snippet";
                 return new vscode.CompletionList([snippetItem], false);
             }
             case XmlTagName.Plugins: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
                 snippetItem.insertText = pluginSnippet;
-                snippetItem.detail = "Provided by central provider";
+                snippetItem.detail = "Maven Snippet";
                 return new vscode.CompletionList([snippetItem], false);
             }
             default:
