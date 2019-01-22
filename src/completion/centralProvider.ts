@@ -10,7 +10,8 @@ import { getArtifacts, getVersions } from "./requestUtils";
 const artifactSegements: string[] = [
     "\t<groupId>$1</groupId>",
     "\t<artifactId>$2</artifactId>",
-    "\t<version>$3</version>"
+    // tslint:disable-next-line:no-invalid-template-strings
+    "\t<version>${3:(0.0.0,)}</version>"
 ];
 const dependencySnippet: vscode.SnippetString = new vscode.SnippetString([
     "<dependency>",
