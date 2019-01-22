@@ -52,39 +52,42 @@ export class ElementNode {
 }
 
 export function getCurrentNode(document: vscode.TextDocument, position: vscode.Position): ElementNode {
-    const range: vscode.Range = new vscode.Range(new vscode.Position(0, 0), position);
-    const text: string = document.getText(range);
+    const text: string = document.getText();
     const tokens: number[][] = Lexx(text);
-    return getElementHierarchy(text, tokens);
+    return getElementHierarchy(text, tokens, document.offsetAt(position));
 }
 
-function getElementHierarchy(text: string, tokens: number[][]): ElementNode {
+function getElementHierarchy(text: string, tokens: number[][], cursorOffset: number): ElementNode {
     const n: number = tokens.length;
-    let current: ElementNode = null;
+    let cursorNode: ElementNode = null;
+    let iter: ElementNode = null;
     let i: number = 0;
     while (i < n) {
         const token: number[] = tokens[i];
         switch (token[0]) {
             case 1: // ELEMENT_NODE
-                const newElement: ElementNode = new ElementNode(current, text.substring(token[1], token[2]));
-                if (current) {
-                    current.addChild(newElement);
+                const newElement: ElementNode = new ElementNode(iter, text.substring(token[1], token[2]));
+                if (iter) {
+                    iter.addChild(newElement);
                 }
-                current = newElement;
+                iter = newElement;
                 break;
             case 3: // TEXT_NODE
-                if (current) {
-                    current.text = text.substring(token[1], token[2]);
-                    current.offset = token[1];
+                if (iter) {
+                    iter.text = text.substring(token[1], token[2]);
+                    iter.offset = token[1];
                 }
                 break;
             case 13: // CLOSE_ELEMENT
-                current = current.parent;
+                iter = iter.parent;
                 break;
             default:
                 break;
         }
+        if (!cursorNode && cursorOffset <= token[2]) {
+            cursorNode = iter;
+        }
         i += 1;
     }
-    return current;
+    return cursorNode;
 }
