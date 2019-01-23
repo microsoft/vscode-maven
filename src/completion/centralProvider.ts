@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 
 import { ElementNode, getCurrentNode, XmlTagName } from "./lexerUtils";
 import { getArtifacts, getVersions } from "./requestUtils";
+import { getSortText } from "./versionUtils";
 
 const artifactSegments: string[] = [
     "\t<groupId>$1</groupId>",
@@ -63,7 +64,7 @@ class RemoteProvider implements vscode.CompletionItemProvider {
                     const item: vscode.CompletionItem = new vscode.CompletionItem(doc.a, vscode.CompletionItemKind.Field);
                     item.insertText = doc.a;
                     item.range = targetRange;
-                    item.detail = doc.g;
+                    item.detail = `groupId: ${doc.g}`;
                     return item;
                 });
                 return new vscode.CompletionList(artifactIdItems, false);
@@ -78,12 +79,12 @@ class RemoteProvider implements vscode.CompletionItemProvider {
 
                 const body: any = await getVersions(groupIdNode.text, artifactIdNode.text);
                 const docs: any[] = _.get(body, "response.docs", []);
-                const versionItems: vscode.CompletionItem[] = docs.map((doc, index) => {
+                const versionItems: vscode.CompletionItem[] = docs.map((doc) => {
                     const item: vscode.CompletionItem = new vscode.CompletionItem(doc.v, vscode.CompletionItemKind.Constant);
                     item.insertText = doc.v;
-                    item.sortText = _.padStart(index.toString(), 3, "0");
                     item.range = targetRange;
-                    // TODO: show Updated date in details
+                    item.detail = `Updated: ${new Date(doc.timestamp).toLocaleDateString()}`;
+                    item.sortText = getSortText(doc.v);
                     return item;
                 });
                 return new vscode.CompletionList(versionItems, false);
