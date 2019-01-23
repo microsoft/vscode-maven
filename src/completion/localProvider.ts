@@ -9,37 +9,7 @@ import * as vscode from "vscode";
 import { ElementNode, getCurrentNode } from "./lexerUtils";
 
 class LocalProvider implements vscode.CompletionItemProvider {
-    public localRepository: string;
-    public metadata: {
-        [groupId: string]: {
-            [artifactId: string]: {
-                [version: string]: true
-            }
-        }
-    };
-
-    public async initialize(repo?: string): Promise<void> {
-        if (this.metadata !== undefined) {
-            return;
-        }
-
-        this.metadata = {};
-        this.localRepository = repo || path.join(os.homedir(), ".m2", "repository");
-        return new Promise<void>((resolve, reject) => {
-            fg.stream(["**/*.pom"], { cwd: this.localRepository })
-                .on("data", (chunk: string) => {
-                    const segs: string[] = chunk.split("/");
-                    if (segs.length > 3) {
-                        const version: string = segs[segs.length - 2];
-                        const artifactId: string = segs[segs.length - 3];
-                        const groupId: string = segs.slice(0, segs.length - 3).join(".");
-                        _.set(this.metadata, [groupId, artifactId, version], true);
-                    }
-                })
-                .on("error", reject)
-                .on("end", resolve);
-        });
-    }
+    public localRepository: string = path.join(os.homedir(), ".m2", "repository");  // TODO: use effective m2 home.
 
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
         const currentNode: ElementNode = getCurrentNode(document, position);
@@ -53,7 +23,7 @@ class LocalProvider implements vscode.CompletionItemProvider {
         );
 
         if (currentNode.tag === "groupId") {
-            return this.completeForGroupId(targetRange);
+            return this.completeForGroupId(targetRange, currentNode.text);
         }
         if (currentNode.tag === "artifactId" && currentNode.parent) {
             const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
@@ -79,12 +49,10 @@ class LocalProvider implements vscode.CompletionItemProvider {
         return null;
     }
 
-    private completeForGroupId(targetRange: vscode.Range): vscode.CompletionList {
-        if (!this.metadata) {
-            return null;
-        }
-
-        const validGroupIds: string[] = Object.keys(this.metadata);
+    private async completeForGroupId(targetRange: vscode.Range, groupIdHint: string): Promise<vscode.CompletionList> {
+        const packageSegments: string[] = groupIdHint.split(".");
+        packageSegments.pop();
+        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments);
         const groupIdItems: vscode.CompletionItem[] = validGroupIds.map(gid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
             item.insertText = gid;
@@ -95,17 +63,12 @@ class LocalProvider implements vscode.CompletionItemProvider {
         return new vscode.CompletionList(groupIdItems, false);
     }
 
-    private completeForArtifactId(targetRange: vscode.Range, groupId: string): vscode.CompletionList {
-        if (!this.metadata || !groupId) {
+    private async completeForArtifactId(targetRange: vscode.Range, groupId: string): Promise<vscode.CompletionList> {
+        if (!groupId) {
             return null;
         }
 
-        const artifactIdMap: {} = this.metadata[groupId];
-        if (!artifactIdMap) {
-            return null;
-        }
-
-        const validArtifactIds: string[] = Object.keys(artifactIdMap);
+        const validArtifactIds: string[] = await this.searchForArtifactIds(groupId);
         const artifactIdItems: vscode.CompletionItem[] = validArtifactIds.map(aid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field);
             item.insertText = aid;
@@ -116,21 +79,53 @@ class LocalProvider implements vscode.CompletionItemProvider {
         return new vscode.CompletionList(artifactIdItems, false);
     }
 
-    private completeForVersion(targetRange: vscode.Range, groupId: string, artifactId: string): vscode.CompletionList {
-        if (!this.metadata || !groupId || !artifactId) {
+    private async completeForVersion(targetRange: vscode.Range, groupId: string, artifactId: string): Promise<vscode.CompletionList> {
+        if (!groupId || !artifactId) {
             return null;
         }
 
-        const versionMap: {} = _.get(this.metadata, [groupId, artifactId]);
-        const validVersions: string[] = Object.keys(versionMap);
+        const validVersions: string[] = await this.searchForVersions(groupId, artifactId);
         const versionItems: vscode.CompletionItem[] = validVersions.map(v => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(v, vscode.CompletionItemKind.Constant);
             item.insertText = v;
             item.range = targetRange;
             item.detail = "local";
+            // TODO: use sortText to list latest version at top.
             return item;
         });
         return new vscode.CompletionList(versionItems, false);
+    }
+
+    private async searchForGroupIds(segments: string[]): Promise<string[]> {
+        const cwd: string = path.join(this.localRepository, ...segments);
+        return new Promise<string[]>((resolve, reject) => {
+            fg.async(["**", "!**/*.*"], { onlyFiles: false, deep: 2, cwd }).then(entries => {
+                const validSegments: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
+                const prefix: string = _.isEmpty(segments) ? "" : [...segments, ""].join(".");
+                const groupIds: string[] = Array.from(new Set(validSegments)).map(seg => `${prefix}${seg}`);
+                resolve(groupIds);
+            }).catch(reject);
+        });
+    }
+
+    private async searchForArtifactIds(groupId: string): Promise<string[]> {
+        const cwd: string = path.join(this.localRepository, ...groupId.split("."));
+        return await new Promise<string[]>((resolve, reject) => {
+            fg.async(["**/*.pom"], { deep: 2, cwd }).then(entries => {
+                const validArtifactIds: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
+                resolve(Array.from(new Set(validArtifactIds)));
+            }).catch(reject);
+        });
+    }
+
+    private async searchForVersions(groupId: string, artifactId: string): Promise<string[]> {
+        const cwd: string = path.join(this.localRepository, ...groupId.split("."), artifactId);
+        return await new Promise<string[]>((resolve, reject) => {
+            fg.async(["*/*.pom"], { deep: 1, cwd }).then(entries => {
+                const validVersions: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
+                resolve(validVersions);
+            }).catch(reject);
+        });
     }
 
 }

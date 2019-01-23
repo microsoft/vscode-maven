@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import { ElementNode, getCurrentNode, XmlTagName } from "./lexerUtils";
 import { getArtifacts, getVersions } from "./requestUtils";
 
-const artifactSegements: string[] = [
+const artifactSegments: string[] = [
     "\t<groupId>$1</groupId>",
     "\t<artifactId>$2</artifactId>",
     // tslint:disable-next-line:no-invalid-template-strings
@@ -15,12 +15,12 @@ const artifactSegements: string[] = [
 ];
 const dependencySnippet: vscode.SnippetString = new vscode.SnippetString([
     "<dependency>",
-    ...artifactSegements,
+    ...artifactSegments,
     "</dependency>$0"
 ].join("\n"));
 const pluginSnippet: vscode.SnippetString = new vscode.SnippetString([
     "<plugin>",
-    ...artifactSegements,
+    ...artifactSegments,
     "</plugin>$0"
 ].join("\n"));
 
@@ -83,6 +83,7 @@ class RemoteProvider implements vscode.CompletionItemProvider {
                     item.insertText = doc.v;
                     item.sortText = _.padStart(index.toString(), 3, "0");
                     item.range = targetRange;
+                    // TODO: show Updated date in details
                     return item;
                 });
                 return new vscode.CompletionList(versionItems, false);
