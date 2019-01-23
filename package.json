@@ -405,7 +405,7 @@
               "hierarchical"
             ],
             "default": "flat",
-            "scope": "resource",
+            "scope": "window",
             "description": "%configuration.maven.view%"
           }
         }
