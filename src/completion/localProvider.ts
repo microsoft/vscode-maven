@@ -7,6 +7,7 @@ import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
 import { ElementNode, getCurrentNode } from "./lexerUtils";
+import { getSortText } from "./versionUtils";
 
 class LocalProvider implements vscode.CompletionItemProvider {
     public localRepository: string = path.join(os.homedir(), ".m2", "repository");  // TODO: use effective m2 home.
@@ -90,7 +91,7 @@ class LocalProvider implements vscode.CompletionItemProvider {
             item.insertText = v;
             item.range = targetRange;
             item.detail = "local";
-            // TODO: use sortText to list latest version at top.
+            item.sortText = getSortText(v);
             return item;
         });
         return new vscode.CompletionList(versionItems, false);
