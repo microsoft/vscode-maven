@@ -82,7 +82,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     });
     registerCommand(context, "maven.goal.custom", async (node: MavenProject) => {
         if (node && node.pomPath) {
-            await Utils.excuteCustomGoal(node.pomPath);
+            await Utils.executeCustomGoal(node.pomPath);
         }
     });
     registerCommand(context, "maven.project.openPom", async (node: MavenProject) => {
@@ -123,7 +123,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         }),
         // configuration change listener
         vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
-            // close all terminals with outdated JAVA related Envs
+            // close all terminals with outdated JAVA related environment variables
             if (e.affectsConfiguration("maven.terminal.useJavaHome")
                 || e.affectsConfiguration("maven.terminal.customEnv")
                 || Settings.Terminal.useJavaHome() && e.affectsConfiguration("java.home")
@@ -141,10 +141,4 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // completion item provider
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], centralProvider, ".", "-"));
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], localProvider, "."));
-    if (vscode.workspace.getConfiguration("maven", null).get<boolean>("completion.enabled")) {
-        vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, (progress) => {
-            progress.report({ message: "Updating local Maven repository indices" });
-            return localProvider.initialize();
-        });
-    }
 }

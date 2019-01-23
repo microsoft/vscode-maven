@@ -159,7 +159,7 @@ export namespace Utils {
         const mvnExecutable: string = await getMaven(workspaceFolder);
         const mvnString: string = wrappedWithQuotes(mvnExecutable);
         // Todo with following line:
-        // 1. pomfile and workspacefolde = undefined, error
+        // 1. pomfile and workspacefolder = undefined, error
         // 2. non-readable
         const commandCwd: string = path.resolve(workspaceFolder.uri.fsPath, mvnExecutable, "..");
 
@@ -317,14 +317,14 @@ export namespace Utils {
         ));
     }
 
-    export async function excuteCustomGoal(pomPath: string): Promise<void> {
+    export async function executeCustomGoal(pomPath: string): Promise<void> {
         if (!pomPath) {
             return;
         }
         const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
-        const trimedGoals: string = inputGoals && inputGoals.trim();
-        if (trimedGoals) {
-            Utils.executeInTerminal(trimedGoals, pomPath);
+        const trimmedGoals: string = inputGoals && inputGoals.trim();
+        if (trimmedGoals) {
+            Utils.executeInTerminal(trimmedGoals, pomPath);
         }
     }
 
