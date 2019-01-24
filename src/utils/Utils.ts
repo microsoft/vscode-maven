@@ -371,7 +371,7 @@ export namespace Utils {
         // select a command
         const selectedCommand: string = await window.showQuickPick(
             ["custom", "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].map(item => ({
-                value: item,
+                value: item === "custom" ? "Custom goals ..." : item,
                 label: item,
                 description: undefined
             })),

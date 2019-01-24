@@ -19,8 +19,8 @@ import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
+import { openFileIfExists, showTroubleshootingDialog } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
-import { showTroubleshootingDialog, openFileIfExists } from "./utils/uiUtils";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     await loadPackageInfo(context);
