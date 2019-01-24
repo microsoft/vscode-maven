@@ -6,95 +6,51 @@ import * as _ from "lodash";
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
-import { ElementNode, getCurrentNode } from "./lexerUtils";
+import { IArtifactProvider } from "./IArtifactProvider";
 import { getSortText } from "./versionUtils";
 
-class LocalProvider implements vscode.CompletionItemProvider {
-    public localRepository: string = path.join(os.homedir(), ".m2", "repository");  // TODO: use effective m2 home.
+class LocalProvider implements IArtifactProvider {
+    public localRepository: string = path.join(os.homedir(), ".m2", "repository");
 
-    public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
-        const currentNode: ElementNode = getCurrentNode(document, position);
-        if (!currentNode) {
-            return null;
-        }
-
-        const targetRange: vscode.Range = new vscode.Range(
-            currentNode.offset ? document.positionAt(currentNode.offset) : position,
-            position
-        );
-
-        if (currentNode.tag === "groupId") {
-            return this.completeForGroupId(targetRange, currentNode.text);
-        }
-        if (currentNode.tag === "artifactId" && currentNode.parent) {
-            const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
-            if (!groupIdNode) {
-                return null;
-            }
-
-            return this.completeForArtifactId(targetRange, groupIdNode.text);
-        }
-        if (currentNode.tag === "version" && currentNode.parent) {
-            const groupIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "groupId");
-            if (!groupIdNode) {
-                return null;
-            }
-
-            const artifactIdNode: ElementNode = currentNode.parent.children.find(elem => elem.tag === "artifactId");
-            if (!artifactIdNode) {
-                return null;
-            }
-
-            return this.completeForVersion(targetRange, groupIdNode.text, artifactIdNode.text);
-        }
-        return null;
-    }
-
-    private async completeForGroupId(targetRange: vscode.Range, groupIdHint: string): Promise<vscode.CompletionList> {
+    public async getGroupIdCandidates(groupIdHint: string): Promise<vscode.CompletionItem[]> {
         const packageSegments: string[] = groupIdHint.split(".");
         packageSegments.pop();
-        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments);
-        const groupIdItems: vscode.CompletionItem[] = validGroupIds.map(gid => {
+        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments) || [];
+        return validGroupIds.map(gid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
             item.insertText = gid;
-            item.range = targetRange;
             item.detail = "local";
             return item;
         });
-        return new vscode.CompletionList(groupIdItems, false);
     }
 
-    private async completeForArtifactId(targetRange: vscode.Range, groupId: string): Promise<vscode.CompletionList> {
+    public async getArtifactIdCandidates(groupId: string): Promise<vscode.CompletionItem[]> {
         if (!groupId) {
-            return null;
+            return [];
         }
 
         const validArtifactIds: string[] = await this.searchForArtifactIds(groupId);
-        const artifactIdItems: vscode.CompletionItem[] = validArtifactIds.map(aid => {
+        return validArtifactIds.map(aid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field);
             item.insertText = aid;
-            item.range = targetRange;
             item.detail = "local";
             return item;
         });
-        return new vscode.CompletionList(artifactIdItems, false);
     }
 
-    private async completeForVersion(targetRange: vscode.Range, groupId: string, artifactId: string): Promise<vscode.CompletionList> {
+    public async getVersionCandidates(groupId: string, artifactId: string): Promise<vscode.CompletionItem[]>{
         if (!groupId || !artifactId) {
-            return null;
+            return [];
         }
 
         const validVersions: string[] = await this.searchForVersions(groupId, artifactId);
-        const versionItems: vscode.CompletionItem[] = validVersions.map(v => {
+        return validVersions.map(v => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(v, vscode.CompletionItemKind.Constant);
             item.insertText = v;
-            item.range = targetRange;
             item.detail = "local";
             item.sortText = getSortText(v);
             return item;
         });
-        return new vscode.CompletionList(versionItems, false);
     }
 
     private async searchForGroupIds(segments: string[]): Promise<string[]> {
@@ -131,4 +87,4 @@ class LocalProvider implements vscode.CompletionItemProvider {
 
 }
 
-export const localProvider: LocalProvider = new LocalProvider();
+export const localProvider: IArtifactProvider = new LocalProvider();
