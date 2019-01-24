@@ -42,7 +42,7 @@ class RemoteProvider implements vscode.CompletionItemProvider {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
                 const artifactIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
                 const query: string = _.isEmpty(artifactIdNode && artifactIdNode.text) ? currentNode.text : `${currentNode.text} ${artifactIdNode.text}`;
-                const body: any = await getArtifacts(query);
+                const body: any = await getArtifacts(query.trim());
                 const docs: any[] = _.get(body, "response.docs", []);
                 const groupIds: string[] = Array.from(new Set(docs.map(doc => doc.g)).values());
                 const groupIdItems: vscode.CompletionItem[] = groupIds.map(gid => {
@@ -58,7 +58,7 @@ class RemoteProvider implements vscode.CompletionItemProvider {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
                 const groupIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
                 const query: string = _.isEmpty(groupIdNode && groupIdNode.text) ? currentNode.text : `${currentNode.text} ${groupIdNode.text}`;
-                const body: any = await getArtifacts(query);
+                const body: any = await getArtifacts(query.trim());
                 const docs: any[] = _.get(body, "response.docs", []);
                 const artifactIdItems: vscode.CompletionItem[] = docs.map(doc => {
                     const item: vscode.CompletionItem = new vscode.CompletionItem(doc.a, vscode.CompletionItemKind.Field);

@@ -13,7 +13,7 @@ export async function getArtifacts(keyword: string): Promise<{}> {
         rows: 20,
         wt: "json"
     };
-    const raw: string = await httpGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
+    const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
     return JSON.parse(raw);
 }
 
@@ -24,14 +24,14 @@ export async function getVersions(gid: string, aid: string): Promise<{}> {
         rows: 50,
         wt: "json"
     };
-    const raw: string = await httpGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
+    const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
     return JSON.parse(raw);
 }
 
-function httpGet(options: string | url.URL | https.RequestOptions): Promise<string> {
+function httpsGet(urlString: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         let result: string = "";
-        https.get(options, (res: http.IncomingMessage) => {
+        https.get(url.parse(urlString), (res: http.IncomingMessage) => {
             res.on("data", chunk => {
                 result = result.concat(chunk.toString());
             });
