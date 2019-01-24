@@ -9,7 +9,7 @@ export enum XmlTagName {
     ArtifactId = "artifactId",
     Version = "version",
     Dependencies = "dependencies",
-    Plugins = "Plugins"
+    Plugins = "plugins"
 }
 
 export class ElementNode {
