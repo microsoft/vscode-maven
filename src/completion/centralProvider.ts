@@ -3,11 +3,11 @@
 
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { IArtifactProvider } from "./IArtifactProvider";
+import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getArtifacts, getVersions } from "./requestUtils";
 import { getSortText } from "./versionUtils";
 
-class CentralArtifactProvider implements IArtifactProvider {
+class CentralProvider implements IMavenCompletionItemProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
         const query: string = `${groupIdHint} ${artifactIdHint}`.trim();
         const body: any = await getArtifacts(query);
@@ -50,4 +50,4 @@ class CentralArtifactProvider implements IArtifactProvider {
     }
 }
 
-export const centralProvider: IArtifactProvider = new CentralArtifactProvider();
+export const centralProvider: IMavenCompletionItemProvider = new CentralProvider();

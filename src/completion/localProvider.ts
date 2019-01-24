@@ -6,10 +6,10 @@ import * as _ from "lodash";
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
-import { IArtifactProvider } from "./IArtifactProvider";
+import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getSortText } from "./versionUtils";
 
-class LocalProvider implements IArtifactProvider {
+class LocalProvider implements IMavenCompletionItemProvider {
     public localRepository: string = path.join(os.homedir(), ".m2", "repository");
 
     public async getGroupIdCandidates(groupIdHint: string): Promise<vscode.CompletionItem[]> {
@@ -87,4 +87,4 @@ class LocalProvider implements IArtifactProvider {
 
 }
 
-export const localProvider: IArtifactProvider = new LocalProvider();
+export const localProvider: IMavenCompletionItemProvider = new LocalProvider();
