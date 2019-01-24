@@ -1,24 +1,13 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
-- [Change Log](#change-log)
-  - [0.13.0](#0130)
-  - [0.12.1](#0121)
-  - [0.12.0](#0120)
-  - [0.11.3](#0113)
-  - [0.11.2](#0112)
-  - [0.11.1](#0111)
-  - [0.11.0](#0110)
-  - [0.10.0](#0100)
-  - [0.9.2](#092)
-  - [0.9.1](#091)
-  - [0.9.0](#090)
-  - [0.8.0](#080)
-  - [0.7.0](#070)
-  - [0.6.0](#060)
-  - [0.5.2](#052)
-  - [0.5.1](#051)
-  - [0.5.0](#050)
-  - [Early Versions](#early-versions)
+
+## 0.14.0
+#### Added
+- Provide completion suggestions leveraging info from both local and central repository. [#195](https://github.com/Microsoft/vscode-maven/issues/195)
+
+#### Fixed
+- Fix the issue that mvn help:describe keeps grabbing the focus in MacOSX. [#214](https://github.com/Microsoft/vscode-maven/issues/214)
+- Fix WSL file path conversion when the root is changed in `wsl.conf`. [#206](https://github.com/Microsoft/vscode-maven/issues/206)
 
 ## 0.13.0
 - Support to switch between hierarchical and flat view of modules. [#193](https://github.com/Microsoft/vscode-maven/issues/193)
