@@ -20,7 +20,7 @@ import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
 import { Utils } from "./utils/Utils";
-import { VSCodeUI } from "./VSCodeUI";
+import { showTroubleshootingDialog, openFileIfExists } from "./utils/uiUtils";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     await loadPackageInfo(context);
@@ -43,7 +43,7 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
             if (error instanceof OperationCanceledError) {
                 // swallow
             } else {
-                VSCodeUI.showTroubleshootingDialog(`Command "${commandName}" fails. ${error.message}`);
+                showTroubleshootingDialog(`Command "${commandName}" fails. ${error.message}`);
             }
             throw error;
         }
@@ -87,7 +87,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     });
     registerCommand(context, "maven.project.openPom", async (node: MavenProject) => {
         if (node && node.pomPath) {
-            await VSCodeUI.openFileIfExists(node.pomPath);
+            await openFileIfExists(node.pomPath);
         }
     });
     registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
