@@ -4,12 +4,12 @@
 import * as fse from "fs-extra";
 import * as os from "os";
 import * as path from "path";
-import { Uri } from "vscode";
+import { Uri, window } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
+import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
-import { VSCodeUI } from "../VSCodeUI";
 import { Archetype } from "./Archetype";
 
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
@@ -22,14 +22,14 @@ export namespace ArchetypeModule {
             selectedArchetype = await showQuickPickForArchetypes({ all: true });
         }
         if (!selectedArchetype) {
-            throw new OperationCanceledError("Archeype not selected.");
+            throw new OperationCanceledError("Archetype not selected.");
         }
 
         return selectedArchetype;
     }
 
     async function chooseTargetFolder(entry: Uri | undefined): Promise<string> {
-        const result: Uri = await VSCodeUI.openDialogForFolder({
+        const result: Uri = await openDialogForFolder({
             defaultUri: entry && entry.fsPath ? Uri.file(entry.fsPath) : undefined,
             openLabel: "Select Destination Folder"
         });
@@ -70,13 +70,15 @@ export namespace ArchetypeModule {
     }
 
     async function showQuickPickForArchetypes(options?: { all: boolean }): Promise<Archetype> {
-        return await VSCodeUI.getQuickPick<Archetype>(
-            loadArchetypePickItems(options),
-            (item: Archetype) => item.artifactId ? `$(package) ${item.artifactId} ` : "More ...",
-            (item: Archetype) => item.groupId ? `${item.groupId}` : "",
-            (item: Archetype) => item.description,
+        return await window.showQuickPick(
+            loadArchetypePickItems(options).then(items => items.map(item => ({
+                value: item,
+                label: item.artifactId ? `$(package) ${item.artifactId} ` : "More ...",
+                description: item.groupId ? `${item.groupId}` : "",
+                detail: item.description
+            }))),
             { matchOnDescription: true, placeHolder: "Select an archetype ..." }
-        );
+        ).then(selected => selected && selected.value);
     }
 
     async function loadArchetypePickItems(options?: { all: boolean }): Promise<Archetype[]> {

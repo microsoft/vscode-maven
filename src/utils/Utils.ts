@@ -16,12 +16,17 @@ import { MavenProject } from "../explorer/model/MavenProject";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
-import { VSCodeUI } from "../VSCodeUI";
 import { getExtensionName, getExtensionVersion, getPathToTempFolder } from "./contextUtils";
 
 interface ICommandHistory {
     pomPath: string;
     timestamps: { [command: string]: number };
+}
+
+interface ICommandHistoryEntry {
+    command: string;
+    pomPath: string;
+    timestamp: number;
 }
 
 export namespace Utils {
@@ -213,7 +218,7 @@ export namespace Utils {
         }
     }
 
-    export async function getLRUCommands(pomPath: string): Promise<{}[]> {
+    export async function getLRUCommands(pomPath: string): Promise<ICommandHistoryEntry[]> {
         const filepath: string = getCommandHistoryCachePath(pomPath);
         if (await fse.pathExists(filepath)) {
             const content: string = (await fse.readFile(filepath)).toString();
@@ -329,18 +334,20 @@ export namespace Utils {
     }
 
     export async function executeHistoricalGoals(projectPomPaths: string[]): Promise<void> {
-        const candidates: any[] = Array.prototype.concat.apply(
+        const candidates: ICommandHistoryEntry[] = Array.prototype.concat.apply(
             [],
             await Promise.all(projectPomPaths.map(projectPomPath => Utils.getLRUCommands(projectPomPath)))
         );
         candidates.sort((a, b) => b.timestamp - a.timestamp);
-        const selected: { command: string, pomPath: string } = await VSCodeUI.getQuickPick(
-            candidates,
-            (x) => x.command,
-            null,
-            (x) => x.pomPath,
-            { placeHolder: "Select from history ... " }
-        );
+        const selected: { command: string; pomPath: string; timestamp: number } = await window.showQuickPick(
+            candidates.map(item => ({
+                value: item,
+                label: item.command,
+                description: undefined,
+                detail: item.pomPath
+            })),
+            { placeHolder: "Select from history ...", ignoreFocusOut: true }
+        ).then(item => item && item.value);
         if (selected) {
             Utils.executeInTerminal(selected.command, selected.pomPath);
         }
@@ -348,28 +355,33 @@ export namespace Utils {
 
     export async function executeMavenCommand(): Promise<void> {
         // select a project(pomfile)
-        const item: MavenProject = await VSCodeUI.getQuickPick<MavenProject>(
-            mavenExplorerProvider.mavenProjectNodes,
-            node => `$(primitive-dot) ${node.name}`,
-            null,
-            node => node.pomPath,
-            { placeHolder: "Select a Maven project." }
-        );
-        if (!item) {
+        const selectedProject: MavenProject = await window.showQuickPick(
+            mavenExplorerProvider.mavenProjectNodes.map(item => ({
+                value: item,
+                label: `$(primitive-dot) ${item.name}`,
+                description: undefined,
+                detail: item.pomPath
+            })),
+            { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
+        ).then(item => item && item.value);
+        if (!selectedProject) {
             return;
         }
+
         // select a command
-        const command: string = await VSCodeUI.getQuickPick<string>(
-            ["custom", "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
-            (x: string) => x === "custom" ? "Custom goals ..." : x,
-            null,
-            null,
-            { placeHolder: "Select the goal to execute." }
-        );
-        if (!command) {
+        const selectedCommand: string = await window.showQuickPick(
+            ["custom", "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].map(item => ({
+                value: item === "custom" ? "Custom goals ..." : item,
+                label: item,
+                description: undefined
+            })),
+            { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }
+        ).then(item => item && item.value);
+        if (!selectedCommand) {
             return;
         }
+
         // execute
-        await commands.executeCommand(`maven.goal.${command}`, item);
+        await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
     }
 }
