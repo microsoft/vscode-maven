@@ -36,10 +36,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             return null;
         }
 
-        const targetRange: vscode.Range = new vscode.Range(
-            currentNode.offset ? document.positionAt(currentNode.offset) : position,
-            position
-        );
+        const targetRange: vscode.Range = new vscode.Range(document.positionAt(currentNode.contentStart), position);
         switch (currentNode.tag) {
             case XmlTagName.GroupId: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
@@ -60,9 +57,19 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const artifactIdHint: string = currentNode.text || "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                // To add additionalTextEdit to update group id.
+                if (groupIdNode) {
+                    centralItems.forEach(item => {
+                        const matchedGroupId: string = _.get(item, "data.groupId");
+                        if (matchedGroupId) {
+                            const groupIdRange: vscode.Range = new vscode.Range(document.positionAt(groupIdNode.contentStart), document.positionAt(groupIdNode.contentEnd));
+                            item.additionalTextEdits = [new vscode.TextEdit(groupIdRange, matchedGroupId)];
+                        }
+                    });
+                }
                 const localItems: vscode.CompletionItem[] = await localProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                return new vscode.CompletionList([].concat(centralItems, localItems), false);
+                const mergedItems: vscode.CompletionItem[] = [].concat(centralItems, localItems);
+                mergedItems.forEach(item => item.range = targetRange);
+                return new vscode.CompletionList(mergedItems, false);
             }
             case XmlTagName.Version: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);

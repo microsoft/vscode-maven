@@ -38,7 +38,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
         });
     }
 
-    public async getVersionCandidates(groupId: string, artifactId: string): Promise<vscode.CompletionItem[]>{
+    public async getVersionCandidates(groupId: string, artifactId: string): Promise<vscode.CompletionItem[]> {
         if (!groupId || !artifactId) {
             return [];
         }
@@ -56,7 +56,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
     private async searchForGroupIds(segments: string[]): Promise<string[]> {
         const cwd: string = path.join(this.localRepository, ...segments);
         return new Promise<string[]>((resolve, reject) => {
-            fg.async(["**", "!**/*.*"], { onlyFiles: false, deep: 2, cwd }).then(entries => {
+            fg.async(["**/*/*", "!**/*.*"], { onlyFiles: false, deep: 2, cwd }).then(entries => {
                 const validSegments: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
                 const prefix: string = _.isEmpty(segments) ? "" : [...segments, ""].join(".");
                 const groupIds: string[] = Array.from(new Set(validSegments)).map(seg => `${prefix}${seg}`);
