@@ -72,7 +72,7 @@ function getElementHierarchy(text: string, tokens: number[][], cursorOffset: num
         switch (token[0]) {
             case NodeTypes.XML_DECLARATION:
             case NodeTypes.ELEMENT_NODE: {
-                // const [_type, start, end] = token;
+                // [_type, start, end] = token;
                 const [start, end] = token.slice(1, 3);
                 const newElement: ElementNode = new ElementNode(currentNode, text.substring(start, end));
                 if (currentNode) {
@@ -83,10 +83,9 @@ function getElementHierarchy(text: string, tokens: number[][], cursorOffset: num
                 elementNodes.push(newElement);
                 newElement.contentStart = pointer;
                 break;
-
             }
             case NodeTypes.ATTRIBUTE_NODE: {
-                // const [_type, _keyStart, _keyEnd, _valueStart, valueEnd] = token;
+                // [_type, _keyStart, _keyEnd, _valueStart, valueEnd] = token;
                 const valueEnd: number = token[4];
                 // Attributes not handled yet.
                 pointer = valueEnd + 1; // pass ">" mark.
@@ -94,7 +93,7 @@ function getElementHierarchy(text: string, tokens: number[][], cursorOffset: num
                 break;
             }
             case NodeTypes.TEXT_NODE: {
-                // const [_type, start, end] = token;
+                // [_type, start, end] = token;
                 const [start, end] = token.slice(1, 3);
                 if (currentNode) {
                     currentNode.text = text.substring(start, end);
@@ -118,6 +117,7 @@ function getElementHierarchy(text: string, tokens: number[][], cursorOffset: num
     return cursorNode || elementNodes[elementNodes.length - 1];
 }
 
+// Definition from xml-zero-lexer
 enum NodeTypes {
     XML_DECLARATION = 0, // unofficial
     // Most XML parsers ignore this but because I'm parsing it I may as well include it.
