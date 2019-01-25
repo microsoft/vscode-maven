@@ -12,8 +12,7 @@ import { localProvider } from "./localProvider";
 const artifactSegments: string[] = [
     "\t<groupId>$1</groupId>",
     "\t<artifactId>$2</artifactId>",
-    // tslint:disable-next-line:no-invalid-template-strings
-    "\t<version>${3:(0.0.0,)}</version>"
+    "\t<version>$3</version>"
 ];
 const dependencySnippet: vscode.SnippetString = new vscode.SnippetString([
     "<dependency>",
