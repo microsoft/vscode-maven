@@ -7,6 +7,8 @@ import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getArtifacts, getVersions } from "./requestUtils";
 import { getSortText } from "./versionUtils";
 
+const COMMAND_COMPLETION_ITEM_SELECTED: string = "maven.completion.selected";
+
 class CentralProvider implements IMavenCompletionItemProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
         const keywords: string[] = [...groupIdHint.split("."), ...artifactIdHint.split("-")];
@@ -17,6 +19,10 @@ class CentralProvider implements IMavenCompletionItemProvider {
             const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
             item.insertText = gid;
             item.detail = "central";
+            item.command = {
+                title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+                arguments: [{ completeFor: "groupId", source: "maven-central" }]
+            };
             return item;
         });
     }
@@ -30,6 +36,10 @@ class CentralProvider implements IMavenCompletionItemProvider {
             item.insertText = doc.a;
             item.detail = `GroupId: ${doc.g}`;
             (<any>item).data = { groupId: doc.g };
+            item.command = {
+                title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+                arguments: [{ completeFor: "artifactId", source: "maven-central" }]
+            };
             return item;
         });
     }
@@ -46,6 +56,10 @@ class CentralProvider implements IMavenCompletionItemProvider {
             item.insertText = doc.v;
             item.detail = `Updated: ${new Date(doc.timestamp).toLocaleDateString()}`;
             item.sortText = getSortText(doc.v);
+            item.command = {
+                title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+                arguments: [{ completeFor: "version", source: "maven-central" }]
+            };
             return item;
         });
     }

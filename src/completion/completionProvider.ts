@@ -25,6 +25,8 @@ const pluginSnippet: vscode.SnippetString = new vscode.SnippetString([
     "</plugin>$0"
 ].join("\n"));
 
+const COMMAND_COMPLETION_ITEM_SELECTED: string = "maven.completion.selected";
+
 class CompletionProvider implements vscode.CompletionItemProvider {
     public localRepository: string = path.join(os.homedir(), ".m2", "repository");
 
@@ -88,12 +90,20 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("dependency", vscode.CompletionItemKind.Snippet);
                 snippetItem.insertText = dependencySnippet;
                 snippetItem.detail = "Maven Snippet";
+                snippetItem.command = {
+                    title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+                    arguments: [{ completeFor: "dependency", source: "snippet" }]
+                };
                 return new vscode.CompletionList([snippetItem], false);
             }
             case XmlTagName.Plugins: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
                 snippetItem.insertText = pluginSnippet;
                 snippetItem.detail = "Maven Snippet";
+                snippetItem.command = {
+                    title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+                    arguments: [{ completeFor: "plugin", source: "snippet" }]
+                };
                 return new vscode.CompletionList([snippetItem], false);
             }
             default:

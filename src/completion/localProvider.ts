@@ -9,6 +9,8 @@ import * as vscode from "vscode";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getSortText } from "./versionUtils";
 
+const COMMAND_COMPLETION_ITEM_SELECTED: string = "maven.completion.selected";
+
 class LocalProvider implements IMavenCompletionItemProvider {
     public localRepository: string = path.join(os.homedir(), ".m2", "repository");
 
@@ -20,6 +22,10 @@ class LocalProvider implements IMavenCompletionItemProvider {
             const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
             item.insertText = gid;
             item.detail = "local";
+            item.command = {
+                title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+                arguments: [{ completeFor: "groupId", source: "maven-local" }]
+            };
             return item;
         });
     }
@@ -34,6 +40,10 @@ class LocalProvider implements IMavenCompletionItemProvider {
             const item: vscode.CompletionItem = new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field);
             item.insertText = aid;
             item.detail = "local";
+            item.command = {
+                title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+                arguments: [{ completeFor: "artifactId", source: "maven-local" }]
+            };
             return item;
         });
     }
@@ -49,6 +59,10 @@ class LocalProvider implements IMavenCompletionItemProvider {
             item.insertText = v;
             item.detail = "local";
             item.sortText = getSortText(v);
+            item.command = {
+                title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+                arguments: [{ completeFor: "version", source: "maven-local" }]
+            };
             return item;
         });
     }

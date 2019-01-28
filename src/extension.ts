@@ -4,7 +4,7 @@
 "use strict";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
-import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation } from "vscode-extension-telemetry-wrapper";
+import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { completionProvider } from "./completion/completionProvider";
 import { OperationCanceledError } from "./Errors";
@@ -139,4 +139,5 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     );
     // completion item provider
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], completionProvider, ".", "-"));
+    registerCommand(context, "maven.completion.selected", sendInfo, true);
 }
