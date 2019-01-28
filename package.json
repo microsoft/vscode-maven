@@ -43,7 +43,8 @@
     "onCommand:maven.archetype.update",
     "onCommand:maven.history",
     "onCommand:maven.plugin.execute",
-    "onView:mavenProjects"
+    "onView:mavenProjects",
+    "onLanguage:xml"
   ],
   "main": "./dist/extension",
   "contributes": {
