@@ -9,8 +9,8 @@ import { getSortText } from "./versionUtils";
 
 class CentralProvider implements IMavenCompletionItemProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
-        const query: string = `${groupIdHint} ${artifactIdHint}`.trim();
-        const body: any = await getArtifacts(query);
+        const keywords: string[] = [...groupIdHint.split("."), ...artifactIdHint.split("-")];
+        const body: any = await getArtifacts(keywords);
         const docs: any[] = _.get(body, "response.docs", []);
         const groupIds: string[] = Array.from(new Set(docs.map(doc => doc.g)).values());
         return groupIds.map(gid => {
@@ -22,8 +22,8 @@ class CentralProvider implements IMavenCompletionItemProvider {
     }
 
     public async getArtifactIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
-        const query: string = `${groupIdHint} ${artifactIdHint}`.trim();
-        const body: any = await getArtifacts(query.trim());
+        const keywords: string[] = [...groupIdHint.split("."), ...artifactIdHint.split("-")];
+        const body: any = await getArtifacts(keywords);
         const docs: any[] = _.get(body, "response.docs", []);
         return docs.map(doc => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(doc.a, vscode.CompletionItemKind.Field);

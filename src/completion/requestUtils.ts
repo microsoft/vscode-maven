@@ -7,9 +7,15 @@ import * as url from "url";
 
 const URL_BASIC_SEARCH: string = "https://search.maven.org/solrsearch/select";
 
-export async function getArtifacts(keyword: string): Promise<{}> {
+export async function getArtifacts(keywords: string[]): Promise<{}> {
+    // Remove short keywords
+    const validKeywords: string[] = keywords.filter(keyword => keyword.length >= 3);
+    if (validKeywords.length === 0) {
+        return null;
+    }
+
     const params: any = {
-        q: keyword,
+        q: validKeywords.join(" ").trim(),
         rows: 20,
         wt: "json"
     };

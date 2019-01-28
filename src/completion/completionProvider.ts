@@ -47,7 +47,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const localItems: vscode.CompletionItem[] = await localProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
                 const mergedItems: vscode.CompletionItem[] = this.deDuplicate(centralItems, localItems);
                 mergedItems.forEach(item => item.range = targetRange);
-                return new vscode.CompletionList(mergedItems, false);
+
+                return new vscode.CompletionList(mergedItems, _.isEmpty(centralItems));
             }
             case XmlTagName.ArtifactId: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
@@ -68,7 +69,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const localItems: vscode.CompletionItem[] = await localProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 const mergedItems: vscode.CompletionItem[] = [].concat(centralItems, localItems);
                 mergedItems.forEach(item => item.range = targetRange);
-                return new vscode.CompletionList(mergedItems, false);
+                return new vscode.CompletionList(mergedItems, _.isEmpty(centralItems));
             }
             case XmlTagName.Version: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
