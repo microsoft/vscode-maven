@@ -3,8 +3,8 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## 0.14.1
 #### Fixed
-Fix the order of completion items for non-semantic versions. [#236](https://github.com/Microsoft/vscode-maven/issues/236)
-Fix the issue that extension is not activated when opening an external pom.xml file. [#232](https://github.com/Microsoft/vscode-maven/issues/232)
+- Fix the order of completion items for non-semantic versions. [#236](https://github.com/Microsoft/vscode-maven/issues/236)
+- Fix the issue that extension is not activated when opening an external pom.xml file. [#232](https://github.com/Microsoft/vscode-maven/issues/232)
 
 ## 0.14.0
 #### Added
