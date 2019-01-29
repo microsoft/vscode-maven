@@ -6,10 +6,9 @@ import * as _ from "lodash";
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
+import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getSortText } from "./versionUtils";
-
-const COMMAND_COMPLETION_ITEM_SELECTED: string = "maven.completion.selected";
 
 class LocalProvider implements IMavenCompletionItemProvider {
     public localRepository: string = path.join(os.homedir(), ".m2", "repository");

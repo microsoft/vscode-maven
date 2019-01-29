@@ -6,6 +6,7 @@ import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
 import { centralProvider } from "./centralProvider";
+import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
 import { ElementNode, getCurrentNode, XmlTagName } from "./lexerUtils";
 import { localProvider } from "./localProvider";
 
@@ -24,8 +25,6 @@ const pluginSnippet: vscode.SnippetString = new vscode.SnippetString([
     ...artifactSegments,
     "</plugin>$0"
 ].join("\n"));
-
-const COMMAND_COMPLETION_ITEM_SELECTED: string = "maven.completion.selected";
 
 class CompletionProvider implements vscode.CompletionItemProvider {
     public localRepository: string = path.join(os.homedir(), ".m2", "repository");

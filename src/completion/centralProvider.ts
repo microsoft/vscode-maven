@@ -3,11 +3,10 @@
 
 import * as _ from "lodash";
 import * as vscode from "vscode";
+import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getArtifacts, getVersions } from "./requestUtils";
 import { getSortText } from "./versionUtils";
-
-const COMMAND_COMPLETION_ITEM_SELECTED: string = "maven.completion.selected";
 
 class CentralProvider implements IMavenCompletionItemProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
