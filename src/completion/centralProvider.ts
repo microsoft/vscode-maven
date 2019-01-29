@@ -3,7 +3,7 @@
 
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
+import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getArtifacts, getVersions } from "./requestUtils";
 import { getSortText } from "./versionUtils";
@@ -16,7 +16,7 @@ class CentralProvider implements IMavenCompletionItemProvider {
         const groupIds: string[] = Array.from(new Set(docs.map(doc => doc.g)).values());
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
-            arguments: [{ completeFor: "groupId", source: "maven-central" }]
+            arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "groupId", source: "maven-central" }]
         };
         return groupIds.map(gid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
@@ -33,7 +33,7 @@ class CentralProvider implements IMavenCompletionItemProvider {
         const docs: any[] = _.get(body, "response.docs", []);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
-            arguments: [{ completeFor: "artifactId", source: "maven-central" }]
+            arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "artifactId", source: "maven-central" }]
         };
         return docs.map(doc => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(doc.a, vscode.CompletionItemKind.Field);
@@ -54,7 +54,7 @@ class CentralProvider implements IMavenCompletionItemProvider {
         const docs: any[] = _.get(body, "response.docs", []);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
-            arguments: [{ completeFor: "version", source: "maven-central" }]
+            arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "version", source: "maven-central" }]
         };
         return docs.map((doc) => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(doc.v, vscode.CompletionItemKind.Constant);
