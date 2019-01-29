@@ -6,6 +6,7 @@ import * as _ from "lodash";
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
+import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getSortText } from "./versionUtils";
 
@@ -16,10 +17,15 @@ class LocalProvider implements IMavenCompletionItemProvider {
         const packageSegments: string[] = groupIdHint.split(".");
         packageSegments.pop();
         const validGroupIds: string[] = await this.searchForGroupIds(packageSegments) || [];
+        const commandOnSelection: vscode.Command = {
+            title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+            arguments: [{ completeFor: "groupId", source: "maven-local" }]
+        };
         return validGroupIds.map(gid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(gid, vscode.CompletionItemKind.Module);
             item.insertText = gid;
             item.detail = "local";
+            item.command = commandOnSelection;
             return item;
         });
     }
@@ -30,10 +36,15 @@ class LocalProvider implements IMavenCompletionItemProvider {
         }
 
         const validArtifactIds: string[] = await this.searchForArtifactIds(groupId);
+        const commandOnSelection: vscode.Command = {
+            title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+            arguments: [{ completeFor: "artifactId", source: "maven-local" }]
+        };
         return validArtifactIds.map(aid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field);
             item.insertText = aid;
             item.detail = "local";
+            item.command = commandOnSelection;
             return item;
         });
     }
@@ -44,11 +55,16 @@ class LocalProvider implements IMavenCompletionItemProvider {
         }
 
         const validVersions: string[] = await this.searchForVersions(groupId, artifactId);
+        const commandOnSelection: vscode.Command = {
+            title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
+            arguments: [{ completeFor: "version", source: "maven-local" }]
+        };
         return validVersions.map(v => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(v, vscode.CompletionItemKind.Constant);
             item.insertText = v;
             item.detail = "local";
             item.sortText = getSortText(v);
+            item.command = commandOnSelection;
             return item;
         });
     }
