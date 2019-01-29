@@ -22,7 +22,7 @@ Maven extension for VS Code. It provides a project explorer and shortcuts to exe
 For troubleshooting, please refer to the page [HERE](Troubleshooting.md).
 
 ## Basic Usage
-<details>
+<details open>
 <summary>Maven Explorer</summary>
 
 The extension scans `pom.xml` in your workspace, and displays all Maven projects and their modules in the sidebar.
@@ -34,9 +34,18 @@ The extension scans `pom.xml` in your workspace, and displays all Maven projects
 <details>
 <summary>Run Plugin Goals</summary>
 
-The extension parse effective-pom of maven projects, and displays all plugins and plugin goals hierarchically.
+The extension parse effective-pom of Maven projects, and displays all plugins and plugin goals hierarchically.
 
 ![Screenshot](images/plugin.gif)
+
+</details>
+
+<details>
+<summary>POM File Editing</summary>
+
+The extension provides Maven specific completion suggestions when editing POM files, including snippets and artifact hints.
+
+![Screenshot](images/completion.gif)
 
 </details>
 
@@ -121,7 +130,7 @@ If you have JAVA_HOME configured through the `maven.terminal.customEnv` setting,
 
 <details>
 <summary>Default Options for Maven Command</summary>
-The usage of maven executable is:
+The usage of Maven executable is:
 
 > usage: mvn [options] [<goal(s)>] [<phase(s)>]
 
