@@ -20,8 +20,8 @@ class MavenTerminal implements vscode.Disposable {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
         const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
         if (this.terminals[name] === undefined) {
-            this.terminals[name] = vscode.window.createTerminal({ name });
-            setupEnvironment(this.terminals[name]);
+            const env: {[envKey: string]: string} = Utils.getEnvironment();
+            this.terminals[name] = vscode.window.createTerminal({ name, env });
         }
         this.terminals[name].show();
         if (cwd) {
@@ -93,34 +93,6 @@ async function getCDCommand(cwd: string): Promise<string> {
         }
     } else {
         return `cd "${cwd}"`;
-    }
-}
-
-function setupEnvironment(terminal?: vscode.Terminal): void {
-    // do this first so it can be overridden if desired
-    const customEnv: {[envKey: string]: string} = Utils.getEnvironment();
-    if (terminal) {
-        Object.keys(customEnv).forEach(key => {
-            terminal.sendText(composeSetEnvironmentVariableCommand(key, customEnv[key]), true);
-        });
-    }
-}
-
-function composeSetEnvironmentVariableCommand(variable: string, value: string): string {
-    if (process.platform === "win32") {
-        switch (currentWindowsShell()) {
-            case "Git Bash":
-            case "WSL Bash":
-                return `export ${variable}="${value}"`; // Git Bash
-            case "PowerShell":
-                return `$Env:${variable}="${value}"`; // PowerShell
-            case "Command Prompt":
-                return `set ${variable}=${value}`; // CMD
-            default:
-                return `set ${variable}=${value}`; // Unknown, try using common one.
-        }
-    } else {
-        return `export ${variable}="${value}"`; // general linux
     }
 }
 
