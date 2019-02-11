@@ -1,9 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
-## Unreleased
+## 0.14.2
 #### Fixed 
 - Use a simple and robust way to inject custom environment variables into terminals. [PR#240](https://github.com/Microsoft/vscode-maven/pull/240)
+- Fix a regression of executing custom goals from command palette. [#243](https://github.com/Microsoft/vscode-maven/issues/243)
 
 ## 0.14.1
 #### Fixed
