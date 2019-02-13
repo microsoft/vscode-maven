@@ -4,7 +4,7 @@
 import * as fse from "fs-extra";
 import * as os from "os";
 import * as path from "path";
-import { Uri, window } from "vscode";
+import { Uri, window, workspace } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
@@ -30,7 +30,7 @@ export namespace ArchetypeModule {
 
     async function chooseTargetFolder(entry: Uri | undefined): Promise<string> {
         const result: Uri = await openDialogForFolder({
-            defaultUri: entry && entry.fsPath ? Uri.file(entry.fsPath) : undefined,
+            defaultUri: entry,
             openLabel: "Select Destination Folder"
         });
         const cwd: string = result && result.fsPath;
@@ -55,7 +55,13 @@ export namespace ArchetypeModule {
         sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId });
 
         // choose target folder.
-        const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(entry);
+        let targetFolderHint: Uri;
+        if (entry) {
+            targetFolderHint = entry;
+        } else if (workspace.workspaceFolders.length > 0) {
+            targetFolderHint = workspace.workspaceFolders[0].uri;
+        }
+        const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(targetFolderHint);
 
         // execute in terminal.
         await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminal)(groupId, artifactId, cwd);
