@@ -49,6 +49,6 @@ export async function showTroubleshootingDialog(errorMessage: string): Promise<v
     const choiceForDetails: string = await window.showErrorMessage(errorMessage, OPTION_LEARN_MORE);
     if (choiceForDetails === OPTION_LEARN_MORE) {
         // open FAQs
-        vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(TROUBLESHOOTING_LINK));
+        vscode.env.openExternal(vscode.Uri.parse(TROUBLESHOOTING_LINK));
     }
 }
