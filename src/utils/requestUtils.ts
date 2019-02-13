@@ -61,6 +61,21 @@ export async function getVersions(gid: string, aid: string): Promise<IVersionMet
     }
 }
 
+export async function getLatestVersion(gid: string, aid: string): Promise<string> {
+    try {
+        const params: any = {
+            q: `g:"${gid}" AND a:"${aid}"`,
+            rows: 1,
+            wt: "json"
+        };
+        const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
+        return _.get(JSON.parse(raw), "response.docs[0].latestVersion");
+    } catch (error) {
+        console.error(error);
+        return undefined;
+    }
+}
+
 function httpsGet(urlString: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         let result: string = "";
@@ -78,6 +93,6 @@ function httpsGet(urlString: string): Promise<string> {
     });
 }
 
-function toQueryString(params: {[key: string]: any}): string {
+function toQueryString(params: { [key: string]: any }): string {
     return Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k].toString())}`).join("&");
 }

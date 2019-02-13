@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { getArtifacts, getVersions, IArtifactMetadata, IVersionMetadata } from "../utils/requestUtils";
 import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
-import { getArtifacts, getVersions, IArtifactMetadata, IVersionMetadata } from "./requestUtils";
 import { getSortText } from "./versionUtils";
 
 class CentralProvider implements IMavenCompletionItemProvider {

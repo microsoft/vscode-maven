@@ -13,7 +13,11 @@ import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
+<<<<<<< HEAD
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
+=======
+import {hoverProvider} from "./hover/hoverProvider";
+>>>>>>> Hover on groupId/artifactId to see latest version
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
@@ -144,4 +148,6 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.completion.selected", sendInfo, true);
 
     registerCommand(context, "maven.project.addDependency", async () => await addDependencyHandler());
+    // hover
+    context.subscriptions.push(vscode.languages.registerHoverProvider([{ language: "xml", scheme: "file", pattern: "**/pom.xml" }], hoverProvider));
 }
