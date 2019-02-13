@@ -26,7 +26,7 @@ class HoverProvider implements vscode.HoverProvider {
                 if (groupIdHint && artifactIdHint) {
                     const latestVersion: string = await getLatestVersion(groupIdHint, artifactIdHint);
                     const id: string = `${groupIdHint}:${artifactIdHint}`;
-                    return new vscode.Hover(`id = ${id}, latestVersion = ${latestVersion}`, targetRange);
+                    return new vscode.Hover(`id = ${id}\n\nlatestVersion = ${latestVersion}`, targetRange);
                 }
 
             }
