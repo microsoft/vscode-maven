@@ -31,7 +31,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
 
     public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList> {
 
-        const currentNode: ElementNode = getCurrentNode(document, position);
+        const currentNode: ElementNode = getCurrentNode(document.getText(), document.offsetAt(position));
         if (!currentNode) {
             return null;
         }
