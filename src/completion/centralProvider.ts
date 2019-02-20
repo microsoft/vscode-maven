@@ -1,18 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as _ from "lodash";
 import * as vscode from "vscode";
 import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
-import { getArtifacts, getVersions } from "./requestUtils";
+import { getArtifacts, getVersions, IArtifactMetadata, IVersionMetadata } from "./requestUtils";
 import { getSortText } from "./versionUtils";
 
 class CentralProvider implements IMavenCompletionItemProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
         const keywords: string[] = [...groupIdHint.split("."), ...artifactIdHint.split("-")];
-        const body: any = await getArtifacts(keywords);
-        const docs: any[] = _.get(body, "response.docs", []);
+        const docs: IArtifactMetadata[] = await getArtifacts(keywords);
         const groupIds: string[] = Array.from(new Set(docs.map(doc => doc.g)).values());
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
@@ -29,8 +27,7 @@ class CentralProvider implements IMavenCompletionItemProvider {
 
     public async getArtifactIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
         const keywords: string[] = [...groupIdHint.split("."), ...artifactIdHint.split("-")];
-        const body: any = await getArtifacts(keywords);
-        const docs: any[] = _.get(body, "response.docs", []);
+        const docs: IArtifactMetadata[] = await getArtifacts(keywords);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "artifactId", source: "maven-central" }]
@@ -50,8 +47,7 @@ class CentralProvider implements IMavenCompletionItemProvider {
             return [];
         }
 
-        const body: any = await getVersions(groupId, artifactId);
-        const docs: any[] = _.get(body, "response.docs", []);
+        const docs: IVersionMetadata[] = await getVersions(groupId, artifactId);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "version", source: "maven-central" }]

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as vscode from "vscode";
 import Lexx from "xml-zero-lexer";
 
 export enum XmlTagName {
@@ -53,10 +52,9 @@ export class ElementNode {
 
 }
 
-export function getCurrentNode(document: vscode.TextDocument, position: vscode.Position): ElementNode {
-    const text: string = document.getText();
+export function getCurrentNode(text: string, offset: number): ElementNode {
     const tokens: number[][] = Lexx(text);
-    return getElementHierarchy(text, tokens, document.offsetAt(position));
+    return getElementHierarchy(text, tokens, offset);
 }
 
 function getElementHierarchy(text: string, tokens: number[][], cursorOffset: number): ElementNode {
