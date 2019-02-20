@@ -3,11 +3,28 @@
 
 import * as http from "http";
 import * as https from "https";
+import * as _ from "lodash";
 import * as url from "url";
 
 const URL_BASIC_SEARCH: string = "https://search.maven.org/solrsearch/select";
 
-export async function getArtifacts(keywords: string[]): Promise<{}> {
+export interface IArtifactMetadata {
+    id: string;
+    g: string;
+    a: string;
+    latestVersion: string;
+    versionCount: number;
+}
+
+export interface IVersionMetadata {
+    id: string;
+    g: string;
+    a: string;
+    v: string;
+    timestamp: number;
+}
+
+export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadata[]> {
     // Remove short keywords
     const validKeywords: string[] = keywords.filter(keyword => keyword.length >= 3);
     if (validKeywords.length === 0) {
@@ -20,10 +37,15 @@ export async function getArtifacts(keywords: string[]): Promise<{}> {
         wt: "json"
     };
     const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
-    return JSON.parse(raw);
+    try {
+        return _.get(JSON.parse(raw), "response.docs", []);
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
 }
 
-export async function getVersions(gid: string, aid: string): Promise<{}> {
+export async function getVersions(gid: string, aid: string): Promise<IVersionMetadata[]> {
     const params: any = {
         q: `g:"${gid}" AND a:"${aid}"`,
         core: "gav",
@@ -31,7 +53,12 @@ export async function getVersions(gid: string, aid: string): Promise<{}> {
         wt: "json"
     };
     const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
-    return JSON.parse(raw);
+    try {
+        return _.get(JSON.parse(raw), "response.docs", []);
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
 }
 
 function httpsGet(urlString: string): Promise<string> {
