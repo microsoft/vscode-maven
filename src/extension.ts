@@ -145,7 +145,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     registerCommand(context, "maven.project.addDependency", async () => {
         if (vscode.window.activeTextEditor) {
-            await addDependencyHandler(vscode.window.activeTextEditor.document.uri.fsPath);
+            await addDependencyHandler(vscode.window.activeTextEditor.document);
         }
     });
 }
