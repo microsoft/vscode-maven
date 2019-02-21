@@ -33,7 +33,7 @@ export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadat
 
     const params: any = {
         q: validKeywords.join(" ").trim(),
-        rows: 20,
+        rows: 50,
         wt: "json"
     };
     const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);

@@ -43,6 +43,7 @@
     "onCommand:maven.archetype.update",
     "onCommand:maven.history",
     "onCommand:maven.plugin.execute",
+    "onCommand:maven.project.addDependency",
     "onView:mavenProjects",
     "onLanguage:xml"
   ],
@@ -164,6 +165,11 @@
           "light": "resources/light/view-hierarchical.svg",
           "dark": "resources/dark/view-hierarchical.svg"
         }
+      },
+      {
+        "command": "maven.project.addDependency",
+        "title": "%contributes.commands.maven.project.addDependency%",
+        "category": "Maven"
       }
     ],
     "views": {
