@@ -8,7 +8,8 @@ export enum XmlTagName {
     ArtifactId = "artifactId",
     Version = "version",
     Dependencies = "dependencies",
-    Plugins = "plugins"
+    Plugins = "plugins",
+    Project = "project"
 }
 
 export class ElementNode {
@@ -52,14 +53,30 @@ export class ElementNode {
 
 }
 
+export function getNodesByTag(text: string, tag: string): ElementNode[] {
+    const tokens: number[][] = Lexx(text);
+    return getElementHierarchy(text, tokens, tag);
+}
+
 export function getCurrentNode(text: string, offset: number): ElementNode {
     const tokens: number[][] = Lexx(text);
     return getElementHierarchy(text, tokens, offset);
 }
 
-function getElementHierarchy(text: string, tokens: number[][], cursorOffset: number): ElementNode {
+function getElementHierarchy(text: string, tokens: number[][], targetTag: string): ElementNode[];
+function getElementHierarchy(text: string, tokens: number[][], cursorOffset: number): ElementNode;
+// tslint:disable-next-line:cyclomatic-complexity
+function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: number | string): ElementNode | ElementNode[] {
+    let targetTag: string;
+    let cursorOffset: number;
+    if (typeof tagOrOffset === "string") {
+        targetTag = tagOrOffset;
+    } else if (typeof tagOrOffset === "number") {
+        cursorOffset = tagOrOffset;
+    }
     const n: number = tokens.length;
     const elementNodes: ElementNode[] = [];
+    const tagNodes: ElementNode[] = [];
     let cursorNode: ElementNode = null;
     let pointer: number = 0;
     let i: number = 0;
@@ -107,12 +124,20 @@ function getElementHierarchy(text: string, tokens: number[][], cursorOffset: num
             default:
                 break;
         }
-        if (!cursorNode && currentNode && currentNode.contentStart <= cursorOffset && currentNode.contentEnd && cursorOffset <= currentNode.contentEnd) {
+        if (targetTag !== undefined && currentNode && targetTag === currentNode.tag && tagNodes.indexOf(currentNode) < 0) {
+            tagNodes.push(currentNode);
+        }
+        if (cursorOffset !== undefined && !cursorNode && currentNode && currentNode.contentStart <= cursorOffset && currentNode.contentEnd && cursorOffset <= currentNode.contentEnd) {
             cursorNode = currentNode;
         }
         i += 1;
     }
-    return cursorNode || elementNodes[elementNodes.length - 1];
+    if (targetTag !== undefined) {
+        return tagNodes;
+    } else if (cursorOffset !== undefined) {
+        return cursorNode || elementNodes[elementNodes.length - 1];
+    }
+    return undefined;
 }
 
 // Definition from xml-zero-lexer

@@ -11,6 +11,7 @@
     "contributes.commands.maven.plugin.execute": "执行",
     "contributes.commands.maven.view.hierarchical": "切换到分层视图",
     "contributes.commands.maven.view.flat": "切换到扁平视图",
+    "contributes.commands.maven.project.addDependency": "添加依赖",
     "contributes.views.explorer.mavenProjects": "Maven 项目",
     "configuration.maven.excludedFolders": "指定搜索 Maven 项目时要排除的文件夹。",
     "configuration.maven.executable.preferMavenWrapper": "指定是否优先使用 Maven Wrapper。如果为 true，则尝试使用根文件夹下的 mvnw 作为可执行文件；否则尝试使用系统 PATH 中的 mvn。",
