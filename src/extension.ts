@@ -143,9 +143,5 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-"));
     registerCommand(context, "maven.completion.selected", sendInfo, true);
 
-    registerCommand(context, "maven.project.addDependency", async () => {
-        if (vscode.window.activeTextEditor) {
-            await addDependencyHandler(vscode.window.activeTextEditor.document);
-        }
-    });
+    registerCommand(context, "maven.project.addDependency", async () => await addDependencyHandler());
 }
