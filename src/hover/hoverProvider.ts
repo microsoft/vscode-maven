@@ -4,12 +4,13 @@
 import * as _ from "lodash";
 import * as vscode from "vscode";
 
+import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
+import { MavenProject } from "../explorer/model/MavenProject";
 import { ElementNode, getCurrentNode, XmlTagName } from "../utils/lexerUtils";
-import { getLatestVersion } from "../utils/requestUtils";
 
 class HoverProvider implements vscode.HoverProvider {
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken): Promise<vscode.Hover> {
-        const currentNode: ElementNode = getCurrentNode(document, position);
+        const currentNode: ElementNode = getCurrentNode(document.getText(), document.offsetAt(position));
         if (!currentNode) {
             return undefined;
         }
@@ -24,16 +25,32 @@ class HoverProvider implements vscode.HoverProvider {
                 const groupIdHint: string = groupIdNode && groupIdNode.text;
                 const artifactIdHint: string = artifactIdNode && artifactIdNode.text;
                 if (groupIdHint && artifactIdHint) {
-                    const latestVersion: string = await getLatestVersion(groupIdHint, artifactIdHint);
-                    const id: string = `${groupIdHint}:${artifactIdHint}`;
-                    return new vscode.Hover(`id = ${id}\n\nlatestVersion = ${latestVersion}`, targetRange);
+                    const effectiveVersion: string = await getEffectiveVersion(document.uri, groupIdHint, artifactIdHint);
+                    if (effectiveVersion) {
+                        return new vscode.Hover([
+                            `gourpId = ${groupIdHint}`,
+                            `artifactId = ${artifactIdHint}`,
+                            `version = ${effectiveVersion}`
+                        ].join("\n\n"), targetRange);
+                    }
                 }
-
             }
             default:
                 return undefined;
         }
     }
+
+}
+
+function getEffectiveVersion(uri: vscode.Uri, gid: string, aid: string): string {
+    const mavenProject: MavenProject = mavenExplorerProvider.getMavenProject(uri.fsPath);
+    if (!mavenProject) {
+        return undefined;
+    }
+
+    const deps: [] = _.get(mavenProject.effectivePom, "project.dependencies[0].dependency", []);
+    const targetDep: any = deps.find(elem => _.get(elem, "groupId[0]") === gid && _.get(elem, "artifactId[0]") === aid);
+    return targetDep && _.get(targetDep, "version[0]");
 
 }
 

@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { ElementNode, getNodesByTag, XmlTagName } from "../completion/lexerUtils";
-import { getArtifacts, IArtifactMetadata } from "../completion/requestUtils";
+import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
+import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
 
 export async function addDependencyHandler(): Promise<void> {
     if (!vscode.window.activeTextEditor) {
