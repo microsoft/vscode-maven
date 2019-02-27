@@ -39,7 +39,6 @@ class HoverProvider implements vscode.HoverProvider {
                 return undefined;
         }
     }
-
 }
 
 function getEffectiveVersion(uri: vscode.Uri, gid: string, aid: string): string {
