@@ -1,7 +1,7 @@
-import { Utils } from "../../utils/Utils";
-
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+
+import { Utils } from "../../utils/Utils";
 
 export class EffectivePom {
 
