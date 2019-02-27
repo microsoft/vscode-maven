@@ -14,6 +14,7 @@ import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
+import {hoverProvider} from "./hover/hoverProvider";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
@@ -144,4 +145,6 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.completion.selected", sendInfo, true);
 
     registerCommand(context, "maven.project.addDependency", async () => await addDependencyHandler());
+    // hover
+    context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
 }

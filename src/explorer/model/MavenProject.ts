@@ -41,6 +41,10 @@ export class MavenProject implements ITreeItem {
         return this._rawEffectivePom;
     }
 
+    public get effectivePom(): string {
+        return this._effectivePom;
+    }
+
     public get plugins(): MavenPlugin[] {
         let plugins: any[];
         if (_.get(this._effectivePom, "projects.project")) {

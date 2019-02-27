@@ -5,9 +5,9 @@ import * as _ from "lodash";
 import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
+import { ElementNode, getCurrentNode, XmlTagName } from "../utils/lexerUtils";
 import { centralProvider } from "./centralProvider";
 import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
-import { ElementNode, getCurrentNode, XmlTagName } from "./lexerUtils";
 import { localProvider } from "./localProvider";
 
 const artifactSegments: string[] = [
