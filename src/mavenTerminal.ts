@@ -5,7 +5,6 @@ import * as vscode from "vscode";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
 import { executeCommand } from "./utils/cpUtils";
-import { Utils } from "./utils/Utils";
 
 interface ITerminalOptions {
     addNewLine?: boolean;
@@ -20,7 +19,7 @@ class MavenTerminal implements vscode.Disposable {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
         const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
         if (this.terminals[name] === undefined) {
-            const env: {[envKey: string]: string} = Utils.getEnvironment();
+            const env: {[envKey: string]: string} = Settings.getEnvironment();
             this.terminals[name] = vscode.window.createTerminal({ name, env });
         }
         this.terminals[name].show();

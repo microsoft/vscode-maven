@@ -57,4 +57,29 @@ export namespace Settings {
     function _getMavenSection<T>(section: string, resource?: Uri): T {
         return workspace.getConfiguration("maven", resource).get<T>(section);
     }
+
+    export function getEnvironment(): {} {
+        const customEnv: any = _getJavaHomeEnvIfAvailable();
+        type EnvironmentSetting = {
+            environmentVariable: string;
+            value: string;
+        };
+        const environmentSettings: EnvironmentSetting[] = Settings.Terminal.customEnv();
+        environmentSettings.forEach((s: EnvironmentSetting) => {
+            customEnv[s.environmentVariable] = s.value;
+        });
+        return customEnv;
+    }
+
+    function _getJavaHomeEnvIfAvailable(): {} {
+        // Look for the java.home setting from the redhat.java extension.  We can reuse it
+        // if it exists to avoid making the user configure it in two places.
+        const javaHome: string = Settings.External.javaHome();
+        const useJavaHome: boolean = Settings.Terminal.useJavaHome();
+        if (useJavaHome && javaHome) {
+            return { JAVA_HOME: javaHome };
+        } else {
+            return {};
+        }
+    }
 }
