@@ -48,8 +48,8 @@ function getEffectiveVersion(uri: vscode.Uri, gid: string, aid: string): string 
         return undefined;
     }
 
-    const deps: [] = _.get(mavenProject.effectivePom, "project.dependencies[0].dependency", []);
-    const targetDep: any = deps.find(elem => _.get(elem, "groupId[0]") === gid && _.get(elem, "artifactId[0]") === aid);
+    const deps: {}[] = _.get(mavenProject.effectivePom, "project.dependencies[0].dependency", []);
+    const targetDep: {} = deps.find(elem => _.get(elem, "groupId[0]") === gid && _.get(elem, "artifactId[0]") === aid);
     return targetDep && _.get(targetDep, "version[0]");
 
 }
