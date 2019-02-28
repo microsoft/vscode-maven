@@ -19,7 +19,7 @@ class TaskExecutor implements Disposable {
 
     public execute(task: any): void {
         this._tasks.push(task);
-        this._pickAndRun();
+        this._pickAndRun().catch(console.error);
     }
 
     public dispose(): void {
@@ -42,7 +42,7 @@ class TaskExecutor implements Disposable {
             // ignore.
         }
         this._isExecuting = false;
-        this._pickAndRun();
+        this._pickAndRun().catch(console.error);
     }
 }
 

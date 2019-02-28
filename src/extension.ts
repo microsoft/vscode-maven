@@ -28,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await loadPackageInfo(context);
     // Usage data statistics.
     if (getAiKey()) {
-        await initialize(getExtensionId(), getExtensionVersion(), getAiKey());
+        initialize(getExtensionId(), getExtensionVersion(), getAiKey());
     }
     await instrumentOperation("activation", doActivate)(context);
 }
@@ -45,7 +45,7 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
             if (error instanceof OperationCanceledError) {
                 // swallow
             } else {
-                showTroubleshootingDialog(`Command "${commandName}" fails. ${error.message}`);
+                await showTroubleshootingDialog(`Command "${commandName}" fails. ${error.message}`);
             }
             throw error;
         }
@@ -60,7 +60,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // pom.xml listener to refresh tree view
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
     watcher.onDidCreate((e: Uri) => mavenExplorerProvider.addProject(e.fsPath), null, context.subscriptions);
-    watcher.onDidChange((e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh(), null, context.subscriptions);
+    watcher.onDidChange(async (e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh(), null, context.subscriptions);
     watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath), null, context.subscriptions);
     context.subscriptions.push(watcher);
     context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
@@ -114,7 +114,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         if (node &&
             node.name &&
             node.plugin && node.plugin.project && node.plugin.project.pomPath) {
-            executeInTerminal(node.name, node.plugin.project.pomPath);
+            await executeInTerminal(node.name, node.plugin.project.pomPath);
         }
     });
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());

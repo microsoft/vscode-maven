@@ -41,8 +41,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             case XmlTagName.GroupId: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
                 const artifactIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
-                const groupIdHint: string = currentNode.text || "";
-                const artifactIdHint: string = artifactIdNode && artifactIdNode.text || "";
+                const groupIdHint: string = currentNode.text ? currentNode.text : "";
+                const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
@@ -54,8 +54,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             case XmlTagName.ArtifactId: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
                 const groupIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
-                const groupIdHint: string = groupIdNode && groupIdNode.text || "";
-                const artifactIdHint: string = currentNode.text || "";
+                const groupIdHint: string = groupIdNode && groupIdNode.text ? groupIdNode.text : "";
+                const artifactIdHint: string = currentNode.text ? currentNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 if (groupIdNode) {
@@ -76,8 +76,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
                 const groupIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
                 const artifactIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
-                const groupIdHint: string = groupIdNode && groupIdNode.text || "";
-                const artifactIdHint: string = artifactIdNode && artifactIdNode.text || "";
+                const groupIdHint: string = groupIdNode && groupIdNode.text ? groupIdNode.text : "";
+                const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getVersionCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getVersionCandidates(groupIdHint, artifactIdHint);

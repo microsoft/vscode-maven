@@ -77,7 +77,7 @@
         "no-unnecessary-callback-wrapper": true,
         "no-unnecessary-initializer": true,
         "no-unnecessary-override": true,
-        "no-unsafe-any": true,
+        "no-unsafe-any": false,
         "no-unsafe-finally": true,
         "no-unused-expression": true,
         "no-use-before-declare": true,

@@ -76,7 +76,7 @@ export async function getLatestVersion(gid: string, aid: string): Promise<string
     }
 }
 
-function httpsGet(urlString: string): Promise<string> {
+async function httpsGet(urlString: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         let result: string = "";
         https.get(url.parse(urlString), (res: http.IncomingMessage) => {

@@ -60,8 +60,10 @@ export namespace Utils {
             } else if (urlObj.protocol === "http:") {
                 client = http;
             } else {
-                return reject(new Error("Unsupported protocol."));
+                reject(new Error("Unsupported protocol."));
+                return;
             }
+            // tslint:disable-next-line: no-unsafe-any
             client.get(options, (res: http.IncomingMessage) => {
                 let rawData: string;
                 let ws: fse.WriteStream;
@@ -103,7 +105,7 @@ export namespace Utils {
         if (project) {
             pomxml = await project.calculateEffectivePom();
         } else {
-            pomxml = await Utils.getEffectivePom(pomPath);
+            pomxml = await getEffectivePom(pomPath);
         }
 
         if (pomxml) {
@@ -125,28 +127,32 @@ export namespace Utils {
         } else {
             return undefined;
         }
-        return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+        return await window.withProgress({ location: ProgressLocation.Window }, async (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Generating Effective POM: ${name}` });
                 try {
-                    return resolve(rawEffectivePom(pomPath));
+                    resolve(rawEffectivePom(pomPath));
+                    return;
                 } catch (error) {
-                    setUserError(error);
-                    return reject(error);
+                    setUserError(<Error>error);
+                    reject(error);
+                    return;
                 }
             }
         ));
     }
 
     export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
-        return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+        return await window.withProgress({ location: ProgressLocation.Window }, async (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Retrieving Plugin Info: ${pluginId}` });
                 try {
-                    return resolve(pluginDescription(pluginId, pomPath));
+                    resolve(pluginDescription(pluginId, pomPath));
+                    return;
                 } catch (error) {
-                    setUserError(error);
-                    return reject(error);
+                    setUserError(<Error>error);
+                    reject(error);
+                    return;
                 }
             }
         ));
@@ -159,12 +165,12 @@ export namespace Utils {
         const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
         const trimmedGoals: string = inputGoals && inputGoals.trim();
         if (trimmedGoals) {
-            executeInTerminal(trimmedGoals, pomPath);
+            await executeInTerminal(trimmedGoals, pomPath);
         }
     }
 
     export async function executeHistoricalGoals(projectPomPaths: string[]): Promise<void> {
-        const candidates: ICommandHistoryEntry[] = Array.prototype.concat.apply(
+        const candidates: ICommandHistoryEntry[] = <ICommandHistoryEntry[]>Array.prototype.concat.apply(
             [],
             await Promise.all(projectPomPaths.map(getLRUCommands))
         );
@@ -179,7 +185,7 @@ export namespace Utils {
             { placeHolder: "Select from history ...", ignoreFocusOut: true }
         ).then(item => item && item.value);
         if (selected) {
-            executeInTerminal(selected.command, selected.pomPath);
+            await executeInTerminal(selected.command, selected.pomPath);
         }
     }
 
