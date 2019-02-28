@@ -5,6 +5,7 @@ import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Settings } from "../../Settings";
+import { taskExecutor } from "../../taskExecutor";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Utils } from "../../utils/Utils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
@@ -24,6 +25,7 @@ export class MavenProject implements ITreeItem {
     constructor(pomPath: string) {
         this._pomPath = pomPath;
         this._effectivePom = new EffectivePom(pomPath);
+        taskExecutor.execute(async () => await this._effectivePom.update(true));
     }
 
     public get name(): string {
