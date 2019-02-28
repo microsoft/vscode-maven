@@ -233,6 +233,10 @@
         {
           "command": "maven.project.openPom",
           "when": "never"
+        },
+        {
+          "command": "maven.plugin.execute",
+          "when": "never"
         }
       ],
       "explorer/context": [
