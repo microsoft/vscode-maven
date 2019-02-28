@@ -20,6 +20,7 @@ import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
+import { executeInTerminal } from "./utils/mavenUtils";
 import { openFileIfExists, showTroubleshootingDialog } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
 
@@ -65,7 +66,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
     // register commands.
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => Utils.executeInTerminal(goal, node.pomPath));
+        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal(goal, node.pomPath));
     });
     registerCommand(context, "maven.explorer.refresh", async (item?: ITreeItem): Promise<void> => {
         if (item && item.refresh) {
@@ -113,7 +114,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         if (node &&
             node.name &&
             node.plugin && node.plugin.project && node.plugin.project.pomPath) {
-            Utils.executeInTerminal(node.name, node.plugin.project.pomPath);
+            executeInTerminal(node.name, node.plugin.project.pomPath);
         }
     });
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());

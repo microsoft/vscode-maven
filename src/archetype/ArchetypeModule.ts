@@ -8,6 +8,7 @@ import { Uri, window, workspace } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
+import { executeInTerminal } from "../utils/mavenUtils";
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
@@ -40,13 +41,13 @@ export namespace ArchetypeModule {
         return cwd;
     }
 
-    async function executeInTerminal(archetypeGroupId: string, archetypeArtifactId: string, cwd: string): Promise<void> {
+    async function executeInTerminalHandler(archetypeGroupId: string, archetypeArtifactId: string, cwd: string): Promise<void> {
         const cmd: string = [
             "archetype:generate",
             `-DarchetypeArtifactId="${archetypeArtifactId}"`,
             `-DarchetypeGroupId="${archetypeGroupId}"`
         ].join(" ");
-        await Utils.executeInTerminal(cmd, null, { cwd });
+        await executeInTerminal(cmd, null, { cwd });
     }
 
     export async function generateFromArchetype(entry: Uri | undefined, operationId: string | undefined): Promise<void> {
@@ -64,7 +65,7 @@ export namespace ArchetypeModule {
         const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(targetFolderHint);
 
         // execute in terminal.
-        await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminal)(groupId, artifactId, cwd);
+        await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminalHandler)(groupId, artifactId, cwd);
     }
 
     export async function updateArchetypeCatalog(): Promise<void> {
