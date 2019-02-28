@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import { rawEffectivePom } from "../../utils/mavenUtils";
 import { Utils } from "../../utils/Utils";
 
 export class EffectivePom {
@@ -18,14 +19,14 @@ export class EffectivePom {
     /**
      * Generate effective pom and parse the data
      */
-    public async update(): Promise<void> {
+    public async update(silent?: boolean): Promise<void> {
         if (this._updating) {
             return;
         }
 
         this._updating = true;
         try {
-            this.raw = await Utils.getEffectivePom(this.pomPath);
+            this.raw = silent ? await rawEffectivePom(this.pomPath) : await Utils.getEffectivePom(this.pomPath);
             this.data = await Utils.parseXmlContent(this.raw);
         } catch (error) {
             console.error(error);
