@@ -77,7 +77,7 @@ export async function executeInTerminal(command: string, pomfile?: string, optio
     const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
     await mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
     if (pomfile) {
-        updateLRUCommands(command, pomfile);
+        await updateLRUCommands(command, pomfile);
     }
 }
 

@@ -64,7 +64,7 @@ export namespace Settings {
             environmentVariable: string;
             value: string;
         };
-        const environmentSettings: EnvironmentSetting[] = Settings.Terminal.customEnv();
+        const environmentSettings: EnvironmentSetting[] = Terminal.customEnv();
         environmentSettings.forEach((s: EnvironmentSetting) => {
             customEnv[s.environmentVariable] = s.value;
         });
@@ -74,8 +74,8 @@ export namespace Settings {
     function _getJavaHomeEnvIfAvailable(): {} {
         // Look for the java.home setting from the redhat.java extension.  We can reuse it
         // if it exists to avoid making the user configure it in two places.
-        const javaHome: string = Settings.External.javaHome();
-        const useJavaHome: boolean = Settings.Terminal.useJavaHome();
+        const javaHome: string = External.javaHome();
+        const useJavaHome: boolean = Terminal.useJavaHome();
         if (useJavaHome && javaHome) {
             return { JAVA_HOME: javaHome };
         } else {

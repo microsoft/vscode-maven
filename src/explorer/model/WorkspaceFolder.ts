@@ -35,7 +35,7 @@ export class WorkspaceFolder implements ITreeItem {
             allProjects.push(currentProject);
         }
 
-        await Promise.all(newProjects.map(elem => elem.parsePom()));
+        await Promise.all(newProjects.map(async elem => elem.parsePom()));
         mavenExplorerProvider.updateProjects(...newProjects);
         newProjects.forEach(p => {
             p.modules.forEach(m => {

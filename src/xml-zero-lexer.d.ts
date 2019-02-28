@@ -1,1 +1,1 @@
-declare module 'xml-zero-lexer'
+declare module "xml-zero-lexer"
