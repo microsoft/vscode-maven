@@ -208,7 +208,7 @@ export namespace Utils {
         const LABEL_FAVORITES: string = "Favorites ...";
         // select a command
         const selectedCommand: string = await window.showQuickPick(
-            [LABEL_CUSTOM, LABEL_FAVORITES, "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
+            [LABEL_FAVORITES, LABEL_CUSTOM, "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
             { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }
         );
         if (!selectedCommand) {

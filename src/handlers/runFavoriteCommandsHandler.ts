@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
-import { Utils } from "../utils/Utils";
+import { executeInTerminal } from "../utils/mavenUtils";
 
 type FavoriteCommand = { command: string, alias: string };
 export async function runFavoriteCommandsHandler(project: MavenProject | undefined): Promise<void> {
@@ -51,5 +51,5 @@ export async function runFavoriteCommandsHandler(project: MavenProject | undefin
         return;
     }
 
-    await Utils.executeInTerminal(selectedCommand.command, selectedProject.pomPath);
+    await executeInTerminal(selectedCommand.command, selectedProject.pomPath);
 }
