@@ -15,7 +15,7 @@ export async function openDialogForFolder(customOptions: OpenDialogOptions): Pro
         canSelectMany: false
     };
     const result: Uri[] = await window.showOpenDialog(Object.assign(options, customOptions));
-    if (result && result.length) {
+    if (result && result.length > 0) {
         return Promise.resolve(result[0]);
     } else {
         return Promise.resolve(null);
@@ -29,7 +29,7 @@ export async function openDialogForFile(customOptions?: OpenDialogOptions): Prom
         canSelectMany: false
     };
     const result: Uri[] = await window.showOpenDialog(Object.assign(options, customOptions));
-    if (result && result.length) {
+    if (result && result.length > 0) {
         return Promise.resolve(result[0]);
     } else {
         return Promise.resolve(null);

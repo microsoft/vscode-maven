@@ -25,7 +25,7 @@ class HoverProvider implements vscode.HoverProvider {
                 const groupIdHint: string = groupIdNode && groupIdNode.text;
                 const artifactIdHint: string = artifactIdNode && artifactIdNode.text;
                 if (groupIdHint && artifactIdHint) {
-                    const effectiveVersion: string = await getEffectiveVersion(document.uri, groupIdHint, artifactIdHint);
+                    const effectiveVersion: string = getEffectiveVersion(document.uri, groupIdHint, artifactIdHint);
                     if (effectiveVersion) {
                         return new vscode.Hover([
                             `gourpId = ${groupIdHint}`,
@@ -47,7 +47,7 @@ function getEffectiveVersion(uri: vscode.Uri, gid: string, aid: string): string 
         return undefined;
     }
 
-    const deps: {}[] = _.get(mavenProject.effectivePom, "project.dependencies[0].dependency", []);
+    const deps: {}[] = _.get(mavenProject.effectivePom.data, "project.dependencies[0].dependency", []);
     const targetDep: {} = deps.find(elem => _.get(elem, "groupId[0]") === gid && _.get(elem, "artifactId[0]") === aid);
     return targetDep && _.get(targetDep, "version[0]");
 

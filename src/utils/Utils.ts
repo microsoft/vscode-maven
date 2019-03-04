@@ -1,33 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as child_process from "child_process";
 import * as fse from "fs-extra";
 import * as http from "http";
 import * as https from "https";
 import * as md5 from "md5";
-import * as path from "path";
 import * as url from "url";
 import { commands, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
-import { mavenOutputChannel } from "../mavenOutputChannel";
-import { mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
-import { getExtensionName, getExtensionVersion, getPathToTempFolder } from "./contextUtils";
-
-interface ICommandHistory {
-    pomPath: string;
-    timestamps: { [command: string]: number };
-}
-
-interface ICommandHistoryEntry {
-    command: string;
-    pomPath: string;
-    timestamp: number;
-}
+import { getExtensionVersion, getPathToWorkspaceStorage } from "./contextUtils";
+import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
+import { executeInTerminal, pluginDescription, rawEffectivePom } from "./mavenUtils";
 
 export namespace Utils {
 
@@ -56,18 +43,7 @@ export namespace Utils {
     }
 
     function getTempOutputPath(key: string): string {
-        return getPathToTempFolder(getExtensionName(), md5(key), createUuid());
-    }
-
-    function getCommandHistoryCachePath(pomXmlFilePath: string): string {
-        return getPathToTempFolder(getExtensionName(), md5(pomXmlFilePath), "commandHistory.json");
-    }
-
-    export async function readFileIfExists(filepath: string): Promise<string> {
-        if (await fse.pathExists(filepath)) {
-            return (await fse.readFile(filepath)).toString();
-        }
-        return null;
+        return getPathToWorkspaceStorage(md5(key), createUuid());
     }
 
     export async function downloadFile(targetUrl: string, readContent?: boolean, customHeaders?: {}): Promise<string> {
@@ -84,8 +60,10 @@ export namespace Utils {
             } else if (urlObj.protocol === "http:") {
                 client = http;
             } else {
-                return reject(new Error("Unsupported protocol."));
+                reject(new Error("Unsupported protocol."));
+                return;
             }
+            // tslint:disable-next-line: no-unsafe-any
             client.get(options, (res: http.IncomingMessage) => {
                 let rawData: string;
                 let ws: fse.WriteStream;
@@ -115,142 +93,6 @@ export namespace Utils {
         });
     }
 
-    async function getMaven(workspaceFolder?: WorkspaceFolder): Promise<string> {
-        if (!workspaceFolder) {
-            return Settings.Executable.path(null) || "mvn";
-        }
-        const executablePathInConf: string = Settings.Executable.path(workspaceFolder.uri);
-        const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(workspaceFolder.uri);
-        if (!executablePathInConf) {
-            const mvnwPathWithoutExt: string = path.join(workspaceFolder.uri.fsPath, "mvnw");
-            if (preferMavenWrapper && await fse.pathExists(mvnwPathWithoutExt)) {
-                return mvnwPathWithoutExt;
-            } else {
-                return "mvn";
-            }
-        } else {
-            return path.resolve(workspaceFolder.uri.fsPath, executablePathInConf);
-        }
-    }
-
-    function wrappedWithQuotes(mvn: string): string {
-        if (mvn === "mvn") {
-            return mvn;
-        } else {
-            return `"${mvn}"`;
-        }
-    }
-
-    export async function executeInTerminal(command: string, pomfile?: string, options?: {}): Promise<void> {
-        const workspaceFolder: WorkspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
-        const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(await getMaven(workspaceFolder)));
-        const fullCommand: string = [
-            mvnString,
-            command.trim(),
-            pomfile && `-f "${await mavenTerminal.formattedPathForTerminal(pomfile)}"`,
-            Settings.Executable.options(pomfile && Uri.file(pomfile))
-        ].filter(Boolean).join(" ");
-        const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
-        await mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
-        if (pomfile) {
-            updateLRUCommands(command, pomfile);
-        }
-    }
-
-    export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: WorkspaceFolder): Promise<any> {
-        if (!workspaceFolder) {
-            workspaceFolder = pomfile && workspace.getWorkspaceFolder(Uri.file(pomfile));
-        }
-        const mvnExecutable: string = await getMaven(workspaceFolder);
-        const mvnString: string = wrappedWithQuotes(mvnExecutable);
-        // Todo with following line:
-        // 1. pomfile and workspacefolder = undefined, error
-        // 2. non-readable
-        const commandCwd: string = path.resolve(workspaceFolder.uri.fsPath, mvnExecutable, "..");
-
-        const fullCommand: string = [
-            mvnString,
-            command.trim(),
-            pomfile && `-f "${pomfile}"`,
-            Settings.Executable.options(pomfile && Uri.file(pomfile))
-        ].filter(Boolean).join(" ");
-
-        const customEnv: {} = getEnvironment();
-        const execOptions: child_process.ExecOptions = {
-            cwd: commandCwd,
-            env: Object.assign({}, process.env, customEnv)
-        };
-        return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {
-            mavenOutputChannel.appendLine(fullCommand, "Background Command");
-            child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
-                if (error) {
-                    mavenOutputChannel.appendLine(error);
-                    reject(error);
-                } else {
-                    resolve(stdout);
-                }
-            });
-        });
-    }
-
-    export function getEnvironment(): {} {
-        const customEnv: any = getJavaHomeEnvIfAvailable();
-        type EnvironmentSetting = {
-            environmentVariable: string;
-            value: string;
-        };
-        const environmentSettings: EnvironmentSetting[] = Settings.Terminal.customEnv();
-        environmentSettings.forEach((s: EnvironmentSetting) => {
-            customEnv[s.environmentVariable] = s.value;
-        });
-        return customEnv;
-    }
-
-    function getJavaHomeEnvIfAvailable(): {} {
-        // Look for the java.home setting from the redhat.java extension.  We can reuse it
-        // if it exists to avoid making the user configure it in two places.
-        const javaHome: string = Settings.External.javaHome();
-        const useJavaHome: boolean = Settings.Terminal.useJavaHome();
-        if (useJavaHome && javaHome) {
-            return { JAVA_HOME: javaHome };
-        } else {
-            return {};
-        }
-    }
-
-    export async function getLRUCommands(pomPath: string): Promise<ICommandHistoryEntry[]> {
-        const filepath: string = getCommandHistoryCachePath(pomPath);
-        if (await fse.pathExists(filepath)) {
-            const content: string = (await fse.readFile(filepath)).toString();
-            let historyObject: ICommandHistory;
-            try {
-                historyObject = JSON.parse(content);
-            } catch (error) {
-                historyObject = { pomPath, timestamps: {} };
-            }
-            const timestamps: { [command: string]: number } = historyObject.timestamps;
-            const commandList: string[] = Object.keys(timestamps).sort((a, b) => timestamps[b] - timestamps[a]);
-            return commandList.map(command => Object.assign({ command, pomPath, timestamp: timestamps[command] }));
-        }
-        return [];
-    }
-
-    async function updateLRUCommands(command: string, pomPath: string): Promise<void> {
-        const historyFilePath: string = getCommandHistoryCachePath(pomPath);
-        await fse.ensureFile(historyFilePath);
-        const content: string = (await fse.readFile(historyFilePath)).toString();
-        let historyObject: ICommandHistory;
-        try {
-            historyObject = JSON.parse(content);
-            historyObject.pomPath = pomPath;
-        } catch (error) {
-            historyObject = { pomPath, timestamps: {} };
-        } finally {
-            historyObject.timestamps[command] = Date.now();
-        }
-        await fse.writeFile(historyFilePath, JSON.stringify(historyObject));
-    }
-
     export async function getAllPomPaths(workspaceFolder: WorkspaceFolder): Promise<string[]> {
         const exclusions: string[] = Settings.excludedFolders(workspaceFolder.uri);
         const pomFileUris: Uri[] = await workspace.findFiles(new RelativePattern(workspaceFolder, "**/pom.xml"), `{${exclusions.join(",")}}`);
@@ -261,10 +103,9 @@ export namespace Utils {
         let pomxml: string;
         const project: MavenProject = mavenExplorerProvider.getMavenProject(pomPath);
         if (project) {
-            await project.calculateEffectivePom();
-            pomxml = project.rawEffectivePom;
+            pomxml = await project.calculateEffectivePom();
         } else {
-            pomxml = await Utils.getEffectivePom(pomPath);
+            pomxml = await getEffectivePom(pomPath);
         }
 
         if (pomxml) {
@@ -286,37 +127,32 @@ export namespace Utils {
         } else {
             return undefined;
         }
-        return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+        return await window.withProgress({ location: ProgressLocation.Window }, async (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Generating Effective POM: ${name}` });
                 try {
-                    const outputPath: string = getTempOutputPath(pomPath);
-                    await Utils.executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
-                    const pomxml: string = await Utils.readFileIfExists(outputPath);
-                    await fse.remove(outputPath);
-                    return resolve(pomxml);
+                    resolve(rawEffectivePom(pomPath));
+                    return;
                 } catch (error) {
-                    setUserError(error);
-                    return reject(error);
+                    setUserError(<Error>error);
+                    reject(error);
+                    return;
                 }
             }
         ));
     }
 
     export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
-        return await window.withProgress({ location: ProgressLocation.Window }, (p: Progress<{ message?: string }>) => new Promise<string>(
+        return await window.withProgress({ location: ProgressLocation.Window }, async (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Retrieving Plugin Info: ${pluginId}` });
-                const outputPath: string = getTempOutputPath(pluginId);
                 try {
-                    // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock
-                    await Utils.executeInBackground(`help:describe -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
-                    const content: string = await Utils.readFileIfExists(outputPath);
-                    await fse.remove(outputPath);
-                    return resolve(content);
+                    resolve(pluginDescription(pluginId, pomPath));
+                    return;
                 } catch (error) {
-                    setUserError(error);
-                    return reject(error);
+                    setUserError(<Error>error);
+                    reject(error);
+                    return;
                 }
             }
         ));
@@ -329,14 +165,14 @@ export namespace Utils {
         const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
         const trimmedGoals: string = inputGoals && inputGoals.trim();
         if (trimmedGoals) {
-            Utils.executeInTerminal(trimmedGoals, pomPath);
+            await executeInTerminal(trimmedGoals, pomPath);
         }
     }
 
     export async function executeHistoricalGoals(projectPomPaths: string[]): Promise<void> {
-        const candidates: ICommandHistoryEntry[] = Array.prototype.concat.apply(
+        const candidates: ICommandHistoryEntry[] = <ICommandHistoryEntry[]>Array.prototype.concat.apply(
             [],
-            await Promise.all(projectPomPaths.map(projectPomPath => Utils.getLRUCommands(projectPomPath)))
+            await Promise.all(projectPomPaths.map(getLRUCommands))
         );
         candidates.sort((a, b) => b.timestamp - a.timestamp);
         const selected: { command: string; pomPath: string; timestamp: number } = await window.showQuickPick(
@@ -349,7 +185,7 @@ export namespace Utils {
             { placeHolder: "Select from history ...", ignoreFocusOut: true }
         ).then(item => item && item.value);
         if (selected) {
-            Utils.executeInTerminal(selected.command, selected.pomPath);
+            await executeInTerminal(selected.command, selected.pomPath);
         }
     }
 

@@ -3,9 +3,11 @@
 
 import * as cp from "child_process";
 import * as vscode from "vscode";
+import { mavenOutputChannel } from "../mavenOutputChannel";
 
 export async function executeCommand(command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
     return new Promise((resolve: (res: string) => void, reject: (e: Error) => void): void => {
+        mavenOutputChannel.appendLine(`${command}, [${args.join(",")}]`);
         let result: string = "";
         const childProc: cp.ChildProcess = cp.spawn(command, args, options);
         childProc.stdout.on("data", (data: string | Buffer) => {
@@ -26,6 +28,7 @@ export async function executeCommand(command: string, args: string[], options: c
 export async function executeCommandWithProgress(message: string, command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
     let result: string = "";
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: vscode.Progress<{}>) => {
+        mavenOutputChannel.appendLine(`${command}, [${args.join(",")}]`);
         return new Promise(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
             p.report({ message });
             try {
