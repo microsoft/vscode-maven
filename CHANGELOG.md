@@ -1,8 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.15.0
 #### Added 
 - Allow to specify and execute "favorite" Maven commands. [#72](https://github.com/Microsoft/vscode-maven/issues/72) [#259](https://github.com/Microsoft/vscode-maven/issues/259)
+- Hover to show effective version of a dependency. [#260](https://github.com/Microsoft/vscode-maven/issues/260)
+- Add a command "Maven: Add a dependency" for convenience when editing pom.xml. [#253](https://github.com/Microsoft/vscode-maven/issues/253)
 
 ## 0.14.2
 #### Fixed 

@@ -203,20 +203,11 @@ The tree view of maven projects should update when any pom.xml is created/modifi
     1. Commands can be successfully executed in above tasks.
 
 ## For Telemetry 
-After above tests, verify corresponding entries in Application Insight portal (vscode maven telemetry test).
+After above tests, verify corresponding entries in Application Insight portal.
+- For develop build, verify in `vscode maven telemetry test`.
+- For RC build, verify in `vscode maven telemetry prod`.
 
-### Legacy (Still need to verify for now)
-* For each command executed, verify:
-    1. There are records named `vscjava.vscode-maven/commandStart` and `vscjava.vscode-maven/commandEnd` with same `customDimensions.sessionId`.
-    2. For record `vscjava.vscode-maven/commandEnd`, value (ms) of `customMeasurements.duration` is reasonable.
-* For command `Generate from Maven Archetype`, verify: 
-    1. values of `customDimensions.extra.finishedSteps`, `customDimensions.extra.artifactId` and `customDimensions.extra.groupId` are reasonable.
-        * **finishedSteps**: The steps user goes through after triggering the command. Candidates are `TargetFolder`, `ListMore` and `Archetype`.
-        * **groupId**: Group Id of selected archetype.
-        * **artifactId**: Artifact Id of selected archetype.
-
-### New
-
+#### Verification
 * For extension activation and each command executed, verify:
     1. There are records named `vscjava.vscode-maven/opStart` and `vscjava.vscode-maven/opEnd` with same `customDimensions.operationId`, `customDimensions.operationName`
     2. In `opEnd`, check `customDimensions.errorCode`

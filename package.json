@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.14.2",
+  "version": "0.15.0",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -18,7 +18,7 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Microsoft/vscode-maven/blob/0.14.2/README.md",
+  "homepage": "https://github.com/Microsoft/vscode-maven/blob/0.15.0/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-maven.git"
@@ -419,7 +419,7 @@
             "description": "%configuration.maven.terminal.customEnv%",
             "scope": "window"
           },
-          "maven.terminal.favorites" :{
+          "maven.terminal.favorites": {
             "type": "array",
             "items": {
               "type": "object",
@@ -483,7 +483,7 @@
     "lodash": "^4.17.11",
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
-    "vscode-extension-telemetry-wrapper": "0.3.8",
+    "vscode-extension-telemetry-wrapper": "^0.3.9",
     "xml-zero-lexer": "^2.0.5",
     "xml2js": "^0.4.19"
   }
