@@ -419,20 +419,20 @@
             "type": "array",
             "items": {
               "type": "object",
-              "title": "Favorite command",
+              "title": "Favorite commands",
               "properties": {
                 "alias": {
                   "type": "string",
-                  "description": "a short name for the command"
+                  "description": "%configuration.maven.terminal.favorites.alias%"
                 },
                 "command": {
                   "type": "string",
-                  "description": "favorite command"
+                  "description": "%configuration.maven.terminal.favorites.command%"
                 }
               }
             },
             "default": [],
-            "description": "Specify pre-defined favorite commands to execute",
+            "description": "%configuration.maven.terminal.favorites%",
             "scope": "resource"
           },
           "maven.view": {

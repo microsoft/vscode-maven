@@ -21,5 +21,8 @@
     "configuration.maven.terminal.customEnv": "Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed.",
     "configuration.maven.terminal.customEnv.environmentVariable": "Name of the environment variable to set.",
     "configuration.maven.terminal.customEnv.value": "Value of the environment variable to set.",
-    "configuration.maven.view": "Specifies the way of viewing Maven projects."
+    "configuration.maven.view": "Specifies the way of viewing Maven projects.",
+    "configuration.maven.terminal.favorite": "Specify pre-defined favorite commands to execute.",
+    "configuration.maven.terminal.favorite.alias": "A short name for the command.",
+    "configuration.maven.terminal.favorite.command": "Content of the favorite command."
 }
