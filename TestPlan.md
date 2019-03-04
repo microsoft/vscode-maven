@@ -35,7 +35,7 @@
 
 ### Execute custom goals
 1. Right-click on project item
-1. Click `Custom goals ... `
+1. Click `Custom ... `
 1. Input a valid string of goals, e.g. `clean package -DskipTests`, press `Enter`.
 1. Verify: 
     1. It execute the corresponding maven command.
@@ -198,7 +198,7 @@ The tree view of maven projects should update when any pom.xml is created/modifi
 1. Open `User Settings`.
 2. Check supported platforms and terminals in [README](https://github.com/Eskibear/vscode-maven/blob/develop/README.md)
 3. Change value of `terminal.integrated.shell.windows/linux/osx` according to the targeted system and terminal.
-4. Test `Custom goals ...`, `Generate project from Maven Archetype` and `Effective POM`.
+4. Test `Custom ...`, `Generate project from Maven Archetype` and `Effective POM`.
 5. Verify: 
     1. Commands can be successfully executed in above tasks.
 

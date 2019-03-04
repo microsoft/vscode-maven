@@ -204,7 +204,7 @@ export namespace Utils {
             return;
         }
 
-        const LABEL_CUSTOM: string = "Custom goals ...";
+        const LABEL_CUSTOM: string = "Custom ...";
         const LABEL_FAVORITES: string = "Favorites ...";
         // select a command
         const selectedCommand: string = await window.showQuickPick(
