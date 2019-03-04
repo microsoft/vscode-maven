@@ -41,6 +41,10 @@ export namespace Settings {
         }[] {
             return _getMavenSection("terminal.customEnv");
         }
+
+        export function favorites(resource: Uri): {alias: string; command: string}[] {
+            return _getMavenSection("terminal.favorites", resource);
+        }
     }
     export namespace Executable {
         export function path(resource: Uri): string {

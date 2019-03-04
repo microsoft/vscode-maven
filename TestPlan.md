@@ -52,6 +52,23 @@
     1. It lists recently executed maven commands **for this project**, with information of goals and pom file path.
     2. Select one of them, it should execute the corresponding command.
 
+### Maven Favorite Command
+1. Specify a favorite command in settings, e.g.
+    ```
+        {
+            "maven.terminal.favorite": [
+                {
+                    "alias": "full-build without tests"
+                    "value": "clean package -DskipTests"
+                }
+            ]
+        }
+    ```
+2. Right-click on project item, click `Favorite ...`
+3. Verify: 
+    1. It should show favorite commands in a drop-down list.
+    2. Click one, it should execute the corresponding maven command.
+
 ## Maven Archetypes
 ### Generate project from maven archetypes
 1. Right-click a target folder in file explorer view.

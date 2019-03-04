@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+#### Added 
+- Allow to specify and execute "favorite" Maven commands. [#72](https://github.com/Microsoft/vscode-maven/issues/72) [#259](https://github.com/Microsoft/vscode-maven/issues/259)
+
 ## 0.14.2
 #### Fixed 
 - Use a simple and robust way to inject custom environment variables into terminals. [PR#240](https://github.com/Microsoft/vscode-maven/pull/240)

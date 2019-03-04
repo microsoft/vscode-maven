@@ -170,6 +170,11 @@
         "command": "maven.project.addDependency",
         "title": "%contributes.commands.maven.project.addDependency%",
         "category": "Maven"
+      },
+      {
+        "command": "maven.favorites",
+        "title": "Favorites ...",
+        "category": "Maven"
       }
     ],
     "views": {
@@ -277,6 +282,11 @@
           "command": "maven.goal.custom",
           "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "1-lifecycle@5"
+        },
+        {
+          "command": "maven.favorites",
+          "when": "view == mavenProjects && viewItem == MavenProject",
+          "group": "1-lifecycle@3"
         },
         {
           "command": "maven.history",
@@ -408,6 +418,26 @@
             "default": [],
             "description": "%configuration.maven.terminal.customEnv%",
             "scope": "window"
+          },
+          "maven.terminal.favorites" :{
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Favorite commands",
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "description": "%configuration.maven.terminal.favorites.alias%"
+                },
+                "command": {
+                  "type": "string",
+                  "description": "%configuration.maven.terminal.favorites.command%"
+                }
+              }
+            },
+            "default": [],
+            "description": "%configuration.maven.terminal.favorites%",
+            "scope": "resource"
           },
           "maven.view": {
             "type": "string",

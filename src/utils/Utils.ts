@@ -204,20 +204,27 @@ export namespace Utils {
             return;
         }
 
+        const LABEL_CUSTOM: string = "Custom goals ...";
+        const LABEL_FAVORITES: string = "Favorites ...";
         // select a command
         const selectedCommand: string = await window.showQuickPick(
-            ["custom", "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].map(item => ({
-                label: item === "custom" ? "Custom goals ..." : item,
-                value: item,
-                description: undefined
-            })),
+            [LABEL_FAVORITES, LABEL_CUSTOM, "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
             { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }
-        ).then(item => item && item.value);
+        );
         if (!selectedCommand) {
             return;
         }
 
-        // execute
-        await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
+        switch (selectedCommand) {
+            case LABEL_CUSTOM:
+                await commands.executeCommand("maven.goal.custom", selectedProject);
+                break;
+            case LABEL_FAVORITES:
+                await commands.executeCommand("maven.favorites", selectedProject);
+                break;
+            default:
+                await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
+                break;
+        }
     }
 }

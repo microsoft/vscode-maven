@@ -14,6 +14,7 @@ import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
+import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
 import {hoverProvider} from "./hover/hoverProvider";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
@@ -53,6 +54,7 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
     context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
 }
 
+// tslint:disable-next-line:max-func-body-length
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     pluginInfoProvider.initialize(context);
     context.subscriptions.push(vscode.window.registerTreeDataProvider("mavenProjects", mavenExplorerProvider));
@@ -109,6 +111,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             await Utils.executeHistoricalGoals(mavenExplorerProvider.mavenProjectNodes.map(_node => _node.pomPath));
         }
     });
+    registerCommand(context, "maven.favorites", async (item: MavenProject | undefined) => await runFavoriteCommandsHandler(item));
     registerCommand(context, "maven.goal.execute", async () => await Utils.executeMavenCommand());
     registerCommand(context, "maven.plugin.execute", async (node: PluginGoal) => {
         if (node &&
