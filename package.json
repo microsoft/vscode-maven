@@ -404,9 +404,14 @@
             "items": {
               "type": "object",
               "title": "environment setting",
+              "required": [
+                "environmentVariable",
+                "value"
+              ],
               "properties": {
                 "environmentVariable": {
                   "type": "string",
+                  "minLength": 1,
                   "description": "%configuration.maven.terminal.customEnv.environmentVariable%"
                 },
                 "value": {
@@ -424,13 +429,19 @@
             "items": {
               "type": "object",
               "title": "Favorite commands",
+              "required": [
+                "alias",
+                "command"
+              ],
               "properties": {
                 "alias": {
                   "type": "string",
+                  "minLength": 1,
                   "description": "%configuration.maven.terminal.favorites.alias%"
                 },
                 "command": {
                   "type": "string",
+                  "minLength": 1,
                   "description": "%configuration.maven.terminal.favorites.command%"
                 }
               }
