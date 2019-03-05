@@ -58,7 +58,7 @@
         {
             "maven.terminal.favorite": [
                 {
-                    "alias": "full-build without tests"
+                    "alias": "full-build without tests",
                     "command": "clean package -DskipTests"
                 }
             ]
