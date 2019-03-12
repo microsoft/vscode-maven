@@ -54,19 +54,15 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
     context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
 }
 
-// tslint:disable-next-line:max-func-body-length
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     pluginInfoProvider.initialize(context);
+    // register tree view
     context.subscriptions.push(vscode.window.registerTreeDataProvider("mavenProjects", mavenExplorerProvider));
-
     // pom.xml listener to refresh tree view
-    const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
-    watcher.onDidCreate((e: Uri) => mavenExplorerProvider.addProject(e.fsPath), null, context.subscriptions);
-    watcher.onDidChange(async (e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh(), null, context.subscriptions);
-    watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath), null, context.subscriptions);
-    context.subscriptions.push(watcher);
+    registerPomFileWatcher(context);
+    // register output, terminal, taskExecutor
     context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
-    // register commands.
+    // register common goals
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
         registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal(goal, node.pomPath));
     });
@@ -77,18 +73,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             mavenExplorerProvider.refresh(item);
         }
     });
-    registerCommand(context, "maven.project.effectivePom", async (node: Uri | MavenProject) => {
-        if (node instanceof Uri && node.fsPath) {
-            await Utils.showEffectivePom(node.fsPath);
-        } else if (node instanceof MavenProject && node.pomPath) {
-            await Utils.showEffectivePom(node.pomPath);
-        }
-    });
-    registerCommand(context, "maven.goal.custom", async (node: MavenProject) => {
-        if (node && node.pomPath) {
-            await Utils.executeCustomGoal(node.pomPath);
-        }
-    });
+    registerCommand(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
+    registerCommand(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
     registerCommand(context, "maven.project.openPom", async (node: MavenProject) => {
         if (node && node.pomPath) {
             await openFileIfExists(node.pomPath);
@@ -98,7 +84,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         await ArchetypeModule.generateFromArchetype(entry, operationId);
     }, true);
     registerCommand(context, "maven.archetype.update", async () => {
-        await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: Progress<{}>) => {
+        await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: Progress<{}>) => {
             p.report({ message: "updating archetype catalog ..." });
             await ArchetypeModule.updateArchetypeCatalog();
             p.report({ message: "finished." });
@@ -113,30 +99,14 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     });
     registerCommand(context, "maven.favorites", async (item: MavenProject | undefined) => await runFavoriteCommandsHandler(item));
     registerCommand(context, "maven.goal.execute", async () => await Utils.executeMavenCommand());
-    registerCommand(context, "maven.plugin.execute", async (node: PluginGoal) => {
-        if (node &&
-            node.name &&
-            node.plugin && node.plugin.project && node.plugin.project.pomPath) {
-            await executeInTerminal(node.name, node.plugin.project.pomPath);
-        }
-    });
+    registerCommand(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal(pluginGoal.name, pluginGoal.plugin.project.pomPath));
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());
     registerCommand(context, "maven.view.hierarchical", () => Settings.changeToHierarchicalView());
+
+    registerConfigChangeListner(context);
     context.subscriptions.push(
         vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
             mavenTerminal.onDidCloseTerminal(closedTerminal);
-        }),
-        // configuration change listener
-        vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
-            // close all terminals with outdated JAVA related environment variables
-            if (e.affectsConfiguration("maven.terminal.useJavaHome")
-                || e.affectsConfiguration("maven.terminal.customEnv")
-                || Settings.Terminal.useJavaHome() && e.affectsConfiguration("java.home")
-            ) {
-                mavenTerminal.closeAllTerminals();
-            } else if (e.affectsConfiguration("maven.view")) {
-                mavenExplorerProvider.refresh();
-            }
         }),
         // workspace folder change listener
         vscode.workspace.onDidChangeWorkspaceFolders((_e: vscode.WorkspaceFoldersChangeEvent) => {
@@ -151,4 +121,27 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.project.addDependency", async () => await addDependencyHandler());
     // hover
     context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
+}
+
+function registerPomFileWatcher(context: vscode.ExtensionContext): void {
+    const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
+    watcher.onDidCreate((e: Uri) => mavenExplorerProvider.addProject(e.fsPath), null, context.subscriptions);
+    watcher.onDidChange(async (e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh(), null, context.subscriptions);
+    watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath), null, context.subscriptions);
+    context.subscriptions.push(watcher);
+}
+
+function registerConfigChangeListner(context: vscode.ExtensionContext): void {
+    const configChangeListener: vscode.Disposable = vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
+        // close all terminals with outdated JAVA related environment variables
+        if (e.affectsConfiguration("maven.terminal.useJavaHome")
+            || e.affectsConfiguration("maven.terminal.customEnv")
+            || Settings.Terminal.useJavaHome() && e.affectsConfiguration("java.home")
+        ) {
+            mavenTerminal.closeAllTerminals();
+        } else if (e.affectsConfiguration("maven.view")) {
+            mavenExplorerProvider.refresh();
+        }
+    });
+    context.subscriptions.push(configChangeListener);
 }

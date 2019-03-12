@@ -8,7 +8,7 @@
   "preview": true,
   "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
   "engines": {
-    "vscode": "^1.18.0"
+    "vscode": "^1.22.0"
   },
   "categories": [
     "Programming Languages",
@@ -149,6 +149,11 @@
         "category": "Maven"
       },
       {
+        "command": "maven.plugin.debug",
+        "title": "%contributes.commands.maven.plugin.debug%",
+        "category": "Maven"
+      },
+      {
         "command": "maven.view.flat",
         "title": "%contributes.commands.maven.view.flat%",
         "category": "Maven",
@@ -241,6 +246,10 @@
         },
         {
           "command": "maven.plugin.execute",
+          "when": "never"
+        },
+        {
+          "command": "maven.plugin.debug",
           "when": "never"
         }
       ],
@@ -347,6 +356,11 @@
           "command": "maven.plugin.execute",
           "when": "view == mavenProjects && viewItem == PluginGoal",
           "group": "1@1"
+        },
+        {
+          "command": "maven.plugin.debug",
+          "when": "view == mavenProjects && viewItem == PluginGoal",
+          "group": "1@2"
         },
         {
           "command": "maven.explorer.refresh",
