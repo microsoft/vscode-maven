@@ -51,6 +51,9 @@ export function getPathToExtensionRoot(...args: string[]): string {
 }
 
 export function getPathToWorkspaceStorage(...args: string[]): string {
+    if (EXTENSION_CONTEXT.storagePath === undefined) {
+        return undefined;
+    }
     fse.ensureDirSync(EXTENSION_CONTEXT.storagePath);
     return path.join(EXTENSION_CONTEXT.storagePath, ...args);
 }
