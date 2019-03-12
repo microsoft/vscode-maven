@@ -12,7 +12,7 @@ import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
-import { getExtensionVersion, getPathToWorkspaceStorage } from "./contextUtils";
+import { getExtensionVersion, getPathToWorkspaceStorage, getPathToTempFolder } from "./contextUtils";
 import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
 import { executeInTerminal, pluginDescription, rawEffectivePom } from "./mavenUtils";
 
@@ -43,7 +43,12 @@ export namespace Utils {
     }
 
     function getTempOutputPath(key: string): string {
-        return getPathToWorkspaceStorage(md5(key), createUuid());
+        const pathInWorkspaceFolder: string = getPathToWorkspaceStorage(md5(key), createUuid());
+        if (pathInWorkspaceFolder !== undefined) {
+            return pathInWorkspaceFolder;
+        } else {
+            return getPathToTempFolder(md5(key), createUuid());
+        }
     }
 
     export async function downloadFile(targetUrl: string, readContent?: boolean, customHeaders?: {}): Promise<string> {
