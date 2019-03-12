@@ -12,7 +12,7 @@ import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
-import { getExtensionVersion, getPathToWorkspaceStorage, getPathToTempFolder } from "./contextUtils";
+import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
 import { executeInTerminal, pluginDescription, rawEffectivePom } from "./mavenUtils";
 
