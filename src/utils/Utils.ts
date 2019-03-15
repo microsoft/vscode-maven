@@ -104,7 +104,19 @@ export namespace Utils {
         return pomFileUris.map(_uri => _uri.fsPath);
     }
 
-    export async function showEffectivePom(pomPath: string): Promise<void> {
+    export async function showEffectivePom(param: Uri | MavenProject | string): Promise<void> {
+        let pomPath: string;
+        if (typeof param === "string") {
+            pomPath = param;
+        } else if (typeof param === "object" && param instanceof MavenProject) {
+            pomPath = param.pomPath;
+        } else if (typeof param === "object" && param instanceof Uri) {
+            pomPath = param.fsPath;
+        }
+        if (!pomPath) {
+            throw new Error("Corresponding pom.xml file not found.");
+        }
+
         let pomxml: string;
         const project: MavenProject = mavenExplorerProvider.getMavenProject(pomPath);
         if (project) {
@@ -112,11 +124,12 @@ export namespace Utils {
         } else {
             pomxml = await getEffectivePom(pomPath);
         }
-
-        if (pomxml) {
-            const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
-            window.showTextDocument(document, ViewColumn.Active);
+        if (!pomxml) {
+            throw new Error("Fail to get effective pom.");
         }
+
+        const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
+        await window.showTextDocument(document, ViewColumn.Active);
     }
 
     export async function getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string> {
@@ -163,7 +176,14 @@ export namespace Utils {
         ));
     }
 
-    export async function executeCustomGoal(pomPath: string): Promise<void> {
+    export async function executeCustomGoal(pomOrProject: string | MavenProject): Promise<void> {
+        let pomPath: string;
+        if (typeof pomOrProject === "string") {
+            pomPath = pomOrProject;
+        } else if (typeof pomOrProject === "object" && pomOrProject instanceof MavenProject) {
+            pomPath = pomOrProject.pomPath;
+        }
+
         if (!pomPath) {
             return;
         }
