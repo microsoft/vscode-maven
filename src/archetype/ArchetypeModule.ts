@@ -59,7 +59,7 @@ export namespace ArchetypeModule {
         let targetFolderHint: Uri;
         if (entry) {
             targetFolderHint = entry;
-        } else if (workspace.workspaceFolders.length > 0) {
+        } else if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
             targetFolderHint = workspace.workspaceFolders[0].uri;
         }
         const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(targetFolderHint);

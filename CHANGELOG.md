@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.15.2
+#### Fixed
+- A potential NPE when no folder is open. [#279](https://github.com/Microsoft/vscode-maven/issues/279)
+
 ## 0.15.1
 #### Fixed
 - Errors on executing some commands when there is no open workspace. [#274](https://github.com/Microsoft/vscode-maven/issues/274) [#277](https://github.com/Microsoft/vscode-maven/issues/277)
