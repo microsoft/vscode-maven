@@ -7,7 +7,7 @@ import * as md5 from "md5";
 import * as path from "path";
 import * as vscode from "vscode";
 import { mavenOutputChannel } from "../mavenOutputChannel";
-import { mavenTerminal } from "../mavenTerminal";
+import { ITerminalOptions, mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
 import { getPathToWorkspaceStorage } from "./contextUtils";
 import { updateLRUCommands } from "./historyUtils";
@@ -65,7 +65,7 @@ export async function executeInBackground(command: string, pomfile?: string, wor
     });
 }
 
-export async function executeInTerminal(command: string, pomfile?: string, options?: {}): Promise<void> {
+export async function executeInTerminal(command: string, pomfile?: string, options?: ITerminalOptions): Promise<vscode.Terminal> {
     const workspaceFolder: vscode.WorkspaceFolder = pomfile && vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile));
     const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(await getMaven(workspaceFolder)));
     const fullCommand: string = [
@@ -75,10 +75,11 @@ export async function executeInTerminal(command: string, pomfile?: string, optio
         Settings.Executable.options(pomfile && vscode.Uri.file(pomfile))
     ].filter(Boolean).join(" ");
     const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
-    await mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
+    const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
     if (pomfile) {
         await updateLRUCommands(command, pomfile);
     }
+    return terminal;
 }
 
 async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promise<string> {
