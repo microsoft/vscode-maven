@@ -6,20 +6,21 @@ import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
 import { executeCommand } from "./utils/cpUtils";
 
-interface ITerminalOptions {
+export interface ITerminalOptions {
     addNewLine?: boolean;
     name?: string;
     cwd?: string;
+    env?: { [key: string]: string };
 }
 
 class MavenTerminal implements vscode.Disposable {
     private readonly terminals: { [id: string]: vscode.Terminal } = {};
 
-    public async runInTerminal(command: string, options?: ITerminalOptions): Promise<void> {
+    public async runInTerminal(command: string, options?: ITerminalOptions): Promise<vscode.Terminal> {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
         const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
         if (this.terminals[name] === undefined) {
-            const env: {[envKey: string]: string} = Settings.getEnvironment();
+            const env: { [envKey: string]: string } = { ...Settings.getEnvironment(), ...options.env };
             this.terminals[name] = vscode.window.createTerminal({ name, env });
         }
         this.terminals[name].show();
@@ -27,6 +28,7 @@ class MavenTerminal implements vscode.Disposable {
             this.terminals[name].sendText(await getCDCommand(cwd), true);
         }
         this.terminals[name].sendText(getCommand(command), addNewLine);
+        return this.terminals[name];
     }
 
     public closeAllTerminals(): void {
@@ -58,8 +60,12 @@ class MavenTerminal implements vscode.Disposable {
         }
     }
 
-    public dispose(): void {
-        this.closeAllTerminals();
+    public dispose(id?: string): void {
+        if (id) {
+            this.terminals[id].dispose();
+        } else {
+            this.closeAllTerminals();
+        }
     }
 }
 

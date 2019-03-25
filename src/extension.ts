@@ -14,8 +14,9 @@ import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
+import { debugHandler } from "./handlers/debugHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
-import {hoverProvider} from "./hover/hoverProvider";
+import { hoverProvider } from "./hover/hoverProvider";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
@@ -121,6 +122,20 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.project.addDependency", async () => await addDependencyHandler());
     // hover
     context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
+
+    // debug
+    registerCommand(context, "maven.plugin.debug", debugHandler);
+    vscode.debug.onDidTerminateDebugSession((session: any) => {
+        if (session.type === "java") {
+            const terminalName: string = session._configuration.terminalName;
+            if (terminalName) {
+                // After terminating debug session, output is no longer visible.
+                // Solution: via future API waitOnExit
+                // See: https://github.com/Microsoft/vscode/issues/70444
+                mavenTerminal.dispose(terminalName);
+            }
+        }
+    });
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {

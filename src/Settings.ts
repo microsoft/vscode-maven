@@ -62,7 +62,7 @@ export namespace Settings {
         return workspace.getConfiguration("maven", resource).get<T>(section);
     }
 
-    export function getEnvironment(): {} {
+    export function getEnvironment(): {[key: string]: string} {
         const customEnv: any = _getJavaHomeEnvIfAvailable();
         type EnvironmentSetting = {
             environmentVariable: string;
