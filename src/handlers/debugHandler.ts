@@ -9,10 +9,13 @@ import { Settings } from "../Settings";
 import { executeInTerminal } from "../utils/mavenUtils";
 
 export async function debugHandler(goal: PluginGoal): Promise<void> {
-    // TODO: vscode-java-debug installation check
+    if (!isJavaDebuggerEnabled()) {
+        return;
+    }
+
     const pomPath: string = goal.plugin.project.pomPath;
     const command: string = goal.name;
-    return await debug(pomPath, command);
+    await debug(pomPath, command);
 }
 
 async function debug(pomPath: string, command: string): Promise<void> {
@@ -38,4 +41,21 @@ async function debug(pomPath: string, command: string): Promise<void> {
         await vscode.debug.startDebugging(undefined, debugConfig);
         debugTerimnal.show(true);
     }, 1000 /* wait 1s for mvnDebug startup */);
+}
+
+function isJavaDebuggerEnabled(): boolean {
+    const javaDebuggerExtension: vscode.Extension<any> = vscode.extensions.getExtension("vscjava.vscode-java-debug");
+    if (javaDebuggerExtension === undefined) {
+        guideToInstallJavaDebugger();
+        return false;
+    }
+    return true;
+}
+
+async function guideToInstallJavaDebugger(): Promise<void> {
+    const BUTTON_CONFIRM: string = "View Details";
+    const choice: string = await vscode.window.showInformationMessage("Debugger for Java is required for debugging, please install and enable it.", BUTTON_CONFIRM);
+    if (choice === BUTTON_CONFIRM) {
+        vscode.commands.executeCommand("vscode.open", vscode.Uri.parse("vscode:extension/vscjava.vscode-java-debug"));
+    }
 }
