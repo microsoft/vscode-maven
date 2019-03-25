@@ -9,6 +9,7 @@
     "contributes.commands.maven.history": "历史…",
     "contributes.commands.maven.goal.execute": "执行命令",
     "contributes.commands.maven.plugin.execute": "执行",
+    "contributes.commands.maven.plugin.debug": "调试",
     "contributes.commands.maven.view.hierarchical": "切换到分层视图",
     "contributes.commands.maven.view.flat": "切换到扁平视图",
     "contributes.commands.maven.project.addDependency": "添加依赖",

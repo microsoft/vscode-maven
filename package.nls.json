@@ -26,5 +26,4 @@
     "configuration.maven.terminal.favorites": "Specify pre-defined favorite commands to execute.",
     "configuration.maven.terminal.favorites.alias": "A short name for the command.",
     "configuration.maven.terminal.favorites.command": "Content of the favorite command."
-    
 }
