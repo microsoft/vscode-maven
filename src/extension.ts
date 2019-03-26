@@ -16,6 +16,7 @@ import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
 import { debugHandler } from "./handlers/debugHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
+import { showDependenciesHandler } from "./handlers/showDependenciesHandler";
 import { hoverProvider } from "./hover/hoverProvider";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
@@ -118,11 +119,11 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // completion item provider
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-"));
     registerCommand(context, "maven.completion.selected", sendInfo, true);
-
+    // dependency
     registerCommand(context, "maven.project.addDependency", async () => await addDependencyHandler());
+    registerCommand(context, "maven.project.showDependencies", async (project: MavenProject) => await showDependenciesHandler(project));
     // hover
     context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
-
     // debug
     registerCommand(context, "maven.plugin.debug", debugHandler);
     vscode.debug.onDidTerminateDebugSession((session: any) => {

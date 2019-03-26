@@ -20,6 +20,14 @@ export async function rawEffectivePom(pomPath: string): Promise<string> {
     return pomxml;
 }
 
+export async function rawDependencyTree(pomPath: string): Promise<string> {
+    const outputPath: string = getPathToWorkspaceStorage(md5(pomPath));
+    await executeInBackground(`dependency:tree -Dverbose -DoutputFile="${outputPath}"`, pomPath);
+    const pomxml: string = await readFileIfExists(outputPath);
+    await fse.remove(outputPath);
+    return pomxml;
+}
+
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string> {
     const outputPath: string = getPathToWorkspaceStorage(md5(pluginId));
     // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock

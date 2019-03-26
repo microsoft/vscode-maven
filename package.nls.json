@@ -13,6 +13,7 @@
     "contributes.commands.maven.view.hierarchical": "Switch to hierarchical view",
     "contributes.commands.maven.view.flat": "Switch to flat view",
     "contributes.commands.maven.project.addDependency": "Add a dependency",
+    "contributes.commands.maven.project.showDependencies": "Show dependencies",
     "contributes.views.explorer.mavenProjects": "Maven Projects",
     "configuration.maven.excludedFolders": "Specifies file path pattern of folders to exclude while searching for Maven projects.",
     "configuration.maven.executable.preferMavenWrapper": "Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file configuration exists. Otherwise it tries 'mvn' in PATH instead.",
