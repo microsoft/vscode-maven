@@ -22,6 +22,9 @@ class MavenTerminal implements vscode.Disposable {
         if (this.terminals[name] === undefined) {
             const env: { [envKey: string]: string } = { ...Settings.getEnvironment(), ...options.env };
             this.terminals[name] = vscode.window.createTerminal({ name, env });
+            // Workaround for WSL custom envs.
+            // See: https://github.com/Microsoft/vscode/issues/71267
+            setupEnvForWSL(this.terminals[name], env);
         }
         this.terminals[name].show();
         if (cwd) {
@@ -142,3 +145,11 @@ export async function toWinPath(path: string): Promise<string> {
 }
 
 export const mavenTerminal: MavenTerminal = new MavenTerminal();
+
+function setupEnvForWSL(terminal: vscode.Terminal, env: { [envKey: string]: string }): void {
+    if (terminal) {
+        Object.keys(env).forEach(key => {
+            terminal.sendText(`export ${key}="${env[key]}"`, true);
+        });
+    }
+}
