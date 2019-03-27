@@ -37,38 +37,43 @@ export async function pluginDescription(pluginId: string, pomPath: string): Prom
     return content;
 }
 
-export async function executeInBackground(command: string, pomfile?: string, workspaceFolder?: vscode.WorkspaceFolder): Promise<any> {
-    if (!workspaceFolder) {
-        workspaceFolder = pomfile && vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile));
+async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<any> {
+    const workspaceFolder: vscode.WorkspaceFolder = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
+    const command: string = await getMaven(workspaceFolder);
+    const cwd: string = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, command, "..") : undefined;
+    const args: string[] = mvnArgs.match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
+    if (pomfile) {
+        args.push("-f", pomfile, ...Settings.Executable.options(vscode.Uri.file(pomfile)));
+    } else {
+        args.push(...Settings.Executable.options(null));
     }
-    const mvnExecutable: string = await getMaven(workspaceFolder);
-    const mvnString: string = wrappedWithQuotes(mvnExecutable);
-    // Todo with following line:
-    // 1. pomfile and workspacefolder = undefined, error
-    // 2. non-readable
-    const commandCwd: string = path.resolve(workspaceFolder.uri.fsPath, mvnExecutable, "..");
-
-    const fullCommand: string = [
-        mvnString,
-        command.trim(),
-        pomfile && `-f "${pomfile}"`,
-        Settings.Executable.options(pomfile && vscode.Uri.file(pomfile))
-    ].filter(Boolean).join(" ");
-
-    const customEnv: {} = Settings.getEnvironment();
-    const execOptions: child_process.ExecOptions = {
-        cwd: commandCwd,
-        env: Object.assign({}, process.env, customEnv)
+    const spawnOptions: child_process.SpawnOptions = {
+        cwd,
+        env: Object.assign({}, process.env, Settings.getEnvironment()),
+        shell: true
     };
     return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {
-        mavenOutputChannel.appendLine(fullCommand);
-        child_process.exec(fullCommand, execOptions, (error: Error, stdout: string, _stderr: string): void => {
-            if (error) {
-                mavenOutputChannel.appendLine(error);
-                reject(error);
+        mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({command, args})}`);
+        const proc: child_process.ChildProcess = child_process.spawn(command, args, spawnOptions);
+        proc.on("error", (err: Error) => {
+            reject(new Error(`Error occurred in background process. ${err.message}`));
+        });
+        proc.on("exit", (code: number, signal: string) => {
+            if (code !== null) {
+                if (code === 0) {
+                    resolve(code);
+                } else {
+                    reject(new Error(`Background process terminated with code ${code}.`));
+                }
             } else {
-                resolve(stdout);
+                reject(new Error(`Background process killed by signal ${signal}.`));
             }
+        });
+        proc.stdout.on("data", (chunk: Buffer) => {
+            mavenOutputChannel.append(chunk.toString());
+        });
+        proc.stderr.on("data", (chunk: Buffer) => {
+            mavenOutputChannel.append(chunk.toString());
         });
     });
 }
