@@ -13,6 +13,14 @@ export interface ITerminalOptions {
     env?: { [key: string]: string };
 }
 
+enum WindowsShellType {
+    CMD = "Command Prompt",
+    POWER_SHELL = "PowerShell",
+    GIT_BASH = "Git Bash",
+    WSL = "WSL Bash",
+    OHTERS = "Others"
+}
+
 class MavenTerminal implements vscode.Disposable {
     private readonly terminals: { [id: string]: vscode.Terminal } = {};
 
@@ -22,6 +30,11 @@ class MavenTerminal implements vscode.Disposable {
         if (this.terminals[name] === undefined) {
             const env: { [envKey: string]: string } = { ...Settings.getEnvironment(), ...options.env };
             this.terminals[name] = vscode.window.createTerminal({ name, env });
+            // Workaround for WSL custom envs.
+            // See: https://github.com/Microsoft/vscode/issues/71267
+            if (currentWindowsShell() === WindowsShellType.WSL) {
+                setupEnvForWSL(this.terminals[name], env);
+            }
         }
         this.terminals[name].show();
         if (cwd) {
@@ -50,7 +63,7 @@ class MavenTerminal implements vscode.Disposable {
     public async formattedPathForTerminal(filepath: string): Promise<string> {
         if (process.platform === "win32") {
             switch (currentWindowsShell()) {
-                case "WSL Bash":
+                case WindowsShellType.WSL:
                     return await toWslPath(filepath);
                 default:
                     return filepath;
@@ -72,7 +85,7 @@ class MavenTerminal implements vscode.Disposable {
 function getCommand(cmd: string): string {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
-            case "PowerShell":
+            case WindowsShellType.POWER_SHELL:
                 return `cmd /c ${cmd}`; // PowerShell
             default:
                 return cmd; // others, try using common one.
@@ -85,13 +98,13 @@ function getCommand(cmd: string): string {
 async function getCDCommand(cwd: string): Promise<string> {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
-            case "Git Bash":
+            case WindowsShellType.GIT_BASH:
                 return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
-            case "PowerShell":
+            case WindowsShellType.POWER_SHELL:
                 return `cd "${cwd}"`; // PowerShell
-            case "Command Prompt":
+            case WindowsShellType.CMD:
                 return `cd /d "${cwd}"`; // CMD
-            case "WSL Bash":
+            case WindowsShellType.WSL:
                 return `cd "${await toWslPath(cwd)}"`; // WSL
             default:
                 return `cd "${cwd}"`; // Unknown, try using common one.
@@ -101,19 +114,19 @@ async function getCDCommand(cwd: string): Promise<string> {
     }
 }
 
-function currentWindowsShell(): string {
+function currentWindowsShell(): WindowsShellType {
     const currentWindowsShellPath: string = Settings.External.defaultWindowsShell();
     if (currentWindowsShellPath.endsWith("cmd.exe")) {
-        return "Command Prompt";
+        return WindowsShellType.CMD;
     } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
-        return "PowerShell";
+        return WindowsShellType.POWER_SHELL;
     } else if (currentWindowsShellPath.endsWith("bash.exe") || currentWindowsShellPath.endsWith("wsl.exe")) {
         if (currentWindowsShellPath.includes("Git")) {
-            return "Git Bash";
+            return WindowsShellType.GIT_BASH;
         }
-        return "WSL Bash";
+        return WindowsShellType.WSL;
     } else {
-        return "Others";
+        return WindowsShellType.OHTERS;
     }
 }
 
@@ -142,3 +155,11 @@ export async function toWinPath(path: string): Promise<string> {
 }
 
 export const mavenTerminal: MavenTerminal = new MavenTerminal();
+
+function setupEnvForWSL(terminal: vscode.Terminal, env: { [envKey: string]: string }): void {
+    if (terminal) {
+        Object.keys(env).forEach(key => {
+            terminal.sendText(`export ${key}="${env[key]}"`, true);
+        });
+    }
+}
