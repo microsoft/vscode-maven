@@ -41,11 +41,10 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
     const workspaceFolder: vscode.WorkspaceFolder = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const command: string = await getMaven(workspaceFolder);
     const cwd: string = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, command, "..") : undefined;
-    const args: string[] = mvnArgs.match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
+    const userArgs: string = Settings.Executable.options(pomfile && vscode.Uri.file(pomfile));
+    const args: string[] = `${mvnArgs} ${userArgs}`.match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
     if (pomfile) {
-        args.push("-f", pomfile, ...Settings.Executable.options(vscode.Uri.file(pomfile)));
-    } else {
-        args.push(...Settings.Executable.options(null));
+        args.push("-f", pomfile);
     }
     const spawnOptions: child_process.SpawnOptions = {
         cwd,
