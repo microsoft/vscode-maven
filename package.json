@@ -177,6 +177,11 @@
         "category": "Maven"
       },
       {
+        "command": "maven.project.showDependencies",
+        "title": "%contributes.commands.maven.project.showDependencies%",
+        "category": "Maven"
+      },
+      {
         "command": "maven.favorites",
         "title": "Favorites ...",
         "category": "Maven"
@@ -351,6 +356,11 @@
           "command": "maven.project.effectivePom",
           "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "0-pom@1"
+        },
+        {
+          "command": "maven.project.showDependencies",
+          "when": "view == mavenProjects && viewItem == MavenProject",
+          "group": "0-pom@0"
         },
         {
           "command": "maven.plugin.execute",
