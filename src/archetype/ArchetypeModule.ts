@@ -4,7 +4,7 @@
 import * as fse from "fs-extra";
 import * as os from "os";
 import * as path from "path";
-import { Uri, window, workspace } from "vscode";
+import { Uri, window, workspace, QuickPickItem } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
@@ -18,11 +18,11 @@ const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.w
 
 export namespace ArchetypeModule {
     async function selectArchetype(): Promise<Archetype> {
-        let selectedArchetype: Archetype = await showQuickPickForArchetypes();
-        if (selectedArchetype && !selectedArchetype.artifactId) {
-            selectedArchetype = await showQuickPickForArchetypes({ all: true });
+        let selectedArchetype: Archetype | undefined | null = await showQuickPickForArchetypes();
+        while (selectedArchetype === null) {
+            selectedArchetype = await showQuickPickForArchetypes(true);
         }
-        if (!selectedArchetype) {
+        if (selectedArchetype === undefined) {
             throw new OperationCanceledError("Archetype not selected.");
         }
 
@@ -30,11 +30,11 @@ export namespace ArchetypeModule {
     }
 
     async function chooseTargetFolder(entry: Uri | undefined): Promise<string> {
-        const result: Uri = await openDialogForFolder({
+        const result: Uri | undefined = await openDialogForFolder({
             defaultUri: entry,
             openLabel: "Select Destination Folder"
         });
-        const cwd: string = result && result.fsPath;
+        const cwd: string | undefined = result !== undefined ? result.fsPath : undefined;
         if (!cwd) {
             throw new OperationCanceledError("Target folder not selected.");
         }
@@ -47,16 +47,16 @@ export namespace ArchetypeModule {
             `-DarchetypeArtifactId="${archetypeArtifactId}"`,
             `-DarchetypeGroupId="${archetypeGroupId}"`
         ].join(" ");
-        await executeInTerminal(cmd, null, { cwd });
+        await executeInTerminal(cmd, undefined, { name: "Maven archetype", cwd });
     }
 
-    export async function generateFromArchetype(entry: Uri | undefined, operationId: string | undefined): Promise<void> {
+    export async function generateFromArchetype(entry: Uri | undefined, operationId: string): Promise<void> {
         // select archetype.
         const { artifactId, groupId } = await instrumentOperationStep(operationId, "selectArchetype", selectArchetype)();
         sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId });
 
         // choose target folder.
-        let targetFolderHint: Uri;
+        let targetFolderHint: Uri | undefined;
         if (entry) {
             targetFolderHint = entry;
         } else if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
@@ -76,42 +76,53 @@ export namespace ArchetypeModule {
         await fse.writeJSON(targetFilePath, archetypes);
     }
 
-    async function showQuickPickForArchetypes(options?: { all: boolean }): Promise<Archetype> {
+    async function showQuickPickForArchetypes(all?: boolean): Promise<Archetype | undefined | null> {
+// new Archetype(null, null, null, "Find more archetypes available in remote catalog.")
+        const morePickItem: QuickPickItem & {value: null} = {
+            value: null,
+            label: "More ...",
+            description: "",
+            detail: "Find more archetypes available in remote catalog."
+        };
         return await window.showQuickPick(
-            loadArchetypePickItems(options).then(items => items.map(item => ({
+            loadArchetypePickItems(all).then(items => items.map(item => ({
                 value: item,
                 label: item.artifactId ? `$(package) ${item.artifactId} ` : "More ...",
                 description: item.groupId ? `${item.groupId}` : "",
                 detail: item.description
-            }))),
+            }))).then(items => all ? items : [morePickItem, ...items]),
             { matchOnDescription: true, placeHolder: "Select an archetype ..." }
-        ).then(selected => selected && selected.value);
+        ).then(selected => selected ? selected.value : undefined);
     }
 
-    async function loadArchetypePickItems(options?: { all: boolean }): Promise<Archetype[]> {
+    async function loadArchetypePickItems(all?: boolean): Promise<Archetype[]> {
         // from local catalog
         const localItems: Archetype[] = await getLocalArchetypeItems();
         // from cached remote-catalog
         const remoteItems: Archetype[] = await getCachedRemoteArchetypeItems();
         const localOnlyItems: Archetype[] = localItems.filter(localItem => !remoteItems.find(remoteItem => remoteItem.identifier === localItem.identifier));
-        if (options && options.all) {
-            return [].concat(localOnlyItems, remoteItems);
+        if (all) {
+            return [...localOnlyItems, ...remoteItems];
         } else {
             const recommendedItems: Archetype[] = await getRecomendedItems(remoteItems);
-            return [new Archetype(null, null, null, "Find more archetypes available in remote catalog.")].concat(localOnlyItems, recommendedItems);
+            return [...localOnlyItems, ...recommendedItems];
         }
     }
 
     async function getRecomendedItems(allItems: Archetype[]): Promise<Archetype[]> {
         // Top popular archetypes according to usage data
-        let fixedList: string[];
+        let fixedList: string[] | undefined;
         try {
             const rawlist: string = await Utils.downloadFile(POPULAR_ARCHETYPES_URL, true);
             fixedList = JSON.parse(rawlist);
         } catch (error) {
-            fixedList = [];
+            console.error(error);
         }
-        return fixedList.map((fullname: string) => allItems.find((item: Archetype) => fullname === `${item.groupId}:${item.artifactId}`));
+        if (!fixedList) {
+            return [];
+        } else {
+            return <Archetype[]>fixedList.map((fullname: string) => allItems.find((item: Archetype) => fullname === `${item.groupId}:${item.artifactId}`)).filter(Boolean);
+        }
     }
 
     async function listArchetypeFromXml(xmlString: string): Promise<Archetype[]> {

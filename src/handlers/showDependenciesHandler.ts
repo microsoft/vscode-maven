@@ -7,12 +7,17 @@ import { MavenProject } from "../explorer/model/MavenProject";
 import { rawDependencyTree } from "../utils/mavenUtils";
 
 export async function showDependenciesHandler(project: MavenProject): Promise<void> {
-    const treeContent: string = (await getDependencyTree(project)).replace(/\|/g, " ");
-    const document: vscode.TextDocument = await vscode.workspace.openTextDocument({ language: "diff", content: treeContent });
+    const dependencyTree : string | undefined = await getDependencyTree(project);
+    if (dependencyTree === undefined) {
+        throw new Error("Failed to generate dependency tree.");
+    }
+
+    const treeContent: string = dependencyTree.replace(/\|/g, " ");
+    const document: vscode.TextDocument = await vscode.workspace.openTextDocument({ language: "plain", content: treeContent });
     await vscode.window.showTextDocument(document, { viewColumn: vscode.ViewColumn.Active, preview: false });
 }
 
-async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): Promise<string> {
+async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
     let pomPath: string;
     let name: string;
     if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
@@ -25,7 +30,7 @@ async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): 
     } else {
         return undefined;
     }
-    return await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: vscode.Progress<{ message?: string }>) => new Promise<string>(
+    return await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: vscode.Progress<{ message?: string }>) => new Promise<string | undefined>(
         async (resolve, reject): Promise<void> => {
             p.report({ message: `Generating Dependency Tree: ${name}` });
             try {

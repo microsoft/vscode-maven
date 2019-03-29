@@ -101,7 +101,7 @@ export function getNodesByTag(text: string, tag: string): ElementNode[] {
     return getElementHierarchy(text, tokens, tag);
 }
 
-export function getCurrentNode(text: string, offset: number): ElementNode {
+export function getCurrentNode(text: string, offset: number): ElementNode | undefined {
     const tokens: number[][] = Lexx(text);
     return getElementHierarchy(text, tokens, offset);
 }
@@ -109,9 +109,9 @@ export function getCurrentNode(text: string, offset: number): ElementNode {
 function getElementHierarchy(text: string, tokens: number[][], targetTag: string): ElementNode[];
 function getElementHierarchy(text: string, tokens: number[][], cursorOffset: number): ElementNode;
 // tslint:disable-next-line:cyclomatic-complexity
-function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: number | string): ElementNode | ElementNode[] {
-    let targetTag: string;
-    let cursorOffset: number;
+function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: number | string): ElementNode | ElementNode[] | undefined {
+    let targetTag: string | undefined;
+    let cursorOffset: number | undefined;
     if (typeof tagOrOffset === "string") {
         targetTag = tagOrOffset;
     } else if (typeof tagOrOffset === "number") {
@@ -120,7 +120,7 @@ function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: numb
     const n: number = tokens.length;
     const elementNodes: ElementNode[] = [];
     const tagNodes: ElementNode[] = [];
-    let cursorNode: ElementNode = null;
+    let cursorNode: ElementNode | undefined;
     let pointer: number = 0;
     let i: number = 0;
 
@@ -133,7 +133,7 @@ function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: numb
                 // [_type, start, end] = token;
                 const [start, end] = token.slice(1, 3);
                 const newElement: ElementNode = new ElementNode(currentNode, text.substring(start, end));
-                if (currentNode) {
+                if (currentNode !== undefined) {
                     currentNode.addChild(newElement);
                 }
 
@@ -153,7 +153,7 @@ function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: numb
             case NodeTypes.TEXT_NODE: {
                 // [_type, start, end] = token;
                 const [start, end] = token.slice(1, 3);
-                if (currentNode) {
+                if (currentNode !== undefined) {
                     currentNode.text = text.substring(start, end);
                 }
                 pointer = end;
@@ -167,10 +167,14 @@ function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: numb
             default:
                 break;
         }
-        if (targetTag !== undefined && currentNode && targetTag === currentNode.tag && tagNodes.indexOf(currentNode) < 0) {
+        if (targetTag !== undefined && currentNode !== undefined && targetTag === currentNode.tag && tagNodes.indexOf(currentNode) < 0) {
             tagNodes.push(currentNode);
         }
-        if (cursorOffset !== undefined && !cursorNode && currentNode && currentNode.contentStart <= cursorOffset && currentNode.contentEnd !== undefined && cursorOffset <= currentNode.contentEnd) {
+        if (cursorOffset !== undefined
+            && cursorNode !== undefined
+            && currentNode !== undefined
+            && currentNode.contentStart !== undefined && currentNode.contentStart <= cursorOffset
+            && currentNode.contentEnd !== undefined && cursorOffset <= currentNode.contentEnd) {
             cursorNode = currentNode;
         }
         i += 1;
@@ -178,7 +182,7 @@ function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: numb
     if (targetTag !== undefined) {
         return tagNodes;
     } else if (cursorOffset !== undefined) {
-        return cursorNode || elementNodes[elementNodes.length - 1];
+        return cursorNode !== undefined ? cursorNode : elementNodes[elementNodes.length - 1];
     }
     return undefined;
 }

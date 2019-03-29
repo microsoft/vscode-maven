@@ -41,7 +41,7 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         }
     }
 
-    public getMavenProject(pomPath: string): MavenProject {
+    public getMavenProject(pomPath: string): MavenProject | undefined {
         return this._projectMap.get(pomPath);
     }
     public getTreeItem(element: ITreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -50,7 +50,7 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
             return item;
         });
     }
-    public async getChildren(element?: ITreeItem): Promise<ITreeItem[]> {
+    public async getChildren(element?: ITreeItem): Promise<ITreeItem[] | undefined> {
         if (element === undefined) {
             if (!vscode.workspace.workspaceFolders) {
                 return undefined;
@@ -60,7 +60,7 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
             }
             return vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolder(workspaceFolder));
         } else {
-            return element.getChildren && element.getChildren();
+            return element.getChildren ? element.getChildren() : undefined;
         }
     }
 

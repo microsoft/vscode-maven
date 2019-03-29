@@ -17,7 +17,8 @@ export class ModulesMenu extends Menu implements ITreeItem {
 
     public getChildren() : MavenProject[] {
         return this._project.modules.map(modulePomPath => {
-            return mavenExplorerProvider.getMavenProject(modulePomPath) || new MavenProject(modulePomPath);
+            const found: MavenProject | undefined = mavenExplorerProvider.getMavenProject(modulePomPath);
+            return  found ? found : new MavenProject(modulePomPath);
         });
     }
 }

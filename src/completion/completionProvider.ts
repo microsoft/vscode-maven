@@ -29,18 +29,19 @@ const pluginSnippet: vscode.SnippetString = new vscode.SnippetString([
 class CompletionProvider implements vscode.CompletionItemProvider {
     public localRepository: string = path.join(os.homedir(), ".m2", "repository");
 
-    public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList> {
+// tslint:disable-next-line: cyclomatic-complexity
+    public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
 
-        const currentNode: ElementNode = getCurrentNode(document.getText(), document.offsetAt(position));
-        if (!currentNode) {
-            return null;
+        const currentNode: ElementNode | undefined = getCurrentNode(document.getText(), document.offsetAt(position));
+        if (currentNode === undefined || currentNode.contentStart === undefined) {
+            return undefined;
         }
 
         const targetRange: vscode.Range = new vscode.Range(document.positionAt(currentNode.contentStart), position);
         switch (currentNode.tag) {
             case XmlTagName.GroupId: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
-                const artifactIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
+                const artifactIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
                 const groupIdHint: string = currentNode.text ? currentNode.text : "";
                 const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
 
@@ -53,29 +54,30 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             }
             case XmlTagName.ArtifactId: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
-                const groupIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
+                const groupIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
                 const groupIdHint: string = groupIdNode && groupIdNode.text ? groupIdNode.text : "";
                 const artifactIdHint: string = currentNode.text ? currentNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                if (groupIdNode) {
-                    centralItems.forEach(item => {
+                if (groupIdNode && groupIdNode.contentStart !== undefined && groupIdNode.contentEnd !== undefined) {
+                    for (const item of centralItems) {
                         const matchedGroupId: string = _.get(item, "data.groupId");
                         if (matchedGroupId) {
                             const groupIdRange: vscode.Range = new vscode.Range(document.positionAt(groupIdNode.contentStart), document.positionAt(groupIdNode.contentEnd));
                             item.additionalTextEdits = [new vscode.TextEdit(groupIdRange, matchedGroupId)];
                         }
-                    });
+                    }
                 }
                 const localItems: vscode.CompletionItem[] = await localProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                const mergedItems: vscode.CompletionItem[] = [].concat(centralItems, localItems);
+                const mergedItems: vscode.CompletionItem[] = [];
+                mergedItems.push(...centralItems, ...localItems);
                 mergedItems.forEach(item => item.range = targetRange);
                 return new vscode.CompletionList(mergedItems, _.isEmpty(centralItems));
             }
             case XmlTagName.Version: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
-                const groupIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
-                const artifactIdNode: ElementNode = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
+                const groupIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
+                const artifactIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
                 const groupIdHint: string = groupIdNode && groupIdNode.text ? groupIdNode.text : "";
                 const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
 
@@ -106,7 +108,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 return new vscode.CompletionList([snippetItem], false);
             }
             default:
-                return null;
+                return undefined;
         }
     }
 

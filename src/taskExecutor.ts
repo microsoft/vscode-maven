@@ -23,7 +23,7 @@ class TaskExecutor implements Disposable {
     }
 
     public dispose(): void {
-        this._tasks = undefined;
+        // do nothing
     }
 
     private async _pickAndRun(): Promise<void> {

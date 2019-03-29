@@ -8,7 +8,7 @@ import { executeCommand } from "./utils/cpUtils";
 
 export interface ITerminalOptions {
     addNewLine?: boolean;
-    name?: string;
+    name: string;
     cwd?: string;
     env?: { [key: string]: string };
 }
@@ -24,7 +24,7 @@ enum WindowsShellType {
 class MavenTerminal implements vscode.Disposable {
     private readonly terminals: { [id: string]: vscode.Terminal } = {};
 
-    public async runInTerminal(command: string, options?: ITerminalOptions): Promise<vscode.Terminal> {
+    public async runInTerminal(command: string, options: ITerminalOptions): Promise<vscode.Terminal> {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
         const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
         if (this.terminals[name] === undefined) {
@@ -115,7 +115,11 @@ async function getCDCommand(cwd: string): Promise<string> {
 }
 
 function currentWindowsShell(): WindowsShellType {
-    const currentWindowsShellPath: string = Settings.External.defaultWindowsShell();
+    const currentWindowsShellPath: string | undefined = Settings.External.defaultWindowsShell();
+    if (currentWindowsShellPath === undefined) {
+        return WindowsShellType.OHTERS;
+    }
+
     if (currentWindowsShellPath.endsWith("cmd.exe")) {
         return WindowsShellType.CMD;
     } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
