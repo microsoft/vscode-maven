@@ -1,7 +1,9 @@
 # Test Plan
 
 ## Basic view
+
 ### Explore Items
+
 1. Clone code from https://github.com/Microsoft/todo-app-java-on-azure.git
 2. Open the cloned project.
 3. Verify: 
