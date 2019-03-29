@@ -22,13 +22,13 @@
 ### Generate Effective POM file
 
 1. Right-click on project item
-2. Click `Effective POM`
-3. Verify: 
+1. Click `Effective POM`
+1. Verify: 
     1. It shows `Generating effective pom ...` in status bar during generating.
-    2. Once the operation is over, message is cleaned from status bar, and it opens the Effective POM in editor.
-4. Right-click on `pom.xml` in the file explorer view.
-5. Click on `Effective POM`
-6. Verify that it should have the same behaviour as above.
+    1. Once the operation is over, message is cleaned from status bar, and it opens the Effective POM in editor.
+1. Right-click on `pom.xml` in the file explorer view.
+1. Click on `Effective POM`
+1. Verify that it should have the same behaviour as above.
 
 ### Execute Maven goals
 1. Right-click on project item
