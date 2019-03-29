@@ -16,6 +16,10 @@ export namespace Settings {
         workspace.getConfiguration().update("maven.view", "flat", false);
     }
 
+    export function getFileEncoding(): void {
+        workspace.getConfiguration().get("files.encoding", "utf8");
+    }
+
     export function changeToHierarchicalView(): void {
         workspace.getConfiguration().update("maven.view", "hierarchical", false);
     }
