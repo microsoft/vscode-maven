@@ -14,11 +14,13 @@
     5. Right click a goal, choose "Execute", it can execute the corresponding command in the terminal.
 
 ### Open corresponding POM file
+
 1. Click on project item
 2. Verify: 
     1. It opens the corresponding POM file in editor.
 
 ### Generate Effective POM file
+
 1. Right-click on project item
 2. Click `Effective POM`
 3. Verify: 
