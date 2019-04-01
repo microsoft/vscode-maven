@@ -27,7 +27,7 @@ export class WorkspaceFolder implements ITreeItem {
         const allProjects: MavenProject[] = [];
         const pomPaths: string[] = await Utils.getAllPomPaths(this._workspaceFolder);
         for (const pomPath of pomPaths) {
-            let currentProject: MavenProject = mavenExplorerProvider.getMavenProject(pomPath);
+            let currentProject: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
             if (!currentProject) {
                 currentProject = new MavenProject(pomPath);
                 newProjects.push(currentProject);
@@ -39,7 +39,7 @@ export class WorkspaceFolder implements ITreeItem {
         mavenExplorerProvider.updateProjects(...newProjects);
         newProjects.forEach(p => {
             p.modules.forEach(m => {
-                const moduleNode: MavenProject = mavenExplorerProvider.getMavenProject(m);
+                const moduleNode: MavenProject | undefined = mavenExplorerProvider.getMavenProject(m);
                 if (moduleNode) {
                     moduleNode.parent = p;
                 }
@@ -58,7 +58,8 @@ export class WorkspaceFolder implements ITreeItem {
                 return this.sortByName(allProjects.filter(m => !m.parent));
             case "flat":
                 return this.sortByName(allProjects);
-            default: return null;
+            default:
+                return [];
         }
     }
 

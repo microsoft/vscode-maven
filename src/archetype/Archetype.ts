@@ -4,8 +4,8 @@
 export class Archetype {
     public artifactId: string;
     public groupId: string;
-    public repository: string;
-    public description: string;
+    public repository?: string;
+    public description?: string;
     public versions: string[];
     public get identifier(): string {
         return `${this.groupId}:${this.artifactId}`;

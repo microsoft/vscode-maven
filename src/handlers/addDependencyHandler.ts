@@ -10,19 +10,25 @@ export async function addDependencyHandler(): Promise<void> {
         throw new Error("Please open a pom.xml file first.");
     }
 
-    const keywordString: string = await vscode.window.showInputBox({
+    const keywordString: string | undefined = await vscode.window.showInputBox({
         ignoreFocusOut: true,
         prompt: "Input keywords to search artifacts from Maven Central Repository.",
-        placeHolder: "e.g. spring azure storage"
+        placeHolder: "e.g. spring azure storage",
+        validateInput: (text: string) => {
+            if (text.trim().length < 3) {
+                return "Keywords are too short.";
+            }
+            return undefined;
+        }
     });
     if (!keywordString) {
         return;
     }
 
-    const selectedDoc: IArtifactMetadata = await vscode.window.showQuickPick(
+    const selectedDoc: IArtifactMetadata | undefined = await vscode.window.showQuickPick(
         getArtifacts(keywordString.trim().split(/[-,. :]/)).then(artifacts => artifacts.map(artifact => ({ value: artifact, label: `$(package) ${artifact.a}`, description: artifact.g }))),
         { placeHolder: "Select a dependency ..." }
-    ).then(selected => selected && selected.value);
+    ).then(selected => selected ? selected.value : undefined);
     if (!selectedDoc) {
         return;
     }
@@ -30,14 +36,18 @@ export async function addDependencyHandler(): Promise<void> {
 }
 
 async function addDependency(gid: string, aid: string, version: string): Promise<void> {
+    if (!vscode.window.activeTextEditor) {
+        throw new Error("No POM file is open.");
+    }
+
     // Find out <dependencies> node and insert content.
     const projectNodes: ElementNode[] = getNodesByTag(vscode.window.activeTextEditor.document.getText(), XmlTagName.Project);
-    if (!projectNodes || projectNodes.length !== 1) {
+    if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new Error("Only support POM file with single <project> node.");
     }
 
     const proejctNode: ElementNode = projectNodes[0];
-    const dependenciesNode: ElementNode = proejctNode.children && proejctNode.children.find(node => node.tag === XmlTagName.Dependencies);
+    const dependenciesNode: ElementNode | undefined = proejctNode.children && proejctNode.children.find(node => node.tag === XmlTagName.Dependencies);
     if (dependenciesNode !== undefined) {
         await insertDependency(dependenciesNode, gid, aid, version);
     } else {
@@ -47,8 +57,15 @@ async function addDependency(gid: string, aid: string, version: string): Promise
 }
 
 async function insertDependency(targetNode: ElementNode, gid: string, aid: string, version: string): Promise<void> {
+    if (!vscode.window.activeTextEditor) {
+        throw new Error("No POM file is open.");
+    }
+    if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined){
+        throw new Error("Invalid target XML node to insert dependency.");
+    }
+
     const currentDocument: vscode.TextDocument = vscode.window.activeTextEditor.document;
-    const baseIndent: string = getIndentation(currentDocument, targetNode);
+    const baseIndent: string = getIndentation(currentDocument, targetNode.contentEnd);
     const options: vscode.TextEditorOptions = vscode.window.activeTextEditor.options;
     const indent: string = options.insertSpaces ? " ".repeat(<number>options.tabSize) : "\t";
     const eol: string = currentDocument.eol === vscode.EndOfLine.LF ? "\n" : "\r\n";
@@ -97,8 +114,8 @@ function constructDependenciesNode(gid: string, aid: string, version: string, ba
     ].join(`${eol}${baseIndent}${indent}`);
 }
 
-function getIndentation(document: vscode.TextDocument, targetNode: ElementNode): string {
-    const closingTagPosition: vscode.Position = document.positionAt(targetNode.contentEnd);
+function getIndentation(document: vscode.TextDocument, offset: number): string {
+    const closingTagPosition: vscode.Position = document.positionAt(offset);
     return document.getText(new vscode.Range(
         new vscode.Position(closingTagPosition.line, 0),
         closingTagPosition

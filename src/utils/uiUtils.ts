@@ -8,31 +8,31 @@ import { OpenDialogOptions, Uri, window } from "vscode";
 const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
 
 // file chooser dialog
-export async function openDialogForFolder(customOptions: OpenDialogOptions): Promise<Uri> {
+export async function openDialogForFolder(customOptions: OpenDialogOptions): Promise<Uri | undefined> {
     const options: OpenDialogOptions = {
         canSelectFiles: false,
         canSelectFolders: true,
         canSelectMany: false
     };
-    const result: Uri[] = await window.showOpenDialog(Object.assign(options, customOptions));
+    const result: Uri[] | undefined = await window.showOpenDialog(Object.assign(options, customOptions));
     if (result && result.length > 0) {
         return Promise.resolve(result[0]);
     } else {
-        return Promise.resolve(null);
+        return Promise.resolve(undefined);
     }
 }
 
-export async function openDialogForFile(customOptions?: OpenDialogOptions): Promise<Uri> {
+export async function openDialogForFile(customOptions?: OpenDialogOptions): Promise<Uri | undefined> {
     const options: OpenDialogOptions = {
         canSelectFiles: true,
         canSelectFolders: false,
         canSelectMany: false
     };
-    const result: Uri[] = await window.showOpenDialog(Object.assign(options, customOptions));
+    const result: Uri[] | undefined = await window.showOpenDialog(Object.assign(options, customOptions));
     if (result && result.length > 0) {
         return Promise.resolve(result[0]);
     } else {
-        return Promise.resolve(null);
+        return Promise.resolve(undefined);
     }
 }
 
@@ -46,7 +46,7 @@ export async function openFileIfExists(filepath: string): Promise<void> {
 // Troubleshooting
 export async function showTroubleshootingDialog(errorMessage: string): Promise<void> {
     const OPTION_LEARN_MORE: string = "Learn more";
-    const choiceForDetails: string = await window.showErrorMessage(errorMessage, OPTION_LEARN_MORE);
+    const choiceForDetails: string | undefined = await window.showErrorMessage(errorMessage, OPTION_LEARN_MORE);
     if (choiceForDetails === OPTION_LEARN_MORE) {
         // open FAQs
         vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(TROUBLESHOOTING_LINK));

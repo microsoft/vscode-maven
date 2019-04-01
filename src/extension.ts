@@ -142,7 +142,12 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
     watcher.onDidCreate((e: Uri) => mavenExplorerProvider.addProject(e.fsPath), null, context.subscriptions);
-    watcher.onDidChange(async (e: Uri) => mavenExplorerProvider.getMavenProject(e.fsPath).refresh(), null, context.subscriptions);
+    watcher.onDidChange(async (e: Uri) => {
+        const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(e.fsPath);
+        if (project) {
+            await project.refresh();
+        }
+    }, null, context.subscriptions);
     watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath), null, context.subscriptions);
     context.subscriptions.push(watcher);
 }

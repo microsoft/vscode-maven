@@ -7,7 +7,7 @@ import { Utils } from "../../utils/Utils";
 export class EffectivePom {
 
     public pomPath: string;
-    public raw: string;
+    public raw: string | undefined;
     public data: any;
     private _updating: boolean;
 
@@ -27,7 +27,7 @@ export class EffectivePom {
         this._updating = true;
         try {
             this.raw = silent ? await rawEffectivePom(this.pomPath) : await Utils.getEffectivePom(this.pomPath);
-            this.data = await Utils.parseXmlContent(this.raw);
+            this.data = await Utils.parseXmlContent(this.raw ? this.raw : "");
         } catch (error) {
             console.error(error);
         }

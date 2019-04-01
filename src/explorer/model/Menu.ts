@@ -16,7 +16,7 @@ export abstract class Menu implements ITreeItem {
         this._project = project;
     }
 
-    public abstract getChildren(): vscode.ProviderResult<ITreeItem[]>;
+    public abstract getChildren(): ITreeItem[] | undefined | Promise<ITreeItem[] | undefined>;
 
     public getContextValue(): string {
         return CONTEXT_VALUE;

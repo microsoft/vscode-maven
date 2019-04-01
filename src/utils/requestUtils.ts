@@ -28,7 +28,7 @@ export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadat
     // Remove short keywords
     const validKeywords: string[] = keywords.filter(keyword => keyword.length >= 3);
     if (validKeywords.length === 0) {
-        return null;
+        return [];
     }
 
     const params: any = {
@@ -61,7 +61,7 @@ export async function getVersions(gid: string, aid: string): Promise<IVersionMet
     }
 }
 
-export async function getLatestVersion(gid: string, aid: string): Promise<string> {
+export async function getLatestVersion(gid: string, aid: string): Promise<string | undefined> {
     try {
         const params: any = {
             q: `g:"${gid}" AND a:"${aid}"`,
