@@ -495,7 +495,7 @@
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
     "compile": "tsc -p ./",
-    "tslint": "tslint -t verbose src/*.ts",
+    "tslint": "tslint -t verbose src/*.ts --project tslint.json",
     "watch": "webpack --mode development --watch --info-verbosity verbose",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",

@@ -37,7 +37,8 @@ export class MavenProject implements ITreeItem {
     }
 
     public get moduleNames(): string[] {
-        return _.get(this._pom, "project.modules[0].module") || [];
+        const moduleNames: string[] | undefined = _.get(this._pom, "project.modules[0].module");
+        return moduleNames ? moduleNames : [];
     }
 
     public get effectivePom(): EffectivePom {
@@ -72,7 +73,7 @@ export class MavenProject implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         await this.parsePom();
-        const label: string = this.name || "[Corrupted]";
+        const label: string = this.name ? this.name : "[Corrupted]";
         const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
