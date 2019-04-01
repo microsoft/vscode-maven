@@ -256,6 +256,10 @@
         {
           "command": "maven.plugin.debug",
           "when": "never"
+        },
+        {
+          "command": "maven.project.showDependencies",
+          "when": "never"
         }
       ],
       "explorer/context": [
