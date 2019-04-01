@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.16.0
+#### Added
+- Support to debug a plugin goal.
+  - The feature is designed for debugging code of the plugin goal itself. It can also debug Java classes loaded in the same JVM. 
+  - Debugging Java classes loaded by a forked process is not supported. E.g. when `devtools` is present, breakpoints in application code will not be hit when debugging `spring-boot:run` according to [its docs](https://docs.spring.io/spring-boot/docs/current/maven-plugin/run-mojo.html#fork).
+- Add a shortcut to show dependency tree.
+
+#### Fixed
+- Fix miscellaneous minor issues by enabling TS strict null check.
+  
 ## 0.15.2
 #### Fixed
 - A potential NPE when no folder is open. [#279](https://github.com/Microsoft/vscode-maven/issues/279)
