@@ -26,7 +26,9 @@ export async function updateLRUCommands(command: string, pomPath: string): Promi
         historyObject.pomPath = pomPath;
         historyObject.timestamps[command] = Date.now();
     } catch (error) {
-        historyObject = { pomPath, timestamps: { command: Date.now() } };
+        console.error(error);
+        historyObject = { pomPath, timestamps: {} };
+        historyObject.timestamps[command] = Date.now();
     }
     await fse.writeFile(historyFilePath, JSON.stringify(historyObject));
 }
