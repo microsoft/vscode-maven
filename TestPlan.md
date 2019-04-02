@@ -102,8 +102,8 @@
 1. Open command palatte
 2. Find and select `Maven: Update Maven Archetype Catalog`.
 3. Verify: 
-    1. It shows `updating archetype catalog ...` in progress bar during updating.
-    2. Once the operation is over, progress bar is cleaned.
+    1. It shows `updating archetype catalog ...` in a notification during updating.
+    2. Once the operation is over, the notification is closed.
     3. The `archetypes.json` file located in `$HOME/.vscode/extensions/vscjava.vscode-maven-<version>/resources` is updated.
 
 ## Executable related
