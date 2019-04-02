@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.15.2",
+  "version": "0.16.0",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -18,7 +18,7 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Microsoft/vscode-maven/blob/0.15.2/README.md",
+  "homepage": "https://github.com/Microsoft/vscode-maven/blob/0.16.0/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-maven.git"
@@ -256,6 +256,10 @@
         {
           "command": "maven.plugin.debug",
           "when": "never"
+        },
+        {
+          "command": "maven.project.showDependencies",
+          "when": "never"
         }
       ],
       "explorer/context": [
@@ -491,7 +495,7 @@
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
     "compile": "tsc -p ./",
-    "tslint": "tslint -t verbose src/*.ts",
+    "tslint": "tslint -t verbose src/*.ts --project tslint.json",
     "watch": "webpack --mode development --watch --info-verbosity verbose",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",

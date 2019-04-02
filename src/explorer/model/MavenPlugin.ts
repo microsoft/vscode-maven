@@ -18,10 +18,10 @@ export class MavenPlugin implements ITreeItem {
     public artifactId: string;
     public version: string;
 
-    public prefix: string;
-    public goals: string[];
+    public prefix: string | undefined;
+    public goals: string[] | undefined;
 
-    constructor(project: MavenProject, groupId: string, artifactId: string, version?: string) {
+    constructor(project: MavenProject, groupId: string, artifactId: string, version: string) {
         this.project = project;
         this.groupId = groupId;
         this.artifactId = artifactId;
@@ -50,7 +50,7 @@ export class MavenPlugin implements ITreeItem {
         } catch (error) {
             return [];
         }
-        return this.goals.map(goal => new PluginGoal(this, goal));
+        return this.goals ? this.goals.map(goal => new PluginGoal(this, goal)) : [];
     }
 
     public async refresh(): Promise<void> {

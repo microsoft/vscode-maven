@@ -18,12 +18,12 @@ import { executeInTerminal, pluginDescription, rawEffectivePom } from "./mavenUt
 
 export namespace Utils {
 
-    export async function parseXmlFile(xmlFilePath: string, options?: xml2js.OptionsV2): Promise<{}> {
+    export async function parseXmlFile(xmlFilePath: string, options?: xml2js.OptionsV2): Promise<{} | undefined> {
         if (await fse.pathExists(xmlFilePath)) {
             const xmlString: string = await fse.readFile(xmlFilePath, "utf8");
             return parseXmlContent(xmlString, options);
         } else {
-            return null;
+            return undefined;
         }
     }
 
@@ -43,7 +43,7 @@ export namespace Utils {
     }
 
     function getTempOutputPath(key: string): string {
-        const pathInWorkspaceFolder: string = getPathToWorkspaceStorage(md5(key), createUuid());
+        const pathInWorkspaceFolder: string | undefined = getPathToWorkspaceStorage(md5(key), createUuid());
         if (pathInWorkspaceFolder !== undefined) {
             return pathInWorkspaceFolder;
         } else {
@@ -105,7 +105,7 @@ export namespace Utils {
     }
 
     export async function showEffectivePom(param: Uri | MavenProject | string): Promise<void> {
-        let pomPath: string;
+        let pomPath: string | undefined;
         if (typeof param === "string") {
             pomPath = param;
         } else if (typeof param === "object" && param instanceof MavenProject) {
@@ -117,8 +117,8 @@ export namespace Utils {
             throw new Error("Corresponding pom.xml file not found.");
         }
 
-        let pomxml: string;
-        const project: MavenProject = mavenExplorerProvider.getMavenProject(pomPath);
+        let pomxml: string | undefined;
+        const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
         if (project) {
             pomxml = await project.calculateEffectivePom();
         } else {
@@ -132,7 +132,7 @@ export namespace Utils {
         await window.showTextDocument(document, ViewColumn.Active);
     }
 
-    export async function getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string> {
+    export async function getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
         let pomPath: string;
         let name: string;
         if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
@@ -149,12 +149,11 @@ export namespace Utils {
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Generating Effective POM: ${name}` });
                 try {
-                    resolve(rawEffectivePom(pomPath));
-                    return;
+                    const ret: string | undefined = await rawEffectivePom(pomPath);
+                    resolve(ret ? ret : "");
                 } catch (error) {
                     setUserError(<Error>error);
                     reject(error);
-                    return;
                 }
             }
         ));
@@ -165,19 +164,18 @@ export namespace Utils {
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Retrieving Plugin Info: ${pluginId}` });
                 try {
-                    resolve(pluginDescription(pluginId, pomPath));
-                    return;
+                    const ret: string | undefined = await pluginDescription(pluginId, pomPath);
+                    resolve(ret ? ret : "");
                 } catch (error) {
                     setUserError(<Error>error);
                     reject(error);
-                    return;
                 }
             }
         ));
     }
 
     export async function executeCustomGoal(pomOrProject: string | MavenProject): Promise<void> {
-        let pomPath: string;
+        let pomPath: string | undefined;
         if (typeof pomOrProject === "string") {
             pomPath = pomOrProject;
         } else if (typeof pomOrProject === "object" && pomOrProject instanceof MavenProject) {
@@ -187,8 +185,8 @@ export namespace Utils {
         if (!pomPath) {
             return;
         }
-        const inputGoals: string = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
-        const trimmedGoals: string = inputGoals && inputGoals.trim();
+        const inputGoals: string | undefined = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
+        const trimmedGoals: string | undefined = inputGoals ? inputGoals.trim() : undefined;
         if (trimmedGoals) {
             await executeInTerminal(trimmedGoals, pomPath);
         }
@@ -200,7 +198,7 @@ export namespace Utils {
             await Promise.all(projectPomPaths.map(getLRUCommands))
         );
         candidates.sort((a, b) => b.timestamp - a.timestamp);
-        const selected: { command: string; pomPath: string; timestamp: number } = await window.showQuickPick(
+        const selected: { command: string; pomPath: string; timestamp: number } | undefined = await window.showQuickPick(
             candidates.map(item => ({
                 value: item,
                 label: item.command,
@@ -208,7 +206,7 @@ export namespace Utils {
                 detail: item.pomPath
             })),
             { placeHolder: "Select from history ...", ignoreFocusOut: true }
-        ).then(item => item && item.value);
+        ).then(item => item ? item.value : undefined);
         if (selected) {
             await executeInTerminal(selected.command, selected.pomPath);
         }
@@ -216,7 +214,7 @@ export namespace Utils {
 
     export async function executeMavenCommand(): Promise<void> {
         // select a project(pomfile)
-        const selectedProject: MavenProject = await window.showQuickPick(
+        const selectedProject: MavenProject | undefined = await window.showQuickPick(
             mavenExplorerProvider.mavenProjectNodes.map(item => ({
                 value: item,
                 label: `$(primitive-dot) ${item.name}`,
@@ -224,7 +222,7 @@ export namespace Utils {
                 detail: item.pomPath
             })),
             { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
-        ).then(item => item && item.value);
+        ).then(item => item ? item.value : undefined);
         if (!selectedProject) {
             return;
         }
@@ -232,7 +230,7 @@ export namespace Utils {
         const LABEL_CUSTOM: string = "Custom ...";
         const LABEL_FAVORITES: string = "Favorites ...";
         // select a command
-        const selectedCommand: string = await window.showQuickPick(
+        const selectedCommand: string | undefined = await window.showQuickPick(
             [LABEL_FAVORITES, LABEL_CUSTOM, "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
             { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }
         );

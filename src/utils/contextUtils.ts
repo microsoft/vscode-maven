@@ -4,7 +4,7 @@
 import * as fse from "fs-extra";
 import * as os from "os";
 import * as path from "path";
-import { ExtensionContext, extensions } from "vscode";
+import { Extension, ExtensionContext, extensions } from "vscode";
 
 let EXTENSION_CONTEXT: ExtensionContext;
 let EXTENSION_PUBLISHER: string;
@@ -47,10 +47,14 @@ export function getPathToTempFolder(...args: string[]): string {
 }
 
 export function getPathToExtensionRoot(...args: string[]): string {
-    return path.join(extensions.getExtension(getExtensionId()).extensionPath, ...args);
+    const ext: Extension<any> | undefined = extensions.getExtension(getExtensionId());
+    if (!ext) {
+        throw new Error("Cannot identify Maven extension.");
+    }
+    return path.join(ext.extensionPath, ...args);
 }
 
-export function getPathToWorkspaceStorage(...args: string[]): string {
+export function getPathToWorkspaceStorage(...args: string[]): string | undefined {
     if (EXTENSION_CONTEXT.storagePath === undefined) {
         return undefined;
     }

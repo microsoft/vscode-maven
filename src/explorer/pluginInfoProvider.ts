@@ -20,7 +20,7 @@ class PluginInfoProvider {
     }
 
     public async getPluginInfo(projectBasePath: string, gid: string, aid: string, version: string): Promise<IPluginInfo> {
-        const cachedResult: IPluginInfo = await this.getFromLocalCache(gid, aid, version);
+        const cachedResult: IPluginInfo | undefined = await this.getFromLocalCache(gid, aid, version);
         if (cachedResult) {
             return cachedResult;
         }
@@ -34,40 +34,43 @@ class PluginInfoProvider {
         await this.saveToLocalCache(gid, aid, version, undefined);
     }
 
-    private async getFromLocalCache(gid: string, aid: string, version: string): Promise<IPluginInfo> {
+    private async getFromLocalCache(gid: string, aid: string, version: string): Promise<IPluginInfo | undefined> {
         const plugins: any = this._context.globalState.get(KEY_PLUGINS);
         return _.get(plugins, [gid, aid, version]);
     }
 
-    private async saveToLocalCache(gid: string, aid: string, version: string, pluginInfo: IPluginInfo): Promise<void> {
-        const plugins: any = this._context.globalState.get(KEY_PLUGINS) || {};
+    private async saveToLocalCache(gid: string, aid: string, version: string, pluginInfo: IPluginInfo | undefined): Promise<void> {
+        let plugins: any = this._context.globalState.get(KEY_PLUGINS);
+        if (!plugins) {
+            plugins = {};
+        }
         _.set(plugins, [gid, aid, version], pluginInfo);
         await this._context.globalState.update(KEY_PLUGINS, plugins);
     }
 
     private async fetchFromRepository(projectBasePath: string, gid: string, aid: string, version?: string): Promise<IPluginInfo> {
-        let prefix: string;
+        let prefix: string | undefined;
         const goals: string[] = [];
         const rawOutput: string = await Utils.getPluginDescription(this.getPluginId(gid, aid, version), projectBasePath);
 
         const versionRegExp: RegExp = /^Version: (.*)/m;
-        const versionMatch: string[] = rawOutput.match(versionRegExp);
-        if (versionMatch && versionMatch.length === 2) {
+        const versionMatch: string[] | null = rawOutput.match(versionRegExp);
+        if (versionMatch !== null && versionMatch.length === 2) {
             version = versionMatch[1];
         }
 
         // find prefix
         const prefixRegExp: RegExp = /^Goal Prefix: (.*)/m;
-        const prefixMatch: string[] = rawOutput.match(prefixRegExp);
-        if (prefixMatch && prefixMatch.length === 2) {
+        const prefixMatch: string[] | null = rawOutput.match(prefixRegExp);
+        if (prefixMatch !== null && prefixMatch.length === 2) {
             prefix = prefixMatch[1];
         }
 
         // find goals
-        if (version && prefix) {
+        if (version && prefix !== undefined) {
             const goalRegExp: RegExp = new RegExp(`^${prefix}:(.*)`, "gm");
-            const goalsMatch: string[] = rawOutput.match(goalRegExp);
-            if (goalsMatch) {
+            const goalsMatch: string[] | null = rawOutput.match(goalRegExp);
+            if (goalsMatch !== null) {
                 goals.push(...goalsMatch);
             }
         }

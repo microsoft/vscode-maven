@@ -10,7 +10,7 @@ import { executeInTerminal } from "../utils/mavenUtils";
 
 type FavoriteCommand = { command: string, alias: string };
 export async function runFavoriteCommandsHandler(project: MavenProject | undefined): Promise<void> {
-    let selectedProject: MavenProject = project;
+    let selectedProject: MavenProject | undefined = project;
     if (!selectedProject) {
         selectedProject = await vscode.window.showQuickPick(
             mavenExplorerProvider.mavenProjectNodes.map(item => ({
@@ -26,17 +26,17 @@ export async function runFavoriteCommandsHandler(project: MavenProject | undefin
         }
     }
 
-    const favorites: FavoriteCommand[] = Settings.Terminal.favorites(vscode.Uri.file(selectedProject.pomPath));
-    if (_.isEmpty(favorites)) {
+    const favorites: FavoriteCommand[] | undefined = Settings.Terminal.favorites(vscode.Uri.file(selectedProject.pomPath));
+    if (!favorites || _.isEmpty(favorites)) {
         const BUTTON_OPEN_SETTINGS: string = "Open Settings";
-        const choice: string = await vscode.window.showInformationMessage("Found no favorite commands. You can specify `maven.terminal.favorites` in Settings.", BUTTON_OPEN_SETTINGS);
+        const choice: string | undefined = await vscode.window.showInformationMessage("Found no favorite commands. You can specify `maven.terminal.favorites` in Settings.", BUTTON_OPEN_SETTINGS);
         if (choice === BUTTON_OPEN_SETTINGS) {
             await vscode.commands.executeCommand("workbench.action.openSettings");
         }
         return;
     }
 
-    const selectedCommand: FavoriteCommand = await vscode.window.showQuickPick(
+    const selectedCommand: FavoriteCommand | undefined = await vscode.window.showQuickPick(
         favorites.map(item => ({
             value: item,
             label: item.alias,

@@ -37,7 +37,8 @@ export class MavenProject implements ITreeItem {
     }
 
     public get moduleNames(): string[] {
-        return _.get(this._pom, "project.modules[0].module") || [];
+        const moduleNames: string[] | undefined = _.get(this._pom, "project.modules[0].module");
+        return moduleNames ? moduleNames : [];
     }
 
     public get effectivePom(): EffectivePom {
@@ -45,7 +46,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public get plugins(): MavenPlugin[] {
-        let plugins: any[];
+        let plugins: any[] | undefined;
         if (_.has(this._effectivePom.data, "projects.project")) {
             // multi-module project
             const project: any = (<any[]>this._effectivePom.data.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
@@ -72,7 +73,7 @@ export class MavenProject implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         await this.parsePom();
-        const label: string = this.name || "[Corrupted]";
+        const label: string = this.name ? this.name : "[Corrupted]";
         const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
@@ -88,16 +89,17 @@ export class MavenProject implements ITreeItem {
         return CONTEXT_VALUE;
     }
 
-    public getChildren(): vscode.ProviderResult<ITreeItem[]> {
+    public getChildren(): ITreeItem[] {
         const ret: ITreeItem[] = [];
         ret.push(new PluginsMenu(this));
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {
-            ret.push(...this.modules.map(m => mavenExplorerProvider.getMavenProject(m)));
+            const projects: MavenProject[] = <MavenProject[]>this.modules.map(m => mavenExplorerProvider.getMavenProject(m)).filter(Boolean);
+            ret.push(...projects);
         }
         return ret;
     }
 
-    public async calculateEffectivePom(force?: boolean): Promise<string> {
+    public async calculateEffectivePom(force?: boolean): Promise<string | undefined> {
         if (!force && this._effectivePom.raw) {
             return this._effectivePom.raw;
         }
@@ -128,11 +130,11 @@ export class MavenProject implements ITreeItem {
         mavenExplorerProvider.refresh(this);
     }
 
-    private _convertXmlPlugin(plugins: any[]): MavenPlugin[] {
+    private _convertXmlPlugin(plugins: any[] | undefined): MavenPlugin[] {
         if (plugins && plugins.length > 0) {
             return plugins.map(p => new MavenPlugin(
                 this,
-                _.get(p, "groupId[0]") || "org.apache.maven.plugins",
+                _.has(p, "groupId[0]") ? _.get(p, "groupId[0]") : "org.apache.maven.plugins",
                 _.get(p, "artifactId[0]"),
                 _.get(p, "version[0]")
             ));

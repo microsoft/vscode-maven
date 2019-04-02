@@ -10,6 +10,7 @@
     3. Expand "Plugins" node, plguins are listed.
     4. Expand a plugin node, plugin specified goals are listed.
     5. Right click a goal, choose "Execute", it can execute the corresponding command in the terminal.
+    6. Right click a goal, choose "Debug", it can execute the corresponding command in the terminal in debug mode, and attach a Java debug session to it.
 
 ### Open corresponding POM file
 1. Click on project item
