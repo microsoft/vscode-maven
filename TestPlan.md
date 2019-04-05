@@ -57,7 +57,7 @@
 1. Specify a favorite command in settings, e.g.
     ```
         {
-            "maven.terminal.favorite": [
+            "maven.terminal.favorites": [
                 {
                     "alias": "full-build without tests",
                     "command": "clean package -DskipTests"
