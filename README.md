@@ -158,6 +158,26 @@ To speed up the searching of Maven projects, you can exclude folders in settings
 ```
 </details>
 
+<details>
+<summary>Customize Favorite Maven Commands</summary>
+
+Specify a favorite command in settings:
+
+```json
+{
+    "maven.terminal.favorites": [
+        {
+            "alias": "full-build without tests",
+            "command": "clean package -DskipTests"
+        }
+    ]
+}
+```
+
+Now right-click on an project item, and then click `Favorite ...`. The option `full-build without tests` should show up.
+
+</details>
+
 ## Data/Telemetry
 
 VS Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](http://go.microsoft.com/fwlink/?LinkId=521839) to learn more. If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
