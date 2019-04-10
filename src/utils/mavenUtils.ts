@@ -39,8 +39,9 @@ export async function pluginDescription(pluginId: string, pomPath: string): Prom
 
 async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<any> {
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const command: string = await getMaven(workspaceFolder);
-    const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, command, "..") : undefined;
+    const mvn: string = await getMaven(workspaceFolder);
+    const command: string = await wrappedWithQuotes(mvn);
+    const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
     const userArgs: string | undefined = Settings.Executable.options(pomfile);
     const matched: RegExpMatchArray | null = [mvnArgs, userArgs].filter(Boolean).join(" ").match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
     const args: string[] = matched !== null ? matched : [];
