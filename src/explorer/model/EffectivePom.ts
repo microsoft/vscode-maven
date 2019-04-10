@@ -29,9 +29,9 @@ export class EffectivePom {
             this.raw = silent ? await rawEffectivePom(this.pomPath) : await Utils.getEffectivePom(this.pomPath);
             this.data = await Utils.parseXmlContent(this.raw ? this.raw : "");
         } catch (error) {
-            console.error(error);
+            throw error;
+        } finally {
+            this._updating = false;
         }
-        this._updating = false;
-
     }
 }
