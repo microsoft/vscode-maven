@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.16.1
+#### Fixed 
+- An error on calculating effective pom when whitespace in project path. [#304](https://github.com/Microsoft/vscode-maven/issues/304)
+
 ## 0.16.0
 #### Added
 - Support to debug a plugin goal.

@@ -45,7 +45,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
     const matched: RegExpMatchArray | null = [mvnArgs, userArgs].filter(Boolean).join(" ").match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
     const args: string[] = matched !== null ? matched : [];
     if (pomfile) {
-        args.push("-f", pomfile);
+        args.push("-f", `"${pomfile}"`);
     }
     const spawnOptions: child_process.SpawnOptions = {
         cwd,
