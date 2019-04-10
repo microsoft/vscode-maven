@@ -104,9 +104,14 @@ export class MavenProject implements ITreeItem {
             return this._effectivePom.raw;
         }
 
-        await this._effectivePom.update();
-        mavenExplorerProvider.refresh(this);
-        return this._effectivePom.raw;
+        try {
+            await this._effectivePom.update();
+            mavenExplorerProvider.refresh(this);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            return this._effectivePom.raw;
+        }
     }
 
     public async refresh(): Promise<void> {

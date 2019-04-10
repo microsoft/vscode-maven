@@ -3,7 +3,8 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## 0.16.1
 #### Fixed 
-- An error on calculating effective pom when whitespace in project path. [#304](https://github.com/Microsoft/vscode-maven/issues/304)
+- An error on calculating effective pom when there is whitespace in project path. [#304](https://github.com/Microsoft/vscode-maven/issues/304)
+- A bug which causes to retry calculating effective pom all the time. [#296](https://github.com/Microsoft/vscode-maven/issues/296)
 
 ## 0.16.0
 #### Added
