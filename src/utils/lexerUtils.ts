@@ -171,7 +171,7 @@ function getElementHierarchy(text: string, tokens: number[][], tagOrOffset: numb
             tagNodes.push(currentNode);
         }
         if (cursorOffset !== undefined
-            && cursorNode !== undefined
+            && cursorNode === undefined
             && currentNode !== undefined
             && currentNode.contentStart !== undefined && currentNode.contentStart <= cursorOffset
             && currentNode.contentEnd !== undefined && cursorOffset <= currentNode.contentEnd) {
