@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.16.2
+#### Fixed
+- A regression issue which blocks auto-completion for pom files. [#311](https://github.com/Microsoft/vscode-maven/issues/311)
+
 ## 0.16.1
 #### Fixed 
 - An error on calculating effective pom when there is whitespace in project path. [#304](https://github.com/Microsoft/vscode-maven/issues/304)
