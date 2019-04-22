@@ -513,7 +513,7 @@
     "tslint": "^5.13.0",
     "tslint-microsoft-contrib": "^5.0.1",
     "typescript": "^2.9.2",
-    "vscode": "^1.1.30",
+    "vscode": "^1.1.33",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3"
   },
