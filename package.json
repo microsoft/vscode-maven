@@ -487,6 +487,12 @@
             "default": "flat",
             "scope": "window",
             "description": "%configuration.maven.view%"
+          },
+          "maven.pomfile.globPattern": {
+            "type": "string",
+            "default": "**/pom.xml",
+            "description": "%configuration.maven.pomfile.globpattern%",
+            "scope": "window"
           }
         }
       }

@@ -115,7 +115,11 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             mavenExplorerProvider.refresh();
         })
     );
-    const pomSelector: vscode.DocumentSelector = [{ language: "xml", scheme: "file", pattern: "**/pom.xml" }];
+    const pomSelector: vscode.DocumentSelector = [{
+        language: "xml",
+        scheme: "file",
+        pattern: Settings.Pomfile.globPattern(),
+    }];
     // completion item provider
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-"));
     registerCommand(context, "maven.completion.selected", sendInfo, true);
@@ -140,7 +144,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
-    const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher("**/pom.xml");
+    const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(Settings.Pomfile.globPattern());
     watcher.onDidCreate((e: Uri) => mavenExplorerProvider.addProject(e.fsPath), null, context.subscriptions);
     watcher.onDidChange(async (e: Uri) => {
         const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(e.fsPath);
