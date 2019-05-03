@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as _ from "lodash";
+import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Settings } from "../../Settings";
@@ -64,7 +65,10 @@ export class MavenProject implements ITreeItem {
      * @return list of absolute path of modules pom.xml.
      */
     public get modules(): string[] {
-        return this.moduleNames.map(moduleName => path.join(path.dirname(this._pomPath), moduleName, "pom.xml"));
+        return this.moduleNames.map(moduleName => {
+            const relative = path.join(path.dirname(this._pomPath), moduleName);
+            return fs.statSync(relative).isFile() ? relative : path.join(relative, "pom.xml");
+        });
     }
 
     public get pomPath(): string {
