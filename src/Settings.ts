@@ -59,6 +59,14 @@ export namespace Settings {
         }
     }
 
+    export namespace Pomfile {
+        export function globPattern(): string {
+            const ret: string | undefined = _getMavenSection<string>("pomfile.globPattern");
+            return ret !== undefined ? ret : "**/pom.xml";
+        }
+    }
+
+
     function _getMavenSection<T>(section: string, resourceOrFilepath?: Uri | string): T | undefined {
         let resource: Uri | undefined;
         if (typeof resourceOrFilepath === "string") {
