@@ -3,7 +3,7 @@
 [![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs-short/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
 [![Rating](https://vsmarketplacebadge.apphb.com/rating-short/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
-[![Build Status](https://travis-ci.org/Microsoft/vscode-maven.svg)](https://travis-ci.org/Microsoft/vscode-maven)
+[![Build status](https://dev.azure.com/mseng/VSJava/_apis/build/status/VSCode-Maven-Extension-VSIX-CI)](https://dev.azure.com/mseng/VSJava/_build/latest?definitionId=8760)
 
 ## Features
 
