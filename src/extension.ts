@@ -121,7 +121,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         pattern: Settings.Pomfile.globPattern(),
     }];
     // completion item provider
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-"));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-", "<"));
     registerCommand(context, "maven.completion.selected", sendInfo, true);
     // dependency
     registerCommand(context, "maven.project.addDependency", async () => await addDependencyHandler());
