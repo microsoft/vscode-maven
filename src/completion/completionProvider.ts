@@ -15,24 +15,24 @@ const artifactSegments: string[] = [
     "\t<artifactId>$2</artifactId>",
     "\t<version>$3</version>"
 ];
-const dependencySnippet: vscode.SnippetString = new vscode.SnippetString([
+const dependencySnippetString: string = [
     "<dependency>",
     ...artifactSegments,
     "</dependency>$0"
-].join("\n"));
-const pluginSnippet: vscode.SnippetString = new vscode.SnippetString([
+].join("\n");
+const pluginSnippetString: string = [
     "<plugin>",
     ...artifactSegments,
     "</plugin>$0"
-].join("\n"));
+].join("\n");
 
 class CompletionProvider implements vscode.CompletionItemProvider {
     public localRepository: string = path.join(os.homedir(), ".m2", "repository");
 
-// tslint:disable-next-line: cyclomatic-complexity
-    public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
-
-        const currentNode: ElementNode | undefined = getCurrentNode(document.getText(), document.offsetAt(position));
+    public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
+        const documentText: string = document.getText();
+        const cursorOffset: number = document.offsetAt(position);
+        const currentNode: ElementNode | undefined = getCurrentNode(documentText, cursorOffset);
         if (currentNode === undefined || currentNode.contentStart === undefined) {
             return undefined;
         }
@@ -89,6 +89,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             }
             case XmlTagName.Dependencies: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("dependency", vscode.CompletionItemKind.Snippet);
+                const dependencySnippet = new vscode.SnippetString(dependencySnippetString);
+                if (this.shouldSnippetTrimLeft(context, documentText[cursorOffset - 1])) {
+                    dependencySnippet.value = dependencySnippet.value.slice(1);
+                }
                 snippetItem.insertText = dependencySnippet;
                 snippetItem.detail = "Maven Snippet";
                 snippetItem.command = {
@@ -99,6 +103,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             }
             case XmlTagName.Plugins: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
+                const pluginSnippet = new vscode.SnippetString(pluginSnippetString);
+                if (this.shouldSnippetTrimLeft(context, documentText[cursorOffset - 1])) {
+                    pluginSnippet.value = pluginSnippet.value.slice(1);
+                }
                 snippetItem.insertText = pluginSnippet;
                 snippetItem.detail = "Maven Snippet";
                 snippetItem.command = {
@@ -114,6 +122,11 @@ class CompletionProvider implements vscode.CompletionItemProvider {
 
     private deDuplicate(primary: vscode.CompletionItem[], secondary: vscode.CompletionItem[]): vscode.CompletionItem[] {
         return _.unionBy(primary, secondary, (item) => item.insertText);
+    }
+
+    private shouldSnippetTrimLeft(context: vscode.CompletionContext, prevChar?: string): boolean {
+        return (context.triggerKind === vscode.CompletionTriggerKind.TriggerCharacter && context.triggerCharacter === "<")
+            || (context.triggerKind === vscode.CompletionTriggerKind.Invoke && prevChar === "<");
     }
 }
 

@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+#### Fixed
+- Unexpected insertion of code snippets. [#310](https://github.com/microsoft/vscode-maven/issues/310)
+
 ## 0.16.2
 #### Fixed
 - A regression issue which blocks auto-completion for pom files. [#311](https://github.com/Microsoft/vscode-maven/issues/311)
