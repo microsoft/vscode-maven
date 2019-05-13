@@ -8,7 +8,6 @@ import * as path from "path";
 import { Extension, ExtensionContext, extensions } from "vscode";
 import { Utils } from "./Utils";
 
-
 let EXTENSION_CONTEXT: ExtensionContext;
 let EXTENSION_PUBLISHER: string;
 let EXTENSION_NAME: string;
