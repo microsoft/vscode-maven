@@ -3,15 +3,15 @@
 
 import * as fg from "fast-glob";
 import * as _ from "lodash";
-import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
 import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getSortText } from "./versionUtils";
+import { getMavenLocalRepository } from "../utils/contextUtils";
 
 class LocalProvider implements IMavenCompletionItemProvider {
-    public localRepository: string = path.join(os.homedir(), ".m2", "repository");
+    public localRepository: string = getMavenLocalRepository();
 
     public async getGroupIdCandidates(groupIdHint: string): Promise<vscode.CompletionItem[]> {
         const packageSegments: string[] = groupIdHint.split(".");

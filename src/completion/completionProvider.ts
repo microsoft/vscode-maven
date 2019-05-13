@@ -2,8 +2,6 @@
 // Licensed under the MIT license.
 
 import * as _ from "lodash";
-import * as os from "os";
-import * as path from "path";
 import * as vscode from "vscode";
 import { ElementNode, getCurrentNode, XmlTagName } from "../utils/lexerUtils";
 import { centralProvider } from "./centralProvider";
@@ -27,7 +25,6 @@ const pluginSnippetString: string = [
 ].join("\n");
 
 class CompletionProvider implements vscode.CompletionItemProvider {
-    public localRepository: string = path.join(os.homedir(), ".m2", "repository");
 
     public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
         const documentText: string = document.getText();

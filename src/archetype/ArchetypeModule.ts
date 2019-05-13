@@ -2,12 +2,11 @@
 // Licensed under the MIT license.
 
 import * as fse from "fs-extra";
-import * as os from "os";
 import * as path from "path";
 import { Uri, window, workspace, QuickPickItem } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
-import { getPathToExtensionRoot } from "../utils/contextUtils";
+import { getPathToExtensionRoot, getMavenLocalRepository } from "../utils/contextUtils";
 import { executeInTerminal } from "../utils/mavenUtils";
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
@@ -155,7 +154,7 @@ export namespace ArchetypeModule {
     }
 
     async function getLocalArchetypeItems(): Promise<Archetype[]> {
-        const localCatalogPath: string = path.join(os.homedir(), ".m2", "repository", "archetype-catalog.xml");
+        const localCatalogPath: string = path.join(getMavenLocalRepository(), "archetype-catalog.xml");
         if (await fse.pathExists(localCatalogPath)) {
             const buf: Buffer = await fse.readFile(localCatalogPath);
             return listArchetypeFromXml(buf.toString());
