@@ -3,6 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 #### Fixed
 - Unexpected insertion of code snippets. [#310](https://github.com/microsoft/vscode-maven/issues/310)
+- A bug that Maven `localRepository` setting was not effective. [#322](https://github.com/microsoft/vscode-maven/issues/322)
 
 ## 0.16.2
 #### Fixed
