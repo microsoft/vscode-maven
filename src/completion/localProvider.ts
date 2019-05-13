@@ -11,12 +11,11 @@ import { getSortText } from "./versionUtils";
 import { getMavenLocalRepository } from "../utils/contextUtils";
 
 class LocalProvider implements IMavenCompletionItemProvider {
-    public localRepository: string = getMavenLocalRepository();
 
     public async getGroupIdCandidates(groupIdHint: string): Promise<vscode.CompletionItem[]> {
         const packageSegments: string[] = groupIdHint.split(".");
         packageSegments.pop();
-        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments) || [];
+        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments).catch(console.log) || [];
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "groupId", source: "maven-local" }]
@@ -35,7 +34,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
             return [];
         }
 
-        const validArtifactIds: string[] = await this.searchForArtifactIds(groupId);
+        const validArtifactIds: string[] = await this.searchForArtifactIds(groupId).catch(console.log) || [];
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "artifactId", source: "maven-local" }]
@@ -54,7 +53,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
             return [];
         }
 
-        const validVersions: string[] = await this.searchForVersions(groupId, artifactId);
+        const validVersions: string[] = await this.searchForVersions(groupId, artifactId).catch(console.log) || [];
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "version", source: "maven-local" }]
@@ -70,7 +69,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
     }
 
     private async searchForGroupIds(segments: string[]): Promise<string[]> {
-        const cwd: string = path.join(this.localRepository, ...segments);
+        const cwd: string = path.join(getMavenLocalRepository(), ...segments);
         return new Promise<string[]>((resolve, reject) => {
             fg.async(["**/*/*", "!**/*.*"], { onlyFiles: false, deep: 2, cwd }).then(entries => {
                 const validSegments: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
@@ -82,7 +81,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
     }
 
     private async searchForArtifactIds(groupId: string): Promise<string[]> {
-        const cwd: string = path.join(this.localRepository, ...groupId.split("."));
+        const cwd: string = path.join(getMavenLocalRepository(), ...groupId.split("."));
         return await new Promise<string[]>((resolve, reject) => {
             fg.async(["**/*.pom"], { deep: 2, cwd }).then(entries => {
                 const validArtifactIds: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
@@ -92,7 +91,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
     }
 
     private async searchForVersions(groupId: string, artifactId: string): Promise<string[]> {
-        const cwd: string = path.join(this.localRepository, ...groupId.split("."), artifactId);
+        const cwd: string = path.join(getMavenLocalRepository(), ...groupId.split("."), artifactId);
         return await new Promise<string[]>((resolve, reject) => {
             fg.async(["*/*.pom"], { deep: 1, cwd }).then(entries => {
                 const validVersions: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
