@@ -83,7 +83,7 @@ export namespace ArchetypeModule {
             description: "",
             detail: "Find more archetypes available in remote catalog."
         };
-        return await window.showQuickPick(
+        return await window.showQuickPick<QuickPickItem & {value: Archetype}>(
             loadArchetypePickItems(all).then(items => items.map(item => ({
                 value: item,
                 label: item.artifactId ? `$(package) ${item.artifactId} ` : "More ...",
