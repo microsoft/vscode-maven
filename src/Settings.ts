@@ -60,6 +60,10 @@ export namespace Settings {
     }
 
     export namespace Pomfile {
+        export function autoUpdateEffectivePOM(): boolean {
+            return !!_getMavenSection<boolean>("pomfile.autoUpdateEffectivePOM");
+        }
+
         export function globPattern(): string {
             const ret: string | undefined = _getMavenSection<string>("pomfile.globPattern");
             return ret !== undefined ? ret : "**/pom.xml";
