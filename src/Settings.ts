@@ -66,7 +66,6 @@ export namespace Settings {
         }
     }
 
-
     function _getMavenSection<T>(section: string, resourceOrFilepath?: Uri | string): T | undefined {
         let resource: Uri | undefined;
         if (typeof resourceOrFilepath === "string") {
