@@ -30,7 +30,6 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         const documentText: string = document.getText();
         const cursorOffset: number = document.offsetAt(position);
         const currentNode: ElementNode | undefined = getCurrentNode(documentText, cursorOffset);
-        currentNode
         if (currentNode === undefined || currentNode.contentStart === undefined) {
             return undefined;
         }
