@@ -491,7 +491,7 @@
           "maven.pomfile.globPattern": {
             "type": "string",
             "default": "**/pom.xml",
-            "description": "%configuration.maven.pomfile.globpattern%",
+            "description": "%configuration.maven.pomfile.globPattern%",
             "scope": "window"
           }
         }
