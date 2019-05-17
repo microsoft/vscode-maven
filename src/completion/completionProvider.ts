@@ -16,17 +16,17 @@ const artifactSegments: string[] = [
 const dependencySnippetString: string = [
     "<dependency>",
     ...artifactSegments,
-    "</dependency>$0"
+    "</dependency>"
 ].join("\n");
 const pluginSnippetString: string = [
     "<plugin>",
     ...artifactSegments,
-    "</plugin>$0"
+    "</plugin>"
 ].join("\n");
 
 class CompletionProvider implements vscode.CompletionItemProvider {
 
-    public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
+    public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
         const documentText: string = document.getText();
         const cursorOffset: number = document.offsetAt(position);
         const currentNode: ElementNode | undefined = getCurrentNode(documentText, cursorOffset);
@@ -86,10 +86,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             }
             case XmlTagName.Dependencies: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("dependency", vscode.CompletionItemKind.Snippet);
-                const dependencySnippet = new vscode.SnippetString(dependencySnippetString);
-                if (this.shouldSnippetTrimLeft(context, documentText[cursorOffset - 1])) {
-                    dependencySnippet.value = dependencySnippet.value.slice(1);
-                }
+                const snippetContent: string = trimBrackets(dependencySnippetString, documentText, cursorOffset);
+                const dependencySnippet = new vscode.SnippetString(snippetContent);
                 snippetItem.insertText = dependencySnippet;
                 snippetItem.detail = "Maven Snippet";
                 snippetItem.command = {
@@ -100,10 +98,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             }
             case XmlTagName.Plugins: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
-                const pluginSnippet = new vscode.SnippetString(pluginSnippetString);
-                if (this.shouldSnippetTrimLeft(context, documentText[cursorOffset - 1])) {
-                    pluginSnippet.value = pluginSnippet.value.slice(1);
-                }
+                const snippetContent: string = trimBrackets(pluginSnippetString, documentText, cursorOffset);
+                const pluginSnippet = new vscode.SnippetString(snippetContent);
                 snippetItem.insertText = pluginSnippet;
                 snippetItem.detail = "Maven Snippet";
                 snippetItem.command = {
@@ -120,11 +116,22 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     private deDuplicate(primary: vscode.CompletionItem[], secondary: vscode.CompletionItem[]): vscode.CompletionItem[] {
         return _.unionBy(primary, secondary, (item) => item.insertText);
     }
+}
 
-    private shouldSnippetTrimLeft(context: vscode.CompletionContext, prevChar?: string): boolean {
-        return (context.triggerKind === vscode.CompletionTriggerKind.TriggerCharacter && context.triggerCharacter === "<")
-            || (context.triggerKind === vscode.CompletionTriggerKind.Invoke && prevChar === "<");
+function trimBrackets(snippetContent: string, fileContent: string, offset: number): string {
+    let ret: string = snippetContent;
+    // trim left "<" when previous chars contain "<"
+    const sectionStart = fileContent.lastIndexOf(">", offset - 1) + 1;
+    const preChars: string = fileContent.slice(sectionStart, offset).trim();
+    if (preChars.startsWith("<")) {
+        ret = ret.slice(1, ret.length);
     }
+    // trim right ">" when next char is ">"
+    const postChar: string = fileContent[offset];
+    if (postChar === ">") {
+        ret = ret.slice(0, ret.length - 1);
+    } 
+    return ret;
 }
 
 export const completionProvider: CompletionProvider = new CompletionProvider();

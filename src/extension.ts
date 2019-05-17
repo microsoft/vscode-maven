@@ -118,7 +118,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     const pomSelector: vscode.DocumentSelector = [{
         language: "xml",
         scheme: "file",
-        pattern: Settings.Pomfile.globPattern(),
+        pattern: Settings.Pomfile.globPattern()
     }];
     // completion item provider
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-", "<"));
