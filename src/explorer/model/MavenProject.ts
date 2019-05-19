@@ -104,7 +104,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public async calculateEffectivePom(force?: boolean): Promise<string | undefined> {
-        if (!force && this._effectivePom.raw) {
+        if (!force && this._effectivePom.upToDate) {
             return this._effectivePom.raw;
         }
 
