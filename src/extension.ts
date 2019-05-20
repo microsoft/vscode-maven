@@ -150,6 +150,12 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
         const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(e.fsPath);
         if (project) {
             await project.refresh();
+            if (Settings.Pomfile.autoUpdateEffectivePOM()) {
+                taskExecutor.execute(async () => {
+                    await project.effectivePom.update();
+                    mavenExplorerProvider.refresh(project)
+                });
+            }
         }
     }, null, context.subscriptions);
     watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath), null, context.subscriptions);

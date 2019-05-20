@@ -7,6 +7,7 @@ import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
+import { mavenExplorerProvider } from "../mavenExplorerProvider";
 
 export class PluginsMenu extends Menu implements ITreeItem {
     constructor(project: MavenProject) {
@@ -30,6 +31,7 @@ export class PluginsMenu extends Menu implements ITreeItem {
     }
 
     public async refresh(): Promise<void> {
-        await this._project.calculateEffectivePom(true);
+        this._project.effectivePom.upToDate = false;
+        mavenExplorerProvider.refresh(this);
     }
 }

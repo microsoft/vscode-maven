@@ -9,11 +9,14 @@ export class EffectivePom {
     public pomPath: string;
     public raw: string | undefined;
     public data: any;
+    public upToDate: boolean;
+
     private _updating: boolean;
 
     constructor(pomPath: string) {
         this.pomPath = pomPath;
         this._updating = false;
+        this.upToDate = false;
     }
 
     /**
@@ -28,6 +31,7 @@ export class EffectivePom {
         try {
             this.raw = silent ? await rawEffectivePom(this.pomPath) : await Utils.getEffectivePom(this.pomPath);
             this.data = await Utils.parseXmlContent(this.raw ? this.raw : "");
+            this.upToDate = true;
         } catch (error) {
             throw error;
         } finally {

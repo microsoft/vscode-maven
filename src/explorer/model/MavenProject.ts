@@ -104,7 +104,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public async calculateEffectivePom(force?: boolean): Promise<string | undefined> {
-        if (!force && this._effectivePom.raw) {
+        if (!force && this._effectivePom.upToDate) {
             return this._effectivePom.raw;
         }
 
@@ -120,10 +120,6 @@ export class MavenProject implements ITreeItem {
 
     public async refresh(): Promise<void> {
         await this._refreshPom();
-        this._effectivePom.update()
-        .then(() => {
-            mavenExplorerProvider.refresh(this);
-        }).catch(console.error); // no await to unblock the thread.
     }
 
     public async parsePom(): Promise<void> {

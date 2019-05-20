@@ -493,6 +493,12 @@
             "default": "**/pom.xml",
             "description": "%configuration.maven.pomfile.globPattern%",
             "scope": "window"
+          },
+          "maven.pomfile.autoUpdateEffectivePOM": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.maven.pomfile.autoUpdateEffectivePOM%",
+            "scope": "window"
           }
         }
       }
