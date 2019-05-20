@@ -1,10 +1,17 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.17.0
+#### Added
+- Add new config `maven.pomfile.globPattern`, which specifies how the extension searchs for POM files. [#316](https://github.com/microsoft/vscode-maven/issues/316)
+- Add new config `maven.pomfile.autoUpdateEffectivePOM`, which specifies whether to update Effective-POM automatically. [#319](https://github.com/microsoft/vscode-maven/issues/319)
+
 #### Fixed
 - Unexpected insertion of code snippets. [#310](https://github.com/microsoft/vscode-maven/issues/310)
 - A bug that Maven `localRepository` setting was not effective. [#322](https://github.com/microsoft/vscode-maven/issues/322)
 - Cannot create Maven project when target directory has brackets and default shell is PowerShell. [#324](https://github.com/microsoft/vscode-maven/issues/324)
+
+Thank [Justin Ridgewell (@jridgewell)](https://github.com/jridgewell) for the contributions to make the extension even better.
 
 ## 0.16.2
 #### Fixed
