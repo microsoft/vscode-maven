@@ -66,8 +66,12 @@ export class MavenProject implements ITreeItem {
      */
     public get modules(): string[] {
         return this.moduleNames.map(moduleName => {
-            const relative = path.join(path.dirname(this._pomPath), moduleName);
-            return fs.statSync(relative).isFile() ? relative : path.join(relative, "pom.xml");
+            const relative: string = path.join(path.dirname(this._pomPath), moduleName);
+            if (fs.existsSync(relative) && fs.statSync(relative).isFile())  {
+                return relative;
+            } else {
+                return path.join(relative, "pom.xml");
+            }
         });
     }
 
