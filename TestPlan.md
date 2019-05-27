@@ -17,15 +17,25 @@
 2. Verify: 
     1. It opens the corresponding POM file in editor.
 
-### Generate Effective POM file
+### Show Effective POM file
 1. Right-click on project item
-2. Click `Effective POM`
+2. Click `Show Effective POM`
 3. Verify: 
-    1. It shows `Generating effective pom ...` in status bar during generating.
-    2. Once the operation is over, message is cleaned from status bar, and it opens the Effective POM in editor.
+    1. It opens the Effective POM in editor.
 4. Right-click on `pom.xml` in the file explorer view.
-5. Click on `Effective POM`
+5. Click on `Show Effective POM`
 6. Verify that it should have the same behaviour as above.
+
+### Update Effective POM file
+1. Open user settings, set `true` for `maven.pomfile.autoUpdateEffectivePOM`.
+2. Change pom file and save it.
+3. Verify:
+    1. It shows `Generating effective pom ...` in status bar during generating. 
+    2. Once the operation is over, the message is cleaned from the status bar.
+4. Set `false` for `maven.pomfile.autoUpdateEffectivePOM`. 
+5. Change pom file and save it.
+6. Verify:
+    1. It not update effective pom automatically.
 
 ### Execute Maven goals
 1. Right-click on project item
@@ -144,6 +154,12 @@ The tree view of maven projects should update when any pom.xml is created/modifi
 3. Verify:
     1. The corresponding project item is removed from the sidebar.
 
+### Searchs for POM files
+1. Open user settings, set a value for `maven.pomfile.globPattern`, e.g. "**/*-pom.xml", press `Enter`.
+2. Refresh maven projects explorer.
+3. Verify:
+    1. The corresponding project items are listed in sidebar. 
+
 ## Maven Executable Options and Enviroment Variables
 ### Maven Options
 1. Open user settings, set a value for `maven.executable.options`, e.g. "-o".
@@ -184,6 +200,14 @@ The tree view of maven projects should update when any pom.xml is created/modifi
 2. Open VS Code, open a project, execute `Effective POM`, verify:
     1. It shows a message box for the issue and detailed error message.
     2. Click `Learn more`, it previews `Troubleshooting.md` in the editor.
+
+## Pom.xml file completion
+### Dependency completion
+1. In the `<dependencies>` section, type `<` and accept the suggested `dependency` maven snippet.
+2. Hit Ctrl + Space.
+3. Verify:
+    1. The snippet is correctly inserted.
+    2. The IntelliSense is correctly worked for `<groupId>`, `<artifactId>` and `<version>`.
 
 
 ## Others
