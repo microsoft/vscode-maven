@@ -26,7 +26,7 @@
 5. Click on `Show Effective POM`
 6. Verify that it should have the same behaviour as above.
 
-### Update Effective POM file
+### Update Effective POM file automatically
 1. Open user settings, set `true` for `maven.pomfile.autoUpdateEffectivePOM`.
 2. Change pom file and save it.
 3. Verify:
@@ -155,14 +155,14 @@ The tree view of maven projects should update when any pom.xml is created/modifi
     1. The corresponding project item is removed from the sidebar.
 
 ### Searchs for POM files
-1. Open user settings, set a value for `maven.pomfile.globPattern`, e.g. "**/*-pom.xml", press `Enter`.
+1. Open user settings, set a value for `maven.pomfile.globPattern`, e.g. `**/*-pom.xml`, press `Enter`.
 2. Refresh maven projects explorer.
 3. Verify:
     1. The corresponding project items are listed in sidebar. 
 
 ## Maven Executable Options and Enviroment Variables
 ### Maven Options
-1. Open user settings, set a value for `maven.executable.options`, e.g. "-o".
+1. Open user settings, set a value for `maven.executable.options`, e.g. `-o`.
 2. Right click on a project to trigger a maven command.
 3. Verify:
     1. The command executed in the terminal should have the options appended.
@@ -178,7 +178,8 @@ The tree view of maven projects should update when any pom.xml is created/modifi
     "maven.terminal.useJavaHome": true      // Use the Red Hat Java Language Support Setting for JAVA_HOME
     ```
 4. Trigger a maven command, in the newly created terminal, verify:
-    1. value of env `JAVA_HOME` should be the value you just set in `java.home`
+    1. On windows platform, input `$Env:MAVEN_OPTS` and press `Enter`, the value of env `JAVA_HOME` should be the value you just set in `java.home`.
+    2. On mac/linux platform, input `echo $MAVEN_OPTS` and press `Enter`, the value of env `JAVA_HOME` should be the value you just set in `java.home`.
 
 ### General Environment Variables
 1. Specify a environment variable `MAVEN_OPTS` in settings, e.g.
@@ -193,7 +194,8 @@ The tree view of maven projects should update when any pom.xml is created/modifi
         }
     ```
 2. Trigger a maven command, in the newly created terminal, verify:
-    1. value of env `MAVEN_OPTS` should be the value you just set in settings.
+    1. On windows platform, input `$Env:MAVEN_OPTS` and press `Enter`, the value of env `MAVEN_OPTS` should be the value you just set in settings.
+    2. On mac/linux platform, input `echo $MAVEN_OPTS` and press `Enter`, the value of env `MAVEN_OPTS` should be the value you just set in settings.
 
 ### Guide to Troubleshooting page if error occurs. 
 1. Make sure `mvn` is not in PATH, or you have set wrong `maven.executable.path` in VS Code.
@@ -204,7 +206,7 @@ The tree view of maven projects should update when any pom.xml is created/modifi
 ## Pom.xml file completion
 ### Dependency completion
 1. In the `<dependencies>` section, type `<` and accept the suggested `dependency` maven snippet.
-2. Hit Ctrl + Space.
+2. Press `Ctrl + Space`.
 3. Verify:
     1. The snippet is correctly inserted.
     2. The IntelliSense is correctly worked for `<groupId>`, `<artifactId>` and `<version>`.
