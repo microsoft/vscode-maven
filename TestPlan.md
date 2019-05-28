@@ -17,15 +17,25 @@
 2. Verify: 
     1. It opens the corresponding POM file in editor.
 
-### Generate Effective POM file
+### Show Effective POM file
 1. Right-click on project item
-2. Click `Effective POM`
+2. Click `Show Effective POM`
 3. Verify: 
-    1. It shows `Generating effective pom ...` in status bar during generating.
-    2. Once the operation is over, message is cleaned from status bar, and it opens the Effective POM in editor.
+    1. It opens the Effective POM in editor.
 4. Right-click on `pom.xml` in the file explorer view.
-5. Click on `Effective POM`
+5. Click on `Show Effective POM`
 6. Verify that it should have the same behaviour as above.
+
+### Update Effective POM file automatically
+1. Open user settings, set `true` for `maven.pomfile.autoUpdateEffectivePOM`.
+2. Change pom file and save it.
+3. Verify:
+    1. It shows `Generating effective pom ...` in status bar during generating. 
+    2. Once the operation is over, the message is cleaned from the status bar.
+4. Set `false` for `maven.pomfile.autoUpdateEffectivePOM`. 
+5. Change pom file and save it.
+6. Verify:
+    1. It does not update effective pom automatically.
 
 ### Execute Maven goals
 1. Right-click on project item
@@ -70,6 +80,12 @@
     1. It should show favorite commands in a drop-down list.
     2. Click one, it should execute the corresponding maven command.
 
+### Support POM files with customized name
+1. Open user settings, set a value for `maven.pomfile.globPattern`, e.g. `**/*-pom.xml`, press `Enter`.
+2. Refresh maven projects explorer.
+3. Verify:
+    1. The corresponding project items are listed in sidebar. 
+
 ## Maven Archetypes
 ### Generate project from maven archetypes
 1. Right-click a target folder in file explorer view.
@@ -96,7 +112,6 @@
     1. It opens an integrated terminal, and navigates to the target folder you previously selected.
     2. It issues the corresponding maven command (archetype:generate) with correct parameters.
     3. You can interactively continue to fill in missing params in the terminal to complete the task.
-
 
 ### Update Maven Archetype Catalog
 1. Open command palatte
@@ -146,7 +161,7 @@ The tree view of maven projects should update when any pom.xml is created/modifi
 
 ## Maven Executable Options and Enviroment Variables
 ### Maven Options
-1. Open user settings, set a value for `maven.executable.options`, e.g. "-o".
+1. Open user settings, set a value for `maven.executable.options`, e.g. `-o`.
 2. Right click on a project to trigger a maven command.
 3. Verify:
     1. The command executed in the terminal should have the options appended.
@@ -162,7 +177,8 @@ The tree view of maven projects should update when any pom.xml is created/modifi
     "maven.terminal.useJavaHome": true      // Use the Red Hat Java Language Support Setting for JAVA_HOME
     ```
 4. Trigger a maven command, in the newly created terminal, verify:
-    1. value of env `JAVA_HOME` should be the value you just set in `java.home`
+    1. On Windows platform, input `$Env:JAVA_HOME` in Powershell or `set JAVA_HOME` in CMD and press `Enter`, the value of env `JAVA_HOME` should be the value you just set in `java.home`.
+    2. On Mac/Linux platform, input `echo $JAVA_HOME` and press `Enter`, the value of env `JAVA_HOME` should be the value you just set in `java.home`.
 
 ### General Environment Variables
 1. Specify a environment variable `MAVEN_OPTS` in settings, e.g.
@@ -177,7 +193,8 @@ The tree view of maven projects should update when any pom.xml is created/modifi
         }
     ```
 2. Trigger a maven command, in the newly created terminal, verify:
-    1. value of env `MAVEN_OPTS` should be the value you just set in settings.
+    1. On Windows platform, input `$Env:MAVEN_OPTS` in Powershell or `set MAVEN_OPTS` in CMD and press `Enter`, the value of env `MAVEN_OPTS` should be the value you just set in settings.
+    2. On Mac/Linux platform, input `echo $MAVEN_OPTS` and press `Enter`, the value of env `MAVEN_OPTS` should be the value you just set in settings.
 
 ### Guide to Troubleshooting page if error occurs. 
 1. Make sure `mvn` is not in PATH, or you have set wrong `maven.executable.path` in VS Code.
@@ -185,6 +202,13 @@ The tree view of maven projects should update when any pom.xml is created/modifi
     1. It shows a message box for the issue and detailed error message.
     2. Click `Learn more`, it previews `Troubleshooting.md` in the editor.
 
+## Pom.xml file completion
+### Dependency completion
+1. In the `<dependencies>` section, type `<` and accept the suggested `dependency` maven snippet.
+2. Press `Ctrl + Space`.
+3. Verify:
+    1. The snippet is correctly inserted.
+    2. The IntelliSense is correctly worked for `<groupId>`, `<artifactId>` and `<version>`.
 
 ## Others
 
