@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.17.1
+#### Fixed
+- Provide a workaround for default shell detection. [#319](https://github.com/microsoft/vscode-maven/issues/319)
+
 ## 0.17.0
 #### Added
 - Add new config `maven.pomfile.globPattern`, which specifies how the extension searchs for POM files. [#316](https://github.com/microsoft/vscode-maven/issues/316)
