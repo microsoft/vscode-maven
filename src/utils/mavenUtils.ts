@@ -9,7 +9,7 @@ import * as vscode from "vscode";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { ITerminalOptions, mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
-import { getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
+import { getPathToTempFolder, getPathToWorkspaceStorage, getPathToExtensionRoot } from "./contextUtils";
 import { updateLRUCommands } from "./historyUtils";
 
 export async function rawEffectivePom(pomPath: string): Promise<string | undefined> {
@@ -97,20 +97,20 @@ export async function executeInTerminal(command: string, pomfile?: string, optio
 }
 
 async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promise<string> {
-    if (!workspaceFolder) {
-        const executableFromSettings: string | undefined = Settings.Executable.path();
-        return executableFromSettings ? executableFromSettings : "mvn";
+    const workspaceFolderUri : vscode.Uri | undefined = workspaceFolder && workspaceFolder.uri;
+    const mvnPathFromSettings = Settings.Executable.path(workspaceFolderUri);
+    if (mvnPathFromSettings) {
+        return mvnPathFromSettings;
     }
 
-    const executablePathInConf: string | undefined = Settings.Executable.path(workspaceFolder.uri);
-    if (executablePathInConf) {
-        return path.resolve(workspaceFolder.uri.fsPath, executablePathInConf);
-    }
-
-    const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(workspaceFolder.uri);
-    const mvnwPathWithoutExt: string = path.join(workspaceFolder.uri.fsPath, "mvnw");
-    if (preferMavenWrapper && await fse.pathExists(mvnwPathWithoutExt)) {
-        return mvnwPathWithoutExt;
+    const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(workspaceFolderUri);
+    if (preferMavenWrapper) {
+        const localMvnwPath: string | undefined = workspaceFolderUri && path.join(workspaceFolderUri.fsPath, "mvnw");
+        if (localMvnwPath && await fse.pathExists(localMvnwPath)) {
+            return localMvnwPath;
+        } else {
+            return getPathToExtensionRoot("mvnw", "mvnw");
+        }
     } else {
         return "mvn";
     }
