@@ -2,12 +2,11 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-// import { Utils } from "../../Utils";
+import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
-import { mavenExplorerProvider } from "../mavenExplorerProvider";
 
 export class PluginsMenu extends Menu implements ITreeItem {
     constructor(project: MavenProject) {

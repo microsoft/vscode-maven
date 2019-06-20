@@ -120,13 +120,10 @@ async function getCDCommand(cwd: string): Promise<string> {
 
 function currentWindowsShell(): WindowsShellType {
     let currentWindowsShellPath: string | undefined = Settings.External.defaultWindowsShell();
-    if (currentWindowsShellPath === undefined) {
-        return WindowsShellType.OHTERS;
-    }
-
-    if (currentWindowsShellPath === null) {
+    if (!currentWindowsShellPath) {
         currentWindowsShellPath = getDefaultShell();
     }
+
     if (currentWindowsShellPath.endsWith("cmd.exe")) {
         return WindowsShellType.CMD;
     } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
@@ -191,9 +188,9 @@ function getDefaultShell(): string {
 let _TERMINAL_DEFAULT_SHELL_WINDOWS: string | null = null;
 function getTerminalDefaultShellWindows(): string {
     if (!_TERMINAL_DEFAULT_SHELL_WINDOWS) {
-        const isAtLeastWindows10 = os.platform() === "win32" && parseFloat(os.release()) >= 10;
-        const is32ProcessOn64Windows = process.env.hasOwnProperty("PROCESSOR_ARCHITEW6432");
-        const powerShellPath = `${process.env.windir}\\${is32ProcessOn64Windows ? "Sysnative" : "System32"}\\WindowsPowerShell\\v1.0\\powershell.exe`;
+        const isAtLeastWindows10: boolean = os.platform() === "win32" && parseFloat(os.release()) >= 10;
+        const is32ProcessOn64Windows: boolean = process.env.hasOwnProperty("PROCESSOR_ARCHITEW6432");
+        const powerShellPath: string = `${process.env.windir}\\${is32ProcessOn64Windows ? "Sysnative" : "System32"}\\WindowsPowerShell\\v1.0\\powershell.exe`;
         _TERMINAL_DEFAULT_SHELL_WINDOWS = isAtLeastWindows10 ? powerShellPath : getWindowsShell();
     }
     return _TERMINAL_DEFAULT_SHELL_WINDOWS;
