@@ -167,10 +167,12 @@ function registerConfigChangeListner(context: vscode.ExtensionContext): void {
         // close all terminals with outdated JAVA related environment variables
         if (e.affectsConfiguration("maven.terminal.useJavaHome")
             || e.affectsConfiguration("maven.terminal.customEnv")
-            || Settings.Terminal.useJavaHome() && e.affectsConfiguration("java.home")
+            || e.affectsConfiguration("java.home") && Settings.Terminal.useJavaHome()
         ) {
             mavenTerminal.closeAllTerminals();
-        } else if (e.affectsConfiguration("maven.view")) {
+        }
+        if (e.affectsConfiguration("maven.view")
+            || e.affectsConfiguration("maven.pomfile.globPattern")) {
             mavenExplorerProvider.refresh();
         }
     });
