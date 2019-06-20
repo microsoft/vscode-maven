@@ -4,7 +4,7 @@
     "contributes.commands.maven.goal.custom": "自定义…",
     "contributes.commands.maven.project.effectivePom": "显示有效的 POM",
     "contributes.commands.maven.project.openPom": "打开 POM 文件",
-    "contributes.commands.maven.archetype.generate": "从 Maven 原型生成新项目",
+    "contributes.commands.maven.archetype.generate": "从 Maven 原型创建新项目",
     "contributes.commands.maven.archetype.update": "更新 Maven 原型目录",
     "contributes.commands.maven.history": "历史…",
     "contributes.commands.maven.goal.execute": "执行命令",
