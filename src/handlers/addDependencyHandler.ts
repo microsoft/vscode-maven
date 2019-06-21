@@ -25,7 +25,7 @@ export async function addDependencyHandler(): Promise<void> {
         return;
     }
 
-    const selectedDoc: IArtifactMetadata | undefined = await vscode.window.showQuickPick(
+    const selectedDoc: IArtifactMetadata | undefined = await vscode.window.showQuickPick<vscode.QuickPickItem & { value: IArtifactMetadata }>(
         getArtifacts(keywordString.trim().split(/[-,. :]/)).then(artifacts => artifacts.map(artifact => ({ value: artifact, label: `$(package) ${artifact.a}`, description: artifact.g }))),
         { placeHolder: "Select a dependency ..." }
     ).then(selected => selected ? selected.value : undefined);
@@ -60,7 +60,7 @@ async function insertDependency(targetNode: ElementNode, gid: string, aid: strin
     if (!vscode.window.activeTextEditor) {
         throw new Error("No POM file is open.");
     }
-    if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined){
+    if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined) {
         throw new Error("Invalid target XML node to insert dependency.");
     }
 
@@ -90,7 +90,7 @@ async function insertDependency(targetNode: ElementNode, gid: string, aid: strin
     vscode.window.activeTextEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
 }
 
-function constructDependencyNode(gid: string, aid: string, version: string,  baseIndent: string, indent: string, eol: string): string {
+function constructDependencyNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
     return [
         eol,
         "<dependency>",

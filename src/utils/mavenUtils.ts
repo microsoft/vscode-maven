@@ -6,12 +6,12 @@ import * as fse from "fs-extra";
 import * as md5 from "md5";
 import * as path from "path";
 import * as vscode from "vscode";
+import * as which from "which";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { ITerminalOptions, mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
 import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { updateLRUCommands } from "./historyUtils";
-import * as which from "which";
 
 export async function rawEffectivePom(pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempTolder(pomPath);
@@ -41,7 +41,7 @@ export async function pluginDescription(pluginId: string, pomPath: string): Prom
 async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<any> {
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const mvn: string = await getMaven(workspaceFolder);
-    const command: string = await wrappedWithQuotes(mvn);
+    const command: string = wrappedWithQuotes(mvn);
     const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
     const userArgs: string | undefined = Settings.Executable.options(pomfile);
     const matched: RegExpMatchArray | null = [mvnArgs, userArgs].filter(Boolean).join(" ").match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
