@@ -520,6 +520,7 @@
     "@types/md5": "^2.1.33",
     "@types/minimatch": "^3.0.3",
     "@types/node": "^8.10.40",
+    "@types/which": "^1.3.1",
     "@types/xml2js": "^0.4.3",
     "ts-loader": "^4.4.2",
     "tslint": "^5.13.0",
@@ -537,6 +538,7 @@
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
     "vscode-extension-telemetry-wrapper": "^0.4.0",
+    "which": "^1.3.1",
     "xml-zero-lexer": "^2.0.5",
     "xml2js": "^0.4.19"
   }

@@ -9,8 +9,9 @@ import * as vscode from "vscode";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { ITerminalOptions, mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
-import { getPathToTempFolder, getPathToWorkspaceStorage, getPathToExtensionRoot } from "./contextUtils";
+import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { updateLRUCommands } from "./historyUtils";
+import * as which from "which";
 
 export async function rawEffectivePom(pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempTolder(pomPath);
@@ -98,22 +99,31 @@ export async function executeInTerminal(command: string, pomfile?: string, optio
 
 async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promise<string> {
     const workspaceFolderUri : vscode.Uri | undefined = workspaceFolder && workspaceFolder.uri;
-    const mvnPathFromSettings = Settings.Executable.path(workspaceFolderUri);
+    const mvnPathFromSettings: string | undefined = Settings.Executable.path(workspaceFolderUri);
     if (mvnPathFromSettings) {
         return mvnPathFromSettings;
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(workspaceFolderUri);
-    if (preferMavenWrapper) {
-        const localMvnwPath: string | undefined = workspaceFolderUri && path.join(workspaceFolderUri.fsPath, "mvnw");
-        if (localMvnwPath && await fse.pathExists(localMvnwPath)) {
-            return localMvnwPath;
-        } else {
-            return getPathToExtensionRoot("mvnw", "mvnw");
-        }
+    const localMvnwPath: string | undefined = workspaceFolderUri && path.join(workspaceFolderUri.fsPath, "mvnw");
+    if (preferMavenWrapper && localMvnwPath && await fse.pathExists(localMvnwPath)) {
+        return localMvnwPath;
     } else {
-        return "mvn";
+        return await defaultMavenExecutable();
     }
+}
+
+async function defaultMavenExecutable(): Promise<string> {
+    return new Promise<string>((resolve) => {
+        which("mvn", (_err, filepath) => {
+            if (filepath) {
+                resolve("mvn");
+            } else {
+                mavenOutputChannel.appendLine("Maven executable not found in PATH, use embeded mvnw as fallback.");
+                resolve(getPathToExtensionRoot("mvnw", "mvnw"));
+            }
+        });
+    });
 }
 
 function wrappedWithQuotes(mvn: string): string {
