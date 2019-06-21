@@ -4,7 +4,7 @@
     "contributes.commands.maven.goal.custom": "Custom ... ",
     "contributes.commands.maven.project.effectivePom": "Show Effective POM",
     "contributes.commands.maven.project.openPom": "Open POM file",
-    "contributes.commands.maven.archetype.generate": "Generate from Maven Archetype",
+    "contributes.commands.maven.archetype.generate": "Create Maven Project",
     "contributes.commands.maven.archetype.update": "Update Maven Archetype Catalog",
     "contributes.commands.maven.history": "History ...",
     "contributes.commands.maven.goal.execute": "Execute commands",
