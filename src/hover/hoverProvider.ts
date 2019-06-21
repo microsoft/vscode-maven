@@ -25,7 +25,7 @@ class HoverProvider implements vscode.HoverProvider {
                 const groupIdHint: string | undefined = groupIdNode && groupIdNode.text;
                 const artifactIdHint: string | undefined = artifactIdNode && artifactIdNode.text;
                 if (groupIdHint && artifactIdHint) {
-                    const effectiveVersion: string | undefined= getEffectiveVersion(document.uri, groupIdHint, artifactIdHint);
+                    const effectiveVersion: string | undefined = getEffectiveVersion(document.uri, groupIdHint, artifactIdHint);
                     if (effectiveVersion) {
                         return new vscode.Hover([
                             `gourpId = ${groupIdHint}`,

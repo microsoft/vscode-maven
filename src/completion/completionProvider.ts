@@ -26,6 +26,7 @@ const pluginSnippetString: string = [
 
 class CompletionProvider implements vscode.CompletionItemProvider {
 
+    // tslint:disable-next-line:cyclomatic-complexity
     public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
         const documentText: string = document.getText();
         const cursorOffset: number = document.offsetAt(position);
@@ -87,7 +88,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             case XmlTagName.Dependencies: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("dependency", vscode.CompletionItemKind.Snippet);
                 const snippetContent: string = trimBrackets(dependencySnippetString, documentText, cursorOffset);
-                const dependencySnippet = new vscode.SnippetString(snippetContent);
+                const dependencySnippet: vscode.SnippetString = new vscode.SnippetString(snippetContent);
                 snippetItem.insertText = dependencySnippet;
                 snippetItem.detail = "Maven Snippet";
                 snippetItem.command = {
@@ -99,7 +100,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             case XmlTagName.Plugins: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
                 const snippetContent: string = trimBrackets(pluginSnippetString, documentText, cursorOffset);
-                const pluginSnippet = new vscode.SnippetString(snippetContent);
+                const pluginSnippet: vscode.SnippetString = new vscode.SnippetString(snippetContent);
                 snippetItem.insertText = pluginSnippet;
                 snippetItem.detail = "Maven Snippet";
                 snippetItem.command = {
@@ -121,7 +122,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
 function trimBrackets(snippetContent: string, fileContent: string, offset: number): string {
     let ret: string = snippetContent;
     // trim left "<" when previous chars contain "<"
-    const sectionStart = fileContent.lastIndexOf(">", offset - 1) + 1;
+    const sectionStart: number = fileContent.lastIndexOf(">", offset - 1) + 1;
     const preChars: string = fileContent.slice(sectionStart, offset).trim();
     if (preChars.startsWith("<")) {
         ret = ret.slice(1, ret.length);
@@ -130,7 +131,7 @@ function trimBrackets(snippetContent: string, fileContent: string, offset: numbe
     const postChar: string = fileContent[offset];
     if (postChar === ">") {
         ret = ret.slice(0, ret.length - 1);
-    } 
+    }
     return ret;
 }
 

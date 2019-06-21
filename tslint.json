@@ -80,7 +80,6 @@
         "no-unsafe-any": false,
         "no-unsafe-finally": true,
         "no-unused-expression": true,
-        "no-use-before-declare": true,
         "no-with-statement": true,
         "promise-function-async": true,
         "promise-must-complete": true,

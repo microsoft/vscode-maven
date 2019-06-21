@@ -5,17 +5,17 @@ import * as fg from "fast-glob";
 import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
+import { getMavenLocalRepository } from "../utils/contextUtils";
 import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getSortText } from "./versionUtils";
-import { getMavenLocalRepository } from "../utils/contextUtils";
 
 class LocalProvider implements IMavenCompletionItemProvider {
 
     public async getGroupIdCandidates(groupIdHint: string): Promise<vscode.CompletionItem[]> {
         const packageSegments: string[] = groupIdHint.split(".");
         packageSegments.pop();
-        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments).catch(console.log) || [];
+        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments).catch(console.error) || [];
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "groupId", source: "maven-local" }]
@@ -34,7 +34,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
             return [];
         }
 
-        const validArtifactIds: string[] = await this.searchForArtifactIds(groupId).catch(console.log) || [];
+        const validArtifactIds: string[] = await this.searchForArtifactIds(groupId).catch(console.error) || [];
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "artifactId", source: "maven-local" }]
@@ -53,7 +53,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
             return [];
         }
 
-        const validVersions: string[] = await this.searchForVersions(groupId, artifactId).catch(console.log) || [];
+        const validVersions: string[] = await this.searchForVersions(groupId, artifactId).catch(console.error) || [];
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "version", source: "maven-local" }]

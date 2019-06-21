@@ -3,10 +3,10 @@
 
 import * as fse from "fs-extra";
 import * as path from "path";
-import { Uri, window, workspace, QuickPickItem } from "vscode";
+import { QuickPickItem, Uri, window, workspace } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
-import { getPathToExtensionRoot, getMavenLocalRepository } from "../utils/contextUtils";
+import { getMavenLocalRepository, getPathToExtensionRoot } from "../utils/contextUtils";
 import { executeInTerminal } from "../utils/mavenUtils";
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";

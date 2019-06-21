@@ -100,7 +100,7 @@ export namespace Utils {
 
     export async function getAllPomPaths(workspaceFolder: WorkspaceFolder): Promise<string[]> {
         const exclusions: string[] = Settings.excludedFolders(workspaceFolder.uri);
-        const pattern = Settings.Pomfile.globPattern();
+        const pattern: string = Settings.Pomfile.globPattern();
         const pomFileUris: Uri[] = await workspace.findFiles(new RelativePattern(workspaceFolder, pattern), `{${exclusions.join(",")}}`);
         return pomFileUris.map(_uri => _uri.fsPath);
     }
