@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.18.0
+#### Added
+- Fallback to use an embedded Maven wrapper if no availble Maven executable is found. [PR#344](https://github.com/microsoft/vscode-maven/pull/344)
+- Refresh explorer when config `maven.pomfile.globPattern` changes. [#334](https://github.com/microsoft/vscode-maven/issues/334)
+
+#### Changed
+- Change command name "Generate from Maven Archetype" to "Create Maven Project" for clarity. [#345](https://github.com/microsoft/vscode-maven/issues/345)
+
 ## 0.17.1
 #### Fixed
 - Provide a workaround for default shell detection. [#319](https://github.com/microsoft/vscode-maven/issues/319)
