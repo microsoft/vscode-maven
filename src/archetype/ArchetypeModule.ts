@@ -7,7 +7,7 @@ import { QuickPickItem, Uri, window, workspace } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
 import { getMavenLocalRepository, getPathToExtensionRoot } from "../utils/contextUtils";
-import { executeInTerminal } from "../utils/mavenUtils";
+import { executeInTerminal, getEmbededMavenWrapper, getMaven } from "../utils/mavenUtils";
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
@@ -40,13 +40,20 @@ export namespace ArchetypeModule {
         return cwd;
     }
 
-    async function executeInTerminalHandler(archetypeGroupId: string, archetypeArtifactId: string, cwd: string): Promise<void> {
-        const cmd: string = [
+    async function executeInTerminalHandler(archetypeGroupId: string, archetypeArtifactId: string, targetFolder: string): Promise<void> {
+        const cmdArgs: string[] = [
             "archetype:generate",
             `-DarchetypeArtifactId="${archetypeArtifactId}"`,
             `-DarchetypeGroupId="${archetypeGroupId}"`
-        ].join(" ");
-        await executeInTerminal(cmd, undefined, { name: "Maven archetype", cwd });
+        ];
+        let mvnPath: string | undefined;
+        let cwd: string = targetFolder;
+        if (!await getMaven()) {
+            cmdArgs.push(`-DoutputDirectory="${targetFolder}"`);
+            mvnPath = getEmbededMavenWrapper();
+            cwd = path.dirname(mvnPath);
+        }
+        await executeInTerminal({ mvnPath, command: cmdArgs.join(" "), pomfile: undefined, terminalName: "Maven archetype", cwd });
     }
 
     export async function generateFromArchetype(entry: Uri | undefined, operationId: string): Promise<void> {

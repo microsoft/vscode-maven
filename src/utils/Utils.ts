@@ -189,7 +189,7 @@ export namespace Utils {
         const inputGoals: string | undefined = await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
         const trimmedGoals: string | undefined = inputGoals ? inputGoals.trim() : undefined;
         if (trimmedGoals) {
-            await executeInTerminal(trimmedGoals, pomPath);
+            await executeInTerminal({ command: trimmedGoals, pomfile: pomPath });
         }
     }
 
@@ -209,7 +209,7 @@ export namespace Utils {
             { placeHolder: "Select from history ...", ignoreFocusOut: true }
         ).then(item => item ? item.value : undefined);
         if (selected) {
-            await executeInTerminal(selected.command, selected.pomPath);
+            await executeInTerminal({ command: selected.command, pomfile: selected.pomPath });
         }
     }
 

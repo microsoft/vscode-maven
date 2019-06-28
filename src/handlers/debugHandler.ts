@@ -26,10 +26,16 @@ async function debug(pomPath: string, command: string): Promise<void> {
         `-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=${freePort}` // MAVEN_DEBUG_OPTS
     ].filter(Boolean).join(" ");
     const sessionId: string = createUuid().substr(0, 6);
-    const debugTerimnal: vscode.Terminal = await executeInTerminal(command, pomPath, {
-        name: `mvnDebug ${sessionId}: ${command}`,
+    const debugTerimnal: vscode.Terminal | undefined = await executeInTerminal({
+        command,
+        pomfile: pomPath,
+        terminalName: `mvnDebug ${sessionId}: ${command}`,
         env: { MAVEN_OPTS: mavenOpts }
     });
+    if (!debugTerimnal) {
+        return;
+    }
+
     const debugConfig: vscode.DebugConfiguration = {
         type: "java",
         name: `Maven (Attach) - ${sessionId}`,
