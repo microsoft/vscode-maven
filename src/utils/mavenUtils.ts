@@ -8,7 +8,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as which from "which";
 import { mavenOutputChannel } from "../mavenOutputChannel";
-import { ITerminalOptions, mavenTerminal } from "../mavenTerminal";
+import { mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
 import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { updateLRUCommands } from "./historyUtils";
@@ -40,7 +40,12 @@ export async function pluginDescription(pluginId: string, pomPath: string): Prom
 
 async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<any> {
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const mvn: string = await getMaven(workspaceFolder);
+    const mvn: string | undefined = await getMaven(workspaceFolder);
+    if (mvn === undefined) {
+        await promptToSettingMavenExecutable();
+        return undefined;
+    }
+
     const command: string = wrappedWithQuotes(mvn);
     const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
     const userArgs: string | undefined = Settings.Executable.options(pomfile);
@@ -80,25 +85,39 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
     });
 }
 
-export async function executeInTerminal(command: string, pomfile?: string, options?: ITerminalOptions): Promise<vscode.Terminal> {
+export async function executeInTerminal(options: {
+    command: string;
+    mvnPath?: string;
+    pomfile?: string;
+    cwd?: string;
+    env?: { [key: string]: string };
+    terminalName?: string;
+}): Promise<vscode.Terminal | undefined> {
+    const {command, mvnPath, pomfile, cwd, env, terminalName} = options;
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(await getMaven(workspaceFolder)));
+    const mvn: string | undefined = mvnPath ? mvnPath : await getMaven(workspaceFolder);
+    if (mvn === undefined) {
+        await promptToSettingMavenExecutable();
+        return undefined;
+    }
+
+    const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvn));
     const fullCommand: string = [
         mvnString,
         command.trim(),
         pomfile && `-f "${await mavenTerminal.formattedPathForTerminal(pomfile)}"`,
         Settings.Executable.options(pomfile)
     ].filter(Boolean).join(" ");
-    const name: string = workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven";
-    const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, Object.assign({ name }, options));
+    const name: string = terminalName || (workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven");
+    const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, {name, cwd, env});
     if (pomfile) {
         await updateLRUCommands(command, pomfile);
     }
     return terminal;
 }
 
-async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promise<string> {
-    const workspaceFolderUri : vscode.Uri | undefined = workspaceFolder && workspaceFolder.uri;
+export async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promise<string | undefined> {
+    const workspaceFolderUri: vscode.Uri | undefined = workspaceFolder && workspaceFolder.uri;
     const mvnPathFromSettings: string | undefined = Settings.Executable.path(workspaceFolderUri);
     if (mvnPathFromSettings) {
         return mvnPathFromSettings;
@@ -113,14 +132,18 @@ async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promise<strin
     }
 }
 
+export function getEmbeddedMavenWrapper(): string {
+    return getPathToExtensionRoot("mvnw", "mvnw");
+}
+
 async function defaultMavenExecutable(): Promise<string> {
     return new Promise<string>((resolve) => {
         which("mvn", (_err, filepath) => {
             if (filepath) {
                 resolve("mvn");
             } else {
-                mavenOutputChannel.appendLine("Maven executable not found in PATH, use embeded mvnw as fallback.");
-                resolve(getPathToExtensionRoot("mvnw", "mvnw"));
+                mavenOutputChannel.appendLine("Maven executable not found in PATH.");
+                resolve(undefined);
             }
         });
     });
@@ -144,4 +167,12 @@ async function readFileIfExists(filepath: string): Promise<string | undefined> {
 function getTempTolder(identifier: string): string {
     const outputPath: string | undefined = getPathToWorkspaceStorage(md5(identifier));
     return outputPath ? outputPath : getPathToTempFolder(md5(identifier));
+}
+
+async function promptToSettingMavenExecutable(): Promise<void> {
+    const BUTTON_GOTO_SETTINGS: string = "Open Settings";
+    const choice: string | undefined = await vscode.window.showInformationMessage("Maven executable not found in PATH. Please specify maven.executable.path in Settings.", BUTTON_GOTO_SETTINGS);
+    if (choice === BUTTON_GOTO_SETTINGS) {
+        await vscode.commands.executeCommand("workbench.action.openSettings", "maven.executable.path");
+    }
 }

@@ -66,7 +66,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
     // register common goals
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal(goal, node.pomPath));
+        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
     });
     registerCommand(context, "maven.explorer.refresh", async (item?: ITreeItem): Promise<void> => {
         if (item && item.refresh) {
@@ -101,7 +101,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     });
     registerCommand(context, "maven.favorites", async (item: MavenProject | undefined) => await runFavoriteCommandsHandler(item));
     registerCommand(context, "maven.goal.execute", async () => await Utils.executeMavenCommand());
-    registerCommand(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal(pluginGoal.name, pluginGoal.plugin.project.pomPath));
+    registerCommand(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.name, pomfile: pluginGoal.plugin.project.pomPath }));
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());
     registerCommand(context, "maven.view.hierarchical", () => Settings.changeToHierarchicalView());
 

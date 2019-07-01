@@ -51,5 +51,5 @@ export async function runFavoriteCommandsHandler(project: MavenProject | undefin
         return;
     }
 
-    await executeInTerminal(selectedCommand.command, selectedProject.pomPath);
+    await executeInTerminal({ command: selectedCommand.command, pomfile: selectedProject.pomPath });
 }
