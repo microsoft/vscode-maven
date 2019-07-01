@@ -3,7 +3,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## 0.18.0
 #### Added
-- Fallback to use an embedded Maven wrapper if no availble Maven executable is found. [PR#344](https://github.com/microsoft/vscode-maven/pull/344)
+- For Maven project creation:
+  - Fallback to use an embedded Maven wrapper if no availble Maven executable is found. [PR#344](https://github.com/microsoft/vscode-maven/pull/344)
+  - Support to select archetype version. [#354](https://github.com/microsoft/vscode-maven/issues/354)
 - Refresh explorer when config `maven.pomfile.globPattern` changes. [#334](https://github.com/microsoft/vscode-maven/issues/334)
 
 #### Changed
