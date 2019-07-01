@@ -16,7 +16,7 @@ const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/mave
 const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
 
 export namespace ArchetypeModule {
-    async function selectArchetype(): Promise<Archetype> {
+    async function selectArchetype(): Promise<{ artifactId: string, groupId: string, version: string }> {
         let selectedArchetype: Archetype | undefined | null = await showQuickPickForArchetypes();
         while (selectedArchetype === null) {
             selectedArchetype = await showQuickPickForArchetypes(true);
@@ -24,8 +24,14 @@ export namespace ArchetypeModule {
         if (selectedArchetype === undefined) {
             throw new OperationCanceledError("Archetype not selected.");
         }
-
-        return selectedArchetype;
+        const version: string | undefined = await window.showQuickPick(selectedArchetype.versions, {
+            placeHolder: "Select a version ..."
+        });
+        if (version === undefined) {
+            throw new OperationCanceledError("Archetype version not selected.");
+        }
+        const { artifactId, groupId } = selectedArchetype;
+        return { artifactId, groupId, version };
     }
 
     async function chooseTargetFolder(entry: Uri | undefined): Promise<string> {
@@ -40,11 +46,12 @@ export namespace ArchetypeModule {
         return cwd;
     }
 
-    async function executeInTerminalHandler(archetypeGroupId: string, archetypeArtifactId: string, targetFolder: string): Promise<void> {
+    async function executeInTerminalHandler(archetypeGroupId: string, archetypeArtifactId: string, archetypeVersion: string, targetFolder: string): Promise<void> {
         const cmdArgs: string[] = [
             "archetype:generate",
             `-DarchetypeArtifactId="${archetypeArtifactId}"`,
-            `-DarchetypeGroupId="${archetypeGroupId}"`
+            `-DarchetypeGroupId="${archetypeGroupId}"`,
+            `-DarchetypeVersion="${archetypeVersion}"`
         ];
         let mvnPath: string | undefined;
         let cwd: string = targetFolder;
@@ -58,8 +65,8 @@ export namespace ArchetypeModule {
 
     export async function generateFromArchetype(entry: Uri | undefined, operationId: string): Promise<void> {
         // select archetype.
-        const { artifactId, groupId } = await instrumentOperationStep(operationId, "selectArchetype", selectArchetype)();
-        sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId });
+        const { artifactId, groupId, version } = await instrumentOperationStep(operationId, "selectArchetype", selectArchetype)();
+        sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId, archetypeVersion: version });
 
         // choose target folder.
         let targetFolderHint: Uri | undefined;
@@ -71,7 +78,7 @@ export namespace ArchetypeModule {
         const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(targetFolderHint);
 
         // execute in terminal.
-        await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminalHandler)(groupId, artifactId, cwd);
+        await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminalHandler)(groupId, artifactId, version, cwd);
     }
 
     export async function updateArchetypeCatalog(): Promise<void> {
