@@ -89,26 +89,28 @@
 ## Maven Archetypes
 ### Generate project from maven archetypes
 1. Right-click a target folder in file explorer view.
-2. Click `Generate from Maven Archetype`.
+2. Click `Create Maven Project`.
 3. Verify:
     1. It should show a dropdown list of popular maven archetypes.
     2. The first item is `More ...`.
 4. Select one of the listed archetype.
-5. Select the target folder in the popup dialog.
-6. Verify: 
+5. Select one of the listed version.
+6. Select the target folder in the popup dialog.
+7. Verify: 
     1. It opens an integrated terminal, and navigates to the target folder you previously selected.
     2. It issues the corresponding maven command (archetype:generate) with correct parameters.
     3. You can interactively continue to fill in missing params in the terminal to complete the task.
 
 ### Generate project from maven archetypes (for empty workspace)
 1. Open Command Palette.
-2. Click `Maven: Generate from Maven Archetype`.
+2. Click `Maven: Create Maven Project`.
 3. Verify:
     1. It should show a dropdown list of popular maven archetypes.
     2. The first item is `More ...`.
 4. Select one of the listed archetype.
-5. Select the target folder in the popup dialog.
-6. Verify: 
+5. Select one of the listed version.
+6. Select the target folder in the popup dialog.
+7. Verify: 
     1. It opens an integrated terminal, and navigates to the target folder you previously selected.
     2. It issues the corresponding maven command (archetype:generate) with correct parameters.
     3. You can interactively continue to fill in missing params in the terminal to complete the task.
@@ -124,7 +126,7 @@
 ## Executable related
 ### Maven Wrapper support
 1. Clone code https://github.com/Microsoft/todo-app-java-on-azure.git
-2. Test `clean`, `Generate project from Maven Archetype` and `Effective POM`.
+2. Test `clean`, `Create Maven Project` and `Effective POM`.
 3. Verify: 
     1. It uses `./mvnw` in the root folder as executable, and no error occurs.
    
@@ -134,9 +136,17 @@
 3. Change value of `maven.executable.path` according to the maven executable absolute path.
     * For maven executables, use path of `mvn` / `mvn.cmd`
     * For maven wrapper, use path of `mvnw` / `mvnw.cmd`
-4. Test `clean`, `Generate project from Maven Archetype` and `Effective POM`.
+4. Test `clean`, `Create Maven Project` and `Effective POM`.
 5. Verify: 
     1. Corresponding executable is used and commands can be successfully executed with no error.
+
+### Fallback Embedded Maven Wrapper
+1. Make sure `mvn` is not in `PATH`, i.e., you can not directly run `mvn`.
+2. Launch VS Code without opening any folder.
+3. Open Command Palette and click `Maven: Create Maven Project`.
+4. Select archetype, version, and target folder.
+5. Verify:
+    1. It should create project in the target folder.
 
 ## Pom.xml file watcher
 The tree view of maven projects should update when any pom.xml is created/modified/deleted in the current workspace.
