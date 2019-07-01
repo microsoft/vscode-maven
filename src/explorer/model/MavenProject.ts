@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as _ from "lodash";
 import * as fs from "fs";
+import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Settings } from "../../Settings";
