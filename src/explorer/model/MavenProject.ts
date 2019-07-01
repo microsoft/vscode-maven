@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as _ from "lodash";
 import * as fs from "fs";
+import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Settings } from "../../Settings";
@@ -115,9 +115,9 @@ export class MavenProject implements ITreeItem {
         try {
             await this._effectivePom.update();
             mavenExplorerProvider.refresh(this);
+            return this._effectivePom.raw;
         } catch (error) {
             console.error(error);
-        } finally {
             return this._effectivePom.raw;
         }
     }
