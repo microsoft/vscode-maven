@@ -52,11 +52,11 @@ class PluginInfoProvider {
         let prefix: string | undefined;
         const goals: string[] = [];
         const rawOutput: string = await Utils.getPluginDescription(this.getPluginId(gid, aid, version), projectBasePath);
-        
+
         // Remove ANSI escape code: ESC[m, ESC[1m
         // To fix: https://github.com/microsoft/vscode-maven/issues/340#issuecomment-511125457
-        const EscChar: string = Buffer.from([0x1b]).toString();
-        const textOutput: string = rawOutput.replace(new RegExp(`${EscChar}\\[\\d*?m`, "g"), "");
+        const escChar: string = Buffer.from([0x1b]).toString();
+        const textOutput: string = rawOutput.replace(new RegExp(`${escChar}\\[\\d*?m`, "g"), "");
 
         const versionRegExp: RegExp = /^Version: (.*)/m;
         const versionMatch: string[] | null = textOutput.match(versionRegExp);
