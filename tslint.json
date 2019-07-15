@@ -187,7 +187,7 @@
             "parameter",
             // "arrow-parameter",
             "property-declaration",
-            "variable-declaration",
+            // "variable-declaration",
             "member-variable-declaration"
         ],
         "underscore-consistent-invocation": true,
