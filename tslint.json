@@ -187,7 +187,7 @@
             "parameter",
             // "arrow-parameter",
             "property-declaration",
-            // "variable-declaration",
+            "variable-declaration",
             "member-variable-declaration"
         ],
         "underscore-consistent-invocation": true,
@@ -291,5 +291,8 @@
         "no-switch-case-fall-through": false,
         "typeof-compare": false
     },
-    "rulesDirectory": "node_modules/tslint-microsoft-contrib/"
+    "rulesDirectory": "node_modules/tslint-microsoft-contrib/",
+    "linterOptions": {
+        "exclude": ["src/test/**"]
+    }
 }
