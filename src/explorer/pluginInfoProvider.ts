@@ -53,15 +53,20 @@ class PluginInfoProvider {
         const goals: string[] = [];
         const rawOutput: string = await Utils.getPluginDescription(this.getPluginId(gid, aid, version), projectBasePath);
 
+        // Remove ANSI escape code: ESC[m, ESC[1m
+        // To fix: https://github.com/microsoft/vscode-maven/issues/340#issuecomment-511125457
+        const escChar: string = Buffer.from([0x1b]).toString();
+        const textOutput: string = rawOutput.replace(new RegExp(`${escChar}\\[\\d*?m`, "g"), "");
+
         const versionRegExp: RegExp = /^Version: (.*)/m;
-        const versionMatch: string[] | null = rawOutput.match(versionRegExp);
+        const versionMatch: string[] | null = textOutput.match(versionRegExp);
         if (versionMatch !== null && versionMatch.length === 2) {
             version = versionMatch[1];
         }
 
         // find prefix
         const prefixRegExp: RegExp = /^Goal Prefix: (.*)/m;
-        const prefixMatch: string[] | null = rawOutput.match(prefixRegExp);
+        const prefixMatch: string[] | null = textOutput.match(prefixRegExp);
         if (prefixMatch !== null && prefixMatch.length === 2) {
             prefix = prefixMatch[1];
         }
@@ -69,7 +74,7 @@ class PluginInfoProvider {
         // find goals
         if (version && prefix !== undefined) {
             const goalRegExp: RegExp = new RegExp(`^${prefix}:(.*)`, "gm");
-            const goalsMatch: string[] | null = rawOutput.match(goalRegExp);
+            const goalsMatch: string[] | null = textOutput.match(goalRegExp);
             if (goalsMatch !== null) {
                 goals.push(...goalsMatch);
             }
