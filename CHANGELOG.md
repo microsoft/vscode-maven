@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.18.1
+#### Fixed
+- Cannot show plugin goals. [#340](https://github.com/microsoft/vscode-maven/issues/340)
+
 ## 0.18.0
 #### Added
 - For Maven project creation:
