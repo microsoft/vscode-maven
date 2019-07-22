@@ -126,7 +126,9 @@ export namespace Utils {
             pomxml = await getEffectivePom(pomPath);
         }
         if (!pomxml) {
-            throw new Error("Fail to get effective pom.");
+            const error: Error = new Error("Fail to get effective pom.");
+            setUserError(error);
+            throw error;
         }
 
         const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
