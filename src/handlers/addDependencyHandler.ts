@@ -2,12 +2,13 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
 
 export async function addDependencyHandler(): Promise<void> {
     if (!vscode.window.activeTextEditor) {
-        throw new Error("Please open a pom.xml file first.");
+        throw new UserError("Please open a pom.xml file first.");
     }
 
     const keywordString: string | undefined = await vscode.window.showInputBox({
@@ -37,13 +38,13 @@ export async function addDependencyHandler(): Promise<void> {
 
 async function addDependency(gid: string, aid: string, version: string): Promise<void> {
     if (!vscode.window.activeTextEditor) {
-        throw new Error("No POM file is open.");
+        throw new UserError("No POM file is open.");
     }
 
     // Find out <dependencies> node and insert content.
     const projectNodes: ElementNode[] = getNodesByTag(vscode.window.activeTextEditor.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
-        throw new Error("Only support POM file with single <project> node.");
+        throw new UserError("Only support POM file with single <project> node.");
     }
 
     const proejctNode: ElementNode = projectNodes[0];
@@ -58,10 +59,10 @@ async function addDependency(gid: string, aid: string, version: string): Promise
 
 async function insertDependency(targetNode: ElementNode, gid: string, aid: string, version: string): Promise<void> {
     if (!vscode.window.activeTextEditor) {
-        throw new Error("No POM file is open.");
+        throw new UserError("No POM file is open.");
     }
     if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined) {
-        throw new Error("Invalid target XML node to insert dependency.");
+        throw new UserError("Invalid target XML node to insert dependency.");
     }
 
     const currentDocument: vscode.TextDocument = vscode.window.activeTextEditor.document;
