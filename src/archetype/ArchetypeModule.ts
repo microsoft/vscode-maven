@@ -64,21 +64,29 @@ export namespace ArchetypeModule {
     }
 
     export async function generateFromArchetype(entry: Uri | undefined, operationId: string): Promise<void> {
-        // select archetype.
-        const { artifactId, groupId, version } = await instrumentOperationStep(operationId, "selectArchetype", selectArchetype)();
-        sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId, archetypeVersion: version });
+        try {
+            // select archetype.
+            const { artifactId, groupId, version } = await instrumentOperationStep(operationId, "selectArchetype", selectArchetype)();
+            sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId, archetypeVersion: version });
 
-        // choose target folder.
-        let targetFolderHint: Uri | undefined;
-        if (entry) {
-            targetFolderHint = entry;
-        } else if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-            targetFolderHint = workspace.workspaceFolders[0].uri;
+            // choose target folder.
+            let targetFolderHint: Uri | undefined;
+            if (entry) {
+                targetFolderHint = entry;
+            } else if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+                targetFolderHint = workspace.workspaceFolders[0].uri;
+            }
+            const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(targetFolderHint);
+
+            // execute in terminal.
+            await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminalHandler)(groupId, artifactId, version, cwd);
+        } catch (error) {
+            if (error instanceof OperationCanceledError) {
+                // swallow
+            } else {
+                throw error;
+            }
         }
-        const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(targetFolderHint);
-
-        // execute in terminal.
-        await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminalHandler)(groupId, artifactId, version, cwd);
     }
 
     export async function updateArchetypeCatalog(): Promise<void> {
