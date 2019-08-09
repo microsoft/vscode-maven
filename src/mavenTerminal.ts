@@ -119,10 +119,7 @@ async function getCDCommand(cwd: string): Promise<string> {
 }
 
 function currentWindowsShell(): WindowsShellType {
-    let currentWindowsShellPath: string | undefined = Settings.External.defaultWindowsShell();
-    if (!currentWindowsShellPath) {
-        currentWindowsShellPath = getDefaultShell();
-    }
+    const currentWindowsShellPath: string = vscode.env.shell;
 
     if (currentWindowsShellPath.endsWith("cmd.exe")) {
         return WindowsShellType.CMD;
@@ -170,31 +167,4 @@ function setupEnvForWSL(terminal: vscode.Terminal, env: { [envKey: string]: stri
             terminal.sendText(`export ${key}="${env[key]}"`, true);
         });
     }
-}
-
-/*
- Workaround for https://github.com/microsoft/vscode-maven/issues/337
- The following code is based on VS Code from https://github.com/microsoft/vscode/blob/5c65d9bfa4c56538150d7f3066318e0db2c6151f/src/vs/workbench/contrib/terminal/node/terminal.ts#L12-L55
- This is only a fall back to identify the default shell used by VSC.
- On Windows, determine the default shell.
- On others, default to bash.
-*/
-function getDefaultShell(): string {
-    if (os.platform() === "win32") {
-        return getTerminalDefaultShellWindows();
-    }
-    return "/bin/bash";
-}
-let _TERMINAL_DEFAULT_SHELL_WINDOWS: string | null = null;
-function getTerminalDefaultShellWindows(): string {
-    if (!_TERMINAL_DEFAULT_SHELL_WINDOWS) {
-        const isAtLeastWindows10: boolean = os.platform() === "win32" && parseFloat(os.release()) >= 10;
-        const is32ProcessOn64Windows: boolean = process.env.hasOwnProperty("PROCESSOR_ARCHITEW6432");
-        const powerShellPath: string = `${process.env.windir}\\${is32ProcessOn64Windows ? "Sysnative" : "System32"}\\WindowsPowerShell\\v1.0\\powershell.exe`;
-        _TERMINAL_DEFAULT_SHELL_WINDOWS = isAtLeastWindows10 ? powerShellPath : getWindowsShell();
-    }
-    return _TERMINAL_DEFAULT_SHELL_WINDOWS;
-}
-function getWindowsShell(): string {
-    return process.env.comspec || "cmd.exe";
 }
