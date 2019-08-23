@@ -182,21 +182,16 @@ Now right-click on an project item, and then click `Favorite ...`. The option `f
 
 | Name | Description | Default Value |
 |---|---|---|
-| `maven.excludedFolders` | Specifies file path pattern of folders to exclude while searching for Maven projects. | <pre><code>[ "**/.*", "**/node_modules", "**/target", "**/bin" ] </code></pre>|
+| `maven.excludedFolders` | Specifies file path pattern of folders to exclude while searching for Maven projects. | `[ "**/.*", "**/node_modules", "**/target", "**/bin" ]` |
 | `maven.executable.preferMavenWrapper` | Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file configuration exists. Otherwise it tries 'mvn' in PATH instead. | `true` |
-| `maven.executable.path` | Specifies absolute path of your mvn executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to value of 'maven.executable.preferMavenWrapper'. Note that a relative path is not suggested, but if you do specify one, the absolute path will be resolved from your workspace root folder (if exists).  | ` ` |
-| `maven.executable.options` | Specifies default options for all mvn commands. | ` ` |
+| `maven.executable.path` | Specifies absolute path of your mvn executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to value of 'maven.executable.preferMavenWrapper'. Note that a relative path is not suggested, but if you do specify one, the absolute path will be resolved from your workspace root folder (if exists). E.g. `/usr/local/apache-maven-3.6.0/bin/mvn` | ` ` |
+| `maven.executable.options` | Specifies default options for all mvn commands. E.g. `-o -DskipTests` | ` ` |
 | `maven.pomfile.autoUpdateEffectivePOM` | Specifies whether to update effective-pom automatically whenever changes detected. | `false` |
 | `maven.pomfile.globPattern` | Specifies the glob pattern used to look for pom.xml files. | `**/pom.xml` |
-| `maven.view` | Specifies the way of viewing Maven projects. Possible values: `flat`, `hierarchical`. | `flat` |
 | `maven.terminal.useJavaHome` | If this value is true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created. | `false` |
-| `maven.terminal.customEnv` | Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed. | `[]` |
-|  | `environmentVariable`: Name of the environment variable to set. |  |
-|  | `value`: Value of the environment variable to set. |  |
-| `maven.terminal.favorites` | Specify pre-defined favorite commands to execute. | `[]` |
-|  | `alias`: A short name for the command. |  |
-|  | `command`: Content of the favorite command |  |
-
+| `maven.terminal.customEnv` | Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed. <br /> `environmentVariable`: Name of the environment variable to set. <br /> `value`: Value of the environment variable to set. | `[]` |
+| `maven.terminal.favorites` | Specify pre-defined favorite commands to execute. <br /> `alias`: A short name for the command. <br /> `command`: Content of the favorite command. | `[]` |
+| `maven.view` | Specifies the way of viewing Maven projects. Possible values: `flat`, `hierarchical`. | `flat` |
 
 ## Data/Telemetry
 
