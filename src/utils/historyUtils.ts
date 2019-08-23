@@ -26,7 +26,6 @@ export async function updateLRUCommands(command: string, pomPath: string): Promi
         historyObject.pomPath = pomPath;
         historyObject.timestamps[command] = Date.now();
     } catch (error) {
-        console.error(error);
         historyObject = { pomPath, timestamps: {} };
         historyObject.timestamps[command] = Date.now();
     }
