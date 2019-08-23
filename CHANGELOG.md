@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.18.2
+#### Fixed
+- Typo in Hover information. [#368](https://github.com/microsoft/vscode-maven/issues/368)
+- Unexpected error log on first use. [#358](https://github.com/microsoft/vscode-maven/issues/358)
+- Switch to use new VS Code API (v1.37+) to get default shell. [#337](https://github.com/microsoft/vscode-maven/issues/337)
+
+Thank [Christian Lutz @thccorni](https://github.com/thccorni) for contribution.
+
 ## 0.18.1
 #### Fixed
 - Cannot show plugin goals. [#340](https://github.com/microsoft/vscode-maven/issues/340)
