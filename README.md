@@ -178,6 +178,26 @@ Now right-click on an project item, and then click `Favorite ...`. The option `f
 
 </details>
 
+## Settings
+
+| Name | Description | Default Value |
+|---|---|---|
+| `maven.excludedFolders` | Specifies file path pattern of folders to exclude while searching for Maven projects. | <pre><code>[ "**/.*", "**/node_modules", "**/target", "**/bin" ] </code></pre>|
+| `maven.executable.preferMavenWrapper` | Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file configuration exists. Otherwise it tries 'mvn' in PATH instead. | `true` |
+| `maven.executable.path` | Specifies absolute path of your mvn executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to value of 'maven.executable.preferMavenWrapper'. Note that a relative path is not suggested, but if you do specify one, the absolute path will be resolved from your workspace root folder (if exists).  | ` ` |
+| `maven.executable.options` | Specifies default options for all mvn commands. | ` ` |
+| `maven.pomfile.autoUpdateEffectivePOM` | Specifies whether to update effective-pom automatically whenever changes detected. | `false` |
+| `maven.pomfile.globPattern` | Specifies the glob pattern used to look for pom.xml files. | `**/pom.xml` |
+| `maven.view` | Specifies the way of viewing Maven projects. Possible values: `flat`, `hierarchical`. | `flat` |
+| `maven.terminal.useJavaHome` | If this value is true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created. | `false` |
+| `maven.terminal.customEnv` | Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed. | `[]` |
+|  | `environmentVariable`: Name of the environment variable to set. |  |
+|  | `value`: Value of the environment variable to set. |  |
+| `maven.terminal.favorites` | Specify pre-defined favorite commands to execute. | `[]` |
+|  | `alias`: A short name for the command. |  |
+|  | `command`: Content of the favorite command |  |
+
+
 ## Data/Telemetry
 
 VS Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](http://go.microsoft.com/fwlink/?LinkId=521839) to learn more. If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
