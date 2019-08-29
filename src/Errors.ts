@@ -10,3 +10,10 @@ export class OperationCanceledError extends Error {
         setUserError(this);
     }
 }
+
+export class JavaExtensionNotActivatedError extends Error {
+    constructor(msg?: string) {
+        super(msg);
+        setUserError(this);
+    }
+}

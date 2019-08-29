@@ -49,6 +49,9 @@
   ],
   "main": "./dist/extension",
   "contributes": {
+    "javaExtensions": [
+      "./server/com.microsoft.java.maven.plugin-0.1.0.jar"
+    ],
     "commands": [
       {
         "command": "maven.explorer.refresh",
@@ -184,6 +187,11 @@
       {
         "command": "maven.favorites",
         "title": "Favorites ...",
+        "category": "Maven"
+      },
+      {
+        "command": "maven.hello",
+        "title": "Hello",
         "category": "Maven"
       }
     ],
