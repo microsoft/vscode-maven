@@ -18,6 +18,7 @@ import { debugHandler } from "./handlers/debugHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
 import { showDependenciesHandler } from "./handlers/showDependenciesHandler";
 import { hoverProvider } from "./hover/hoverProvider";
+import { executeJavaLanguageServerCommand } from "./jdtls/commands";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
@@ -140,6 +141,10 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
                 mavenTerminal.dispose(terminalName);
             }
         }
+    });
+    registerCommand(context, "maven.hello", async () => {
+        const ret: string = await executeJavaLanguageServerCommand("java.maven.hello");
+        vscode.window.showInformationMessage(ret);
     });
 }
 
