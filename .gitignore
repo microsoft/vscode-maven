@@ -8,3 +8,4 @@ yarn.lock
 .DS_Store
 .test
 dist
+server
