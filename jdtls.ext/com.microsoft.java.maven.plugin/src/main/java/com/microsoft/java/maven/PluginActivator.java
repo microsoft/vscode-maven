@@ -9,7 +9,7 @@
  *     Microsoft Corporation - initial API and implementation
  *******************************************************************************/
 
- package com.microsoft.java.maven;
+package com.microsoft.java.maven;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
