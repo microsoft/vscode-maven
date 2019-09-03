@@ -133,7 +133,7 @@ export async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promis
 }
 
 export function getEmbeddedMavenWrapper(): string {
-    return getPathToExtensionRoot("mvnw", "mvnw");
+    return getPathToExtensionRoot("resources", "maven-wrapper", "mvnw");
 }
 
 async function defaultMavenExecutable(): Promise<string> {

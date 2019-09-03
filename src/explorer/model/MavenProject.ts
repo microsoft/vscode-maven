@@ -67,7 +67,7 @@ export class MavenProject implements ITreeItem {
     public get modules(): string[] {
         return this.moduleNames.map(moduleName => {
             const relative: string = path.join(path.dirname(this._pomPath), moduleName);
-            if (fs.existsSync(relative) && fs.statSync(relative).isFile())  {
+            if (fs.existsSync(relative) && fs.statSync(relative).isFile()) {
                 return relative;
             } else {
                 return path.join(relative, "pom.xml");
@@ -85,8 +85,8 @@ export class MavenProject implements ITreeItem {
         const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
-            light: getPathToExtensionRoot("resources", "light", iconFile),
-            dark: getPathToExtensionRoot("resources", "dark", iconFile)
+            light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
+            dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
         };
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         treeItem.command = { title: "open pom", command: "maven.project.openPom", arguments: [this] };

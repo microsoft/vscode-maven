@@ -58,8 +58,8 @@
         "title": "%contributes.commands.maven.explorer.refresh%",
         "category": "Maven",
         "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
+          "light": "resources/icons/light/refresh.svg",
+          "dark": "resources/icons/dark/refresh.svg"
         }
       },
       {
@@ -127,8 +127,8 @@
         "title": "%contributes.commands.maven.archetype.generate%",
         "category": "Maven",
         "icon": {
-          "light": "resources/light/add.svg",
-          "dark": "resources/dark/add.svg"
+          "light": "resources/icons/light/add.svg",
+          "dark": "resources/icons/dark/add.svg"
         }
       },
       {
@@ -161,8 +161,8 @@
         "title": "%contributes.commands.maven.view.flat%",
         "category": "Maven",
         "icon": {
-          "light": "resources/light/view-flat.svg",
-          "dark": "resources/dark/view-flat.svg"
+          "light": "resources/icons/light/view-flat.svg",
+          "dark": "resources/icons/dark/view-flat.svg"
         }
       },
       {
@@ -170,8 +170,8 @@
         "title": "%contributes.commands.maven.view.hierarchical%",
         "category": "Maven",
         "icon": {
-          "light": "resources/light/view-hierarchical.svg",
-          "dark": "resources/dark/view-hierarchical.svg"
+          "light": "resources/icons/light/view-hierarchical.svg",
+          "dark": "resources/icons/dark/view-hierarchical.svg"
         }
       },
       {
