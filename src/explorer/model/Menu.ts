@@ -25,8 +25,8 @@ export abstract class Menu implements ITreeItem {
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this._name, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {
-            light: getPathToExtensionRoot("resources", "light", "folder.svg"),
-            dark: getPathToExtensionRoot("resources", "dark", "folder.svg")
+            light: getPathToExtensionRoot("resources", "icons", "light", "folder.svg"),
+            dark: getPathToExtensionRoot("resources", "icons", "dark", "folder.svg")
         };
         return treeItem;
     }
