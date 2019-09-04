@@ -1,6 +1,6 @@
 {
     "projects": [
-        "./jdtls-ext/com.microsoft.java.maven.plugin"
+        "./jdtls.ext/com.microsoft.java.maven.plugin"
     ],
-    "targetPlatform": "./jdtls-ext/target.target"
+    "targetPlatform": "./jdtls.ext/target.target"
 }

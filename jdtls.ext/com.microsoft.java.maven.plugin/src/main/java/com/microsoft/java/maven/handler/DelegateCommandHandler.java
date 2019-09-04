@@ -11,6 +11,7 @@
 
 package com.microsoft.java.maven.handler;
 
+import com.google.gson.Gson;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.ls.core.internal.IDelegateCommandHandler;
 
@@ -23,7 +24,7 @@ public class DelegateCommandHandler implements IDelegateCommandHandler {
     @Override
     public Object executeCommand(String commandId, List<Object> arguments, IProgressMonitor monitor) throws Exception {
         if (Objects.equals(commandId, "java.maven.hello")) {
-            return "Hello World from jdtls-ext";
+            return new Gson().toJson("HelloGson");
         }
         return null;
     }
