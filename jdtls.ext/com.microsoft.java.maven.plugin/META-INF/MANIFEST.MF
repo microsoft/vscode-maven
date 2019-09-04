@@ -17,5 +17,7 @@ Require-Bundle: org.eclipse.jdt.core,
  org.eclipse.core.resources,
  org.eclipse.jdt.core.manipulation,
  org.eclipse.text
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/commons-lang3-3.9.jar,
+ lib/gson-2.8.5.jar
 Automatic-Module-Name: com.microsoft.java.maven
