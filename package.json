@@ -50,7 +50,7 @@
   "main": "./dist/extension",
   "contributes": {
     "javaExtensions": [
-      "./server/com.microsoft.java.maven.plugin-0.1.0.jar"
+      "./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.1.0.jar"
     ],
     "commands": [
       {
@@ -514,7 +514,7 @@
   },
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
-    "postinstall": "npx gulp build_server",
+    "build-plugin": "gulp build-plugin",
     "compile": "tsc -p ./",
     "tslint": "tslint -t verbose src/**/*.ts --project tslint.json",
     "watch": "webpack --mode development --watch --info-verbosity verbose",

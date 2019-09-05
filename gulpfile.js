@@ -6,10 +6,8 @@ const cp = require('child_process');
 const path = require('path');
 const serverDir = path.join(__dirname, 'jdtls.ext');
 
-gulp.task('build_server', (done) => {
+gulp.task('build-plugin', (done) => {
   cp.execSync(`${mvnw()} clean package`, { cwd: serverDir, stdio: [0, 1, 2] });
-  gulp.src(path.join(serverDir, 'com.microsoft.java.maven.plugin/target/*.jar'))
-    .pipe(gulp.dest('./server'));
   done();
 });
 

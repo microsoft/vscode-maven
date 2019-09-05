@@ -11,3 +11,7 @@ TestPlan.md
 webpack.*.js
 node_modules
 out/**
+javaConfig.json
+gulpfile.js
+jdtls.ext/**
+!jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-*.jar
