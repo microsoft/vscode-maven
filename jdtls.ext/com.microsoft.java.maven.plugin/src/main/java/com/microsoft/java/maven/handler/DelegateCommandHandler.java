@@ -11,10 +11,12 @@
 
 package com.microsoft.java.maven.handler;
 
-import com.google.gson.Gson;
+import com.microsoft.java.maven.AddDependencyHandler;
+import com.microsoft.java.maven.ArtifactSearcher;
+import com.microsoft.java.maven.AddDependencyHandler.AddDependencyParams;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.ls.core.internal.IDelegateCommandHandler;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -24,8 +26,17 @@ public class DelegateCommandHandler implements IDelegateCommandHandler {
     @Override
     public Object executeCommand(String commandId, List<Object> arguments, IProgressMonitor monitor) throws Exception {
         if (Objects.equals(commandId, "java.maven.hello")) {
-            return new Gson().toJson("HelloGson");
-        }
+            ArtifactSearcher.initialize((String) arguments.get(0));
+        } else if (Objects.equals(commandId, "java.maven.artifactSearch")) {
+            return ArtifactSearcher.searchByClassName((String) arguments.get(0), monitor);
+        } else if (Objects.equals(commandId, "java.maven.addDependency")) {
+            final AddDependencyParams params = new AddDependencyParams((String) arguments.get(0), (String) arguments.get(1), 
+                        (String) arguments.get(2), ((Double) arguments.get(3)).intValue(), ((Double) arguments.get(4)).intValue(), 
+                        ((Double) arguments.get(5)).intValue());
+            return AddDependencyHandler.addDependency(params, monitor);
+        } else if (Objects.equals(commandId, "java.maven.controlContext")) {
+            return ArtifactSearcher.controlIndexerContext((boolean) arguments.get(0), monitor);
+        } 
         return null;
     }
 }
