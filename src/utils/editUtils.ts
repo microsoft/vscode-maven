@@ -1,4 +1,4 @@
-import { commands, Position, Range, Selection, TextEdit, TextEditor, Uri, window, workspace, WorkspaceEdit } from 'vscode';
+import { commands, Position, Range, Selection, TextEdit, TextEditor, Uri, window, workspace, WorkspaceEdit } from "vscode";
 import * as ls from "vscode-languageserver-protocol";
 
 // tslint:disable-next-line: export-name
@@ -20,7 +20,7 @@ export async function applyWorkspaceEdit(edit: ls.WorkspaceEdit): Promise<void> 
             // Get the position information of the first change
             let startPosition: Position = new Position(changes[0].range.start.line, changes[0].range.start.character);
             let lineOffsets: number = changes[0].newText.split(/\r?\n/).length - 1;
-            for (let i: number = 1; i < changes.length; i++) {
+            for (let i: number = 1; i < changes.length; i += 1) {
                 // When it comes to a discontinuous range, execute the range formatting and record the new start position
                 if (changes[i].range.start.line !== startPosition.line) {
                     await executeRangeFormat(currentEditor, startPosition, lineOffsets);
@@ -107,6 +107,7 @@ function asWorkspaceEdit(item: ls.WorkspaceEdit | undefined | null): WorkspaceEd
         });
     } else if (item.changes) {
         Object.keys(item.changes).forEach((key: string) => {
+            // tslint:disable-next-line: no-non-null-assertion
             result.set(Uri.parse(key), asTextEdits(item.changes![key]));
         });
     }

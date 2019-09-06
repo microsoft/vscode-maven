@@ -11,19 +11,18 @@
 
 package com.microsoft.java.maven;
 
+import com.microsoft.java.maven.ArtifactResult;
+import com.microsoft.java.maven.netResponseResult.Info;
+import com.microsoft.java.maven.netResponseResult.fch;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import com.microsoft.java.maven.ArtifactResult;
-import com.microsoft.java.maven.netResponseResult.Info;
-import com.microsoft.java.maven.netResponseResult.fch;
-
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -75,7 +74,7 @@ public class ArtifactSearcher {
     }
     
     public static List<ArtifactResult> searchByClassName(String className, IProgressMonitor monitor) {
-        if(classSearcher==null) {
+        if (classSearcher == null) {
             try {
                 String indexPath = Paths.get(extensionPath, index).toString();
                 String artifactUsagePath = Paths.get(extensionPath, artifactUsage).toString();
