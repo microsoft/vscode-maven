@@ -214,7 +214,7 @@ function registerConfigChangeListner(context: vscode.ExtensionContext): void {
 }
 
 async function getArtifactsPickItems(className: string):  Promise<QuickPickItem[]> {
-    const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.artifactSearch", className);
+    const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", className);
     const picks: QuickPickItem[] = [];
     for (let i: number = 0; i < Math.min(Math.round(response.length / 5), 5); i += 1) {
         const arr: string[] = [response[i].groupId, " : ", response[i].artifactId, " : ", response[i].version];

@@ -51,7 +51,7 @@ public class AddDependencyHandler {
     public static class AddDependencyParams {
 
         final String fullClassName;
-        final String artifactInfo;
+        final String artifactInfo; // gid:aid:version
         final String uri;
         final int line;
         final int character;
@@ -118,8 +118,11 @@ public class AddDependencyHandler {
         try {
             path = unit.getJavaProject().getCorrespondingResource().getLocation().append("pom.xml");
             final String info[] = params.artifactInfo.replaceAll(" ", "").split(":");
+            if (info.length < 3) {
+                return new WorkspaceEdit();
+            }
             final PosInfo posInfo = getPosInfo(path.toString(), info[0] + ":" + info[1]);
-            final String linesep = "\n"; //??  maybe can be better
+            final String linesep = System.lineSeparator(); 
             String newtext = "";
             final String pomUriString = unit.getJavaProject().getCorrespondingResource()
                     .getLocationURI().toString() + "/pom.xml";
@@ -170,10 +173,10 @@ public class AddDependencyHandler {
 class GetPosHandler extends DefaultHandler {
     private Locator locator;
     private PosInfo posInfo = new PosInfo();
-    private final int lineOffset = 1;
-    private final int columnOffset = 1;
-    private final int dependenciesLength = 15; // the length of "</dependencies>"
-    private final int projectsLength = 10; // the length of "</projects>"
+    private final int LINE_OFFSET = 1;
+    private final int COLUMN_OFFSET = 1;
+    private final int DEPENDENCIES_LENGTH = 15; // the length of "</dependencies>"
+    private final int PROJECT_LENGTH = 10; // the length of "</projects>"
     private String targetDependency;
 
     List<String> dependenciesList = new ArrayList<>(); 
@@ -224,13 +227,13 @@ class GetPosHandler extends DefaultHandler {
         switch(qName) {
             case "dependencies":
                 posInfo.alreadyHasDependencies = true;
-                posInfo.pos = new Position(locator.getLineNumber() - lineOffset, 
-                    locator.getColumnNumber() - columnOffset - dependenciesLength);
+                posInfo.pos = new Position(locator.getLineNumber() - LINE_OFFSET, 
+                    locator.getColumnNumber() - COLUMN_OFFSET - DEPENDENCIES_LENGTH);
                 break;
             case "project":
                 if (posInfo.pos == null){
-                    posInfo.pos = new Position(locator.getLineNumber() - lineOffset, 
-                        locator.getColumnNumber() - columnOffset - projectsLength);
+                    posInfo.pos = new Position(locator.getLineNumber() - LINE_OFFSET, 
+                        locator.getColumnNumber() - COLUMN_OFFSET - PROJECT_LENGTH);
                 }
                 break;
             case "dependency":

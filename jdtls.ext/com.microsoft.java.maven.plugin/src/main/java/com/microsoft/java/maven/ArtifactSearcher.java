@@ -12,8 +12,8 @@
 package com.microsoft.java.maven;
 
 import com.microsoft.java.maven.ArtifactResult;
-import com.microsoft.java.maven.netResponseResult.Info;
-import com.microsoft.java.maven.netResponseResult.fch;
+import com.microsoft.java.maven.NetResponseResult.Info;
+import com.microsoft.java.maven.NetResponseResult.fch;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -476,18 +476,18 @@ class NetSearcher {
         final Map<String, ArtifactResult> resultMap = new HashMap<>();
 
         if (!exactResponse.isEmpty()) {
-            final netResponseResult exactResult = new Gson().fromJson(exactResponse, netResponseResult.class);
+            final NetResponseResult exactResult = new Gson().fromJson(exactResponse, NetResponseResult.class);
             addResult(exactResult, resultMap, queryClassName, ArtifactResult.PREFIX);
         }
         if (!prefixResponse.isEmpty()) {
-            final netResponseResult prefixResult = new Gson().fromJson(prefixResponse, netResponseResult.class);
+            final NetResponseResult prefixResult = new Gson().fromJson(prefixResponse, NetResponseResult.class);
             addResult(prefixResult, resultMap, queryClassName, ArtifactResult.PREFIX);
         }
 
         return resultMap;
     }
 
-    private void addResult(netResponseResult responseResult, Map<String, ArtifactResult> resultMap, 
+    private void addResult(NetResponseResult responseResult, Map<String, ArtifactResult> resultMap, 
             String queryClassName, int kind) {
         if (resultMap.size() >= maxResult) {
             return;

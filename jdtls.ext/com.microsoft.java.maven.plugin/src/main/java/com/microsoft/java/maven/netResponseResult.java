@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class netResponseResult {
+public class NetResponseResult {
     Header responseHeader;
     Res response;
     HashMap<String, fch> highlighting;

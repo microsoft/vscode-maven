@@ -4,7 +4,7 @@
   <extension point="org.eclipse.jdt.ls.core.delegateCommandHandler">
     <delegateCommandHandler class="com.microsoft.java.maven.handler.DelegateCommandHandler">
       <command id="java.maven.hello"/>
-      <command id="java.maven.artifactSearch"/>
+      <command id="java.maven.searchArtifact"/>
       <command id="java.maven.addDependency"/>
       <command id="java.maven.controlContext"/>
     </delegateCommandHandler>
