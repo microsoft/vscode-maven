@@ -13,7 +13,7 @@ package com.microsoft.java.maven;
 
 import com.microsoft.java.maven.ArtifactResult;
 import com.microsoft.java.maven.NetResponseResult.Info;
-import com.microsoft.java.maven.NetResponseResult.fch;
+import com.microsoft.java.maven.NetResponseResult.fullClassNameList;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -492,7 +492,7 @@ class NetSearcher {
         if (resultMap.size() >= maxResult) {
             return;
         }
-        final Map<String, fch> consultMap = responseResult.getHighlighting();
+        final Map<String, fullClassNameList> consultMap = responseResult.getHighlighting();
         for (final Info info : responseResult.getResponse().getDocs()) {
             final String id = info.getId();
             if (consultMap.containsKey(id)) {

@@ -25,7 +25,7 @@ public class DelegateCommandHandler implements IDelegateCommandHandler {
     
     @Override
     public Object executeCommand(String commandId, List<Object> arguments, IProgressMonitor monitor) throws Exception {
-        if (Objects.equals(commandId, "java.maven.hello")) {
+        if (Objects.equals(commandId, "java.maven.initializeSearcher")) {
             ArtifactSearcher.initialize((String) arguments.get(0));
         } else if (Objects.equals(commandId, "java.maven.searchArtifact")) {
             return ArtifactSearcher.searchByClassName((String) arguments.get(0), monitor);

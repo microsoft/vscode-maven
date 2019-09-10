@@ -172,10 +172,10 @@ public class AddDependencyHandler {
 class GetPosHandler extends DefaultHandler {
     private Locator locator;
     private PosInfo posInfo = new PosInfo();
-    private final int LINE_OFFSET = 1;
-    private final int COLUMN_OFFSET = 1;
-    private final int DEPENDENCIES_LENGTH = 15; // the length of "</dependencies>"
-    private final int PROJECT_LENGTH = 10; // the length of "</projects>"
+    private final static int LINE_OFFSET = 1;
+    private final static int COLUMN_OFFSET = 1;
+    private final static int DEPENDENCIES_LENGTH = 15; // the length of "</dependencies>"
+    private final static int PROJECT_LENGTH = 10; // the length of "</projects>"
     private String targetDependency;
 
     List<String> dependenciesList = new ArrayList<>(); 

@@ -172,7 +172,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
                     return getArtifactsCodeActions(document, range);
                 }
             });
-            await executeJavaLanguageServerCommand("java.maven.hello", path.join(context.extensionPath, "resources", "IndexData"));
+            await executeJavaLanguageServerCommand("java.maven.initializeSearcher", path.join(context.extensionPath, "resources", "IndexData"));
         });
     }
 }
