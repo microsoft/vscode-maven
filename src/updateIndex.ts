@@ -18,9 +18,7 @@ export async function updateIndex(extensionPath: string): Promise<void> {
 
 async function doUpdateIndex(extensionPath: string): Promise<void> {
     const baseDir: string = extensionPath;
-    // const indexResourceUrl: string = "https://api.github.com/repos/RunxinXu/IndexInfo/contents/index";
     const indexResourceUrl: string = "https://api.github.com/repos/microsoft/vscode-maven/contents/resources/IndexData/index";
-    // const artifactUsageResourceUrl: string = "https://api.github.com/repos/RunxinXu/IndexInfo/contents/ArtifactUsage.json";
     const artifactUsageResourceUrl: string = "https://api.github.com/repos/microsoft/vscode-maven/contents/resources/IndexData/ArtifactUsage.json";
     const indexDataFileName: string = "IndexData";
     const indexDataTmpFileName: string = "IndexData_tmp";
