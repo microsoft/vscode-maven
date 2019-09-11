@@ -3,9 +3,10 @@
 
 "use strict";
 import * as vscode from "vscode";
-import { Progress, Uri } from "vscode";
+import { extensions, Progress, Uri} from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
+import { registerArtifactSearcher } from "./artifactSearcher";
 import { completionProvider } from "./completion/completionProvider";
 import { OperationCanceledError } from "./Errors";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
@@ -18,7 +19,6 @@ import { debugHandler } from "./handlers/debugHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
 import { showDependenciesHandler } from "./handlers/showDependenciesHandler";
 import { hoverProvider } from "./hover/hoverProvider";
-import { executeJavaLanguageServerCommand } from "./jdtls/commands";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
@@ -41,7 +41,7 @@ export async function deactivate(): Promise<void> {
     await disposeTelemetryWrapper();
 }
 
-function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
+export function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
     const callbackWithTroubleshooting: (...args: any[]) => any = instrumentOperation(commandName, async (_operationId: string, ...args: any[]) => {
         try {
             return withOperationIdAhead ? await func(_operationId, ...args) : await func(...args);
@@ -57,6 +57,7 @@ function registerCommand(context: vscode.ExtensionContext, commandName: string, 
     context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
 }
 
+// tslint:disable-next-line: max-func-body-length
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     pluginInfoProvider.initialize(context);
     // register tree view
@@ -142,10 +143,12 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             }
         }
     });
-    registerCommand(context, "maven.hello", async () => {
-        const ret: string = await executeJavaLanguageServerCommand("java.maven.hello");
-        vscode.window.showInformationMessage(ret);
-    });
+    // register artifact searcher if Java language server is activated
+    const EXTENSION_ID: string = "redhat.java";
+    const javaExt: vscode.Extension<any> | undefined = extensions.getExtension(EXTENSION_ID);
+    if (!!javaExt) {
+        registerArtifactSearcher(javaExt, context);
+    }
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
