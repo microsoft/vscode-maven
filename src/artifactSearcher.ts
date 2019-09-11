@@ -65,7 +65,7 @@ async function getWorkSpaceEdits(pickItem: QuickPickItem, param: any): Promise<W
 
 async function applyEdits(uri: Uri, edits: any): Promise<void> {
     // if the pom is invalid, no change occurs in edits[2]
-    if (edits[2].changes) {
+    if (edits[2].changes.length !== undefined) {
         // 0: import 1: replace
         await applyWorkspaceEdit(edits[0]);
         await applyWorkspaceEdit(edits[1]);
@@ -74,6 +74,7 @@ async function applyEdits(uri: Uri, edits: any): Promise<void> {
 
         // 2: pom
         if (edits[2].changes[Object.keys(edits[2].changes)[0]].length === 0) {
+            // already has this dependency
             return;
         }
         await applyWorkspaceEdit(edits[2]);
@@ -86,7 +87,7 @@ async function applyEdits(uri: Uri, edits: any): Promise<void> {
         const editor: TextEditor = await window.showTextDocument(document, {selection: new Range(startLine, 0, startLine + lineNumber, 0), preview: false});
         editor.revealRange(new Range(startLine, 0, startLine + lineNumber, 0), TextEditorRevealType.InCenter);
     } else {
-        window.showInformationMessage("Sorry, the pom.xml file is invalid.");
+        window.showInformationMessage("Sorry, the pom.xml file is inexistent or invalid.");
     }
 }
 
