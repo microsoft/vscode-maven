@@ -44,7 +44,6 @@
     "onCommand:maven.history",
     "onCommand:maven.plugin.execute",
     "onCommand:maven.project.addDependency",
-    "onCommand:maven.updateIndex",
     "onView:mavenProjects",
     "onLanguage:xml"
   ],
@@ -188,11 +187,6 @@
       {
         "command": "maven.favorites",
         "title": "Favorites ...",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.updateIndex",
-        "title": "Update Index",
         "category": "Maven"
       }
     ],
