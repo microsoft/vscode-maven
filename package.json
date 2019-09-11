@@ -517,7 +517,7 @@
     "vscode:prepublish": "webpack --mode production",
     "build-plugin": "gulp build-plugin",
     "compile": "tsc -p ./",
-    "tslint": "tslint -t verbose src/**/*.ts --project tslint.json",
+    "tslint": "tslint -t verbose --project tslint.json",
     "watch": "webpack --mode development --watch --info-verbosity verbose",
     "test": "npm run compile && node ./out/test/runTest.js",
     "webpack": "webpack --mode development"

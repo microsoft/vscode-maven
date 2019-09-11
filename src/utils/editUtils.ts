@@ -33,7 +33,7 @@ export async function applyWorkspaceEdit(edit: ls.WorkspaceEdit): Promise<void> 
             // Recover the cursor's original position
             currentEditor.selection = new Selection(cursorPostion, cursorPostion);
         } catch (error) {
-            // handleErrors(error);
+            // to handle the error
         }
     }
 }
@@ -102,7 +102,7 @@ function asWorkspaceEdit(item: ls.WorkspaceEdit | undefined | null): WorkspaceEd
             } else if (ls.TextDocumentEdit.is(change)) {
                 result.set(Uri.parse(change.textDocument.uri), asTextEdits(change.edits));
             } else {
-                // handleErrors(new Error(`Unknown workspace edit change received:\n${JSON.stringify(change, undefined, 4)}`));
+                // to handle Unknown workspace edit change error
             }
         });
     } else if (item.changes) {

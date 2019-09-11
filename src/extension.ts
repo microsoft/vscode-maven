@@ -2,12 +2,11 @@
 // Licensed under the MIT license.
 
 "use strict";
-import * as path from "path";
 import * as vscode from "vscode";
-import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, Command, Diagnostic, Hover, languages, MarkdownString, Position, Progress, ProviderResult,
-    QuickPickItem, Range, Selection, TextDocument, TextEditor, TextEditorRevealType, Uri, window, workspace, WorkspaceEdit, extensions} from "vscode";
+import { extensions, Progress, Uri} from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
+import { registerArtifactSearcher } from "./artifactSearcher";
 import { completionProvider } from "./completion/completionProvider";
 import { OperationCanceledError } from "./Errors";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
@@ -20,17 +19,14 @@ import { debugHandler } from "./handlers/debugHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
 import { showDependenciesHandler } from "./handlers/showDependenciesHandler";
 import { hoverProvider } from "./hover/hoverProvider";
-import { executeJavaLanguageServerCommand } from "./jdtls/commands";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
-import { applyWorkspaceEdit } from "./utils/editUtils";
 import { executeInTerminal } from "./utils/mavenUtils";
 import { openFileIfExists, showTroubleshootingDialog } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
-import { updateIndex } from "./updateIndex";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     await loadPackageInfo(context);
@@ -45,7 +41,7 @@ export async function deactivate(): Promise<void> {
     await disposeTelemetryWrapper();
 }
 
-function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
+export function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
     const callbackWithTroubleshooting: (...args: any[]) => any = instrumentOperation(commandName, async (_operationId: string, ...args: any[]) => {
         try {
             return withOperationIdAhead ? await func(_operationId, ...args) : await func(...args);
@@ -147,33 +143,11 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             }
         }
     });
+    // register artifact searcher if Java language server is activated
     const EXTENSION_ID: string = "redhat.java";
     const javaExt: vscode.Extension<any> | undefined = extensions.getExtension(EXTENSION_ID);
     if (!!javaExt) {
-        javaExt.activate().then(async () => {
-            registerCommand(context, "maven.updateIndex", async () => {
-                await updateIndex(path.join(context.extensionPath, "resources"));
-            });
-            registerCommand(context, "maven.artifactSearch", async (param: any) => {
-                const pickItem: QuickPickItem|undefined = await window.showQuickPick(getArtifactsPickItems(param.className), {placeHolder: "Select the artifact you want to add"});
-                if (pickItem === undefined) {
-                    return;
-                }
-                const edits: WorkspaceEdit[] = await getWorkSpaceEdits(pickItem, param);
-                await applyEdits(Uri.parse(param.uri), edits);
-            });
-            languages.registerHoverProvider("java", {
-                provideHover(document: TextDocument, position: Position, _token: CancellationToken): ProviderResult<Hover> {
-                    return getArtifactsHover(document, position);
-                }
-            });
-            languages.registerCodeActionsProvider("java", {
-                provideCodeActions(document: TextDocument, range: Range | Selection, _context: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
-                    return getArtifactsCodeActions(document, range);
-                }
-            });
-            await executeJavaLanguageServerCommand("java.maven.initializeSearcher", path.join(context.extensionPath, "resources", "IndexData"));
-        });
+        registerArtifactSearcher(javaExt, context);
     }
 }
 
@@ -211,122 +185,4 @@ function registerConfigChangeListner(context: vscode.ExtensionContext): void {
         }
     });
     context.subscriptions.push(configChangeListener);
-}
-
-async function getArtifactsPickItems(className: string):  Promise<QuickPickItem[]> {
-    const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", className);
-    const picks: QuickPickItem[] = [];
-    for (let i: number = 0; i < Math.min(Math.round(response.length / 5), 5); i += 1) {
-        const arr: string[] = [response[i].groupId, " : ", response[i].artifactId, " : ", response[i].version];
-        picks.push(
-            {
-                label: `$(thumbsup)  ${response[i].className}`,
-                description: response[i].fullClassName,
-                detail: arr.join("")
-            }
-        );
-    }
-    for (let i: number = Math.min(Math.round(response.length / 5), 5); i < response.length; i += 1) {
-        const arr: string[] = [response[i].groupId, " : ", response[i].artifactId, " : ", response[i].version];
-        picks.push(
-            {
-                label: response[i].className,
-                description: response[i].fullClassName,
-                detail: arr.join("")
-            }
-        );
-    }
-    return picks;
-}
-
-async function getWorkSpaceEdits(pickItem: QuickPickItem, param: any): Promise<WorkspaceEdit[]> {
-    return await executeJavaLanguageServerCommand("java.maven.addDependency", pickItem.description, pickItem.detail, param.uri, param.line, param.character, param.length);
-}
-
-async function applyEdits(uri: Uri, edits: any): Promise<void> {
-    // if the pom is invalid, no change occurs in edits[2]
-    if (edits[2].changes) {
-        // 0: import 1: replace
-        await applyWorkspaceEdit(edits[0]);
-        await applyWorkspaceEdit(edits[1]);
-        let document: TextDocument = await workspace.openTextDocument(uri);
-        document.save();
-
-        // 2: pom
-        if (edits[2].changes[Object.keys(edits[2].changes)[0]].length === 0) {
-            return;
-        }
-        await applyWorkspaceEdit(edits[2]);
-        document = await workspace.openTextDocument(Uri.parse(Object.keys(edits[2].changes)[0]));
-        document.save();
-        const startLine: number = edits[2].changes[Object.keys(edits[2].changes)[0]][0].range.start.line + 1; // skip blank line
-        const lineNumber: number = edits[2].changes[Object.keys(edits[2].changes)[0]][0].newText.indexOf("<dependencies>") === -1 ? 5 : 7;
-        const editor: TextEditor = await window.showTextDocument(document, {selection: new Range(startLine, 0, startLine + lineNumber, 0), preview: false});
-        editor.revealRange(new Range(startLine, 0, startLine + lineNumber, 0), TextEditorRevealType.InCenter);
-    } else {
-        window.showInformationMessage("Sorry, the pom.xml file is invalid.");
-    }
-}
-
-function getArtifactsHover(document: TextDocument, position: Position): Hover {
-    const code1: string = "16777218";
-    const diagnostics: Diagnostic[] = languages.getDiagnostics(document.uri).filter(value => {
-        return value.code === code1 && position.isAfterOrEqual(value.range.start) && position.isBeforeOrEqual(value.range.end);
-    });
-    if (diagnostics.length !== 0) {
-        const line: number = diagnostics[0].range.start.line;
-        const character: number = diagnostics[0].range.start.character;
-        const className: string = document.getText(diagnostics[0].range);
-        const length: number = document.offsetAt(diagnostics[0].range.end) - document.offsetAt(diagnostics[0].range.start);
-        const param: any = {
-            className,
-            uri: document.uri.toString(),
-            line,
-            character,
-            length
-        };
-        const commandName: string = "Resolve unknown type";
-        const command: string = "maven.artifactSearch"; 
-        const message: string = `\uD83D\uDC49 [\`${commandName}\`](command:${command}?${encodeURIComponent(JSON.stringify(param))} "${commandName}")`;
-        const hoverMessage: MarkdownString = new MarkdownString(message);
-        hoverMessage.isTrusted = true;
-        return new Hover(hoverMessage);
-    } else {
-        return new Hover(" ");
-    }
-}
-
-function getArtifactsCodeActions(document: TextDocument, range: Range): CodeAction[] {
-    const className: string = document.getText(range);
-    const uri: string = document.uri.toString();
-    const line: number = range.start.line;
-    const character: number = range.start.character;
-    const length: number = document.offsetAt(range.end) - document.offsetAt(range.start);
-    const command: Command = {
-        title: "Resolve unknown type",
-        command: "maven.artifactSearch",
-        arguments: [{
-            className,
-            uri,
-            line,
-            character,
-            length
-        }]
-    };
-    const codeAction: CodeAction = {
-        title: "Resolve unknown type",
-        command: command,
-        kind: CodeActionKind.QuickFix
-    };
-    return [codeAction];
-}
-
-interface IArtifactSearchResult {
-    groupId: string;
-    artifactId: string;
-    version: string;
-    className: string;
-    fullClassName: string;
-    usage: number;
-    kind: number;
 }
