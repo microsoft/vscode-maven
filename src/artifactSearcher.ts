@@ -65,7 +65,7 @@ async function getWorkSpaceEdits(pickItem: QuickPickItem, param: any): Promise<W
 
 async function applyEdits(uri: Uri, edits: any): Promise<void> {
     // if the pom is invalid, no change occurs in edits[2]
-    if (edits[2].changes.length !== undefined) {
+    if (Object.keys(edits[2].changes).length > 0) {
         // 0: import 1: replace
         await applyWorkspaceEdit(edits[0]);
         await applyWorkspaceEdit(edits[1]);
