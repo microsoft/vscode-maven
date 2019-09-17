@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
@@ -20,13 +21,12 @@ export class PluginsMenu extends Menu implements ITreeItem {
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        return new vscode.TreeItem(this._name, vscode.TreeItemCollapsibleState.Collapsed);
-        // const treeItem: vscode.TreeItem = new vscode.TreeItem(this._name, vscode.TreeItemCollapsibleState.Collapsed);
-        // treeItem.iconPath = {
-        //     light: Utils.getResourcePath("light", "pluginMenu.svg"),
-        //     dark: Utils.getResourcePath("dark", "pluginMenu.svg")
-        // };
-        // return treeItem;
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(this._name, vscode.TreeItemCollapsibleState.Collapsed);
+        treeItem.iconPath = {
+            light: getPathToExtensionRoot("resources", "icons", "light", "extensions.svg"),
+            dark: getPathToExtensionRoot("resources", "icons", "dark", "extensions.svg")
+        };
+        return treeItem;
     }
 
     public async refresh(): Promise<void> {
