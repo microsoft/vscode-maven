@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.19.0
+- Add inline action buttons in Maven explorer.
+
 ## 0.18.2
 #### Fixed
 - Typo in Hover information. [#368](https://github.com/microsoft/vscode-maven/issues/368)

@@ -120,7 +120,11 @@
       {
         "command": "maven.project.openPom",
         "title": "%contributes.commands.maven.project.openPom%",
-        "category": "Maven"
+        "category": "Maven",
+        "icon": {
+          "light": "resources/icons/light/go-to-file.svg",
+          "dark": "resources/icons/dark/go-to-file.svg"
+        }
       },
       {
         "command": "maven.archetype.generate",
@@ -374,6 +378,11 @@
           "group": "0-pom@0"
         },
         {
+          "command": "maven.project.openPom",
+          "when": "view == mavenProjects && viewItem == MavenProject",
+          "group": "inline"
+        },
+        {
           "command": "maven.plugin.execute",
           "when": "view == mavenProjects && viewItem == PluginGoal",
           "group": "inline"
@@ -396,7 +405,7 @@
         {
           "command": "maven.explorer.refresh",
           "when": "view == mavenProjects && viewItem == Menu",
-          "group": "1@1"
+          "group": "inline"
         }
       ]
     },
