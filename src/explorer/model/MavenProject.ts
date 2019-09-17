@@ -89,7 +89,6 @@ export class MavenProject implements ITreeItem {
             dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
         };
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-        treeItem.command = { title: "open pom", command: "maven.project.openPom", arguments: [this] };
         return treeItem;
     }
 
