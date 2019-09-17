@@ -34,8 +34,8 @@ async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): 
         async (resolve, reject): Promise<void> => {
             p.report({ message: `Generating Dependency Tree: ${name}` });
             try {
-                await rawDependencyTree(pomPath);
-                resolve();
+                const rawData: string | undefined = await rawDependencyTree(pomPath);
+                resolve(rawData);
                 return;
             } catch (error) {
                 setUserError(<Error>error);
