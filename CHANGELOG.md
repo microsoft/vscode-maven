@@ -2,7 +2,11 @@
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
 ## 0.19.0
+#### Added 
 - Add inline action buttons in Maven explorer.
+
+#### Fixed
+- Cannot show dependencies.
 
 ## 0.18.2
 #### Fixed
