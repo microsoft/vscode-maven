@@ -8,6 +8,8 @@ import { registerCommand } from "./extension";
 import { executeJavaLanguageServerCommand } from "./jdtls/commands";
 import { applyWorkspaceEdit } from "./utils/editUtils";
 
+const unresolvedCode: string[] = ["16777218", "570425394"];
+
 // tslint:disable-next-line: export-name
 export function registerArtifactSearcher(javaExt: vscode.Extension<any>, context: vscode.ExtensionContext): void {
     javaExt.activate().then(async () => {
@@ -25,8 +27,9 @@ export function registerArtifactSearcher(javaExt: vscode.Extension<any>, context
             }
         });
         languages.registerCodeActionsProvider("java", {
-            provideCodeActions(document: TextDocument, range: Range | Selection, _context: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
-                return getArtifactsCodeActions(document, range);
+            // tslint:disable-next-line: no-shadowed-variable
+            provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
+                return getArtifactsCodeActions(document, context, range);
             }
         });
         await executeJavaLanguageServerCommand("java.maven.initializeSearcher", path.join(context.extensionPath, "resources", "IndexData"));
@@ -91,10 +94,9 @@ async function applyEdits(uri: Uri, edits: any): Promise<void> {
     }
 }
 
-function getArtifactsHover(document: TextDocument, position: Position): Hover {
-    const code1: string = "16777218";
+function getArtifactsHover(document: TextDocument, position: Position): Hover|undefined {
     const diagnostics: Diagnostic[] = languages.getDiagnostics(document.uri).filter(value => {
-        return value.code === code1 && position.isAfterOrEqual(value.range.start) && position.isBeforeOrEqual(value.range.end);
+        return unresolvedCode.indexOf(String(value.code)) !== -1 && position.isAfterOrEqual(value.range.start) && position.isBeforeOrEqual(value.range.end);
     });
     if (diagnostics.length !== 0) {
         const line: number = diagnostics[0].range.start.line;
@@ -115,11 +117,11 @@ function getArtifactsHover(document: TextDocument, position: Position): Hover {
         hoverMessage.isTrusted = true;
         return new Hover(hoverMessage);
     } else {
-        return new Hover(" ");
+        return undefined;
     }
 }
 
-function getArtifactsCodeActions(document: TextDocument, range: Range): CodeAction[] {
+function getArtifactsCodeActions(document: TextDocument, context: CodeActionContext, range: Range): CodeAction[] {
     const className: string = document.getText(range);
     const uri: string = document.uri.toString();
     const line: number = range.start.line;
@@ -141,7 +143,14 @@ function getArtifactsCodeActions(document: TextDocument, range: Range): CodeActi
         command: command,
         kind: CodeActionKind.QuickFix
     };
-    return [codeAction];
+    const code: Diagnostic[] = context.diagnostics.filter(value => {
+        return unresolvedCode.indexOf(String(value.code)) !== -1;
+    });
+    if (code.length > 0) {
+        return [codeAction];
+    } else {
+        return [];
+    }
 }
 
 interface IArtifactSearchResult {
