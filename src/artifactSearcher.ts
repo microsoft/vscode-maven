@@ -8,6 +8,8 @@ import { registerCommand } from "./extension";
 import { executeJavaLanguageServerCommand } from "./jdtls/commands";
 import { applyWorkspaceEdit } from "./utils/editUtils";
 
+const unresolvedCode: string[] = ["16777218", "570425394"];
+
 // tslint:disable-next-line: export-name
 export function registerArtifactSearcher(javaExt: vscode.Extension<any>, context: vscode.ExtensionContext): void {
     javaExt.activate().then(async () => {
@@ -92,11 +94,9 @@ async function applyEdits(uri: Uri, edits: any): Promise<void> {
     }
 }
 
-function getArtifactsHover(document: TextDocument, position: Position): Hover {
-    const code1: string = "16777218";
-    const code2: string = "570425394";
+function getArtifactsHover(document: TextDocument, position: Position): Hover|undefined {
     const diagnostics: Diagnostic[] = languages.getDiagnostics(document.uri).filter(value => {
-        return (value.code === code1 || value.code === code2) && position.isAfterOrEqual(value.range.start) && position.isBeforeOrEqual(value.range.end);
+        return unresolvedCode.indexOf(String(value.code)) !== -1 && position.isAfterOrEqual(value.range.start) && position.isBeforeOrEqual(value.range.end);
     });
     if (diagnostics.length !== 0) {
         const line: number = diagnostics[0].range.start.line;
@@ -117,7 +117,7 @@ function getArtifactsHover(document: TextDocument, position: Position): Hover {
         hoverMessage.isTrusted = true;
         return new Hover(hoverMessage);
     } else {
-        return new Hover(" ");
+        return undefined;
     }
 }
 
@@ -143,10 +143,8 @@ function getArtifactsCodeActions(document: TextDocument, context: CodeActionCont
         command: command,
         kind: CodeActionKind.QuickFix
     };
-    const code1: string = "16777218";
-    const code2: string = "570425394";
     const code: Diagnostic[] = context.diagnostics.filter(value => {
-        return value.code === code1 || value.code === code2;
+        return unresolvedCode.indexOf(String(value.code)) !== -1;
     });
     if (code.length > 0) {
         return [codeAction];
