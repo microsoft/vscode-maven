@@ -149,7 +149,11 @@
       {
         "command": "maven.plugin.execute",
         "title": "%contributes.commands.maven.plugin.execute%",
-        "category": "Maven"
+        "category": "Maven",
+        "icon": {
+          "light": "resources/icons/light/play.svg",
+          "dark": "resources/icons/dark/play.svg"
+        }
       },
       {
         "command": "maven.plugin.debug",
@@ -368,6 +372,11 @@
           "command": "maven.project.showDependencies",
           "when": "view == mavenProjects && viewItem == MavenProject",
           "group": "0-pom@0"
+        },
+        {
+          "command": "maven.plugin.execute",
+          "when": "view == mavenProjects && viewItem == PluginGoal",
+          "group": "inline"
         },
         {
           "command": "maven.plugin.execute",

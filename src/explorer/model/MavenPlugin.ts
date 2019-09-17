@@ -3,6 +3,7 @@
 
 import * as vscode from "vscode";
 import { taskExecutor } from "../../taskExecutor";
+import { getPathToExtensionRoot } from "../../utils/contextUtils";
 // import { Utils } from "../../Utils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { pluginInfoProvider } from "../pluginInfoProvider";
@@ -35,13 +36,12 @@ export class MavenPlugin implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         const label: string = this.prefix ? `${this.prefix} (${this.pluginId})` : this.pluginId;
-        return new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
-        // const treeItem: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
-        // treeItem.iconPath = {
-        //     light: Utils.getResourcePath("light/plug.svg"),
-        //     dark: Utils.getResourcePath("dark/plug.svg")
-        // };
-        // return treeItem;
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
+        treeItem.iconPath = {
+            light: getPathToExtensionRoot("resources", "icons", "light", "property.svg"),
+            dark: getPathToExtensionRoot("resources", "icons", "dark", "property.svg")
+        };
+        return treeItem;
     }
 
     public async getChildren(): Promise<PluginGoal[]> {

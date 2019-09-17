@@ -8,7 +8,7 @@
     "contributes.commands.maven.archetype.update": "Update Maven Archetype Catalog",
     "contributes.commands.maven.history": "History ...",
     "contributes.commands.maven.goal.execute": "Execute commands",
-    "contributes.commands.maven.plugin.execute": "Execute",
+    "contributes.commands.maven.plugin.execute": "Run",
     "contributes.commands.maven.plugin.debug": "Debug",
     "contributes.commands.maven.view.hierarchical": "Switch to hierarchical view",
     "contributes.commands.maven.view.flat": "Switch to flat view",
