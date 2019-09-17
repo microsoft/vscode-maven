@@ -9,11 +9,9 @@ import { executeJavaLanguageServerCommand } from "./jdtls/commands";
 import { applyWorkspaceEdit } from "./utils/editUtils";
 
 // Please refer to https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Fconstant-values.html
-// tslint:disable-next-line: variable-name
-const UndefinedType: string = "16777218";
-// tslint:disable-next-line: variable-name
-const UndefinedName: string = "570425394";
-const unresolvedCode: string[] = [UndefinedType, UndefinedName];
+const UNDEFINED_TYPE: string = "16777218";
+const UNDIFINED_NAME: string = "570425394";
+const unresolvedCode: string[] = [UNDEFINED_TYPE, UNDIFINED_NAME];
 
 // tslint:disable-next-line: export-name
 export function registerArtifactSearcher(javaExt: vscode.Extension<any>, context: vscode.ExtensionContext): void {
@@ -101,7 +99,7 @@ async function applyEdits(uri: Uri, edits: any): Promise<void> {
 
 function getArtifactsHover(document: TextDocument, position: Position): Hover|undefined {
     const diagnostics: Diagnostic[] = languages.getDiagnostics(document.uri).filter(value => {
-        return value.code === UndefinedType && position.isAfterOrEqual(value.range.start) && position.isBeforeOrEqual(value.range.end);
+        return value.code === UNDEFINED_TYPE && position.isAfterOrEqual(value.range.start) && position.isBeforeOrEqual(value.range.end);
     });
     if (diagnostics.length !== 0) {
         const line: number = diagnostics[0].range.start.line;
