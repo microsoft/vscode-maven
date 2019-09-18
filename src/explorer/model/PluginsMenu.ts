@@ -16,7 +16,7 @@ export class PluginsMenu extends Menu implements ITreeItem {
     }
 
     public async getChildren() : Promise<MavenPlugin[]> {
-        await this.project.calculateEffectivePom();
+        await this.project.getEffectivePom();
         return this.project.plugins;
     }
 
@@ -30,7 +30,7 @@ export class PluginsMenu extends Menu implements ITreeItem {
     }
 
     public async refresh(): Promise<void> {
-        this.project.effectivePom.upToDate = false;
+        this.project.refreshEffectivePom().catch(console.error);
         mavenExplorerProvider.refresh(this);
     }
 }
