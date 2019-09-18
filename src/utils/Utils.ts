@@ -10,6 +10,7 @@ import { commands, Progress, ProgressLocation, RelativePattern, TextDocument, Ur
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
+import { IEffectivePom } from "../explorer/model/IEffectivePom";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
@@ -121,7 +122,8 @@ export namespace Utils {
         let pomxml: string | undefined;
         const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
         if (project) {
-            pomxml = await project.calculateEffectivePom();
+            const effectivePom: IEffectivePom = await project.getEffectivePom();
+            pomxml = effectivePom.ePomString;
         } else {
             pomxml = await getEffectivePom(pomPath);
         }

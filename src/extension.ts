@@ -160,7 +160,7 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
             await project.refresh();
             if (Settings.Pomfile.autoUpdateEffectivePOM()) {
                 taskExecutor.execute(async () => {
-                    await project.effectivePom.update();
+                    await project.refreshEffectivePom();
                     mavenExplorerProvider.refresh(project);
                 });
             }

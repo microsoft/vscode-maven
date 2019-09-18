@@ -9,11 +9,11 @@ import { MavenProject } from "./MavenProject";
 const CONTEXT_VALUE: string = "Menu";
 
 export abstract class Menu implements ITreeItem {
-    protected _project: MavenProject;
-    protected _name: string;
+    protected project: MavenProject;
+    protected name: string;
 
     constructor(project: MavenProject) {
-        this._project = project;
+        this.project = project;
     }
 
     public abstract getChildren(): ITreeItem[] | undefined | Promise<ITreeItem[] | undefined>;
@@ -23,7 +23,7 @@ export abstract class Menu implements ITreeItem {
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this._name, vscode.TreeItemCollapsibleState.Collapsed);
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {
             light: getPathToExtensionRoot("resources", "icons", "light", "folder.svg"),
             dark: getPathToExtensionRoot("resources", "icons", "dark", "folder.svg")

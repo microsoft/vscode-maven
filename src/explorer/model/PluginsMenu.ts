@@ -12,16 +12,16 @@ import { Menu } from "./Menu";
 export class PluginsMenu extends Menu implements ITreeItem {
     constructor(project: MavenProject) {
         super(project);
-        this._name = "Plugins";
+        this.name = "Plugins";
     }
 
     public async getChildren() : Promise<MavenPlugin[]> {
-        await this._project.calculateEffectivePom();
-        return this._project.plugins;
+        await this.project.getEffectivePom();
+        return this.project.plugins;
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this._name, vscode.TreeItemCollapsibleState.Collapsed);
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = {
             light: getPathToExtensionRoot("resources", "icons", "light", "extensions.svg"),
             dark: getPathToExtensionRoot("resources", "icons", "dark", "extensions.svg")
@@ -30,7 +30,7 @@ export class PluginsMenu extends Menu implements ITreeItem {
     }
 
     public async refresh(): Promise<void> {
-        this._project.effectivePom.upToDate = false;
+        this.project.refreshEffectivePom().catch(console.error);
         mavenExplorerProvider.refresh(this);
     }
 }

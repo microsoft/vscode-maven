@@ -9,8 +9,9 @@ import { Settings } from "../../Settings";
 import { taskExecutor } from "../../taskExecutor";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Utils } from "../../utils/Utils";
+import { EffectivePomProvider } from "../EffectivePomProvider";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
-import { EffectivePom } from "./EffectivePom";
+import { IEffectivePom } from "./IEffectivePom";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
@@ -19,14 +20,15 @@ const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
     public parent?: MavenProject;
-    private _effectivePom: EffectivePom;
+    public pomPath: string;
+    private ePomProvider: EffectivePomProvider;
+    private _ePom: any;
     private _pom: any;
-    private _pomPath: string;
 
     constructor(pomPath: string) {
-        this._pomPath = pomPath;
-        this._effectivePom = new EffectivePom(pomPath);
-        taskExecutor.execute(async () => await this._effectivePom.update(true));
+        this.pomPath = pomPath;
+        this.ePomProvider = new EffectivePomProvider(pomPath);
+        taskExecutor.execute(async () => await this.ePomProvider.calculateEffectivePom());
     }
 
     public get name(): string {
@@ -42,23 +44,34 @@ export class MavenProject implements ITreeItem {
         return moduleNames ? moduleNames : [];
     }
 
-    public get effectivePom(): EffectivePom {
-        return this._effectivePom;
-    }
-
     public get plugins(): MavenPlugin[] {
         let plugins: any[] | undefined;
-        if (_.has(this._effectivePom.data, "projects.project")) {
+        if (_.has(this._ePom, "projects.project")) {
             // multi-module project
-            const project: any = (<any[]>this._effectivePom.data.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
+            const project: any = (<any[]>this._ePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
             if (project) {
                 plugins = _.get(project, "build[0].plugins[0].plugin");
             }
         } else {
             // single-project
-            plugins = _.get(this._effectivePom.data, "project.build[0].plugins[0].plugin");
+            plugins = _.get(this._ePom, "project.build[0].plugins[0].plugin");
         }
         return this._convertXmlPlugin(plugins);
+    }
+
+    public get dependencies(): any[] {
+        let deps: any[] | undefined;
+        if (_.has(this._ePom, "projects.project")) {
+            // multi-module project
+            const project: any = (<any[]>this._ePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
+            if (project) {
+                deps = _.get(project, "build[0].plugins[0].plugin");
+            }
+        } else {
+            // single-project
+            deps = _.get(this._ePom, "project.dependencies[0].dependency");
+        }
+        return deps || [];
     }
 
     /**
@@ -66,17 +79,13 @@ export class MavenProject implements ITreeItem {
      */
     public get modules(): string[] {
         return this.moduleNames.map(moduleName => {
-            const relative: string = path.join(path.dirname(this._pomPath), moduleName);
+            const relative: string = path.join(path.dirname(this.pomPath), moduleName);
             if (fs.existsSync(relative) && fs.statSync(relative).isFile()) {
                 return relative;
             } else {
                 return path.join(relative, "pom.xml");
             }
         });
-    }
-
-    public get pomPath(): string {
-        return this._pomPath;
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
@@ -106,19 +115,19 @@ export class MavenProject implements ITreeItem {
         return ret;
     }
 
-    public async calculateEffectivePom(force?: boolean): Promise<string | undefined> {
-        if (!force && this._effectivePom.upToDate) {
-            return this._effectivePom.raw;
-        }
+    public async refreshEffectivePom(): Promise<void> {
+        await this.ePomProvider.calculateEffectivePom();
+    }
 
+    public async getEffectivePom(): Promise<IEffectivePom> {
+        let res: IEffectivePom = { pomPath: this.pomPath };
         try {
-            await this._effectivePom.update();
-            mavenExplorerProvider.refresh(this);
-            return this._effectivePom.raw;
+            res = await this.ePomProvider.getEffectivePom();
+            this._ePom = res.ePom;
         } catch (error) {
             console.error(error);
-            return this._effectivePom.raw;
         }
+        return res;
     }
 
     public async refresh(): Promise<void> {
@@ -127,7 +136,7 @@ export class MavenProject implements ITreeItem {
 
     public async parsePom(): Promise<void> {
         try {
-            this._pom = await Utils.parseXmlFile(this._pomPath);
+            this._pom = await Utils.parseXmlFile(this.pomPath);
         } catch (error) {
             this._pom = undefined;
         }
