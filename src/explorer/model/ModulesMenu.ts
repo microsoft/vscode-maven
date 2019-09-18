@@ -12,11 +12,11 @@ import { Menu } from "./Menu";
 export class ModulesMenu extends Menu implements ITreeItem {
     constructor(projectNode: MavenProject) {
         super(projectNode);
-        this._name = "Modules";
+        this.name = "Modules";
     }
 
     public getChildren() : MavenProject[] {
-        return this._project.modules.map(modulePomPath => {
+        return this.project.modules.map(modulePomPath => {
             const found: MavenProject | undefined = mavenExplorerProvider.getMavenProject(modulePomPath);
             return  found ? found : new MavenProject(modulePomPath);
         });
