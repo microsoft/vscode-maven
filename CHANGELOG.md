@@ -7,6 +7,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 #### Fixed
 - Cannot show dependencies.
+- Expanded plugin nodes tend to collapse after loading. [#364](https://github.com/microsoft/vscode-maven/issues/364)
 
 ## 0.18.2
 #### Fixed
