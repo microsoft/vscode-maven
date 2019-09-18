@@ -59,6 +59,21 @@ export class MavenProject implements ITreeItem {
         return this._convertXmlPlugin(plugins);
     }
 
+    public get dependencies(): any[] {
+        let deps: any[] | undefined;
+        if (_.has(this._ePom, "projects.project")) {
+            // multi-module project
+            const project: any = (<any[]>this._ePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
+            if (project) {
+                deps = _.get(project, "build[0].plugins[0].plugin");
+            }
+        } else {
+            // single-project
+            deps = _.get(this._ePom, "project.dependencies[0].dependency");
+        }
+        return deps || [];
+    }
+
     /**
      * @return list of absolute path of modules pom.xml.
      */
