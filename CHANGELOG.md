@@ -4,6 +4,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## 0.19.0
 #### Added 
 - Add inline action buttons in Maven explorer.
+- Can add dependencies when hovering on unresolved types. [PR#391](https://github.com/microsoft/vscode-maven/pull/391)
 
 #### Fixed
 - Cannot show dependencies.
