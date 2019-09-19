@@ -115,7 +115,7 @@ function getArtifactsHover(document: TextDocument, position: Position): Hover|un
         };
         const commandName: string = "Resolve unknown type";
         const command: string = "maven.artifactSearch";
-        const message: string = `\uD83D\uDC49 [\`${commandName}\`](command:${command}?${encodeURIComponent(JSON.stringify(param))} "${commandName}")`;
+        const message: string = `\uD83D\uDC49 [${commandName}](command:${command}?${encodeURIComponent(JSON.stringify(param))} "${commandName}")`;
         const hoverMessage: MarkdownString = new MarkdownString(message);
         hoverMessage.isTrusted = true;
         return new Hover(hoverMessage);
