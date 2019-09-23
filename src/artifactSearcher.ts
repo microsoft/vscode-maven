@@ -40,7 +40,7 @@ export function registerArtifactSearcher(javaExt: vscode.Extension<any>, context
 }
 
 async function getArtifactsPickItems(className: string):  Promise<QuickPickItem[]> {
-    const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", className);
+    const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifactByClassName", className);
     const picks: QuickPickItem[] = [];
     for (let i: number = 0; i < Math.min(Math.round(response.length / 5), 5); i += 1) {
         const arr: string[] = [response[i].groupId, " : ", response[i].artifactId, " : ", response[i].version];
@@ -156,7 +156,7 @@ function getArtifactsCodeActions(document: TextDocument, context: CodeActionCont
     }
 }
 
-interface IArtifactSearchResult {
+export interface IArtifactSearchResult {
     groupId: string;
     artifactId: string;
     version: string;

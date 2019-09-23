@@ -25,6 +25,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.maven.index.ArtifactInfo;
@@ -75,14 +76,7 @@ public class ArtifactSearcher {
     
     public static List<ArtifactResult> searchByClassName(String className, IProgressMonitor monitor) {
         if (classSearcher == null) {
-            try {
-                String indexPath = Paths.get(extensionPath, index).toString();
-                String artifactUsagePath = Paths.get(extensionPath, artifactUsage).toString();
-                classSearcher = new ClassSearcher(contextId, repositoryId, indexPath, artifactUsagePath);
-            } catch (Exception e) {
-                classSearcher = null;
-                e.printStackTrace();
-            }
+            constructContext();
         }
         try {
             className = className.toLowerCase();
@@ -92,11 +86,34 @@ public class ArtifactSearcher {
         }
     }
 
+    public static List<ArtifactResult> searchByGA(String groupId, String artifactId, IProgressMonitor monitor) {
+        if (classSearcher == null) {
+            constructContext();
+        }
+        try{
+            return classSearcher.searchByGA(groupId, artifactId);
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+        
+    }
+
     public static Boolean controlIndexerContext(Boolean controlParam, IProgressMonitor monitor) {
         if(classSearcher==null){
             return true;
         } else{
             return classSearcher.controlIndexerContext(controlParam);
+        }
+    }
+
+    private static void constructContext() {
+        try {
+            String indexPath = Paths.get(extensionPath, index).toString();
+            String artifactUsagePath = Paths.get(extensionPath, artifactUsage).toString();
+            classSearcher = new ClassSearcher(contextId, repositoryId, indexPath, artifactUsagePath);
+        } catch (Exception e) {
+            classSearcher = null;
+            e.printStackTrace();
         }
     }
 }
@@ -243,6 +260,11 @@ class ClassSearcher {
         return result;
     }
 
+    public List<ArtifactResult> searchByGA(String groupId, String artifactId) {
+        // does not use netSearcher
+        return mavenSearcher.searchByGA(groupId, artifactId);
+    }
+
     public Boolean controlIndexerContext(Boolean controlParam) {
         if (controlParam == true) {
             return mavenSearcher == null ? constructMavenSearcher() : mavenSearcher.turnOnIndexerContext();
@@ -329,6 +351,31 @@ class BaseClassSearcher extends MavenSearcher {
             return new HashMap<>();
         }
     } 
+
+    public List<ArtifactResult> searchByGA(String groupId, String artifactId) {
+        if (indexerContext == null) {
+            return new ArrayList<>();
+        }
+        Builder builder;
+        builder= new BooleanQuery.Builder();
+        if (!groupId.equals("")) {
+            builder = builder.add(indexer.constructQuery(MAVEN.GROUP_ID, new UserInputSearchExpression(groupId)), Occur.MUST);
+        }
+        if (!artifactId.equals("")) {
+            builder = builder.add(indexer.constructQuery(MAVEN.ARTIFACT_ID, new UserInputSearchExpression(artifactId)), Occur.MUST);
+        }
+        final BooleanQuery bq = builder.build();
+        try {
+            final FlatSearchResponse response = indexer.searchFlat(new FlatSearchRequest(bq, indexerContext));
+            final List<ArtifactResult> resultList = new ArrayList<>();
+            for (final ArtifactInfo r : response.getResults()) {
+                resultList.add(new ArtifactResult(r.getGroupId(), r.getArtifactId(), r.getVersion(), "", "", -1, -1));
+            }
+            return resultList;
+        } catch (IOException e) {
+            return new ArrayList<>();
+        }
+    }
 
     private List<ArtifactResult> search(Query q, String queryClassname) throws IOException {
         final FlatSearchResponse response;
