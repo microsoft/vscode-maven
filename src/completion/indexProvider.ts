@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { IArtifactSearchResult } from "../artifactSearcher";
+import { IArtifactSearchResult, ISearchArtifactParam, SearchType } from "../artifactSearcher";
 import { executeJavaLanguageServerCommand } from "../jdtls/commands";
 import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
@@ -10,8 +10,12 @@ import { getSortText } from "./versionUtils";
 
 class IndexProvider implements IMavenCompletionItemProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
-        const docs: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifactByGA",
-                groupIdHint, artifactIdHint);
+        const searchParam: ISearchArtifactParam = {
+            searchType: SearchType.identifier,
+            groupId: groupIdHint,
+            artifactId: artifactIdHint
+        };
+        const docs: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
         const groupIds: string[] = Array.from(new Set(docs.map(doc => doc.groupId)).values());
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
@@ -27,8 +31,12 @@ class IndexProvider implements IMavenCompletionItemProvider {
     }
 
     public async getArtifactIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
-        const docs: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifactByGA",
-                groupIdHint, artifactIdHint);
+        const searchParam: ISearchArtifactParam = {
+            searchType: SearchType.identifier,
+            groupId: groupIdHint,
+            artifactId: artifactIdHint
+        };
+        const docs: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "artifactId", source: "maven-index" }]
@@ -47,9 +55,12 @@ class IndexProvider implements IMavenCompletionItemProvider {
         if (!groupId && !artifactId) {
             return [];
         }
-
-        const docs: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifactByGA",
-                groupId, artifactId);
+        const searchParam: ISearchArtifactParam = {
+            searchType: SearchType.identifier,
+            groupId: groupId,
+            artifactId: artifactId
+        };
+        const docs: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "version", source: "maven-index" }]

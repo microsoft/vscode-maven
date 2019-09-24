@@ -3,6 +3,7 @@
 
 import * as _ from "lodash";
 import * as vscode from "vscode";
+import { isJavaExtensionInstalled } from "../extension";
 import { ElementNode, getCurrentNode, XmlTagName } from "../utils/lexerUtils";
 import { centralProvider } from "./centralProvider";
 import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
@@ -43,11 +44,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const artifactIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
                 const groupIdHint: string = currentNode.text ? currentNode.text : "";
                 const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
-
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = await indexProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
+                const indexItems: vscode.CompletionItem[] = isJavaExtensionInstalled ? await indexProvider.getGroupIdCandidates(groupIdHint, artifactIdHint) : [];
                 const localItems: vscode.CompletionItem[] = await localProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
-                const mergedItems: vscode.CompletionItem[] = this.deDuplicate(this.deDuplicate(centralItems, indexItems), localItems);
+                const mergedItems: vscode.CompletionItem[] = this.deDuplicate(centralItems, indexItems, localItems, (item) => item.insertText);
                 mergedItems.forEach(item => item.range = targetRange);
 
                 return new vscode.CompletionList(mergedItems, _.isEmpty(centralItems));
@@ -59,14 +59,12 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const artifactIdHint: string = currentNode.text ? currentNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = await indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
+                const indexItems: vscode.CompletionItem[] = isJavaExtensionInstalled ? await indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint) : [];
                 const localItems: vscode.CompletionItem[] = await localProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 let mergedItems: vscode.CompletionItem[] = [];
                 const ID_SEPARATOR: string = ":";
                 // tslint:disable-next-line: restrict-plus-operands
-                mergedItems = _.unionBy(centralItems, indexItems, (item) => _.get(item, "data.groupId") + ID_SEPARATOR + item.insertText);
-                // tslint:disable-next-line: restrict-plus-operands
-                mergedItems = _.unionBy(mergedItems, localItems, (item) => _.get(item, "data.groupId") + ID_SEPARATOR + item.insertText);
+                mergedItems = this.deDuplicate(centralItems, indexItems, localItems, (item) => _.get(item, "data.groupId") + ID_SEPARATOR + item.insertText);
                 mergedItems = this.reserveGidMatch(mergedItems, groupIdHint);
                 if (groupIdNode && groupIdNode.contentStart !== undefined && groupIdNode.contentEnd !== undefined) {
                     for (const item of mergedItems) {
@@ -88,9 +86,9 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getVersionCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = await indexProvider.getVersionCandidates(groupIdHint, artifactIdHint);
+                const indexItems: vscode.CompletionItem[] = isJavaExtensionInstalled ? await indexProvider.getVersionCandidates(groupIdHint, artifactIdHint) : [];
                 const localItems: vscode.CompletionItem[] = await localProvider.getVersionCandidates(groupIdHint, artifactIdHint);
-                const mergedItems: vscode.CompletionItem[] = this.deDuplicate(this.deDuplicate(centralItems, indexItems), localItems);
+                const mergedItems: vscode.CompletionItem[] = this.deDuplicate(centralItems, indexItems, localItems, (item) => item.insertText);
                 mergedItems.forEach(item => item.range = targetRange);
                 return new vscode.CompletionList(mergedItems, false);
             }
@@ -123,8 +121,9 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         }
     }
 
-    private deDuplicate(primary: vscode.CompletionItem[], secondary: vscode.CompletionItem[]): vscode.CompletionItem[] {
-        return _.unionBy(primary, secondary, (item) => item.insertText);
+    private deDuplicate(first: vscode.CompletionItem[], second: vscode.CompletionItem[], third: vscode.CompletionItem[],
+                        valueIteratee: (value: vscode.CompletionItem) => string|vscode.SnippetString|undefined): vscode.CompletionItem[] {
+        return _.unionBy(first, second, third, valueIteratee);
     }
 
     private reserveGidMatch(items: vscode.CompletionItem[], groupIdHint: string): vscode.CompletionItem[] {

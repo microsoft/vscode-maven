@@ -18,19 +18,25 @@ import com.microsoft.java.maven.AddDependencyHandler.AddDependencyParams;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.ls.core.internal.IDelegateCommandHandler;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("restriction")
 public class DelegateCommandHandler implements IDelegateCommandHandler {
+    private final int CLASSNAME = 0;
+    private final int IDENTIFIER = 1;
     
     @Override
     public Object executeCommand(String commandId, List<Object> arguments, IProgressMonitor monitor) throws Exception {
         if (Objects.equals(commandId, "java.maven.initializeSearcher")) {
             ArtifactSearcher.initialize((String) arguments.get(0));
-        } else if (Objects.equals(commandId, "java.maven.searchArtifactByClassName")) {
-            return ArtifactSearcher.searchByClassName((String) arguments.get(0), monitor);
-        } else if (Objects.equals(commandId, "java.maven.searchArtifactByGA")) {
-            return ArtifactSearcher.searchByGA((String) arguments.get(0), (String) arguments.get(1), monitor);
+        } else if (Objects.equals(commandId, "java.maven.searchArtifact")) {
+            Map param = (Map) arguments.get(0);
+            if (((Double) param.get("searchType")).intValue() == CLASSNAME) {
+                return ArtifactSearcher.searchByClassName((String) param.get("className"), monitor);
+            } else if(((Double) param.get("searchType")).intValue() == IDENTIFIER) {
+                return ArtifactSearcher.searchByIdentifier((String) param.get("groupId"), (String) param.get("artifactId"), monitor);
+            }
         } else if (Objects.equals(commandId, "java.maven.addDependency")) {
             final AddDependencyParams params = new AddDependencyParams((String) arguments.get(0), (String) arguments.get(1), 
                         (String) arguments.get(2), ((Double) arguments.get(3)).intValue(), ((Double) arguments.get(4)).intValue(), 
@@ -41,4 +47,5 @@ public class DelegateCommandHandler implements IDelegateCommandHandler {
         } 
         return null;
     }
+
 }

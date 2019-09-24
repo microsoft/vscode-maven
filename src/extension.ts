@@ -27,6 +27,7 @@ import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "
 import { executeInTerminal } from "./utils/mavenUtils";
 import { openFileIfExists, showTroubleshootingDialog } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
+export let isJavaExtensionInstalled: boolean = false;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     await loadPackageInfo(context);
@@ -148,6 +149,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     const javaExt: vscode.Extension<any> | undefined = extensions.getExtension(EXTENSION_ID);
     if (!!javaExt) {
         registerArtifactSearcher(javaExt, context);
+        isJavaExtensionInstalled = true;
     }
 }
 

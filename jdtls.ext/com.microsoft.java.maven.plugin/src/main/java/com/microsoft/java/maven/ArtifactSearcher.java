@@ -86,12 +86,12 @@ public class ArtifactSearcher {
         }
     }
 
-    public static List<ArtifactResult> searchByGA(String groupId, String artifactId, IProgressMonitor monitor) {
+    public static List<ArtifactResult> searchByIdentifier(String groupId, String artifactId, IProgressMonitor monitor) {
         if (classSearcher == null) {
             constructContext();
         }
         try{
-            return classSearcher.searchByGA(groupId, artifactId);
+            return classSearcher.searchByIdentifier(groupId, artifactId);
         } catch (Exception e) {
             return new ArrayList<>();
         }
@@ -260,9 +260,9 @@ class ClassSearcher {
         return result;
     }
 
-    public List<ArtifactResult> searchByGA(String groupId, String artifactId) {
+    public List<ArtifactResult> searchByIdentifier(String groupId, String artifactId) {
         // does not use netSearcher
-        return mavenSearcher.searchByGA(groupId, artifactId);
+        return mavenSearcher.searchByIdentifier(groupId, artifactId);
     }
 
     public Boolean controlIndexerContext(Boolean controlParam) {
@@ -352,7 +352,7 @@ class BaseClassSearcher extends MavenSearcher {
         }
     } 
 
-    public List<ArtifactResult> searchByGA(String groupId, String artifactId) {
+    public List<ArtifactResult> searchByIdentifier(String groupId, String artifactId) {
         if (indexerContext == null) {
             return new ArrayList<>();
         }
