@@ -5,7 +5,7 @@ import * as path from "path";
 import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, Command, Diagnostic, Hover, languages, MarkdownString, Position, ProviderResult, QuickPickItem, Range, Selection, TextDocument, TextEditor, TextEditorRevealType, Uri, window, workspace, WorkspaceEdit} from "vscode";
 import * as vscode from "vscode";
 import { registerCommand } from "./extension";
-import { executeJavaLanguageServerCommand } from "./jdtls/commands";
+import { executeJavaLanguageServerCommand, getJavaExtension } from "./jdtls/commands";
 import { applyWorkspaceEdit } from "./utils/editUtils";
 
 // Please refer to https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Fconstant-values.html
@@ -14,7 +14,8 @@ const UNDIFINED_NAME: string = "570425394";
 const unresolvedCode: string[] = [UNDEFINED_TYPE, UNDIFINED_NAME];
 
 // tslint:disable-next-line: export-name
-export function registerArtifactSearcher(javaExt: vscode.Extension<any>, context: vscode.ExtensionContext): void {
+export function registerArtifactSearcher(context: vscode.ExtensionContext): void {
+    const javaExt: vscode.Extension<any> = <vscode.Extension<any>>getJavaExtension();
     javaExt.activate().then(async () => {
         registerCommand(context, "maven.artifactSearch", async (param: any) => {
             const pickItem: QuickPickItem|undefined = await window.showQuickPick(getArtifactsPickItems(param.className), {placeHolder: "Select the artifact you want to add"});

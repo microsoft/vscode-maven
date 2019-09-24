@@ -3,7 +3,7 @@
 
 "use strict";
 import * as vscode from "vscode";
-import { extensions, Progress, Uri} from "vscode";
+import { Progress, Uri} from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { registerArtifactSearcher } from "./artifactSearcher";
@@ -19,6 +19,7 @@ import { debugHandler } from "./handlers/debugHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
 import { showDependenciesHandler } from "./handlers/showDependenciesHandler";
 import { hoverProvider } from "./hover/hoverProvider";
+import { isJavaExtEnabled } from "./jdtls/commands";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
@@ -27,7 +28,6 @@ import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "
 import { executeInTerminal } from "./utils/mavenUtils";
 import { openFileIfExists, showTroubleshootingDialog } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
-export let isJavaExtensionInstalled: boolean = false;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     await loadPackageInfo(context);
@@ -145,11 +145,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         }
     });
     // register artifact searcher if Java language server is activated
-    const EXTENSION_ID: string = "redhat.java";
-    const javaExt: vscode.Extension<any> | undefined = extensions.getExtension(EXTENSION_ID);
-    if (!!javaExt) {
-        registerArtifactSearcher(javaExt, context);
-        isJavaExtensionInstalled = true;
+    if (isJavaExtEnabled()) {
+        registerArtifactSearcher(context);
     }
 }
 
