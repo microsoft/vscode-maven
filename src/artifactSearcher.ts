@@ -15,29 +15,31 @@ const unresolvedCode: string[] = [UNDEFINED_TYPE, UNDIFINED_NAME];
 
 // tslint:disable-next-line: export-name
 export function registerArtifactSearcher(context: vscode.ExtensionContext): void {
-    const javaExt: vscode.Extension<any> = <vscode.Extension<any>>getJavaExtension();
-    javaExt.activate().then(async () => {
-        registerCommand(context, "maven.artifactSearch", async (param: any) => {
-            const pickItem: QuickPickItem|undefined = await window.showQuickPick(getArtifactsPickItems(param.className), {placeHolder: "Select the artifact you want to add"});
-            if (pickItem === undefined) {
-                return;
-            }
-            const edits: WorkspaceEdit[] = await getWorkSpaceEdits(pickItem, param);
-            await applyEdits(Uri.parse(param.uri), edits);
+    const javaExt: vscode.Extension<any>|undefined = getJavaExtension();
+    if (!!javaExt) {
+        javaExt.activate().then(async () => {
+            registerCommand(context, "maven.artifactSearch", async (param: any) => {
+                const pickItem: QuickPickItem|undefined = await window.showQuickPick(getArtifactsPickItems(param.className), {placeHolder: "Select the artifact you want to add"});
+                if (pickItem === undefined) {
+                    return;
+                }
+                const edits: WorkspaceEdit[] = await getWorkSpaceEdits(pickItem, param);
+                await applyEdits(Uri.parse(param.uri), edits);
+            });
+            languages.registerHoverProvider("java", {
+                provideHover(document: TextDocument, position: Position, _token: CancellationToken): ProviderResult<Hover> {
+                    return getArtifactsHover(document, position);
+                }
+            });
+            languages.registerCodeActionsProvider("java", {
+                // tslint:disable-next-line: no-shadowed-variable
+                provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
+                    return getArtifactsCodeActions(document, context, range);
+                }
+            });
+            await executeJavaLanguageServerCommand("java.maven.initializeSearcher", path.join(context.extensionPath, "resources", "IndexData"));
         });
-        languages.registerHoverProvider("java", {
-            provideHover(document: TextDocument, position: Position, _token: CancellationToken): ProviderResult<Hover> {
-                return getArtifactsHover(document, position);
-            }
-        });
-        languages.registerCodeActionsProvider("java", {
-            // tslint:disable-next-line: no-shadowed-variable
-            provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
-                return getArtifactsCodeActions(document, context, range);
-            }
-        });
-        await executeJavaLanguageServerCommand("java.maven.initializeSearcher", path.join(context.extensionPath, "resources", "IndexData"));
-    });
+    }
 }
 
 async function getArtifactsPickItems(className: string):  Promise<QuickPickItem[]> {
@@ -172,8 +174,8 @@ export interface IArtifactSearchResult {
 }
 
 export enum SearchType {
-    className,
-    identifier
+    className = "CLASSNAME",
+    identifier = "IDENTIFIER"
 }
 
 export interface ISearchArtifactParam {

@@ -17,14 +17,14 @@ import com.microsoft.java.maven.AddDependencyHandler.AddDependencyParams;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.ls.core.internal.IDelegateCommandHandler;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("restriction")
 public class DelegateCommandHandler implements IDelegateCommandHandler {
-    private final int CLASSNAME = 0;
-    private final int IDENTIFIER = 1;
     
     @Override
     public Object executeCommand(String commandId, List<Object> arguments, IProgressMonitor monitor) throws Exception {
@@ -32,10 +32,12 @@ public class DelegateCommandHandler implements IDelegateCommandHandler {
             ArtifactSearcher.initialize((String) arguments.get(0));
         } else if (Objects.equals(commandId, "java.maven.searchArtifact")) {
             Map param = (Map) arguments.get(0);
-            if (((Double) param.get("searchType")).intValue() == CLASSNAME) {
+            if (param.get("searchType").equals("CLASSNAME")) {
                 return ArtifactSearcher.searchByClassName((String) param.get("className"), monitor);
-            } else if(((Double) param.get("searchType")).intValue() == IDENTIFIER) {
+            } else if(param.get("searchType").equals("IDENTIFIER")) {
                 return ArtifactSearcher.searchByIdentifier((String) param.get("groupId"), (String) param.get("artifactId"), monitor);
+            } else {
+                return new ArrayList<>();
             }
         } else if (Objects.equals(commandId, "java.maven.addDependency")) {
             final AddDependencyParams params = new AddDependencyParams((String) arguments.get(0), (String) arguments.get(1), 
