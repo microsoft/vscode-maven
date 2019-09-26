@@ -5,7 +5,7 @@ import * as path from "path";
 import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, Command, Diagnostic, Hover, languages, MarkdownString, Position, ProviderResult, QuickPickItem, Range, Selection, TextDocument, TextEditor, TextEditorRevealType, Uri, window, workspace, WorkspaceEdit} from "vscode";
 import * as vscode from "vscode";
 import { registerCommand } from "./extension";
-import { executeJavaLanguageServerCommand } from "./jdtls/commands";
+import { executeJavaLanguageServerCommand, getJavaExtension } from "./jdtls/commands";
 import { applyWorkspaceEdit } from "./utils/editUtils";
 
 // Please refer to https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Fconstant-values.html
@@ -14,33 +14,40 @@ const UNDIFINED_NAME: string = "570425394";
 const unresolvedCode: string[] = [UNDEFINED_TYPE, UNDIFINED_NAME];
 
 // tslint:disable-next-line: export-name
-export function registerArtifactSearcher(javaExt: vscode.Extension<any>, context: vscode.ExtensionContext): void {
-    javaExt.activate().then(async () => {
-        registerCommand(context, "maven.artifactSearch", async (param: any) => {
-            const pickItem: QuickPickItem|undefined = await window.showQuickPick(getArtifactsPickItems(param.className), {placeHolder: "Select the artifact you want to add"});
-            if (pickItem === undefined) {
-                return;
-            }
-            const edits: WorkspaceEdit[] = await getWorkSpaceEdits(pickItem, param);
-            await applyEdits(Uri.parse(param.uri), edits);
+export function registerArtifactSearcher(context: vscode.ExtensionContext): void {
+    const javaExt: vscode.Extension<any>|undefined = getJavaExtension();
+    if (!!javaExt) {
+        javaExt.activate().then(async () => {
+            registerCommand(context, "maven.artifactSearch", async (param: any) => {
+                const pickItem: QuickPickItem|undefined = await window.showQuickPick(getArtifactsPickItems(param.className), {placeHolder: "Select the artifact you want to add"});
+                if (pickItem === undefined) {
+                    return;
+                }
+                const edits: WorkspaceEdit[] = await getWorkSpaceEdits(pickItem, param);
+                await applyEdits(Uri.parse(param.uri), edits);
+            });
+            languages.registerHoverProvider("java", {
+                provideHover(document: TextDocument, position: Position, _token: CancellationToken): ProviderResult<Hover> {
+                    return getArtifactsHover(document, position);
+                }
+            });
+            languages.registerCodeActionsProvider("java", {
+                // tslint:disable-next-line: no-shadowed-variable
+                provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
+                    return getArtifactsCodeActions(document, context, range);
+                }
+            });
+            await executeJavaLanguageServerCommand("java.maven.initializeSearcher", path.join(context.extensionPath, "resources", "IndexData"));
         });
-        languages.registerHoverProvider("java", {
-            provideHover(document: TextDocument, position: Position, _token: CancellationToken): ProviderResult<Hover> {
-                return getArtifactsHover(document, position);
-            }
-        });
-        languages.registerCodeActionsProvider("java", {
-            // tslint:disable-next-line: no-shadowed-variable
-            provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
-                return getArtifactsCodeActions(document, context, range);
-            }
-        });
-        await executeJavaLanguageServerCommand("java.maven.initializeSearcher", path.join(context.extensionPath, "resources", "IndexData"));
-    });
+    }
 }
 
 async function getArtifactsPickItems(className: string):  Promise<QuickPickItem[]> {
-    const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", className);
+    const searchParam: ISearchArtifactParam = {
+        searchType: SearchType.className,
+        className: className
+    };
+    const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
     const picks: QuickPickItem[] = [];
     for (let i: number = 0; i < Math.min(Math.round(response.length / 5), 5); i += 1) {
         const arr: string[] = [response[i].groupId, " : ", response[i].artifactId, " : ", response[i].version];
@@ -156,7 +163,7 @@ function getArtifactsCodeActions(document: TextDocument, context: CodeActionCont
     }
 }
 
-interface IArtifactSearchResult {
+export interface IArtifactSearchResult {
     groupId: string;
     artifactId: string;
     version: string;
@@ -164,4 +171,16 @@ interface IArtifactSearchResult {
     fullClassName: string;
     usage: number;
     kind: number;
+}
+
+export enum SearchType {
+    className = "CLASSNAME",
+    identifier = "IDENTIFIER"
+}
+
+export interface ISearchArtifactParam {
+    searchType: SearchType;
+    className?: string;
+    groupId?: string;
+    artifactId?: string;
 }

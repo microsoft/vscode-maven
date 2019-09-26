@@ -16,7 +16,16 @@ export function executeJavaLanguageServerCommand(...rest: any[]): any {
     return vscode.commands.executeCommand(JAVA_EXECUTE_WORKSPACE_COMMAND, ...rest);
 }
 
-function isJavaExtEnabled(): boolean {
-    const javaExt: vscode.Extension<any> | undefined = vscode.extensions.getExtension(JAVA_EXTENSION_ID);
+export function isJavaExtEnabled(): boolean {
+    const javaExt: vscode.Extension<any> | undefined = getJavaExtension();
     return !!javaExt;
+}
+
+export function isJavaExtActivated(): boolean {
+    const javaExt: vscode.Extension<any> | undefined = getJavaExtension();
+    return !!javaExt && javaExt.isActive;
+}
+
+export function getJavaExtension(): vscode.Extension<any> | undefined {
+    return vscode.extensions.getExtension(JAVA_EXTENSION_ID);
 }

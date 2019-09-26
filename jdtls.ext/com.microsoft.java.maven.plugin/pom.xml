@@ -63,6 +63,11 @@
 							<artifactId>lucene-queryparser</artifactId>
 							<version>5.5.5</version>
 						</artifactItem>
+						<dependency>
+							<groupId>org.apache.lucene</groupId>
+							<artifactId>lucene-analyzers-common</artifactId>
+							<version>5.5.5</version>
+						</dependency>						
 						<artifactItem>
 							<groupId>com.squareup.okhttp3</groupId>
 							<artifactId>okhttp</artifactId>

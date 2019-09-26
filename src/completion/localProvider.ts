@@ -42,7 +42,8 @@ class LocalProvider implements IMavenCompletionItemProvider {
         return validArtifactIds.map(aid => {
             const item: vscode.CompletionItem = new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field);
             item.insertText = aid;
-            item.detail = "local";
+            item.detail = `GroupId: ${groupId}`;
+            (<any>item).data = { groupId: groupId };
             item.command = commandOnSelection;
             return item;
         });

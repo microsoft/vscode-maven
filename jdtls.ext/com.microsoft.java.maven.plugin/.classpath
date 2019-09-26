@@ -6,6 +6,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/indexer-core-6.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-core-5.5.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-queryparser-5.5.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-analyzers-common-5.5.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/okhttp-3.12.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/okio-1.15.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-text-1.7.jar"/>
