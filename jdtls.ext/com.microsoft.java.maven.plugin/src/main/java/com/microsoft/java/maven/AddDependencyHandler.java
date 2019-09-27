@@ -108,7 +108,7 @@ public class AddDependencyHandler {
 
     private static WorkspaceEdit pomEdit(AddDependencyParams params, 
             ICompilationUnit unit) throws JavaModelException {
-        IPath path = unit.getJavaProject().getCorrespondingResource().getLocation().append("pom.xml");
+        final IPath path = unit.getJavaProject().getCorrespondingResource().getLocation().append("pom.xml");
         final String info[] = params.artifactInfo.replaceAll(" ", "").split(":");
         if (info.length < 3) {
             return new WorkspaceEdit();
@@ -163,10 +163,10 @@ public class AddDependencyHandler {
 class GetPosHandler extends DefaultHandler {
     private Locator locator;
     private PosInfo posInfo = new PosInfo();
-    private final static int LINE_OFFSET = 1;
-    private final static int COLUMN_OFFSET = 1;
-    private final static int DEPENDENCIES_LENGTH = 15; // the length of "</dependencies>"
-    private final static int PROJECT_LENGTH = 10; // the length of "</projects>"
+    private static final int LINE_OFFSET = 1;
+    private static final int COLUMN_OFFSET = 1;
+    private static final int DEPENDENCIES_LENGTH = 15; // the length of "</dependencies>"
+    private static final int PROJECT_LENGTH = 10; // the length of "</projects>"
     private String targetDependency;
 
     List<String> dependenciesList = new ArrayList<>(); 
