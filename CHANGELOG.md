@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.19.1
+#### Added
+- Provide more completion suggestions for groupId and artifactId on POM file authoring. [PR#404](https://github.com/microsoft/vscode-maven/pull/404)
+
+#### Fixed
+- No candidates when resolving unknown types. [PR#405](https://github.com/microsoft/vscode-maven/pull/405)
+
 ## 0.19.0
 #### Added 
 - Add inline action buttons in Maven explorer.
