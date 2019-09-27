@@ -10,8 +10,8 @@ import { applyWorkspaceEdit } from "./utils/editUtils";
 
 // Please refer to https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Fconstant-values.html
 const UNDEFINED_TYPE: string = "16777218";
-const UNDIFINED_NAME: string = "570425394";
-const unresolvedCode: string[] = [UNDEFINED_TYPE, UNDIFINED_NAME];
+const UNDEFINED_NAME: string = "570425394";
+const UNRESOLVED_CODE: string[] = [UNDEFINED_TYPE, UNDEFINED_NAME];
 
 // tslint:disable-next-line: export-name
 export function registerArtifactSearcher(context: vscode.ExtensionContext): void {
@@ -132,31 +132,31 @@ function getArtifactsHover(document: TextDocument, position: Position): Hover|un
 }
 
 function getArtifactsCodeActions(document: TextDocument, context: CodeActionContext, range: Range): CodeAction[] {
-    const className: string = document.getText(range);
-    const uri: string = document.uri.toString();
-    const line: number = range.start.line;
-    const character: number = range.start.character;
-    const length: number = document.offsetAt(range.end) - document.offsetAt(range.start);
-    const command: Command = {
-        title: "Resolve unknown type",
-        command: "maven.artifactSearch",
-        arguments: [{
-            className,
-            uri,
-            line,
-            character,
-            length
-        }]
-    };
-    const codeAction: CodeAction = {
-        title: "Resolve unknown type",
-        command: command,
-        kind: CodeActionKind.QuickFix
-    };
-    const code: Diagnostic[] = context.diagnostics.filter(value => {
-        return unresolvedCode.indexOf(String(value.code)) !== -1;
+    const diagnostics: Diagnostic[] = context.diagnostics.filter(value => {
+        return UNRESOLVED_CODE.indexOf(String(value.code)) !== -1;
     });
-    if (code.length > 0) {
+    if (diagnostics.length === 1) {
+        const className: string = document.getText(diagnostics[0].range);
+        const uri: string = document.uri.toString();
+        const line: number = range.start.line;
+        const character: number = range.start.character;
+        const length: number = document.offsetAt(range.end) - document.offsetAt(range.start);
+        const command: Command = {
+            title: "Resolve unknown type",
+            command: "maven.artifactSearch",
+            arguments: [{
+                className,
+                uri,
+                line,
+                character,
+                length
+            }]
+        };
+        const codeAction: CodeAction = {
+            title: `Resolve unknown type '${className}'`,
+            command: command,
+            kind: CodeActionKind.QuickFix
+        };
         return [codeAction];
     } else {
         return [];
