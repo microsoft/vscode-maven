@@ -39,7 +39,7 @@
 				</dependencies>
 				<configuration>
 					<configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
-					<failOnViolation>false</failOnViolation>
+					<failOnViolation>true</failOnViolation>
 				</configuration>
 			</plugin>
 			<plugin>
