@@ -50,7 +50,7 @@
   "main": "./dist/extension",
   "contributes": {
     "javaExtensions": [
-      "./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.1.0.jar"
+      "./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.19.1.jar"
     ],
     "commands": [
       {
