@@ -18,13 +18,13 @@ import java.util.List;
 public class NetResponseResult {
     Header responseHeader;
     Res response;
-    HashMap<String, fullClassNameList> highlighting;
+    HashMap<String, FullClassNameList> highlighting;
 
     public Res getResponse() {
         return this.response;
     }
 
-    public HashMap<String, fullClassNameList> getHighlighting() {
+    public HashMap<String, FullClassNameList> getHighlighting() {
         return this.highlighting;
     }
 
@@ -85,8 +85,10 @@ public class NetResponseResult {
             return this.v;
         }
     }
-    public class fullClassNameList {
+
+    public class FullClassNameList {
         ArrayList<String> fch;
+
         public ArrayList<String> getFch() {
             return this.fch;
         }

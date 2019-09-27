@@ -8,5 +8,6 @@
         "dist": true,
         "out": true // set this to false to include "out" folder in search results
     },
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.checkstyle.configuration": "${workspaceFolder}/jdtls.ext/checkstyle.xml"
 }

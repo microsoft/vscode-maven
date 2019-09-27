@@ -11,13 +11,10 @@
 
 package com.microsoft.java.maven;
 
-import com.microsoft.java.maven.ArtifactResult;
-import com.microsoft.java.maven.NetResponseResult.Info;
-import com.microsoft.java.maven.NetResponseResult.fullClassNameList;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -25,8 +22,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.Query;
 import org.apache.maven.index.ArtifactInfo;
 import org.apache.maven.index.DefaultIndexer;
@@ -90,7 +87,7 @@ public class ArtifactSearcher {
         if (classSearcher == null) {
             constructContext();
         }
-        try{
+        try {
             return classSearcher.searchByIdentifier(groupId, artifactId);
         } catch (Exception e) {
             return new ArrayList<>();
@@ -99,17 +96,17 @@ public class ArtifactSearcher {
     }
 
     public static Boolean controlIndexerContext(Boolean controlParam, IProgressMonitor monitor) {
-        if(classSearcher==null){
+        if (classSearcher == null) {
             return true;
-        } else{
+        } else {
             return classSearcher.controlIndexerContext(controlParam);
         }
     }
 
     private static void constructContext() {
         try {
-            String indexPath = Paths.get(extensionPath, index).toString();
-            String artifactUsagePath = Paths.get(extensionPath, artifactUsage).toString();
+            final String indexPath = Paths.get(extensionPath, index).toString();
+            final String artifactUsagePath = Paths.get(extensionPath, artifactUsage).toString();
             classSearcher = new ClassSearcher(contextId, repositoryId, indexPath, artifactUsagePath);
         } catch (Exception e) {
             classSearcher = null;
@@ -357,12 +354,14 @@ class BaseClassSearcher extends MavenSearcher {
             return new ArrayList<>();
         }
         Builder builder;
-        builder= new BooleanQuery.Builder();
+        builder = new BooleanQuery.Builder();
         if (!groupId.equals("")) {
-            builder = builder.add(indexer.constructQuery(MAVEN.GROUP_ID, new UserInputSearchExpression(groupId)), Occur.MUST);
+            final Query query = indexer.constructQuery(MAVEN.GROUP_ID, new UserInputSearchExpression(groupId));
+            builder = builder.add(query, Occur.MUST);
         }
         if (!artifactId.equals("")) {
-            builder = builder.add(indexer.constructQuery(MAVEN.ARTIFACT_ID, new UserInputSearchExpression(artifactId)), Occur.MUST);
+            final Query query = indexer.constructQuery(MAVEN.ARTIFACT_ID, new UserInputSearchExpression(artifactId));
+            builder = builder.add(query, Occur.MUST);
         }
         final BooleanQuery bq = builder.build();
         try {
@@ -539,8 +538,8 @@ class NetSearcher {
         if (resultMap.size() >= maxResult) {
             return;
         }
-        final Map<String, fullClassNameList> consultMap = responseResult.getHighlighting();
-        for (final Info info : responseResult.getResponse().getDocs()) {
+        final Map<String, NetResponseResult.FullClassNameList> consultMap = responseResult.getHighlighting();
+        for (final NetResponseResult.Info info : responseResult.getResponse().getDocs()) {
             final String id = info.getId();
             if (consultMap.containsKey(id)) {
                 final List<String> fullClassNames = consultMap.get(id).getFch();

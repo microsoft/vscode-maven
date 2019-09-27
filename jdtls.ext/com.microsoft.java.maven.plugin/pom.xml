@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.microsoft.java.maven</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.1.0</version>
+		<version>0.19.1</version>
 	</parent>
 	<artifactId>com.microsoft.java.maven.plugin</artifactId>
 	<packaging>eclipse-plugin</packaging>
@@ -39,7 +39,7 @@
 				</dependencies>
 				<configuration>
 					<configLocation>${project.parent.basedir}/checkstyle.xml</configLocation>
-					<failOnViolation>false</failOnViolation>
+					<failOnViolation>true</failOnViolation>
 				</configuration>
 			</plugin>
 			<plugin>
