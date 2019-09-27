@@ -131,12 +131,13 @@ function getArtifactsHover(document: TextDocument, position: Position): Hover|un
     }
 }
 
-function getArtifactsCodeActions(document: TextDocument, context: CodeActionContext, range: Range): CodeAction[] {
+function getArtifactsCodeActions(document: TextDocument, context: CodeActionContext, _selectRange: Range): CodeAction[] {
     const diagnostics: Diagnostic[] = context.diagnostics.filter(value => {
         return UNRESOLVED_CODE.indexOf(String(value.code)) !== -1;
     });
     if (diagnostics.length === 1) {
-        const className: string = document.getText(diagnostics[0].range);
+        const range: Range = diagnostics[0].range;
+        const className: string = document.getText(range);
         const uri: string = document.uri.toString();
         const line: number = range.start.line;
         const character: number = range.start.character;
