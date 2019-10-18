@@ -94,12 +94,14 @@ export namespace ArchetypeModule {
         const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
         const catalogs = Settings.Archetype.catalogs();
         let archetypes: Archetype[] = [];
-        let tempArchetypes: Archetype[] = await parseArchetypeCatalog(REMOTE_ARCHETYPE_CATALOG_URL);
-        archetypes.concat(tempArchetypes);
+        await parseArchetypeCatalog(REMOTE_ARCHETYPE_CATALOG_URL).then(response => {
+            archetypes.concat(response);
+        });
         if (typeof catalogs !== 'undefined') {
             for(const catalog of catalogs) {
-                tempArchetypes = await parseArchetypeCatalog(catalog.url);
-                archetypes.concat(tempArchetypes);
+                await parseArchetypeCatalog(catalog.url).then(response => {
+                    archetypes.concat(response);
+                });
             }
         }
         await fse.ensureFile(targetFilePath);
