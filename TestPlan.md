@@ -115,6 +115,29 @@
     2. It issues the corresponding maven command (archetype:generate) with correct parameters.
     3. You can interactively continue to fill in missing params in the terminal to complete the task.
 
+### Custom Maven archetype catalogs
+1. Specify a custom archetype catalog in settings, e.g.
+    ```
+        {
+            "maven.archetype.catalogs": [
+                {
+                    "name": "Contoso catalog",
+                    "url": "http://nexus.contoso.com/service/local/repositories/releases/content/archetype-catalog.xml"
+                }
+            ]
+        }
+    ```
+2. open up the Command Palette -> select `Maven: Update Maven Archetype Catalog`.
+3. Verify: 
+    1. It shows `updating archetype catalog ...` in a notification during updating.
+    2. Once the operation is over, the notification is closed.
+    3. The `archetypes.json` file located in `$HOME/.vscode/extensions/vscjava.vscode-maven-<version>/resources` is updated.
+4. Right-click a target folder in file explorer view.
+5. Click `Create Maven Project`.
+6. Click `More ...`.
+7. Verify:
+    1. It should show an updated dropdown list of remote maven archetypes.
+
 ### Update Maven Archetype Catalog
 1. Open command palatte
 2. Find and select `Maven: Update Maven Archetype Catalog`.

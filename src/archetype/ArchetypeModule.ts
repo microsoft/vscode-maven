@@ -91,22 +91,23 @@ export namespace ArchetypeModule {
     }
 
     export async function updateArchetypeCatalogs(): Promise<void> {
-        let catalogs = Settings.Archetype.catalogs();
+        const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
+        const catalogs = Settings.Archetype.catalogs();
+        let archetypes: Archetype[] = [];
+        archetypes.concat(await parseArchetypeCatalog(REMOTE_ARCHETYPE_CATALOG_URL));
         if (typeof catalogs !== 'undefined') {
             for(const catalog of catalogs) {
-                await updateArchetypeCatalog(catalog.url);
+                archetypes.concat(await parseArchetypeCatalog(catalog.url));
             }
-        } else {
-            await updateArchetypeCatalog(REMOTE_ARCHETYPE_CATALOG_URL);
         }
-    }    
-
-    async function updateArchetypeCatalog(url: string): Promise<void> {
-        const xml: string = await Utils.downloadFile(url, true);
-        const archetypes: Archetype[] = await listArchetypeFromXml(xml);
-        const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
         await fse.ensureFile(targetFilePath);
         await fse.writeJSON(targetFilePath, archetypes);
+    }    
+
+    async function parseArchetypeCatalog(url: string): Promise<Archetype[]> {
+        const xml: string = await Utils.downloadFile(url, true);
+        const archetypes: Archetype[] = await listArchetypeFromXml(xml);
+        return archetypes;
     }
 
     async function showQuickPickForArchetypes(all?: boolean): Promise<Archetype | undefined | null> {
