@@ -94,21 +94,15 @@ export namespace ArchetypeModule {
         const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
         const catalogs = Settings.Archetype.catalogs();
         let archetypes: Archetype[] = [];
-        await parseArchetypeCatalog(REMOTE_ARCHETYPE_CATALOG_URL).then(response => {
-            archetypes.concat(response);
-        }).then(async () => {
-            if (typeof catalogs !== 'undefined') {
-                for(const catalog of catalogs) {
-                    await parseArchetypeCatalog(catalog.url).then(response => {
-                        archetypes.concat(response);
-                    });
-                }
+        archetypes = archetypes.concat(await parseArchetypeCatalog(REMOTE_ARCHETYPE_CATALOG_URL));
+        if (typeof catalogs !== 'undefined') {
+            for (const catalog of catalogs) {
+                archetypes = archetypes.concat(await parseArchetypeCatalog(catalog.url));
             }
-        }).then(async () => {
-            await fse.ensureFile(targetFilePath);
-            await fse.writeJSON(targetFilePath, archetypes);
-        });
-    }    
+        }
+        await fse.ensureFile(targetFilePath);
+        await fse.writeJSON(targetFilePath, archetypes);
+    }
 
     async function parseArchetypeCatalog(url: string): Promise<Archetype[]> {
         const xml: string = await Utils.downloadFile(url, true);
