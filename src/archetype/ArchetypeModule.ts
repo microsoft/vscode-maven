@@ -10,6 +10,7 @@ import { getMavenLocalRepository, getPathToExtensionRoot } from "../utils/contex
 import { executeInTerminal, getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
+import { Settings } from "../Settings";
 import { Archetype } from "./Archetype";
 
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
@@ -89,8 +90,19 @@ export namespace ArchetypeModule {
         }
     }
 
-    export async function updateArchetypeCatalog(): Promise<void> {
-        const xml: string = await Utils.downloadFile(REMOTE_ARCHETYPE_CATALOG_URL, true);
+    export async function updateArchetypeCatalogs(): Promise<void> {
+        let catalogs = Settings.Archetype.catalogs();
+        if (typeof catalogs !== 'undefined') {
+            for(const catalog of catalogs) {
+                await updateArchetypeCatalog(catalog.url);
+            }
+        } else {
+            await updateArchetypeCatalog(REMOTE_ARCHETYPE_CATALOG_URL);
+        }
+    }    
+
+    async function updateArchetypeCatalog(url: string): Promise<void> {
+        const xml: string = await Utils.downloadFile(url, true);
         const archetypes: Archetype[] = await listArchetypeFromXml(xml);
         const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
         await fse.ensureFile(targetFilePath);

@@ -59,6 +59,12 @@ export namespace Settings {
         }
     }
 
+    export namespace Archetype {
+        export function catalogs(): { name: string; url: string }[] | undefined {
+            return _getMavenSection("archetype.catalogs");
+        }
+    }
+
     export namespace Pomfile {
         export function autoUpdateEffectivePOM(): boolean {
             return !!_getMavenSection<boolean>("pomfile.autoUpdateEffectivePOM");

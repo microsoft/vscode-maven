@@ -91,7 +91,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.archetype.update", async () => {
         await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: Progress<{}>) => {
             p.report({ message: "updating archetype catalog ..." });
-            await ArchetypeModule.updateArchetypeCatalog();
+            await ArchetypeModule.updateArchetypeCatalogs();
             p.report({ message: "finished." });
         });
     });
