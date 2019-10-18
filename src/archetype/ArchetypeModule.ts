@@ -2,16 +2,19 @@
 // Licensed under the MIT license.
 
 import * as fse from "fs-extra";
+import * as _ from "lodash";
 import * as path from "path";
 import { QuickPickItem, Uri, window, workspace } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { OperationCanceledError } from "../Errors";
+import { Settings } from "../Settings";
 import { getMavenLocalRepository, getPathToExtensionRoot } from "../utils/contextUtils";
 import { executeInTerminal, getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
-import { Settings } from "../Settings";
 import { Archetype } from "./Archetype";
+
+type ArchetypeCatalog = { name: string, url: string };
 
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
 const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
@@ -92,10 +95,10 @@ export namespace ArchetypeModule {
 
     export async function updateArchetypeCatalogs(): Promise<void> {
         const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
-        const catalogs = Settings.Archetype.catalogs();
+        const catalogs: ArchetypeCatalog[] | undefined = Settings.Archetype.catalogs();
         let archetypes: Archetype[] = [];
         archetypes = archetypes.concat(await parseArchetypeCatalog(REMOTE_ARCHETYPE_CATALOG_URL));
-        if (typeof catalogs !== 'undefined') {
+        if (catalogs && !(_.isEmpty(catalogs))) {
             for (const catalog of catalogs) {
                 archetypes = archetypes.concat(await parseArchetypeCatalog(catalog.url));
             }
