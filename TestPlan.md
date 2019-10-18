@@ -136,7 +136,7 @@
 5. Click `Create Maven Project`.
 6. Click `More ...`.
 7. Verify:
-    1. It should show an updated dropdown list of remote maven archetypes.
+    1. It shows an updated dropdown list of remote maven archetypes, together with default archetypes from central Maven archetype catalog.
 
 ### Update Maven Archetype Catalog
 1. Open command palatte
