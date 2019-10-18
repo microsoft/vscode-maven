@@ -28,5 +28,8 @@
     "configuration.maven.view": "Specifies the way of viewing Maven projects.",
     "configuration.maven.terminal.favorites": "Specify pre-defined favorite commands to execute.",
     "configuration.maven.terminal.favorites.alias": "A short name for the command.",
-    "configuration.maven.terminal.favorites.command": "Content of the favorite command."
+    "configuration.maven.terminal.favorites.command": "Content of the favorite command.",
+    "configuration.maven.archetype.catalogs": "Specify custom remote catalogs from which to fetch archetypes.",
+    "configuration.maven.archetype.catalogs.name": "A name of the remote catalog.",
+    "configuration.maven.archetype.catalogs.url": "URL from which to download the remote catalog."
 }
