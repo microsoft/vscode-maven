@@ -1,14 +1,27 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as fse from "fs-extra";
 import * as vscode from "vscode";
+import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
+import { MavenProject } from "../explorer/model/MavenProject";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
 
 export async function addDependencyHandler(): Promise<void> {
-    if (!vscode.window.activeTextEditor) {
-        throw new UserError("Please open a pom.xml file first.");
+    // select a project(pomfile)
+    const selectedProject: MavenProject | undefined = await vscode.window.showQuickPick(
+        mavenExplorerProvider.mavenProjectNodes.map(item => ({
+            value: item,
+            label: `$(primitive-dot) ${item.name}`,
+            description: undefined,
+            detail: item.pomPath
+        })),
+        { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
+    ).then(item => item ? item.value : undefined);
+    if (!selectedProject) {
+        return;
     }
 
     const keywordString: string | undefined = await vscode.window.showInputBox({
@@ -33,16 +46,17 @@ export async function addDependencyHandler(): Promise<void> {
     if (!selectedDoc) {
         return;
     }
-    await addDependency(selectedDoc.g, selectedDoc.a, selectedDoc.latestVersion);
+    await addDependency(selectedProject.pomPath, selectedDoc.g, selectedDoc.a, selectedDoc.latestVersion);
 }
 
-async function addDependency(gid: string, aid: string, version: string): Promise<void> {
+async function addDependency(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
     if (!vscode.window.activeTextEditor) {
         throw new UserError("No POM file is open.");
     }
 
     // Find out <dependencies> node and insert content.
-    const projectNodes: ElementNode[] = getNodesByTag(vscode.window.activeTextEditor.document.getText(), XmlTagName.Project);
+    const contentBuf: Buffer = await fse.readFile(pomPath);
+    const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
@@ -50,24 +64,21 @@ async function addDependency(gid: string, aid: string, version: string): Promise
     const proejctNode: ElementNode = projectNodes[0];
     const dependenciesNode: ElementNode | undefined = proejctNode.children && proejctNode.children.find(node => node.tag === XmlTagName.Dependencies);
     if (dependenciesNode !== undefined) {
-        await insertDependency(dependenciesNode, gid, aid, version);
+        await insertDependency(pomPath, dependenciesNode, gid, aid, version);
     } else {
-        await insertDependency(proejctNode, gid, aid, version);
+        await insertDependency(pomPath, proejctNode, gid, aid, version);
 
     }
 }
 
-async function insertDependency(targetNode: ElementNode, gid: string, aid: string, version: string): Promise<void> {
-    if (!vscode.window.activeTextEditor) {
-        throw new UserError("No POM file is open.");
-    }
+async function insertDependency(pomPath: string, targetNode: ElementNode, gid: string, aid: string, version: string): Promise<void> {
     if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined) {
         throw new UserError("Invalid target XML node to insert dependency.");
     }
-
-    const currentDocument: vscode.TextDocument = vscode.window.activeTextEditor.document;
+    const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
+    const textEditor: vscode.TextEditor = await vscode.window.showTextDocument(currentDocument);
     const baseIndent: string = getIndentation(currentDocument, targetNode.contentEnd);
-    const options: vscode.TextEditorOptions = vscode.window.activeTextEditor.options;
+    const options: vscode.TextEditorOptions = textEditor.options;
     const indent: string = options.insertSpaces ? " ".repeat(<number>options.tabSize) : "\t";
     const eol: string = currentDocument.eol === vscode.EndOfLine.LF ? "\n" : "\r\n";
     let insertPosition: vscode.Position;
@@ -88,7 +99,7 @@ async function insertDependency(targetNode: ElementNode, gid: string, aid: strin
     edit.set(currentDocument.uri, [textEdit]);
     await vscode.workspace.applyEdit(edit);
     const endingPosition: vscode.Position = currentDocument.positionAt(currentDocument.offsetAt(insertPosition) + targetText.length);
-    vscode.window.activeTextEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
+    textEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
 }
 
 function constructDependencyNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
