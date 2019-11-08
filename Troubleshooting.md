@@ -12,7 +12,7 @@ There are 2 types of command execution methods.
 
 * Install **Java**. Java Runtime is essential to run Maven commands. E.g. [AdoptOpenJDK](https://adoptopenjdk.net/), [Oracle OpenJDK](https://jdk.java.net/), etc.
 * **[Install Maven](https://maven.apache.org/install.html) / Maven Wrapper**. The extension actually leverages Maven executable file in your local machine. By default, it tries the following ones in order:
-  1. The absolute path specified in config `maven.executable.path` if it is not empty.
+  1. The absolute path specified in config `maven.executable.path` if it is not empty.  This should be the full path including `mvn`, e.g. `"maven.executable.path": "/opt/apache-maven-3.6.2/bin/mvn"` in your `settings.json` file.
   2. `mvnw` file under your workspace root folder. (If you prefer to bypass this one, you can change value of config `maven.executable.preferMavenWrapper` to `false`.)
   3. `mvn` in your system's `PATH`.
 
