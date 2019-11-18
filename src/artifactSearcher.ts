@@ -61,7 +61,7 @@ class TypeResolver {
         }
 
         if (!this.initialized) {
-            this.initialize();
+            this.initialize().catch();
             return undefined;
         }
 
@@ -96,7 +96,7 @@ class TypeResolver {
         }
 
         if (!this.initialized) {
-            this.initialize();
+            this.initialize().catch();
             return undefined;
         }
 
@@ -138,7 +138,7 @@ class TypeResolver {
         }
 
         if (!this.initialized) {
-            this.initialize();
+            this.initialize().catch();
             return;
         }
 
