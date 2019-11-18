@@ -169,8 +169,8 @@
         "title": "%contributes.commands.maven.view.flat%",
         "category": "Maven",
         "icon": {
-          "light": "resources/icons/light/view-flat.svg",
-          "dark": "resources/icons/dark/view-flat.svg"
+          "light": "resources/icons/light/list-tree.svg",
+          "dark": "resources/icons/dark/list-tree.svg"
         }
       },
       {
@@ -178,8 +178,8 @@
         "title": "%contributes.commands.maven.view.hierarchical%",
         "category": "Maven",
         "icon": {
-          "light": "resources/icons/light/view-hierarchical.svg",
-          "dark": "resources/icons/dark/view-hierarchical.svg"
+          "light": "resources/icons/light/list-flat.svg",
+          "dark": "resources/icons/dark/list-flat.svg"
         }
       },
       {
