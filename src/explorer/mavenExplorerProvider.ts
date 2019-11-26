@@ -3,10 +3,10 @@
 
 import { TreeDataProvider } from "vscode";
 import * as vscode from "vscode";
+import { Utils } from "../utils/Utils";
 import { ITreeItem } from "./model/ITreeItem";
 import { MavenProject } from "./model/MavenProject";
 import { WorkspaceFolder } from "./model/WorkspaceFolder";
-import { Utils } from "../utils/Utils";
 
 class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: vscode.Event<ITreeItem>;
@@ -69,7 +69,7 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         this._onDidChangeTreeData.fire(item);
     }
 
-    public async loadProjects(workspaceFolder?: vscode.WorkspaceFolder) : Promise<MavenProject[]>{
+    public async loadProjects(workspaceFolder?: vscode.WorkspaceFolder) : Promise<MavenProject[]> {
         const newProjects: MavenProject[] = [];
         const allProjects: MavenProject[] = [];
         const pomPaths: string[] = await Utils.getAllPomPaths(workspaceFolder);

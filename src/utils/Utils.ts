@@ -102,7 +102,7 @@ export namespace Utils {
     export async function getAllPomPaths(workspaceFolder?: WorkspaceFolder): Promise<string[]> {
         if (!workspaceFolder) {
             if (workspace.workspaceFolders) {
-                const arrayOfPoms = await Promise.all(workspace.workspaceFolders.map(wf => getAllPomPaths(wf)))
+                const arrayOfPoms: string[][] = await Promise.all(workspace.workspaceFolders.map(getAllPomPaths));
                 return [].concat.apply([], ...arrayOfPoms);
             } else {
                 return [];
