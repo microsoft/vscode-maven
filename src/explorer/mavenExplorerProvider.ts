@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import { ITreeItem } from "./model/ITreeItem";
 import { MavenProject } from "./model/MavenProject";
 import { WorkspaceFolder } from "./model/WorkspaceFolder";
+import { Utils } from "../utils/Utils";
 
 class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     public readonly onDidChangeTreeData: vscode.Event<ITreeItem>;
@@ -67,6 +68,34 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     public refresh(item?: ITreeItem): void {
         this._onDidChangeTreeData.fire(item);
     }
+
+    public async loadProjects(workspaceFolder?: vscode.WorkspaceFolder) : Promise<MavenProject[]>{
+        const newProjects: MavenProject[] = [];
+        const allProjects: MavenProject[] = [];
+        const pomPaths: string[] = await Utils.getAllPomPaths(workspaceFolder);
+
+        for (const pomPath of pomPaths) {
+            let currentProject: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
+            if (!currentProject) {
+                currentProject = new MavenProject(pomPath);
+                newProjects.push(currentProject);
+            }
+            allProjects.push(currentProject);
+        }
+
+        await Promise.all(newProjects.map(async elem => elem.parsePom()));
+        mavenExplorerProvider.updateProjects(...newProjects);
+        newProjects.forEach(p => {
+            p.modules.forEach(m => {
+                const moduleNode: MavenProject | undefined = mavenExplorerProvider.getMavenProject(m);
+                if (moduleNode) {
+                    moduleNode.parent = p;
+                }
+            });
+        });
+        return allProjects;
+    }
+
 }
 
 // tslint:disable-next-line:export-name

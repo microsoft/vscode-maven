@@ -4,7 +4,6 @@
 import * as vscode from "vscode";
 import { TreeItemCollapsibleState } from "vscode";
 import { Settings } from "../../Settings";
-import { Utils } from "../../utils/Utils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
@@ -23,29 +22,7 @@ export class WorkspaceFolder implements ITreeItem {
     }
 
     public async getChildren(): Promise<ITreeItem[]> {
-        const newProjects: MavenProject[] = [];
-        const allProjects: MavenProject[] = [];
-        const pomPaths: string[] = await Utils.getAllPomPaths(this._workspaceFolder);
-        for (const pomPath of pomPaths) {
-            let currentProject: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
-            if (!currentProject) {
-                currentProject = new MavenProject(pomPath);
-                newProjects.push(currentProject);
-            }
-            allProjects.push(currentProject);
-        }
-
-        await Promise.all(newProjects.map(async elem => elem.parsePom()));
-        mavenExplorerProvider.updateProjects(...newProjects);
-        newProjects.forEach(p => {
-            p.modules.forEach(m => {
-                const moduleNode: MavenProject | undefined = mavenExplorerProvider.getMavenProject(m);
-                if (moduleNode) {
-                    moduleNode.parent = p;
-                }
-            });
-        });
-
+        const allProjects: MavenProject[] = await mavenExplorerProvider.loadProjects(this._workspaceFolder);
         if (allProjects.length === 0) {
             return [{
                 getTreeItem: () => new vscode.TreeItem("No Maven project found."),

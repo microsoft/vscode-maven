@@ -62,6 +62,7 @@ export function registerCommand(context: vscode.ExtensionContext, commandName: s
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     pluginInfoProvider.initialize(context);
     // register tree view
+    await mavenExplorerProvider.loadProjects();
     context.subscriptions.push(vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true }));
     // pom.xml listener to refresh tree view
     registerPomFileWatcher(context);
