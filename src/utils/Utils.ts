@@ -99,7 +99,15 @@ export namespace Utils {
         });
     }
 
-    export async function getAllPomPaths(workspaceFolder: WorkspaceFolder): Promise<string[]> {
+    export async function getAllPomPaths(workspaceFolder?: WorkspaceFolder): Promise<string[]> {
+        if (!workspaceFolder) {
+            if (workspace.workspaceFolders) {
+                const arrayOfPoms: string[][] = await Promise.all(workspace.workspaceFolders.map(getAllPomPaths));
+                return [].concat.apply([], ...arrayOfPoms);
+            } else {
+                return [];
+            }
+        }
         const exclusions: string[] = Settings.excludedFolders(workspaceFolder.uri);
         const pattern: string = Settings.Pomfile.globPattern();
         const pomFileUris: Uri[] = await workspace.findFiles(new RelativePattern(workspaceFolder, pattern), `{${exclusions.join(",")}}`);
