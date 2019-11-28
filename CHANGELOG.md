@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.20.0
+#### Added
+- Support to "Collapse All" in Maven explorer. [PR#414](https://github.com/microsoft/vscode-maven/pull/414)
+- Support to specify the project for command "Maven: Add a dependency". [PR418](https://github.com/microsoft/vscode-maven/pull/418)
+
+#### Changed
+- Update related icons in Maven explorer. [PR#425](https://github.com/microsoft/vscode-maven/pull/425)
+- Upgrade embeded maven wrapper to 3.6.2. [PR#416](https://github.com/microsoft/vscode-maven/pull/416)
+
+#### Fixed
+- Java extension was unnecessarily activated. [#424](https://github.com/microsoft/vscode-maven/issues/424)
+- Projects were not identified before expanding the Maven explorer. [#429](https://github.com/microsoft/vscode-maven/issues/429)
+
 ## 0.19.1
 #### Added
 - Provide more completion suggestions for groupId and artifactId on POM file authoring. [PR#404](https://github.com/microsoft/vscode-maven/pull/404)
@@ -9,7 +22,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - No candidates when resolving unknown types. [PR#405](https://github.com/microsoft/vscode-maven/pull/405)
 
 ## 0.19.0
-#### Added 
+#### Added
 - Add inline action buttons in Maven explorer.
 - Add icons for Maven explorer items. [PR#397](https://github.com/microsoft/vscode-maven/pull/397)
 - Can add dependencies when hovering on unresolved types. [PR#391](https://github.com/microsoft/vscode-maven/pull/391)
@@ -61,20 +74,20 @@ Thank [Justin Ridgewell (@jridgewell)](https://github.com/jridgewell) for the co
 - A regression issue which blocks auto-completion for pom files. [#311](https://github.com/Microsoft/vscode-maven/issues/311)
 
 ## 0.16.1
-#### Fixed 
+#### Fixed
 - An error on calculating effective pom when there is whitespace in project path. [#304](https://github.com/Microsoft/vscode-maven/issues/304)
 - A bug which causes to retry calculating effective pom all the time. [#296](https://github.com/Microsoft/vscode-maven/issues/296)
 
 ## 0.16.0
 #### Added
 - Support to debug a plugin goal.
-  - The feature is designed for debugging code of the plugin goal itself. It can also debug Java classes loaded in the same JVM. 
+  - The feature is designed for debugging code of the plugin goal itself. It can also debug Java classes loaded in the same JVM.
   - Debugging Java classes loaded by a forked process is not supported. E.g. when `devtools` is present, breakpoints in application code will not be hit when debugging `spring-boot:run` according to [its docs](https://docs.spring.io/spring-boot/docs/current/maven-plugin/run-mojo.html#fork).
 - Add a shortcut to show dependency tree.
 
 #### Fixed
 - Fix miscellaneous minor issues by enabling TS strict null check.
-  
+
 ## 0.15.2
 #### Fixed
 - A potential NPE when no folder is open. [#279](https://github.com/Microsoft/vscode-maven/issues/279)
@@ -85,13 +98,13 @@ Thank [Justin Ridgewell (@jridgewell)](https://github.com/jridgewell) for the co
 - Missing description for favorite commands configuration. [PR#275](https://github.com/Microsoft/vscode-maven/pull/275)
 
 ## 0.15.0
-#### Added 
+#### Added
 - Allow to specify and execute "favorite" Maven commands. [#72](https://github.com/Microsoft/vscode-maven/issues/72) [#259](https://github.com/Microsoft/vscode-maven/issues/259)
 - Hover to show effective version of a dependency. [#260](https://github.com/Microsoft/vscode-maven/issues/260)
 - Add a command "Maven: Add a dependency" for convenience when editing pom.xml. [#253](https://github.com/Microsoft/vscode-maven/issues/253)
 
 ## 0.14.2
-#### Fixed 
+#### Fixed
 - Use a simple and robust way to inject custom environment variables into terminals. [PR#240](https://github.com/Microsoft/vscode-maven/pull/240)
 - Fix a regression of executing custom goals from command palette. [#243](https://github.com/Microsoft/vscode-maven/issues/243)
 
