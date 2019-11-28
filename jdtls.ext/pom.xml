@@ -4,7 +4,7 @@
     <groupId>com.microsoft.java.maven</groupId>
     <artifactId>parent</artifactId>
     <name>${base.name} :: Parent</name>
-    <version>0.19.1</version>
+    <version>0.20.0</version>
     <packaging>pom</packaging>
     <properties>
         <base.name>JDTLS Maven Extension</base.name>
@@ -22,7 +22,7 @@
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.15</version>
                     <executions>
-                        <!-- Ensures that both integration-test and verify 
+                        <!-- Ensures that both integration-test and verify
                             goals of the Failsafe Maven plugin are executed. -->
                         <execution>
                             <id>integration-tests</id>
@@ -31,10 +31,10 @@
                                 <goal>verify</goal>
                             </goals>
                             <configuration>
-                                <!-- Sets the VM argument line used when 
+                                <!-- Sets the VM argument line used when
                                     integration tests are run. -->
                                 <argLine>${failsafeArgLine}</argLine>
-                                <!-- Skips integration tests if the value 
+                                <!-- Skips integration tests if the value
                                     of skip.integration.tests property is true -->
                                 <skipTests>${skip.integration.tests}</skipTests>
                             </configuration>
@@ -57,7 +57,7 @@
                     <configuration>
                         <skip>false</skip>
                         <outputDirectory>${basedir}/lib/</outputDirectory>
-                        <!-- baseVersion is to avoid SNAPSHOT dependencies 
+                        <!-- baseVersion is to avoid SNAPSHOT dependencies
                             being copied with ever daily changing timestamp -->
                         <useBaseVersion>true</useBaseVersion>
                     </configuration>
