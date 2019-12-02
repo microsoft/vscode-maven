@@ -178,6 +178,26 @@ Now right-click on an project item, and then click `Favorite ...`. The option `f
 
 </details>
 
+<details>
+<summary>Customize remote Maven archetype catalogs</summary>
+
+Specify a remote archetype catalog in settings:
+
+```json
+{
+    "maven.archetype.catalogs": [
+        {
+            "name": "Contoso catalog",
+            "url": "http://nexus.contoso.com/service/local/repositories/releases/content/archetype-catalog.xml"
+        }
+    ]
+}
+```
+
+Now open up the Command Palette -> select `Maven: Update Maven Archetype Catalog`.
+
+</details>
+
 ## Settings
 
 | Name | Description | Default Value |

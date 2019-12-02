@@ -499,6 +499,32 @@
             "description": "%configuration.maven.terminal.favorites%",
             "scope": "resource"
           },
+          "maven.archetype.catalogs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "title": "Archetype catalogs",
+              "required": [
+                "name",
+                "url"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "%configuration.maven.archetype.catalogs.name%"
+                },
+                "url": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "%configuration.maven.archetype.catalogs.url%"
+                }
+              }
+            },
+            "default": [],
+            "description": "%configuration.maven.archetype.catalogs%",
+            "scope": "window"
+          },
           "maven.view": {
             "type": "string",
             "enum": [

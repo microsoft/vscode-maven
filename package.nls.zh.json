@@ -28,5 +28,8 @@
     "configuration.maven.view": "指定 Maven 项目的视图方式。",
     "configuration.maven.terminal.favorites": "指定要执行的偏好命令。",
     "configuration.maven.terminal.favorites.alias": "命令的简称。",
-    "configuration.maven.terminal.favorites.command": "命令的内容。"
+    "configuration.maven.terminal.favorites.command": "命令的内容。",
+    "configuration.maven.archetype.catalogs": "Specify custom remote catalogs from which to fetch archetypes.",
+    "configuration.maven.archetype.catalogs.name": "A name of the remote catalog.",
+    "configuration.maven.archetype.catalogs.url": "URL from which to download the remote catalog."
 }
