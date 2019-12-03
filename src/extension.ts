@@ -3,8 +3,8 @@
 
 "use strict";
 import * as vscode from "vscode";
-import { Progress, Uri} from "vscode";
-import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
+import { Progress, Uri } from "vscode";
+import { dispose as disposeTelemetryWrapper, initialize, sendInfo, instrumentOperation } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { registerArtifactSearcher } from "./artifactSearcher";
 import { completionProvider } from "./completion/completionProvider";
@@ -58,7 +58,6 @@ export function registerCommand(context: vscode.ExtensionContext, commandName: s
     context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
 }
 
-// tslint:disable-next-line: max-func-body-length
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     pluginInfoProvider.initialize(context);
     // register tree view
@@ -72,66 +71,42 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
         registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
     });
-    registerCommand(context, "maven.explorer.refresh", async (item?: ITreeItem): Promise<void> => {
-        if (item && item.refresh) {
-            await item.refresh();
-        } else {
-            mavenExplorerProvider.refresh(item);
-        }
-    });
+    registerCommand(context, "maven.explorer.refresh", refreshExplorerHandler);
     registerCommand(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
     registerCommand(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
-    registerCommand(context, "maven.project.openPom", async (node: MavenProject) => {
-        if (node && node.pomPath) {
-            await openFileIfExists(node.pomPath);
-        }
-    });
+    registerCommand(context, "maven.project.openPom", openPomHandler);
     registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
         await ArchetypeModule.generateFromArchetype(entry, operationId);
     }, true);
-    registerCommand(context, "maven.archetype.update", async () => {
-        await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: Progress<{}>) => {
-            p.report({ message: "updating archetype catalog ..." });
-            await ArchetypeModule.updateArchetypeCatalog();
-            p.report({ message: "finished." });
-        });
-    });
-    registerCommand(context, "maven.history", async (item: MavenProject | undefined) => {
-        if (item) {
-            await Utils.executeHistoricalGoals([item.pomPath]);
-        } else {
-            await Utils.executeHistoricalGoals(mavenExplorerProvider.mavenProjectNodes.map(_node => _node.pomPath));
-        }
-    });
-    registerCommand(context, "maven.favorites", async (item: MavenProject | undefined) => await runFavoriteCommandsHandler(item));
+    registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
+    registerCommand(context, "maven.history", mavenHistoryHandler);
+    registerCommand(context, "maven.favorites", runFavoriteCommandsHandler);
     registerCommand(context, "maven.goal.execute", async () => await Utils.executeMavenCommand());
     registerCommand(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.name, pomfile: pluginGoal.plugin.project.pomPath }));
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());
     registerCommand(context, "maven.view.hierarchical", () => Settings.changeToHierarchicalView());
 
-    registerConfigChangeListner(context);
+    registerConfigChangeListener(context);
+
+    // Free resources when manually closing a terminal
     context.subscriptions.push(
         vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
-            mavenTerminal.onDidCloseTerminal(closedTerminal);
-        }),
-        // workspace folder change listener
+            mavenTerminal.dispose(closedTerminal.name);
+        })
+    );
+
+    // Reload projects when workspace folders added/removed
+    context.subscriptions.push(
         vscode.workspace.onDidChangeWorkspaceFolders((_e: vscode.WorkspaceFoldersChangeEvent) => {
             mavenExplorerProvider.refresh();
         })
     );
-    const pomSelector: vscode.DocumentSelector = [{
-        language: "xml",
-        scheme: "file",
-        pattern: Settings.Pomfile.globPattern()
-    }];
-    // completion item provider
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-", "<"));
-    registerCommand(context, "maven.completion.selected", sendInfo, true);
+
+    registerPomFileAuthoringHelpers(context);
     // dependency
-    registerCommand(context, "maven.project.addDependency", async () => await addDependencyHandler());
-    registerCommand(context, "maven.project.showDependencies", async (project: MavenProject) => await showDependenciesHandler(project));
-    // hover
-    context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
+    registerCommand(context, "maven.project.addDependency", addDependencyHandler);
+    registerCommand(context, "maven.project.showDependencies", showDependenciesHandler);
+
     // debug
     registerCommand(context, "maven.plugin.debug", debugHandler);
     vscode.debug.onDidTerminateDebugSession((session: any) => {
@@ -170,14 +145,14 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
     context.subscriptions.push(watcher);
 }
 
-function registerConfigChangeListner(context: vscode.ExtensionContext): void {
+function registerConfigChangeListener(context: vscode.ExtensionContext): void {
     const configChangeListener: vscode.Disposable = vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
         // close all terminals with outdated JAVA related environment variables
         if (e.affectsConfiguration("maven.terminal.useJavaHome")
             || e.affectsConfiguration("maven.terminal.customEnv")
             || e.affectsConfiguration("java.home") && Settings.Terminal.useJavaHome()
         ) {
-            mavenTerminal.closeAllTerminals();
+            mavenTerminal.dispose();
         }
         if (e.affectsConfiguration("maven.view")
             || e.affectsConfiguration("maven.pomfile.globPattern")) {
@@ -185,4 +160,47 @@ function registerConfigChangeListner(context: vscode.ExtensionContext): void {
         }
     });
     context.subscriptions.push(configChangeListener);
+}
+
+function registerPomFileAuthoringHelpers(context: vscode.ExtensionContext): void {
+    const pomSelector: vscode.DocumentSelector = [{
+        language: "xml",
+        scheme: "file",
+        pattern: Settings.Pomfile.globPattern()
+    }];
+    // completion item provider
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-", "<"));
+    registerCommand(context, "maven.completion.selected", sendInfo, true);
+    // hover
+    context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
+}
+
+async function mavenHistoryHandler(item: MavenProject | undefined) {
+    if (item) {
+        await Utils.executeHistoricalGoals([item.pomPath]);
+    } else {
+        await Utils.executeHistoricalGoals(mavenExplorerProvider.mavenProjectNodes.map(node => node.pomPath));
+    }
+}
+
+async function updateArchetypeCatalogHandler() {
+    await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: Progress<{}>) => {
+        p.report({ message: "updating archetype catalog ..." });
+        await ArchetypeModule.updateArchetypeCatalog();
+        p.report({ message: "finished." });
+    });
+}
+
+async function refreshExplorerHandler(item?: ITreeItem): Promise<void>{
+    if (item && item.refresh) {
+        await item.refresh();
+    } else {
+        mavenExplorerProvider.refresh(item);
+    }
+}
+
+async function openPomHandler(node: MavenProject) {
+    if (node && node.pomPath) {
+        await openFileIfExists(node.pomPath);
+    }
 }

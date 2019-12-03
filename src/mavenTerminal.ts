@@ -44,21 +44,6 @@ class MavenTerminal implements vscode.Disposable {
         return this.terminals[name];
     }
 
-    public closeAllTerminals(): void {
-        Object.keys(this.terminals).forEach((id: string) => {
-            this.terminals[id].dispose();
-            delete this.terminals[id];
-        });
-    }
-
-    public onDidCloseTerminal(closedTerminal: vscode.Terminal): void {
-        try {
-            delete this.terminals[closedTerminal.name];
-        } catch (error) {
-            // ignore it.
-        }
-    }
-
     // To Refactor: remove from here.
     public async formattedPathForTerminal(filepath: string): Promise<string> {
         if (process.platform === "win32") {
@@ -76,8 +61,12 @@ class MavenTerminal implements vscode.Disposable {
     public dispose(id?: string): void {
         if (id) {
             this.terminals[id].dispose();
+            delete this.terminals[id];
         } else {
-            this.closeAllTerminals();
+            Object.keys(this.terminals).forEach((id: string) => {
+                this.terminals[id].dispose();
+                delete this.terminals[id];
+            });
         }
     }
 }
