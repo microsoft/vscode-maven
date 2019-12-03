@@ -117,7 +117,7 @@ export async function executeInTerminal(options: {
 }
 
 export async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promise<string | undefined> {
-    const workspaceFolderUri: vscode.Uri | undefined = workspaceFolder && workspaceFolder.uri;
+    const workspaceFolderUri: vscode.Uri | undefined = workspaceFolder !== undefined ? workspaceFolder.uri : undefined;
     const mvnPathFromSettings: string | undefined = Settings.Executable.path(workspaceFolderUri);
     if (mvnPathFromSettings) {
         return mvnPathFromSettings;
