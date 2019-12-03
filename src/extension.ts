@@ -4,7 +4,7 @@
 "use strict";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
-import { dispose as disposeTelemetryWrapper, initialize, sendInfo, instrumentOperation } from "vscode-extension-telemetry-wrapper";
+import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { registerArtifactSearcher } from "./artifactSearcher";
 import { completionProvider } from "./completion/completionProvider";
@@ -175,7 +175,7 @@ function registerPomFileAuthoringHelpers(context: vscode.ExtensionContext): void
     context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
 }
 
-async function mavenHistoryHandler(item: MavenProject | undefined) {
+async function mavenHistoryHandler(item: MavenProject | undefined): Promise<void> {
     if (item) {
         await Utils.executeHistoricalGoals([item.pomPath]);
     } else {
@@ -183,7 +183,7 @@ async function mavenHistoryHandler(item: MavenProject | undefined) {
     }
 }
 
-async function updateArchetypeCatalogHandler() {
+async function updateArchetypeCatalogHandler(): Promise<void> {
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: Progress<{}>) => {
         p.report({ message: "updating archetype catalog ..." });
         await ArchetypeModule.updateArchetypeCatalog();
@@ -191,7 +191,7 @@ async function updateArchetypeCatalogHandler() {
     });
 }
 
-async function refreshExplorerHandler(item?: ITreeItem): Promise<void>{
+async function refreshExplorerHandler(item?: ITreeItem): Promise<void> {
     if (item && item.refresh) {
         await item.refresh();
     } else {
@@ -199,8 +199,8 @@ async function refreshExplorerHandler(item?: ITreeItem): Promise<void>{
     }
 }
 
-async function openPomHandler(node: MavenProject) {
-    if (node && node.pomPath) {
+async function openPomHandler(node: MavenProject): Promise<void> {
+    if (node !== undefined && node.pomPath) {
         await openFileIfExists(node.pomPath);
     }
 }

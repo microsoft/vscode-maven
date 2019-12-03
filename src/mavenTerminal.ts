@@ -58,10 +58,10 @@ class MavenTerminal implements vscode.Disposable {
         }
     }
 
-    public dispose(id?: string): void {
-        if (id) {
-            this.terminals[id].dispose();
-            delete this.terminals[id];
+    public dispose(terminalName?: string): void {
+        if (terminalName) {
+            this.terminals[terminalName].dispose();
+            delete this.terminals[terminalName];
         } else {
             Object.keys(this.terminals).forEach((id: string) => {
                 this.terminals[id].dispose();
@@ -150,7 +150,7 @@ export async function toWinPath(path: string): Promise<string> {
 export const mavenTerminal: MavenTerminal = new MavenTerminal();
 
 function setupEnvForWSL(terminal: vscode.Terminal, env: { [envKey: string]: string }): void {
-    if (terminal) {
+    if (terminal !== undefined) {
         Object.keys(env).forEach(key => {
             terminal.sendText(`export ${key}="${env[key]}"`, true);
         });
