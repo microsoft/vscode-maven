@@ -1,6 +1,6 @@
 # Troubleshooting
 
-## Backround knowledge
+## Background knowledge
 
 ### Where to find Error logs
 
