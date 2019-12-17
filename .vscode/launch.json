@@ -21,11 +21,20 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-              "--extensionDevelopmentPath=${workspaceFolder}",
-              "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
             ],
-            "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
+            "outFiles": [
+                "${workspaceFolder}/out/test/**/*.js"
+            ],
             "preLaunchTask": "npm: watch"
-          }
+        },
+        {
+            "type": "java",
+            "name": "Attach to jdtls.ext",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 1044
+        }
     ]
 }
