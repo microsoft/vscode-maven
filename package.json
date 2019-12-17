@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -18,7 +18,8 @@
     "Maven",
     "Java"
   ],
-  "homepage": "https://github.com/Microsoft/vscode-maven/blob/v0.20.0/README.md",
+  "license": "MIT",
+  "homepage": "https://github.com/Microsoft/vscode-maven/blob/v0.20.1/README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-maven.git"
@@ -50,7 +51,7 @@
   "main": "./dist/extension",
   "contributes": {
     "javaExtensions": [
-      "./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.20.0.jar"
+      "./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.20.1.jar"
     ],
     "commands": [
       {

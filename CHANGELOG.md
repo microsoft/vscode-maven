@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.20.1
+#### Fixed
+- Insert the dependency into the wrong position when resolving unknown types. [#441](https://github.com/microsoft/vscode-maven/issues/441)
+
 ## 0.20.0
 #### Added
 - Support to "Collapse All" in Maven explorer. [PR#414](https://github.com/microsoft/vscode-maven/pull/414)
