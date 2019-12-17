@@ -32,9 +32,6 @@ class GetPosHandler extends DefaultHandler {
     private String targetDependency;
 
     List<String> dependenciesList = new ArrayList<>();
-    // Boolean inDependency = false;
-    // Boolean inGroupId = false;
-    // Boolean inArtifactId = false;
     String groupId;
     String artifactId;
     Stack<String> nodes = new Stack<>();
@@ -51,17 +48,6 @@ class GetPosHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         nodes.push(qName);
-        // switch (qName) {
-        //     case "dependency":
-        //         inDependency = true;
-        //         break;
-        //     case "groupId":
-        //         inGroupId = true;
-        //         break;
-        //     case "artifactId":
-        //         inArtifactId = true;
-        //         break;
-        // }
     }
 
     @Override
@@ -92,6 +78,7 @@ class GetPosHandler extends DefaultHandler {
         while (!nodes.empty() && !StringUtils.equals(top, qName)) {
             top = nodes.pop();
         }
+        // post process
         switch(qName) {
             case "dependencies":
                 if (!nodes.empty() && "project".equals(nodes.peek())) {
