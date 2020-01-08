@@ -9,9 +9,9 @@ import { executeJavaLanguageServerCommand, getJavaExtension, isJavaExtActivated 
 import { applyWorkspaceEdit } from "./utils/editUtils";
 
 // Please refer to https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Fconstant-values.html
-const UNDEFINED_TYPE: string = "16777218";
-const UNDEFINED_NAME: string = "570425394";
-const UNRESOLVED_CODE: string[] = [UNDEFINED_TYPE, UNDEFINED_NAME];
+const UNDEFINED_TYPE: string = "16777218"; // e.g. Unknown var;
+const UNDEFINED_NAME: string = "570425394"; // e.g. Unknown.foo();
+
 const COMMAND_SEARCH_ARTIFACT: string = "maven.artifactSearch";
 const TITLE_RESOLVE_UNKNOWN_TYPE: string = "Resolve unknown type";
 
@@ -65,14 +65,17 @@ class TypeResolver {
             return undefined;
         }
 
-        const diagnostics: Diagnostic[] = languages.getDiagnostics(document.uri).filter(value => {
-            return value.code === UNDEFINED_TYPE && position.isAfterOrEqual(value.range.start) && position.isBeforeOrEqual(value.range.end);
+        const diagnostics: Diagnostic[] = languages.getDiagnostics(document.uri).filter(diagnostic => {
+            return diagnosticIndicatesUnresolvedType(diagnostic, document)
+                && position.isAfterOrEqual(diagnostic.range.start)
+                && position.isBeforeOrEqual(diagnostic.range.end);
         });
-        if (diagnostics.length !== 0) {
-            const line: number = diagnostics[0].range.start.line;
-            const character: number = diagnostics[0].range.start.character;
-            const className: string = document.getText(diagnostics[0].range);
-            const length: number = document.offsetAt(diagnostics[0].range.end) - document.offsetAt(diagnostics[0].range.start);
+        if (diagnostics.length > 0) {
+            const diagnostic: Diagnostic = diagnostics[0];
+            const line: number = diagnostic.range.start.line;
+            const character: number = diagnostic.range.start.character;
+            const className: string = document.getText(diagnostic.range);
+            const length: number = document.offsetAt(diagnostic.range.end) - document.offsetAt(diagnostic.range.start);
             const param: any = {
                 className,
                 uri: document.uri.toString(),
@@ -100,10 +103,10 @@ class TypeResolver {
             return undefined;
         }
 
-        const diagnostics: Diagnostic[] = context.diagnostics.filter(value => {
-            return UNRESOLVED_CODE.indexOf(String(value.code)) !== -1;
+        const diagnostics: Diagnostic[] = context.diagnostics.filter(diagnostic => {
+            return diagnosticIndicatesUnresolvedType(diagnostic, document);
         });
-        if (diagnostics.length === 1) {
+        if (diagnostics.length > 0) {
             const range: Range = diagnostics[0].range;
             const className: string = document.getText(range);
             const uri: string = document.uri.toString();
@@ -213,6 +216,16 @@ async function getWorkSpaceEdits(pickItem: QuickPickItem, param: any): Promise<W
     return await executeJavaLanguageServerCommand("java.maven.addDependency", pickItem.description, pickItem.detail, param.uri, param.line, param.character, param.length);
 }
 
+function startsWithCapitalLetter(word: string): boolean {
+    return word.charCodeAt(0) >= 65 && word.charCodeAt(0) <= 90;
+}
+
+function diagnosticIndicatesUnresolvedType(diagnostic: Diagnostic, document: TextDocument): boolean {
+    return (
+        UNDEFINED_TYPE === diagnostic.code ||
+        UNDEFINED_NAME === diagnostic.code && startsWithCapitalLetter(document.getText(diagnostic.range))
+    );
+}
 export interface IArtifactSearchResult {
     groupId: string;
     artifactId: string;
