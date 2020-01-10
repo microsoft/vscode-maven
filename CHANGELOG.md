@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+
+## 0.20.2
+#### Fixed
+- Improve exposure of command "resolve unknown types". [PR#448](https://github.com/microsoft/vscode-maven/pull/448)
+
 ## 0.20.1
 #### Fixed
 - Insert the dependency into the wrong position when resolving unknown types. [#441](https://github.com/microsoft/vscode-maven/issues/441)
