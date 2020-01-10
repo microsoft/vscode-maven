@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -19,7 +19,7 @@
     "Java"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/Microsoft/vscode-maven/blob/v0.20.1/README.md",
+  "homepage": "https://github.com/Microsoft/vscode-maven/",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-maven.git"
