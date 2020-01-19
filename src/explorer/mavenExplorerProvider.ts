@@ -42,6 +42,19 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         }
     }
 
+    public async addWorkspaceFolder(folder: vscode.WorkspaceFolder): Promise<void> {
+        await this.loadProjects(folder);
+        this.refresh();
+    }
+
+    public async removeWorkspaceFolder(folder: vscode.WorkspaceFolder): Promise<void> {
+        const pomPaths: string[] = await Utils.getAllPomPaths(folder);
+        for (const pomPath of pomPaths) {
+            this._projectMap.delete(pomPath);
+        }
+        this.refresh();
+    }
+
     public getMavenProject(pomPath: string): MavenProject | undefined {
         return this._projectMap.get(pomPath);
     }
@@ -69,7 +82,7 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         this._onDidChangeTreeData.fire(item);
     }
 
-    public async loadProjects(workspaceFolder?: vscode.WorkspaceFolder) : Promise<MavenProject[]> {
+    public async loadProjects(workspaceFolder?: vscode.WorkspaceFolder): Promise<MavenProject[]> {
         const newProjects: MavenProject[] = [];
         const allProjects: MavenProject[] = [];
         const pomPaths: string[] = await Utils.getAllPomPaths(workspaceFolder);

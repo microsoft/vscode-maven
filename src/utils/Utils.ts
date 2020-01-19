@@ -103,7 +103,7 @@ export namespace Utils {
         if (!workspaceFolder) {
             if (workspace.workspaceFolders) {
                 const arrayOfPoms: string[][] = await Promise.all(workspace.workspaceFolders.map(getAllPomPaths));
-                return [].concat.apply([], ...arrayOfPoms);
+                return [].concat.apply([], arrayOfPoms);
             } else {
                 return [];
             }
