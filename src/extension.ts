@@ -97,8 +97,13 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     // Reload projects when workspace folders added/removed
     context.subscriptions.push(
-        vscode.workspace.onDidChangeWorkspaceFolders((_e: vscode.WorkspaceFoldersChangeEvent) => {
-            mavenExplorerProvider.refresh();
+        vscode.workspace.onDidChangeWorkspaceFolders(async (e: vscode.WorkspaceFoldersChangeEvent) => {
+            for (const removedWorkspaceFolder of e.removed) {
+                await mavenExplorerProvider.removeWorkspaceFolder(removedWorkspaceFolder);
+            }
+            for (const addedWorkspaceFolder of e.added) {
+                await mavenExplorerProvider.addWorkspaceFolder(addedWorkspaceFolder)
+            }
         })
     );
 
