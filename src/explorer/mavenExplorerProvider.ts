@@ -50,9 +50,7 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
     public async removeWorkspaceFolder(folder: vscode.WorkspaceFolder): Promise<void> {
         const pomPaths: string[] = await Utils.getAllPomPaths(folder);
         for (const pomPath of pomPaths) {
-            if (this._projectMap.has(pomPath)) {
-                this._projectMap.delete(pomPath);
-            }
+            this._projectMap.delete(pomPath);
         }
         this.refresh();
     }
