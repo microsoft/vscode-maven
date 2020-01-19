@@ -75,7 +75,7 @@ function getCommand(cmd: string): string {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
             case WindowsShellType.POWER_SHELL:
-                return `cmd /c ${cmd}`; // PowerShell
+                return `& ${cmd}`; // PowerShell
             default:
                 return cmd; // others, try using common one.
         }
