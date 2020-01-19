@@ -102,7 +102,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
                 await mavenExplorerProvider.removeWorkspaceFolder(removedWorkspaceFolder);
             }
             for (const addedWorkspaceFolder of e.added) {
-                await mavenExplorerProvider.addWorkspaceFolder(addedWorkspaceFolder)
+                await mavenExplorerProvider.addWorkspaceFolder(addedWorkspaceFolder);
             }
         })
     );
