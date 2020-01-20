@@ -9,19 +9,29 @@ import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
 
-export async function addDependencyHandler(): Promise<void> {
-    // select a project(pomfile)
-    const selectedProject: MavenProject | undefined = await vscode.window.showQuickPick(
-        mavenExplorerProvider.mavenProjectNodes.map(item => ({
-            value: item,
-            label: `$(primitive-dot) ${item.name}`,
-            description: undefined,
-            detail: item.pomPath
-        })),
-        { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
-    ).then(item => item ? item.value : undefined);
-    if (!selectedProject) {
-        return;
+export async function addDependencyHandler(options?: { pomPath?: string }): Promise<void> {
+    let pomPath: string;
+    if (options && options.pomPath) {
+        pomPath = options.pomPath;
+    } else {
+        // select a project(pomfile)
+        const selectedProject: MavenProject | undefined = await vscode.window.showQuickPick(
+            mavenExplorerProvider.mavenProjectNodes.map(item => ({
+                value: item,
+                label: `$(primitive-dot) ${item.name}`,
+                description: undefined,
+                detail: item.pomPath
+            })),
+            { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
+        ).then(item => item ? item.value : undefined);
+        if (!selectedProject) {
+            return;
+        }
+        pomPath = selectedProject.pomPath;
+    }
+
+    if (!await fse.pathExists(pomPath)) {
+        throw new UserError("Specified POM file does not exist on file system.");
     }
 
     const keywordString: string | undefined = await vscode.window.showInputBox({
@@ -46,7 +56,7 @@ export async function addDependencyHandler(): Promise<void> {
     if (!selectedDoc) {
         return;
     }
-    await addDependency(selectedProject.pomPath, selectedDoc.g, selectedDoc.a, selectedDoc.latestVersion);
+    await addDependency(pomPath, selectedDoc.g, selectedDoc.a, selectedDoc.latestVersion);
 }
 
 async function addDependency(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
