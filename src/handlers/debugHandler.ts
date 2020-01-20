@@ -9,14 +9,17 @@ import { Settings } from "../Settings";
 import { executeInTerminal } from "../utils/mavenUtils";
 
 export async function debugHandler(goal: PluginGoal): Promise<void> {
+    const pomfile: string = goal.plugin.project.pomPath;
+    const command: string = goal.name;
+    await debugCommand({ command, pomfile });
+}
+
+export async function debugCommand(options: { pomfile: string; command: string }) {
     if (!isJavaDebuggerEnabled()) {
         await guideToInstallJavaDebugger();
         return;
     }
-
-    const pomPath: string = goal.plugin.project.pomPath;
-    const command: string = goal.name;
-    await debug(pomPath, command);
+    await debug(options.pomfile, options.command);
 }
 
 async function debug(pomPath: string, command: string): Promise<void> {

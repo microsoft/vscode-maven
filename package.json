@@ -493,6 +493,11 @@
                   "type": "string",
                   "minLength": 1,
                   "description": "%configuration.maven.terminal.favorites.command%"
+                },
+                "debug": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "%configuration.maven.terminal.favorites.debug%"
                 }
               }
             },
