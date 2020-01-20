@@ -4,6 +4,7 @@
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
 import { OpenDialogOptions, Uri, window } from "vscode";
+import { mavenOutputChannel } from "../mavenOutputChannel";
 
 const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
 
@@ -45,10 +46,13 @@ export async function openFileIfExists(filepath: string): Promise<void> {
 
 // Troubleshooting
 export async function showTroubleshootingDialog(errorMessage: string): Promise<void> {
-    const OPTION_LEARN_MORE: string = "Learn more";
-    const choiceForDetails: string | undefined = await window.showErrorMessage(errorMessage, OPTION_LEARN_MORE);
+    const OPTION_SHOW_OUTPUT: string = "Show Output";
+    const OPTION_LEARN_MORE: string = "Learn More";
+    const choiceForDetails: string | undefined = await window.showErrorMessage(errorMessage, OPTION_SHOW_OUTPUT, OPTION_LEARN_MORE);
     if (choiceForDetails === OPTION_LEARN_MORE) {
         // open FAQs
         vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(TROUBLESHOOTING_LINK));
+    } else if (choiceForDetails === OPTION_SHOW_OUTPUT) {
+        mavenOutputChannel.show();
     }
 }
