@@ -21,6 +21,10 @@ export namespace Settings {
         workspace.getConfiguration().update("maven.view", "hierarchical", false);
     }
 
+    export function setMavenExecutablePath(mvnPath: string): void {
+        workspace.getConfiguration().update("maven.executable.path", mvnPath, true);
+    }
+
     export namespace External {
         export function javaHome(): string | undefined {
             return workspace.getConfiguration("java").get<string>("home");

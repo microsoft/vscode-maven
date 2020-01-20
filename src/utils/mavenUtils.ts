@@ -93,7 +93,7 @@ export async function executeInTerminal(options: {
     env?: { [key: string]: string };
     terminalName?: string;
 }): Promise<vscode.Terminal | undefined> {
-    const {command, mvnPath, pomfile, cwd, env, terminalName} = options;
+    const { command, mvnPath, pomfile, cwd, env, terminalName } = options;
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const mvn: string | undefined = mvnPath ? mvnPath : await getMaven(workspaceFolder);
     if (mvn === undefined) {
@@ -109,7 +109,7 @@ export async function executeInTerminal(options: {
         Settings.Executable.options(pomfile)
     ].filter(Boolean).join(" ");
     const name: string = terminalName || (workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven");
-    const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, {name, cwd, env});
+    const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, { name, cwd, env });
     if (pomfile) {
         await updateLRUCommands(command, pomfile);
     }
@@ -170,9 +170,50 @@ function getTempTolder(identifier: string): string {
 }
 
 async function promptToSettingMavenExecutable(): Promise<void> {
+    const SETTING_MAVEN_EXECUTABLE_PATH: string = "maven.executable.path";
+    const MESSAGE: string = `Maven executable not found in PATH. Please specify "${SETTING_MAVEN_EXECUTABLE_PATH}".`;
     const BUTTON_GOTO_SETTINGS: string = "Open Settings";
-    const choice: string | undefined = await vscode.window.showInformationMessage("Maven executable not found in PATH. Please specify maven.executable.path in Settings.", BUTTON_GOTO_SETTINGS);
-    if (choice === BUTTON_GOTO_SETTINGS) {
-        await vscode.commands.executeCommand("workbench.action.openSettings", "maven.executable.path");
+    const BUTTON_BROWSE_FOR_MAVEN: string = "Browse...";
+
+    const choice: string | undefined = await vscode.window.showInformationMessage(MESSAGE, BUTTON_GOTO_SETTINGS, BUTTON_BROWSE_FOR_MAVEN);
+    switch (choice) {
+        case BUTTON_GOTO_SETTINGS:
+            await vscode.commands.executeCommand("workbench.action.openSettings", SETTING_MAVEN_EXECUTABLE_PATH);
+            break;
+        case BUTTON_BROWSE_FOR_MAVEN:
+            const mvnPath: string | undefined = await browseForMavenBinary();
+            if (mvnPath) {
+                Settings.setMavenExecutablePath(mvnPath);
+                await vscode.window.showInformationMessage(`Successfully set "${SETTING_MAVEN_EXECUTABLE_PATH}" to: ${mvnPath}`);
+            }
+            break;
+        default:
+            break;
     }
+}
+
+async function browseForMavenBinary(): Promise<string | undefined> {
+    const mvnFilename: string = isWin() ? "mvn.cmd" : "mvn";
+    const filters: any = isWin() ? { Executable: ["cmd"] } : undefined;
+
+    const selectedUris: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
+        openLabel: `Select ${mvnFilename}`,
+        canSelectMany: false,
+        filters
+    });
+    if (selectedUris === undefined) {
+        return undefined;
+    }
+
+    const mvnPath: string | undefined = selectedUris.length > 0 && selectedUris[0] !== undefined ? selectedUris[0].fsPath : undefined;
+    if (!mvnPath || !mvnPath.endsWith(mvnFilename)) {
+        await vscode.window.showErrorMessage(`Maven executable file must match with name: ${mvnFilename}`);
+        return undefined;
+    }
+
+    return mvnPath;
+}
+
+function isWin(): boolean {
+    return /^win/.test(process.platform);
 }
