@@ -14,7 +14,7 @@ export async function debugHandler(goal: PluginGoal): Promise<void> {
     await debugCommand({ command, pomfile });
 }
 
-export async function debugCommand(options: { pomfile: string; command: string }) {
+export async function debugCommand(options: { pomfile: string; command: string }): Promise<void> {
     if (!isJavaDebuggerEnabled()) {
         await guideToInstallJavaDebugger();
         return;
