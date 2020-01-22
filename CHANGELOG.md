@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.21.0
+#### Added
+- Support to debug favorite commands. [#444](https://github.com/microsoft/vscode-maven/issues/444)
+- Add shortcut to view output when error occurs. [PR#458](https://github.com/microsoft/vscode-maven/pull/458)
+- Support to browse to select local Maven executable if not found. [PR#457](https://github.com/microsoft/vscode-maven/pull/457)
+
+#### Changed
+- Remove unnecessary prefix `cmd /c` for powershell commands. [#452](https://github.com/microsoft/vscode-maven/issues/452)
+- Walk up parent folders to find available Maven wrapper. [#PR460](https://github.com/microsoft/vscode-maven/pull/460)
+
+#### Fixed
+- Projects were not indexed when adding a folder to current workspace. [#453](https://github.com/microsoft/vscode-maven/issues/453)
 
 ## 0.20.2
 #### Fixed

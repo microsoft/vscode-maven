@@ -183,8 +183,8 @@ Now right-click on an project item, and then click `Favorite ...`. The option `f
 | Name | Description | Default Value |
 |---|---|---|
 | `maven.excludedFolders` | Specifies file path pattern of folders to exclude while searching for Maven projects. | `[ "**/.*", "**/node_modules", "**/target", "**/bin" ]` |
-| `maven.executable.preferMavenWrapper` | Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' in root folder by default if the file configuration exists. Otherwise it tries 'mvn' in PATH instead. | `true` |
-| `maven.executable.path` | Specifies absolute path of your mvn executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to value of 'maven.executable.preferMavenWrapper'. Note that a relative path is not suggested, but if you do specify one, the absolute path will be resolved from your workspace root folder (if exists). E.g. `/usr/local/apache-maven-3.6.0/bin/mvn` | ` ` |
+| `maven.executable.preferMavenWrapper` | Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' by walking up the parent folders. If false, or 'mvnw' is not found, it tries 'mvn' in PATH instead. | `true` |
+| `maven.executable.path` | Specifies absolute path of your 'mvn' executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to the value of 'maven.executable.preferMavenWrapper'. E.g. `/usr/local/apache-maven-3.6.0/bin/mvn` | ` ` |
 | `maven.executable.options` | Specifies default options for all mvn commands. E.g. `-o -DskipTests` | ` ` |
 | `maven.pomfile.autoUpdateEffectivePOM` | Specifies whether to update effective-pom automatically whenever changes detected. | `false` |
 | `maven.pomfile.globPattern` | Specifies the glob pattern used to look for pom.xml files. | `**/pom.xml` |
