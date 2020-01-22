@@ -7,8 +7,9 @@ import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
 import { executeInTerminal } from "../utils/mavenUtils";
+import { debugCommand } from "./debugHandler";
 
-type FavoriteCommand = { command: string, alias: string };
+type FavoriteCommand = { command: string, alias: string, debug?: boolean };
 export async function runFavoriteCommandsHandler(project: MavenProject | undefined): Promise<void> {
     let selectedProject: MavenProject | undefined = project;
     if (!selectedProject) {
@@ -51,5 +52,10 @@ export async function runFavoriteCommandsHandler(project: MavenProject | undefin
         return;
     }
 
-    await executeInTerminal({ command: selectedCommand.command, pomfile: selectedProject.pomPath });
+    const config: any = { command: selectedCommand.command, pomfile: selectedProject.pomPath };
+    if (selectedCommand.debug) {
+        await debugCommand(config);
+    } else {
+        await executeInTerminal(config);
+    }
 }
