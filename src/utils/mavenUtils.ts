@@ -39,14 +39,15 @@ export async function pluginDescription(pluginId: string, pomPath: string): Prom
 }
 
 async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<any> {
-    const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const mvn: string | undefined = await getMaven(workspaceFolder);
+    const mvn: string | undefined = await getMaven(pomfile);
     if (mvn === undefined) {
         await promptToSettingMavenExecutable();
         return undefined;
     }
 
     const command: string = wrappedWithQuotes(mvn);
+    // TODO: re-visit cwd
+    const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
     const userArgs: string | undefined = Settings.Executable.options(pomfile);
     const matched: RegExpMatchArray | null = [mvnArgs, userArgs].filter(Boolean).join(" ").match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
@@ -95,7 +96,7 @@ export async function executeInTerminal(options: {
 }): Promise<vscode.Terminal | undefined> {
     const { command, mvnPath, pomfile, cwd, env, terminalName } = options;
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const mvn: string | undefined = mvnPath ? mvnPath : await getMaven(workspaceFolder);
+    const mvn: string | undefined = mvnPath ? mvnPath : await getMaven(pomfile);
     if (mvn === undefined) {
         await promptToSettingMavenExecutable();
         return undefined;
@@ -116,24 +117,45 @@ export async function executeInTerminal(options: {
     return terminal;
 }
 
-export async function getMaven(workspaceFolder?: vscode.WorkspaceFolder): Promise<string | undefined> {
-    const workspaceFolderUri: vscode.Uri | undefined = workspaceFolder !== undefined ? workspaceFolder.uri : undefined;
-    const mvnPathFromSettings: string | undefined = Settings.Executable.path(workspaceFolderUri);
+export async function getMaven(pomPath?: string): Promise<string | undefined> {
+    const mvnPathFromSettings: string | undefined = Settings.Executable.path(pomPath);
     if (mvnPathFromSettings) {
         return mvnPathFromSettings;
     }
 
-    const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(workspaceFolderUri);
-    const localMvnwPath: string | undefined = workspaceFolderUri && path.join(workspaceFolderUri.fsPath, "mvnw");
-    if (preferMavenWrapper && localMvnwPath && await fse.pathExists(localMvnwPath)) {
-        return localMvnwPath;
-    } else {
-        return await defaultMavenExecutable();
+    const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
+    if (preferMavenWrapper && pomPath) {
+        const localMvnwPath: string | undefined = await getLocalMavenWrapper(path.dirname(pomPath));
+        if (localMvnwPath) {
+            return localMvnwPath;
+        }
     }
+
+    return await defaultMavenExecutable();
 }
 
 export function getEmbeddedMavenWrapper(): string {
-    return getPathToExtensionRoot("resources", "maven-wrapper", "mvnw");
+    const mvnw: string = isWin() ? "mvnw.cmd" : "mvnw";
+    return getPathToExtensionRoot("resources", "maven-wrapper", mvnw);
+}
+
+async function getLocalMavenWrapper(projectFolder: string): Promise<string | undefined> {
+    const mvnw: string = isWin() ? "mvnw.cmd" : "mvnw";
+    const mvnwProperties: string = path.join(".mvn", "wrapper", "maven-wrapper.properties");
+
+    // walk up parent folders
+    let current: string = projectFolder;
+    while (path.basename(current)) {
+        const potentialMvnwPath: string = path.join(current, mvnw);
+        if (await fse.pathExists(potentialMvnwPath)) {
+            const potentialMvnwPropsPath: string = path.join(current, mvnwProperties);
+            if (await fse.pathExists(potentialMvnwPropsPath)) {
+                return potentialMvnwPath;
+            }
+        }
+        current = path.dirname(current);
+    }
+    return undefined;
 }
 
 async function defaultMavenExecutable(): Promise<string> {
@@ -215,5 +237,5 @@ async function browseForMavenBinary(): Promise<string | undefined> {
 }
 
 function isWin(): boolean {
-    return /^win/.test(process.platform);
+    return process.platform.startsWith("win");
 }

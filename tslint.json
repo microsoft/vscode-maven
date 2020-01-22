@@ -156,7 +156,7 @@
         "no-relative-imports": false,
         "no-require-imports": true,
         "no-shadowed-variable": true,
-        "no-suspicious-comment": true,
+        "no-suspicious-comment": false,
         "no-typeof-undefined": true,
         "no-unnecessary-field-initialization": true,
         "no-unnecessary-local-variable": true,
@@ -183,9 +183,7 @@
         "typedef": [
             true,
             "call-signature",
-            // "arrow-call-signature",
             "parameter",
-            // "arrow-parameter",
             "property-declaration",
             "variable-declaration",
             "member-variable-declaration"
