@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.20.2",
+  "version": "0.21.0",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -51,7 +51,7 @@
   "main": "./dist/extension",
   "contributes": {
     "javaExtensions": [
-      "./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.20.1.jar"
+      "./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.21.0.jar"
     ],
     "commands": [
       {
