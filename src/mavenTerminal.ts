@@ -11,6 +11,7 @@ export interface ITerminalOptions {
     name: string;
     cwd?: string;
     env?: { [key: string]: string };
+    workspaceFolder?: vscode.WorkspaceFolder;
 }
 
 enum WindowsShellType {
@@ -26,10 +27,13 @@ class MavenTerminal implements vscode.Disposable {
 
     public async runInTerminal(command: string, options: ITerminalOptions): Promise<vscode.Terminal> {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
-        const { addNewLine, name, cwd } = Object.assign(defaultOptions, options);
+        const { addNewLine, name, cwd, workspaceFolder } = Object.assign(defaultOptions, options);
         if (this.terminals[name] === undefined) {
             const env: { [envKey: string]: string } = { ...Settings.getEnvironment(), ...options.env };
-            this.terminals[name] = vscode.window.createTerminal({ name, env });
+            // Open terminal in workspaceFolder if provided
+            // See: https://github.com/microsoft/vscode-maven/issues/467#issuecomment-584544090
+            const terminalCwd: vscode.Uri | undefined = workspaceFolder ? workspaceFolder.uri : undefined;
+            this.terminals[name] = vscode.window.createTerminal({ name, env, cwd: terminalCwd });
             // Workaround for WSL custom envs.
             // See: https://github.com/Microsoft/vscode/issues/71267
             if (currentWindowsShell() === WindowsShellType.WSL) {
