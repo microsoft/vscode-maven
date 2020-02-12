@@ -22,10 +22,7 @@ export class PluginsMenu extends Menu implements ITreeItem {
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
-        treeItem.iconPath = {
-            light: getPathToExtensionRoot("resources", "icons", "light", "extensions.svg"),
-            dark: getPathToExtensionRoot("resources", "icons", "dark", "extensions.svg")
-        };
+        treeItem.iconPath = new vscode.ThemeIcon("extensions");
         return treeItem;
     }
 

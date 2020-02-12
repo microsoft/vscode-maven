@@ -36,10 +36,7 @@ export class MavenPlugin implements ITreeItem {
     public async getTreeItem(): Promise<vscode.TreeItem> {
         const label: string = this.prefix ? `${this.prefix} (${this.pluginId})` : this.pluginId;
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
-        treeItem.iconPath = {
-            light: getPathToExtensionRoot("resources", "icons", "light", "property.svg"),
-            dark: getPathToExtensionRoot("resources", "icons", "dark", "property.svg")
-        };
+        treeItem.iconPath = new vscode.ThemeIcon("symbol-property");
         return treeItem;
     }
 
