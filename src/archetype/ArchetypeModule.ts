@@ -100,14 +100,14 @@ export namespace ArchetypeModule {
     async function showQuickPickForArchetypes(all?: boolean): Promise<Archetype | undefined | null> {
         const morePickItem: QuickPickItem & { value: null } = {
             value: null,
-            label: "More ...",
+            label: "More...",
             description: "",
             detail: "Find more archetypes available in remote catalog."
         };
         return await window.showQuickPick<QuickPickItem & { value: Archetype | null }>(
             loadArchetypePickItems(all).then(items => items.map(item => ({
                 value: item,
-                label: item.artifactId ? `$(package) ${item.artifactId} ` : "More ...",
+                label: item.artifactId ? `$(package) ${item.artifactId} ` : "More...",
                 description: item.groupId ? `${item.groupId}` : "",
                 detail: item.description
             }))).then(items => all ? items : [morePickItem, ...items]),

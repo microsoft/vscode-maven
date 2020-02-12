@@ -195,7 +195,7 @@
       },
       {
         "command": "maven.favorites",
-        "title": "Favorites ...",
+        "title": "%contributes.commands.maven.favorites%",
         "category": "Maven"
       }
     ],
