@@ -8,7 +8,7 @@
   "preview": true,
   "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
   "engines": {
-    "vscode": "^1.37.0"
+    "vscode": "^1.42.0"
   },
   "categories": [
     "Programming Languages",
@@ -58,10 +58,7 @@
         "command": "maven.explorer.refresh",
         "title": "%contributes.commands.maven.explorer.refresh%",
         "category": "Maven",
-        "icon": {
-          "light": "resources/icons/light/refresh.svg",
-          "dark": "resources/icons/dark/refresh.svg"
-        }
+        "icon": "$(refresh)"
       },
       {
         "command": "maven.goal.clean",
@@ -122,19 +119,13 @@
         "command": "maven.project.openPom",
         "title": "%contributes.commands.maven.project.openPom%",
         "category": "Maven",
-        "icon": {
-          "light": "resources/icons/light/go-to-file.svg",
-          "dark": "resources/icons/dark/go-to-file.svg"
-        }
+        "icon": "$(go-to-file)"
       },
       {
         "command": "maven.archetype.generate",
         "title": "%contributes.commands.maven.archetype.generate%",
         "category": "Maven",
-        "icon": {
-          "light": "resources/icons/light/add.svg",
-          "dark": "resources/icons/dark/add.svg"
-        }
+        "icon": "$(add)"
       },
       {
         "command": "maven.archetype.update",
@@ -155,10 +146,7 @@
         "command": "maven.plugin.execute",
         "title": "%contributes.commands.maven.plugin.execute%",
         "category": "Maven",
-        "icon": {
-          "light": "resources/icons/light/play.svg",
-          "dark": "resources/icons/dark/play.svg"
-        }
+        "icon": "$(play)"
       },
       {
         "command": "maven.plugin.debug",
@@ -169,19 +157,13 @@
         "command": "maven.view.flat",
         "title": "%contributes.commands.maven.view.flat%",
         "category": "Maven",
-        "icon": {
-          "light": "resources/icons/light/list-tree.svg",
-          "dark": "resources/icons/dark/list-tree.svg"
-        }
+        "icon": "$(list-tree)"
       },
       {
         "command": "maven.view.hierarchical",
         "title": "%contributes.commands.maven.view.hierarchical%",
         "category": "Maven",
-        "icon": {
-          "light": "resources/icons/light/list-flat.svg",
-          "dark": "resources/icons/dark/list-flat.svg"
-        }
+        "icon": "$(list-flat)"
       },
       {
         "command": "maven.project.addDependency",
@@ -548,7 +530,7 @@
     "@types/minimatch": "^3.0.3",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.14.13",
-    "@types/vscode": "1.37.0",
+    "@types/vscode": "1.42.0",
     "@types/which": "^1.3.1",
     "@types/xml2js": "^0.4.4",
     "glob": "^7.1.4",

@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-// import { Utils } from "../../Utils";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 
@@ -20,11 +19,5 @@ export class PluginGoal implements ITreeItem {
     }
     public getTreeItem(): vscode.TreeItem {
         return new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.None);
-        // const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.None);
-        // treeItem.iconPath = {
-        //     light: Utils.getResourcePath("light", "goal.svg"),
-        //     dark: Utils.getResourcePath("dark", "goal.svg")
-        // };
-        // return treeItem;
     }
 }
