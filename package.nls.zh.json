@@ -6,6 +6,7 @@
     "contributes.commands.maven.project.openPom": "打开 POM 文件",
     "contributes.commands.maven.archetype.generate": "从 Maven 原型创建新项目",
     "contributes.commands.maven.archetype.update": "更新 Maven 原型目录",
+    "contributes.commands.maven.favorites": "收藏夹…",
     "contributes.commands.maven.history": "历史…",
     "contributes.commands.maven.goal.execute": "执行命令",
     "contributes.commands.maven.plugin.execute": "执行",
