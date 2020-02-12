@@ -110,7 +110,7 @@ export async function executeInTerminal(options: {
         Settings.Executable.options(pomfile)
     ].filter(Boolean).join(" ");
     const name: string = terminalName || (workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven");
-    const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, { name, cwd, env });
+    const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, { name, cwd, env, workspaceFolder });
     if (pomfile) {
         await updateLRUCommands(command, pomfile);
     }
