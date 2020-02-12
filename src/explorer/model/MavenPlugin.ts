@@ -3,7 +3,6 @@
 
 import * as vscode from "vscode";
 import { taskExecutor } from "../../taskExecutor";
-import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { pluginInfoProvider } from "../pluginInfoProvider";
 import { ITreeItem } from "./ITreeItem";

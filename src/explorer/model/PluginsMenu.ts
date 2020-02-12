@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
