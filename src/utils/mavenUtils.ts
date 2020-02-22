@@ -14,7 +14,7 @@ import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage 
 import { updateLRUCommands } from "./historyUtils";
 
 export async function rawEffectivePom(pomPath: string): Promise<string | undefined> {
-    const outputPath: string = getTempTolder(pomPath);
+    const outputPath: string = getTempFolder(pomPath);
     await executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
     const pomxml: string | undefined = await readFileIfExists(outputPath);
     await fse.remove(outputPath);
@@ -22,7 +22,7 @@ export async function rawEffectivePom(pomPath: string): Promise<string | undefin
 }
 
 export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
-    const outputPath: string = getTempTolder(pomPath);
+    const outputPath: string = getTempFolder(pomPath);
     await executeInBackground(`dependency:tree -Dverbose -DoutputFile="${outputPath}"`, pomPath);
     const pomxml: string | undefined = await readFileIfExists(outputPath);
     await fse.remove(outputPath);
@@ -30,7 +30,7 @@ export async function rawDependencyTree(pomPath: string): Promise<string | undef
 }
 
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {
-    const outputPath: string = getTempTolder(pluginId);
+    const outputPath: string = getTempFolder(pluginId);
     // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock
     await executeInBackground(`help:describe -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
     const content: string | undefined = await readFileIfExists(outputPath);
@@ -186,7 +186,7 @@ async function readFileIfExists(filepath: string): Promise<string | undefined> {
     return undefined;
 }
 
-function getTempTolder(identifier: string): string {
+function getTempFolder(identifier: string): string {
     const outputPath: string | undefined = getPathToWorkspaceStorage(md5(identifier));
     return outputPath ? outputPath : getPathToTempFolder(md5(identifier));
 }
