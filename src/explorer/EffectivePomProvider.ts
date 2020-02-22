@@ -10,22 +10,22 @@ export class EffectivePomProvider {
   private pomPath: string;
   private effectivePom: IEffectivePom;
   private emitter: EventEmitter = new EventEmitter();
-  private isCaculating: boolean = false;
+  private isCalculating: boolean = false;
 
   constructor(pomPath: string) {
     this.pomPath = pomPath;
     this.emitter.on("complete", (resp: IEffectivePom) => {
       this.effectivePom = resp;
-      this.isCaculating = false;
+      this.isCalculating = false;
     });
     this.emitter.on("error", (_error) => {
       this.effectivePom = { pomPath };
-      this.isCaculating = false;
+      this.isCalculating = false;
     });
   }
 
   public async calculateEffectivePom(): Promise<void> {
-    if (this.isCaculating) {
+    if (this.isCalculating) {
       return new Promise<void>((resolve, reject) => {
         this.emitter.once("complete", resolve);
         this.emitter.once("error", reject);
@@ -34,7 +34,7 @@ export class EffectivePomProvider {
 
     const pomPath: string = this.pomPath;
     try {
-      this.isCaculating = true;
+      this.isCalculating = true;
       const ePomString: string | undefined = await rawEffectivePom(pomPath);
       const ePom: any = await Utils.parseXmlContent(ePomString ? ePomString : "");
       this.emitter.emit("complete", {
@@ -57,7 +57,7 @@ export class EffectivePomProvider {
       });
     });
 
-    if (this.isCaculating) {
+    if (this.isCalculating) {
       return promise;
     }
 

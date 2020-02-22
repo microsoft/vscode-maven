@@ -9,8 +9,8 @@ class MavenOutputChannel implements vscode.Disposable {
     public appendLine(message: any, title?: string): void {
         if (title) {
             const simplifiedTime: string = (new Date()).toISOString().replace(/z|t/gi, " ").trim(); // YYYY-MM-DD HH:mm:ss.sss
-            const hightlightingTitle: string = `[${title} ${simplifiedTime}]`;
-            this.channel.appendLine(hightlightingTitle);
+            const highlightingTitle: string = `[${title} ${simplifiedTime}]`;
+            this.channel.appendLine(highlightingTitle);
         }
         this.channel.appendLine(message);
     }

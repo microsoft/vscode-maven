@@ -124,17 +124,17 @@ export namespace ArchetypeModule {
         if (all) {
             return [...localOnlyItems, ...remoteItems];
         } else {
-            const recommendedItems: Archetype[] = await getRecomendedItems(remoteItems);
+            const recommendedItems: Archetype[] = await getRecommendedItems(remoteItems);
             return [...localOnlyItems, ...recommendedItems];
         }
     }
 
-    async function getRecomendedItems(allItems: Archetype[]): Promise<Archetype[]> {
+    async function getRecommendedItems(allItems: Archetype[]): Promise<Archetype[]> {
         // Top popular archetypes according to usage data
         let fixedList: string[] | undefined;
         try {
-            const rawlist: string = await Utils.downloadFile(POPULAR_ARCHETYPES_URL, true);
-            fixedList = JSON.parse(rawlist);
+            const rawList: string = await Utils.downloadFile(POPULAR_ARCHETYPES_URL, true);
+            fixedList = JSON.parse(rawList);
         } catch (error) {
             console.error(error);
         }

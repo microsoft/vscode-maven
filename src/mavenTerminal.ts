@@ -19,7 +19,7 @@ enum WindowsShellType {
     POWER_SHELL = "PowerShell",
     GIT_BASH = "Git Bash",
     WSL = "WSL Bash",
-    OHTERS = "Others"
+    OTHERS = "Others"
 }
 
 class MavenTerminal implements vscode.Disposable {
@@ -123,7 +123,7 @@ function currentWindowsShell(): WindowsShellType {
         }
         return WindowsShellType.WSL;
     } else {
-        return WindowsShellType.OHTERS;
+        return WindowsShellType.OTHERS;
     }
 }
 

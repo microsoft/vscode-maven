@@ -71,12 +71,12 @@ async function addDependency(pomPath: string, gid: string, aid: string, version:
         throw new UserError("Only support POM file with single <project> node.");
     }
 
-    const proejctNode: ElementNode = projectNodes[0];
-    const dependenciesNode: ElementNode | undefined = proejctNode.children && proejctNode.children.find(node => node.tag === XmlTagName.Dependencies);
+    const projectNode: ElementNode = projectNodes[0];
+    const dependenciesNode: ElementNode | undefined = projectNode.children && projectNode.children.find(node => node.tag === XmlTagName.Dependencies);
     if (dependenciesNode !== undefined) {
         await insertDependency(pomPath, dependenciesNode, gid, aid, version);
     } else {
-        await insertDependency(pomPath, proejctNode, gid, aid, version);
+        await insertDependency(pomPath, projectNode, gid, aid, version);
 
     }
 }
