@@ -21,7 +21,8 @@ Require-Bundle: com.google.guava,
  org.eclipse.text,
  org.eclipse.ltk.core.refactoring,
  com.google.gson,
- org.slf4j.api
+ org.slf4j.api,
+ org.eclipse.m2e.maven.runtime
 Bundle-ClassPath: .,
  lib/indexer-core-6.0.0.jar,
  lib/lucene-core-5.5.5.jar,
