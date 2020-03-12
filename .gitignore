@@ -9,3 +9,9 @@ yarn.lock
 .test
 dist
 server
+
+# prevents updating maven indexer files
+resources/IndexData/index/*.cfe
+resources/IndexData/index/*.cfs
+resources/IndexData/index/*.si
+resources/IndexData/index/segments*
