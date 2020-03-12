@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.21.1
+#### Changed
+- Reuse VS Code's icons. [#469](https://github.com/microsoft/vscode-maven/pull/469)
+
+#### Fixed
+- Terminals were opened in the wrong workspace root folder. [#467](https://github.com/microsoft/vscode-maven/issues/467)
+- `NoClassDefFoundError` occurred when resolving unknown types. [#474](https://github.com/microsoft/vscode-maven/issues/474)
+
 ## 0.21.0
 #### Added
 - Support to debug favorite commands. [#444](https://github.com/microsoft/vscode-maven/issues/444)
