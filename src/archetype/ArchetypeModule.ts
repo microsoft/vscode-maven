@@ -48,7 +48,9 @@ export namespace ArchetypeModule {
 
     async function executeInTerminalHandler(archetypeGroupId: string, archetypeArtifactId: string, archetypeVersion: string, targetFolder: string): Promise<void> {
         const cmdArgs: string[] = [
-            "archetype:generate",
+            // explicitly using 3.1.2 as maven-archetype-plugin:3.0.1 ignores -DoutputDirectory
+            // see https://github.com/microsoft/vscode-maven/issues/478
+            "org.apache.maven.plugins:maven-archetype-plugin:3.1.2:generate",
             `-DarchetypeArtifactId="${archetypeArtifactId}"`,
             `-DarchetypeGroupId="${archetypeGroupId}"`,
             `-DarchetypeVersion="${archetypeVersion}"`
