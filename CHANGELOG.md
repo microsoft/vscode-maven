@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.21.2
+#### Fixed
+- Destination folder was ingored when creating new project. [#478](https://github.com/microsoft/vscode-maven/issues/478)
+
 ## 0.21.1
 #### Changed
 - Reuse VS Code's icons. [#469](https://github.com/microsoft/vscode-maven/pull/469)
