@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-
 import Lexx from "xml-zero-lexer";
 
 export enum XmlTagName {
