@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.microsoft.java.maven
 Bundle-SymbolicName: com.microsoft.java.maven.plugin;singleton:=true
-Bundle-Version: 0.21.2
+Bundle-Version: 0.21.3
 Bundle-Activator: com.microsoft.java.maven.PluginActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.eclipse.jdt.core,

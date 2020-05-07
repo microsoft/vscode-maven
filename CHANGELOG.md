@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.21.3
+#### Fixed
+- Update dependencies to fix vulnerability issues. [#481](https://github.com/microsoft/vscode-maven/pull/481) [#491](https://github.com/microsoft/vscode-maven/pull/491)
+
 ## 0.21.2
 #### Fixed
 - Destination folder was ingored when creating new project. [#478](https://github.com/microsoft/vscode-maven/issues/478)
