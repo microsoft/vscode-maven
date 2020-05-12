@@ -25,7 +25,7 @@ export async function debugCommand(options: { pomfile: string; command: string }
 async function debug(pomPath: string, command: string): Promise<void> {
     const freePort: number = await getPort();
     const mavenOpts: string = [
-        Settings.getEnvironment().MAVEN_OPTS, // user-setting MAVEN_OPTS
+        Settings.getEnvironment(pomPath).MAVEN_OPTS, // user-setting MAVEN_OPTS
         `-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=${freePort}` // MAVEN_DEBUG_OPTS
     ].filter(Boolean).join(" ");
     const sessionId: string = createUuid().substr(0, 6);
