@@ -16,7 +16,7 @@ export interface ITerminalOptions {
 
 enum WindowsShellType {
     CMD = "Command Prompt",
-    POWER_SHELL = "PowerShell",
+    POWERSHELL = "PowerShell",
     GIT_BASH = "Git Bash",
     WSL = "WSL Bash",
     OTHERS = "Others"
@@ -78,7 +78,7 @@ class MavenTerminal implements vscode.Disposable {
 function getCommand(cmd: string): string {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
-            case WindowsShellType.POWER_SHELL:
+            case WindowsShellType.POWERSHELL:
                 return `& ${cmd}`; // PowerShell
             default:
                 return cmd; // others, try using common one.
@@ -93,7 +93,7 @@ async function getCDCommand(cwd: string): Promise<string> {
         switch (currentWindowsShell()) {
             case WindowsShellType.GIT_BASH:
                 return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
-            case WindowsShellType.POWER_SHELL:
+            case WindowsShellType.POWERSHELL:
                 // Escape '[' and ']' in PowerShell
                 // See: https://github.com/microsoft/vscode-maven/issues/324
                 const escaped: string = cwd.replace(/([\[\]])/g, "``$1");
@@ -116,7 +116,9 @@ function currentWindowsShell(): WindowsShellType {
     if (currentWindowsShellPath.endsWith("cmd.exe")) {
         return WindowsShellType.CMD;
     } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
-        return WindowsShellType.POWER_SHELL;
+        return WindowsShellType.POWERSHELL;
+    } else if (currentWindowsShellPath.endsWith("pwsh.exe")) {
+        return WindowsShellType.POWERSHELL;
     } else if (currentWindowsShellPath.endsWith("bash.exe") || currentWindowsShellPath.endsWith("wsl.exe")) {
         if (currentWindowsShellPath.includes("Git")) {
             return WindowsShellType.GIT_BASH;
