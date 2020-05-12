@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.21.4
+#### Fixed
+- Set custom environment variables in folder level. [#487](https://github.com/microsoft/vscode-maven/issues/487)
+- Better support for PowerShell Core. [#492](https://github.com/microsoft/vscode-maven/issues/492)
+
 ## 0.21.3
 #### Fixed
 - Update dependencies to fix vulnerability issues. [#481](https://github.com/microsoft/vscode-maven/pull/481) [#491](https://github.com/microsoft/vscode-maven/pull/491)
