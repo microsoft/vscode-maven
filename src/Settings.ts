@@ -40,11 +40,11 @@ export namespace Settings {
             return !!_getMavenSection("terminal.useJavaHome");
         }
 
-        export function customEnv(): {
+        export function customEnv(resourceOrFilepath?: Uri | string): {
             environmentVariable: string;
             value: string;
         }[] | undefined {
-            return _getMavenSection("terminal.customEnv");
+            return _getMavenSection("terminal.customEnv", resourceOrFilepath);
         }
 
         export function favorites(resource: Uri): { alias: string; command: string }[] | undefined {
@@ -84,13 +84,13 @@ export namespace Settings {
         return workspace.getConfiguration("maven", resource).get<T>(section);
     }
 
-    export function getEnvironment(): { [key: string]: string } {
+    export function getEnvironment(resourceOrFilepath?: Uri | string): { [key: string]: string } {
         const customEnv: any = _getJavaHomeEnvIfAvailable();
         type EnvironmentSetting = {
             environmentVariable: string;
             value: string;
         };
-        const environmentSettings: EnvironmentSetting[] | undefined = Terminal.customEnv();
+        const environmentSettings: EnvironmentSetting[] | undefined = Terminal.customEnv(resourceOrFilepath);
         if (environmentSettings) {
             environmentSettings.forEach((s: EnvironmentSetting) => {
                 customEnv[s.environmentVariable] = s.value;

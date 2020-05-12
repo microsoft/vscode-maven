@@ -29,10 +29,10 @@ class MavenTerminal implements vscode.Disposable {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
         const { addNewLine, name, cwd, workspaceFolder } = Object.assign(defaultOptions, options);
         if (this.terminals[name] === undefined) {
-            const env: { [envKey: string]: string } = { ...Settings.getEnvironment(), ...options.env };
             // Open terminal in workspaceFolder if provided
             // See: https://github.com/microsoft/vscode-maven/issues/467#issuecomment-584544090
             const terminalCwd: vscode.Uri | undefined = workspaceFolder ? workspaceFolder.uri : undefined;
+            const env: { [envKey: string]: string } = { ...Settings.getEnvironment(terminalCwd), ...options.env };
             this.terminals[name] = vscode.window.createTerminal({ name, env, cwd: terminalCwd });
             // Workaround for WSL custom envs.
             // See: https://github.com/Microsoft/vscode/issues/71267
