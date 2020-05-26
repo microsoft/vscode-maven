@@ -116,7 +116,16 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
     const mvnPathFromSettings: string | undefined = Settings.Executable.path(pomPath);
     if (mvnPathFromSettings) {
         // expand tilde to deal with ~/path-to-mvn
-        return expandHome(mvnPathFromSettings);
+        const expanded: string = expandHome(mvnPathFromSettings);
+        // On Windows, append .cmd for `path/to/mvn` to prevent popup window
+        // See: https://github.com/microsoft/vscode-maven/pull/494#issuecomment-633869294
+        if (isWin() && path.extname(expanded) === "") {
+            const amended: string = `${expanded}.cmd`;
+            if (await fse.pathExists(amended)) {
+                return expandHome(amended);
+            }
+        }
+        return expanded;
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);

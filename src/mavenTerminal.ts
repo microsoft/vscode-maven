@@ -77,17 +77,9 @@ class MavenTerminal implements vscode.Disposable {
 }
 
 function getCommand(cmd: string): string {
-    if (process.platform === "win32") {
-        switch (currentWindowsShell()) {
-            case ShellType.POWERSHELL:
-                return `cmd /c ${cmd}`; // PowerShell
-            default:
-                return cmd; // others, try using common one.
-        }
+    if (currentWindowsShell() === ShellType.POWERSHELL) {
+        return `& ${cmd}`;
     } else {
-        if (currentWindowsShell() === ShellType.POWERSHELL) {
-            return `& ${cmd}`; // pwsh on mac
-        }
         return cmd;
     }
 }
