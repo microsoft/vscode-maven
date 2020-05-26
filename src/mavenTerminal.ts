@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as path from "path";
 import * as vscode from "vscode";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
@@ -14,7 +15,7 @@ export interface ITerminalOptions {
     workspaceFolder?: vscode.WorkspaceFolder;
 }
 
-enum WindowsShellType {
+enum ShellType {
     CMD = "Command Prompt",
     POWERSHELL = "PowerShell",
     GIT_BASH = "Git Bash",
@@ -36,7 +37,7 @@ class MavenTerminal implements vscode.Disposable {
             this.terminals[name] = vscode.window.createTerminal({ name, env, cwd: terminalCwd });
             // Workaround for WSL custom envs.
             // See: https://github.com/Microsoft/vscode/issues/71267
-            if (currentWindowsShell() === WindowsShellType.WSL) {
+            if (currentWindowsShell() === ShellType.WSL) {
                 setupEnvForWSL(this.terminals[name], env);
             }
         }
@@ -52,7 +53,7 @@ class MavenTerminal implements vscode.Disposable {
     public async formattedPathForTerminal(filepath: string): Promise<string> {
         if (process.platform === "win32") {
             switch (currentWindowsShell()) {
-                case WindowsShellType.WSL:
+                case ShellType.WSL:
                     return await toWslPath(filepath);
                 default:
                     return filepath;
@@ -78,12 +79,15 @@ class MavenTerminal implements vscode.Disposable {
 function getCommand(cmd: string): string {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
-            case WindowsShellType.POWERSHELL:
+            case ShellType.POWERSHELL:
                 return `cmd /c ${cmd}`; // PowerShell
             default:
                 return cmd; // others, try using common one.
         }
     } else {
+        if (currentWindowsShell() === ShellType.POWERSHELL) {
+            return `& ${cmd}`; // pwsh on mac
+        }
         return cmd;
     }
 }
@@ -91,16 +95,16 @@ function getCommand(cmd: string): string {
 async function getCDCommand(cwd: string): Promise<string> {
     if (process.platform === "win32") {
         switch (currentWindowsShell()) {
-            case WindowsShellType.GIT_BASH:
+            case ShellType.GIT_BASH:
                 return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
-            case WindowsShellType.POWERSHELL:
+            case ShellType.POWERSHELL:
                 // Escape '[' and ']' in PowerShell
                 // See: https://github.com/microsoft/vscode-maven/issues/324
                 const escaped: string = cwd.replace(/([\[\]])/g, "``$1");
                 return `cd "${escaped}"`; // PowerShell
-            case WindowsShellType.CMD:
+            case ShellType.CMD:
                 return `cd /d "${cwd}"`; // CMD
-            case WindowsShellType.WSL:
+            case ShellType.WSL:
                 return `cd "${await toWslPath(cwd)}"`; // WSL
             default:
                 return `cd "${cwd}"`; // Unknown, try using common one.
@@ -110,22 +114,24 @@ async function getCDCommand(cwd: string): Promise<string> {
     }
 }
 
-function currentWindowsShell(): WindowsShellType {
+function currentWindowsShell(): ShellType {
     const currentWindowsShellPath: string = vscode.env.shell;
-
-    if (currentWindowsShellPath.endsWith("cmd.exe")) {
-        return WindowsShellType.CMD;
-    } else if (currentWindowsShellPath.endsWith("powershell.exe")) {
-        return WindowsShellType.POWERSHELL;
-    } else if (currentWindowsShellPath.endsWith("pwsh.exe")) {
-        return WindowsShellType.POWERSHELL;
-    } else if (currentWindowsShellPath.endsWith("bash.exe") || currentWindowsShellPath.endsWith("wsl.exe")) {
-        if (currentWindowsShellPath.includes("Git")) {
-            return WindowsShellType.GIT_BASH;
-        }
-        return WindowsShellType.WSL;
-    } else {
-        return WindowsShellType.OTHERS;
+    const binaryName: string = path.basename(currentWindowsShellPath);
+    switch (binaryName) {
+        case "cmd.exe":
+            return ShellType.CMD;
+        case "pwsh.exe":
+        case "powershell.exe":
+        case "pwsh": // pwsh on mac/linux
+            return ShellType.POWERSHELL;
+        case "bash.exe":
+        case "wsl.exe":
+            if (currentWindowsShellPath.indexOf("Git") > 0) {
+                return ShellType.GIT_BASH;
+            }
+            return ShellType.WSL;
+        default:
+            return ShellType.OTHERS;
     }
 }
 
@@ -140,17 +146,17 @@ function toDefaultWslPath(p: string): string {
     }
 }
 
-export async function toWslPath(path: string): Promise<string> {
+export async function toWslPath(filepath: string): Promise<string> {
     try {
-        return (await executeCommand("wsl", ["wslpath", "-u", `"${path.replace(/\\/g, "/")}"`])).trim();
+        return (await executeCommand("wsl", ["wslpath", "-u", `"${filepath.replace(/\\/g, "/")}"`])).trim();
     } catch (error) {
         mavenOutputChannel.appendLine(error, "WSL");
-        return toDefaultWslPath(path);
+        return toDefaultWslPath(filepath);
     }
 }
 
-export async function toWinPath(path: string): Promise<string> {
-    return (await executeCommand("wsl", ["wslpath", "-w", `"${path}"`])).trim();
+export async function toWinPath(filepath: string): Promise<string> {
+    return (await executeCommand("wsl", ["wslpath", "-w", `"${filepath}"`])).trim();
 }
 
 export const mavenTerminal: MavenTerminal = new MavenTerminal();
