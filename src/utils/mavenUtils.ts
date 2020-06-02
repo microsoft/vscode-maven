@@ -16,26 +16,20 @@ import { updateLRUCommands } from "./historyUtils";
 export async function rawEffectivePom(pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
     await executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
-    const pomxml: string | undefined = await readFileIfExists(outputPath);
-    await fse.remove(outputPath);
-    return pomxml;
+    return await readFileIfExists(outputPath);
 }
 
 export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
     await executeInBackground(`dependency:tree -Dverbose -DoutputFile="${outputPath}"`, pomPath);
-    const pomxml: string | undefined = await readFileIfExists(outputPath);
-    await fse.remove(outputPath);
-    return pomxml;
+    return await readFileIfExists(outputPath);
 }
 
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pluginId);
     // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock
     await executeInBackground(`help:describe -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
-    const content: string | undefined = await readFileIfExists(outputPath);
-    await fse.remove(outputPath);
-    return content;
+    return await readFileIfExists(outputPath);
 }
 
 async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<any> {

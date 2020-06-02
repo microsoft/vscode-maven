@@ -30,8 +30,9 @@ export async function loadPackageInfo(context: ExtensionContext): Promise<void> 
         const userSettingsPath: string = path.join(os.homedir(), ".m2", "settings.xml");
         const userSettings: {} | undefined = await Utils.parseXmlFile(userSettingsPath);
         MAVEN_LOCAL_REPOSITORY = path.resolve(_.get(userSettings, "settings.localRepository[0]"));
+        mavenOutputChannel.appendLine(`local repository: ${MAVEN_LOCAL_REPOSITORY}`);
     } catch (error) {
-        mavenOutputChannel.appendLine("localRepository not specified in Maven Settings.");
+        // ignore
     }
 
     if (!MAVEN_LOCAL_REPOSITORY) {
