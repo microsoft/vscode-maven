@@ -21,6 +21,8 @@ const config = {
     },
     externals: {
         vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+        'applicationinsights-native-metrics': 'commonjs applicationinsights-native-metrics',
+        'diagnostic-channel-publishers': 'commonjs diagnostic-channel-publishers',
     },
     devtool: 'source-map',
     resolve: { // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
