@@ -135,17 +135,13 @@ export function getEmbeddedMavenWrapper(): string {
 
 async function getLocalMavenWrapper(projectFolder: string): Promise<string | undefined> {
     const mvnw: string = isWin() ? "mvnw.cmd" : "mvnw";
-    const mvnwProperties: string = path.join(".mvn", "wrapper", "maven-wrapper.properties");
 
     // walk up parent folders
     let current: string = projectFolder;
     while (path.basename(current)) {
         const potentialMvnwPath: string = path.join(current, mvnw);
         if (await fse.pathExists(potentialMvnwPath)) {
-            const potentialMvnwPropsPath: string = path.join(current, mvnwProperties);
-            if (await fse.pathExists(potentialMvnwPropsPath)) {
-                return potentialMvnwPath;
-            }
+            return potentialMvnwPath;
         }
         current = path.dirname(current);
     }
