@@ -14,8 +14,9 @@ import { IEffectivePom } from "../explorer/model/IEffectivePom";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
+import { MavenNotFoundError } from "./errorUtils";
 import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
-import { executeInTerminal, pluginDescription, rawEffectivePom } from "./mavenUtils";
+import { executeInTerminal, getMaven, pluginDescription, rawEffectivePom } from "./mavenUtils";
 
 export namespace Utils {
 
@@ -127,6 +128,11 @@ export namespace Utils {
             throw new Error("Corresponding pom.xml file not found.");
         }
 
+        const mvn: string | undefined = await getMaven(pomPath);
+        if (mvn === undefined) {
+            throw new MavenNotFoundError();
+        }
+
         let pomxml: string | undefined;
         const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
         if (project) {
@@ -158,7 +164,7 @@ export namespace Utils {
         } else {
             return undefined;
         }
-        return await window.withProgress({ location: ProgressLocation.Window }, async (p: Progress<{ message?: string }>) => new Promise<string>(
+        return await window.withProgress({ location: ProgressLocation.Notification }, async (p: Progress<{ message?: string }>) => new Promise<string>(
             async (resolve, reject): Promise<void> => {
                 p.report({ message: `Generating Effective POM: ${name}` });
                 try {

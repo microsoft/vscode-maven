@@ -8,7 +8,6 @@ import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, se
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { registerArtifactSearcher } from "./artifactSearcher";
 import { completionProvider } from "./completion/completionProvider";
-import { OperationCanceledError } from "./Errors";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
@@ -25,8 +24,9 @@ import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
+import { generalErrorHandler } from "./utils/errorUtils";
 import { executeInTerminal } from "./utils/mavenUtils";
-import { openFileIfExists, showTroubleshootingDialog } from "./utils/uiUtils";
+import { openFileIfExists } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -47,12 +47,7 @@ export function registerCommand(context: vscode.ExtensionContext, commandName: s
         try {
             return withOperationIdAhead ? await func(_operationId, ...args) : await func(...args);
         } catch (error) {
-            if (error instanceof OperationCanceledError) {
-                // swallow
-            } else {
-                await showTroubleshootingDialog(`Command "${commandName}" fails. ${error.message}`);
-            }
-            throw error;
+            generalErrorHandler(commandName, error);
         }
     });
     context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
