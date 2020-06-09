@@ -47,7 +47,7 @@ export function registerCommand(context: vscode.ExtensionContext, commandName: s
         try {
             return withOperationIdAhead ? await func(_operationId, ...args) : await func(...args);
         } catch (error) {
-            generalErrorHandler(commandName, error);
+            await generalErrorHandler(commandName, error);
         }
     });
     context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
