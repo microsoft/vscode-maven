@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { JavaExtensionNotActivatedError } from "../Errors";
+import { JavaExtensionNotActivatedError } from "../utils/errorUtils";
 
 const JAVA_EXTENSION_ID: string = "redhat.java";
 const JAVA_EXECUTE_WORKSPACE_COMMAND: string = "java.execute.workspaceCommand";

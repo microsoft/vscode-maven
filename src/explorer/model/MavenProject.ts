@@ -28,7 +28,13 @@ export class MavenProject implements ITreeItem {
     constructor(pomPath: string) {
         this.pomPath = pomPath;
         this.ePomProvider = new EffectivePomProvider(pomPath);
-        taskExecutor.execute(async () => await this.ePomProvider.calculateEffectivePom());
+        taskExecutor.execute(async () => {
+            try {
+                await this.ePomProvider.calculateEffectivePom();
+            } catch (error) {
+                // ignore
+            }
+        });
     }
 
     public get name(): string {

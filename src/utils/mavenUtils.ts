@@ -11,6 +11,7 @@ import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
 import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
+import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
 
 export async function rawEffectivePom(pomPath: string): Promise<string | undefined> {
@@ -35,8 +36,7 @@ export async function pluginDescription(pluginId: string, pomPath: string): Prom
 async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<any> {
     const mvn: string | undefined = await getMaven(pomfile);
     if (mvn === undefined) {
-        await promptToSettingMavenExecutable();
-        return undefined;
+        throw new MavenNotFoundError();
     }
 
     const command: string = wrappedWithQuotes(mvn);
@@ -181,7 +181,7 @@ function getTempFolder(identifier: string): string {
     return outputPath ? outputPath : getPathToTempFolder(md5(identifier));
 }
 
-async function promptToSettingMavenExecutable(): Promise<void> {
+export async function promptToSettingMavenExecutable(): Promise<void> {
     const SETTING_MAVEN_EXECUTABLE_PATH: string = "maven.executable.path";
     const MESSAGE: string = `Maven executable not found in PATH. Please specify "${SETTING_MAVEN_EXECUTABLE_PATH}".`;
     const BUTTON_GOTO_SETTINGS: string = "Open Settings";
