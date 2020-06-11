@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as fse from "fs-extra";
 import * as path from "path";
 import * as vscode from "vscode";
 import { mavenOutputChannel } from "./mavenOutputChannel";
@@ -15,7 +16,7 @@ export interface ITerminalOptions {
     workspaceFolder?: vscode.WorkspaceFolder;
 }
 
-enum ShellType {
+export enum ShellType {
     CMD = "Command Prompt",
     POWERSHELL = "PowerShell",
     GIT_BASH = "Git Bash",
@@ -51,15 +52,26 @@ class MavenTerminal implements vscode.Disposable {
 
     // To Refactor: remove from here.
     public async formattedPathForTerminal(filepath: string): Promise<string> {
-        if (process.platform === "win32") {
-            switch (currentWindowsShell()) {
-                case ShellType.WSL:
-                    return await toWslPath(filepath);
-                default:
-                    return filepath;
-            }
-        } else {
+        if (process.platform !== "win32") {
             return filepath;
+        }
+
+        switch (currentWindowsShell()) {
+            case ShellType.WSL:
+                return await toWslPath(filepath);
+            case ShellType.POWERSHELL: {
+                // On Windows, append .cmd for `path/to/mvn` to prevent popup window
+                // See: https://github.com/microsoft/vscode-maven/pull/494#issuecomment-633869294
+                if (path.extname(filepath) === "") {
+                    const amended: string = `${filepath}.cmd`;
+                    if (await fse.pathExists(amended)) {
+                        return amended;
+                    }
+                }
+                return filepath;
+            }
+            default:
+                return filepath;
         }
     }
 
@@ -106,7 +118,7 @@ async function getCDCommand(cwd: string): Promise<string> {
     }
 }
 
-function currentWindowsShell(): ShellType {
+export function currentWindowsShell(): ShellType {
     const currentWindowsShellPath: string = vscode.env.shell;
     const binaryName: string = path.basename(currentWindowsShellPath);
     switch (binaryName) {
