@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as child_process from "child_process";
+import * as expandHome from "expand-home-dir";
 import * as fse from "fs-extra";
 import * as md5 from "md5";
 import * as path from "path";
@@ -114,7 +115,8 @@ export async function executeInTerminal(options: {
 export async function getMaven(pomPath?: string): Promise<string | undefined> {
     const mvnPathFromSettings: string | undefined = Settings.Executable.path(pomPath);
     if (mvnPathFromSettings) {
-        return mvnPathFromSettings;
+        // expand tilde to deal with ~/path-to-mvn
+        return expandHome(mvnPathFromSettings);
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
