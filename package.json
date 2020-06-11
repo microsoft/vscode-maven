@@ -546,6 +546,7 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
+    "expand-home-dir": "0.0.3",
     "fast-glob": "^2.2.7",
     "fs-extra": "^4.0.3",
     "get-port": "^4.2.0",
