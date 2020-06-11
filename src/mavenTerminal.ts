@@ -16,7 +16,7 @@ export interface ITerminalOptions {
     workspaceFolder?: vscode.WorkspaceFolder;
 }
 
-export enum ShellType {
+enum ShellType {
     CMD = "Command Prompt",
     POWERSHELL = "PowerShell",
     GIT_BASH = "Git Bash",
@@ -118,7 +118,7 @@ async function getCDCommand(cwd: string): Promise<string> {
     }
 }
 
-export function currentWindowsShell(): ShellType {
+function currentWindowsShell(): ShellType {
     const currentWindowsShellPath: string = vscode.env.shell;
     const binaryName: string = path.basename(currentWindowsShellPath);
     switch (binaryName) {
