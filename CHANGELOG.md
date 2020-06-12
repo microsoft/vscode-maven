@@ -6,10 +6,10 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - Better support for PowerShell. [#494](https://github.com/microsoft/vscode-maven/pull/494)
 
 #### Changed
-- Keep the cache file of effective pom for dianosis. [#319](https://github.com/microsoft/vscode-maven/issues/319#issuecomment-601494862)
+- Keep the cache file of effective pom for diagnosis. [#319](https://github.com/microsoft/vscode-maven/issues/319#issuecomment-601494862)
 
 #### Fixed
-- Fix: mvnw was not identified if .mvn folder doesn't exists. [#504](https://github.com/microsoft/vscode-maven/issues/504)
+- Fix: mvnw was not identified if .mvn folder doesn't exist. [#504](https://github.com/microsoft/vscode-maven/issues/504)
 - Fix: notification "Maven executable not found in PATH" pops up for multiple times. [#501](https://github.com/microsoft/vscode-maven/issues/501)
 - Fix: tilde was not expanded as home directory in unix-like systems. [#507](https://github.com/microsoft/vscode-maven/pull/507)
 - Fix: Maven output didn't write to the integrated terminal window. [#489](https://github.com/microsoft/vscode-maven/issues/489)
