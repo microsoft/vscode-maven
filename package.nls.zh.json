@@ -15,7 +15,7 @@
     "contributes.commands.maven.view.flat": "切换到扁平视图",
     "contributes.commands.maven.project.addDependency": "添加依赖",
     "contributes.commands.maven.project.showDependencies": "显示所有依赖",
-    "contributes.views.explorer.mavenProjects": "Maven 项目",
+    "contributes.views.explorer.mavenProjects": "Maven",
     "configuration.maven.excludedFolders": "指定搜索 Maven 项目时要排除的文件夹。",
     "configuration.maven.executable.preferMavenWrapper": "指定是否优先使用 Maven Wrapper。如果为 true，则尝试向上遍历父文件夹寻找 mvnw 作为可执行文件；如果为 false，或者找不到 mvnw，则尝试使用系统 PATH 中的 mvn。",
     "configuration.maven.executable.path": "指定mvn可执行文件的绝对路径。当此值为空时，它会根据 maven.executable.preferMavenWrapper 的值尝试使用 mvn 或 mvnw 。",
