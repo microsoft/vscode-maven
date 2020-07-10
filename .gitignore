@@ -15,3 +15,5 @@ resources/IndexData/index/*.cfe
 resources/IndexData/index/*.cfs
 resources/IndexData/index/*.si
 resources/IndexData/index/segments*
+
+.vs/*
