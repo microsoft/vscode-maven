@@ -17,7 +17,3 @@ resources/IndexData/index/*.si
 resources/IndexData/index/segments*
 
 .vs/*
-.vscode/*
-!.vscode/launch.json
-!.vscode/settings.json
-!.vscode/tasks.json
