@@ -83,10 +83,13 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     registerConfigChangeListener(context);
 
-    // Free resources when manually closing a terminal
+    // Free resources when a terminal is manually closed
     context.subscriptions.push(
         vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
-            mavenTerminal.dispose(closedTerminal.name);
+            const name = mavenTerminal.find(closedTerminal);
+            if (name !== undefined) {
+                mavenTerminal.dispose(name);
+            }
         })
     );
 
@@ -109,9 +112,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     // debug
     registerCommand(context, "maven.plugin.debug", debugHandler);
-    vscode.debug.onDidTerminateDebugSession((session: any) => {
+    vscode.debug.onDidTerminateDebugSession((session) => {
         if (session.type === "java") {
-            const terminalName: string = session._configuration.terminalName;
+            const terminalName: string = session.configuration.terminalName;
             if (terminalName) {
                 // After terminating debug session, output is no longer visible.
                 // Solution: via future API waitOnExit
