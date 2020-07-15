@@ -76,15 +76,24 @@ class MavenTerminal implements vscode.Disposable {
     }
 
     public dispose(terminalName?: string): void {
-        if (terminalName && this.terminals[terminalName] !== undefined) {
-            this.terminals[terminalName].dispose();
-            delete this.terminals[terminalName];
-        } else {
+        if (terminalName === undefined) {// If the name is not passed, dispose all.
             Object.keys(this.terminals).forEach((id: string) => {
                 this.terminals[id].dispose();
                 delete this.terminals[id];
             });
+        } else if (this.terminals[terminalName] !== undefined) {
+            this.terminals[terminalName].dispose();
+            delete this.terminals[terminalName];
         }
+    }
+
+    public find(terminal: vscode.Terminal): string | undefined {
+        for (const name in this.terminals) {
+            if (this.terminals[name] === terminal) {
+                return name;
+            }
+        }
+        return;
     }
 }
 
