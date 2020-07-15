@@ -86,7 +86,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // Free resources when a terminal is manually closed
     context.subscriptions.push(
         vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
-            const name = mavenTerminal.find(closedTerminal);
+            const name: string | undefined = mavenTerminal.find(closedTerminal);
             if (name !== undefined) {
                 mavenTerminal.dispose(name);
             }
