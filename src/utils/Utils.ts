@@ -17,6 +17,7 @@ import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } f
 import { MavenNotFoundError } from "./errorUtils";
 import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
 import { executeInTerminal, getMaven, pluginDescription, rawEffectivePom } from "./mavenUtils";
+import { selectProjectIfNecessary } from "./uiUtils";
 
 export namespace Utils {
 
@@ -233,15 +234,7 @@ export namespace Utils {
 
     export async function executeMavenCommand(): Promise<void> {
         // select a project(pomfile)
-        const selectedProject: MavenProject | undefined = await window.showQuickPick(
-            mavenExplorerProvider.mavenProjectNodes.map(item => ({
-                value: item,
-                label: `$(primitive-dot) ${item.name}`,
-                description: undefined,
-                detail: item.pomPath
-            })),
-            { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
-        ).then(item => item ? item.value : undefined);
+        const selectedProject: MavenProject | undefined = await selectProjectIfNecessary();
         if (!selectedProject) {
             return;
         }

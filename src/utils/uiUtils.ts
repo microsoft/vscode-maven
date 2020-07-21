@@ -4,6 +4,8 @@
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
 import { OpenDialogOptions, Uri, window } from "vscode";
+import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
+import { MavenProject } from "../explorer/model/MavenProject";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 
 const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
@@ -55,4 +57,22 @@ export async function showTroubleshootingDialog(errorMessage: string): Promise<v
     } else if (choiceForDetails === OPTION_SHOW_OUTPUT) {
         mavenOutputChannel.show();
     }
+}
+
+export async function selectProjectIfNecessary(): Promise< MavenProject | undefined> {
+    if (!mavenExplorerProvider.mavenProjectNodes || mavenExplorerProvider.mavenProjectNodes.length === 0) {
+        return undefined;
+    }
+    if (mavenExplorerProvider.mavenProjectNodes.length === 1) {
+        return mavenExplorerProvider.mavenProjectNodes[0];
+    }
+    return await window.showQuickPick(
+        mavenExplorerProvider.mavenProjectNodes.map(item => ({
+            value: item,
+            label: `$(primitive-dot) ${item.name}`,
+            description: undefined,
+            detail: item.pomPath
+        })),
+        { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
+    ).then(item => item ? item.value : undefined);
 }

@@ -3,30 +3,21 @@
 
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
 import { executeInTerminal } from "../utils/mavenUtils";
+import { selectProjectIfNecessary } from "../utils/uiUtils";
 import { debugCommand } from "./debugHandler";
 
 type FavoriteCommand = { command: string, alias: string, debug?: boolean };
 export async function runFavoriteCommandsHandler(project: MavenProject | undefined): Promise<void> {
     let selectedProject: MavenProject | undefined = project;
     if (!selectedProject) {
-        selectedProject = await vscode.window.showQuickPick(
-            mavenExplorerProvider.mavenProjectNodes.map(item => ({
-                value: item,
-                label: `$(primitive-dot) ${item.name}`,
-                description: undefined,
-                detail: item.pomPath
-            })),
-            { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
-        ).then(item => item ? item.value : undefined);
-        if (!selectedProject) {
-            return;
-        }
+        selectedProject = await selectProjectIfNecessary();
     }
-
+    if (!selectedProject) {
+        return;
+    }
     const favorites: FavoriteCommand[] | undefined = Settings.Terminal.favorites(vscode.Uri.file(selectedProject.pomPath));
     if (!favorites || _.isEmpty(favorites)) {
         const BUTTON_OPEN_SETTINGS: string = "Open Settings";
