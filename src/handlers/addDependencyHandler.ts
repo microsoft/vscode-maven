@@ -3,11 +3,11 @@
 
 import * as fse from "fs-extra";
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
+import { selectProjectIfNecessary } from "../utils/uiUtils";
 
 export async function addDependencyHandler(options?: { pomPath?: string }): Promise<void> {
     let pomPath: string;
@@ -15,15 +15,7 @@ export async function addDependencyHandler(options?: { pomPath?: string }): Prom
         pomPath = options.pomPath;
     } else {
         // select a project(pomfile)
-        const selectedProject: MavenProject | undefined = await vscode.window.showQuickPick(
-            mavenExplorerProvider.mavenProjectNodes.map(item => ({
-                value: item,
-                label: `$(primitive-dot) ${item.name}`,
-                description: undefined,
-                detail: item.pomPath
-            })),
-            { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
-        ).then(item => item ? item.value : undefined);
+        const selectedProject: MavenProject | undefined = await selectProjectIfNecessary();
         if (!selectedProject) {
             return;
         }
