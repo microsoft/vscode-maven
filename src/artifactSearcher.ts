@@ -22,17 +22,17 @@ export function registerArtifactSearcher(context: vscode.ExtensionContext): void
 
         registerCommand(context, COMMAND_SEARCH_ARTIFACT, async (param: any) => await resolver.pickAndAddDependency(param));
 
-        languages.registerHoverProvider("java", {
+        context.subscriptions.push(languages.registerHoverProvider("java", {
             provideHover(document: TextDocument, position: Position, _token: CancellationToken): ProviderResult<Hover> {
                 return resolver.getArtifactsHover(document, position);
             }
-        });
+        }));
 
-        languages.registerCodeActionsProvider("java", {
+        context.subscriptions.push(languages.registerCodeActionsProvider("java", {
             provideCodeActions(document: TextDocument, range: Range | Selection, codeActionContext: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
                 return resolver.getArtifactsCodeActions(document, codeActionContext, range);
             }
-        });
+        }));
     }
 }
 

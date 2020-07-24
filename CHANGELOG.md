@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.23.0
+#### Changed
+- Rename project explorer. [#512](https://github.com/microsoft/vscode-maven/pull/512)
+- Skip project selection when there is only one project. [#516](https://github.com/microsoft/vscode-maven/pull/516)
+
+#### Fixed
+- Fix: terminals were wrongly closed. [#513](https://github.com/microsoft/vscode-maven/pull/513)
+
 ## 0.22.0
 #### Added
 - Better support for PowerShell. [#494](https://github.com/microsoft/vscode-maven/pull/494)
