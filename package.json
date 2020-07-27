@@ -532,6 +532,7 @@
     "@types/node": "^10.17.21",
     "@types/vscode": "1.43.0",
     "@types/which": "^1.3.2",
+    "@types/xml-zero-lexer": "^2.1.0",
     "@types/xml2js": "^0.4.5",
     "glob": "^7.1.6",
     "gulp": "^4.0.2",
