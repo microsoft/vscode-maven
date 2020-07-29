@@ -3,7 +3,7 @@
 
 import * as fse from "fs-extra";
 import * as path from "path";
-import { QuickPickItem, Uri, window, workspace } from "vscode";
+import { QuickInputButtons, QuickPick, QuickPickItem, Uri, window, workspace } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { getMavenLocalRepository, getPathToExtensionRoot } from "../utils/contextUtils";
 import { OperationCanceledError } from "../utils/errorUtils";
@@ -16,21 +16,55 @@ const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/mave
 const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
 
 export namespace ArchetypeModule {
+
+    enum GenerateSteps {
+        LoadArchetypes = "LOADARCHETYPES",
+        LoadArchetypesMore = "LOADARCHETYPESMORE",
+        SelectVersion = "SELECTVERSION",
+        Finish = "FINISH"
+    }
+
     async function selectArchetype(): Promise<{ artifactId: string, groupId: string, version: string }> {
-        let selectedArchetype: Archetype | undefined | null = await showQuickPickForArchetypes();
-        while (selectedArchetype === null) {
-            selectedArchetype = await showQuickPickForArchetypes(true);
+        const generateSteps: string[] = [];
+        let step: string = GenerateSteps.LoadArchetypes;
+        let selectedArchetype: Archetype | undefined | null;
+        let groupId: string = "";
+        let artifactId: string = "";
+        let version: string = "";
+        while (step !== GenerateSteps.Finish) {
+            try {
+                switch (step) {
+                    case GenerateSteps.LoadArchetypes:
+                        selectedArchetype = await showQuickPickForArchetypes(generateSteps);
+                        step = (selectedArchetype === null) ? GenerateSteps.LoadArchetypesMore : GenerateSteps.SelectVersion;
+                        break;
+                    case GenerateSteps.LoadArchetypesMore:
+                        selectedArchetype = await showQuickPickForArchetypes(generateSteps, true);
+                        step = GenerateSteps.SelectVersion;
+                        break;
+                    case GenerateSteps.SelectVersion:
+                        if (selectedArchetype === null || selectedArchetype === undefined) {
+                            throw new OperationCanceledError("Archetype not selected.");
+                        }
+                        version = await showQuickPickForVersions(generateSteps, selectedArchetype.versions);
+                        artifactId = selectedArchetype.artifactId;
+                        groupId = selectedArchetype.groupId;
+                        step = GenerateSteps.Finish;
+                    default:
+                }
+            } catch (err) {
+                if (err === QuickInputButtons.Back) {
+                    const lastStep: string | undefined = generateSteps.pop();
+                    if (lastStep === undefined) {
+                        throw new OperationCanceledError("Go back Error.");
+                    }
+                    step = lastStep;
+                    continue;
+                } else {
+                    throw err;
+                }
+            }
         }
-        if (selectedArchetype === undefined) {
-            throw new OperationCanceledError("Archetype not selected.");
-        }
-        const version: string | undefined = await window.showQuickPick(selectedArchetype.versions, {
-            placeHolder: "Select a version ..."
-        });
-        if (version === undefined) {
-            throw new OperationCanceledError("Archetype version not selected.");
-        }
-        const { artifactId, groupId } = selectedArchetype;
         return { artifactId, groupId, version };
     }
 
@@ -99,22 +133,72 @@ export namespace ArchetypeModule {
         await fse.writeJSON(targetFilePath, archetypes);
     }
 
-    async function showQuickPickForArchetypes(all?: boolean): Promise<Archetype | undefined | null> {
+    async function showQuickPickForVersions(generateSteps: string[], versions: string[]): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            const pickBox: QuickPick<QuickPickItem> = window.createQuickPick<QuickPickItem>();
+            pickBox.placeholder = "Select a version ...";
+            pickBox.items = versions.map(version => ({
+                label: version
+            }));
+            pickBox.buttons = generateSteps.length > 0 ? [(QuickInputButtons.Back)] : [];
+            pickBox.onDidTriggerButton((item) => {
+                if (item === QuickInputButtons.Back) {
+                    reject(item);
+                    pickBox.dispose();
+                }
+            });
+            pickBox.onDidAccept(() => {
+                resolve(pickBox.selectedItems[0].label);
+                generateSteps.push(GenerateSteps.SelectVersion);
+                pickBox.dispose();
+            });
+            pickBox.onDidHide(() => {
+                reject();
+                pickBox.dispose();
+            });
+            pickBox.show();
+        });
+    }
+
+    async function showQuickPickForArchetypes(generateSteps: string[], all?: boolean): Promise<Archetype | undefined | null> {
         const morePickItem: QuickPickItem & { value: null } = {
             value: null,
             label: "More...",
             description: "",
             detail: "Find more archetypes available in remote catalog."
         };
-        return await window.showQuickPick<QuickPickItem & { value: Archetype | null }>(
-            loadArchetypePickItems(all).then(items => items.map(item => ({
+        return new Promise<Archetype | undefined | null>(async (resolve, reject) => {
+            const pickBox: QuickPick<QuickPickItem & { value: Archetype | null; }> = window.createQuickPick<QuickPickItem & { value: Archetype | null }>();
+            pickBox.placeholder = "Select an archetype ...";
+            pickBox.matchOnDescription = true;
+            pickBox.items = await loadArchetypePickItems(all).then(items => items.map(item => ({
                 value: item,
                 label: item.artifactId ? `$(package) ${item.artifactId} ` : "More...",
                 description: item.groupId ? `${item.groupId}` : "",
                 detail: item.description
-            }))).then(items => all ? items : [morePickItem, ...items]),
-            { matchOnDescription: true, placeHolder: "Select an archetype ..." }
-        ).then(selected => selected ? selected.value : undefined);
+            }))).then(items => all ? items : [morePickItem, ...items]);
+            pickBox.buttons = generateSteps.length > 0 ? [(QuickInputButtons.Back)] : [];
+            pickBox.onDidTriggerButton((item) => {
+                if (item === QuickInputButtons.Back) {
+                    reject(item);
+                    pickBox.dispose();
+                }
+            });
+            pickBox.onDidAccept(() => {
+                if (pickBox.selectedItems !== undefined) {
+                    resolve(pickBox.selectedItems[0].value);
+                } else {
+                    resolve(undefined);
+                }
+                generateSteps.push(all ? GenerateSteps.LoadArchetypesMore : GenerateSteps.LoadArchetypes);
+                pickBox.dispose();
+            });
+            pickBox.onDidHide(() => {
+                reject();
+                pickBox.dispose();
+            });
+            pickBox.show();
+        });
     }
 
     async function loadArchetypePickItems(all?: boolean): Promise<Archetype[]> {
