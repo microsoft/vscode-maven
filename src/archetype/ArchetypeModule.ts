@@ -11,16 +11,27 @@ import { executeInTerminal, getEmbeddedMavenWrapper, getMaven } from "../utils/m
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
-import { IStep } from "./IStep";
-import { StepLoadArchetypes } from "./StepLoadArchetypes";
-import { StepSelectVersion } from "./StepSelectVersion";
+import { IArchetypeGenerateExecutor } from "./IArchetypeGenerateExecutor";
+import { LoadArchetypesExecutor } from "./LoadArchetypesExecutor";
+import { SelectVersionExecutor } from "./SelectVersionExecutor";
 
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
+
+export enum GenerateStep {
+    LoadArchetypes = "LOADARCHETYPES",
+    SelectVersion = "SELECTVERSION",
+    Finish = "FINISH"
+}
+
+const stepMap: Map<GenerateStep, IArchetypeGenerateExecutor> = new Map<GenerateStep, IArchetypeGenerateExecutor>([
+    [GenerateStep.LoadArchetypes, new LoadArchetypesExecutor()],
+    [GenerateStep.SelectVersion, new SelectVersionExecutor()]
+]);
 
 export namespace ArchetypeModule {
 
     async function selectArchetype(): Promise<{ artifactId: string, groupId: string, version: string }> {
-        let step: IStep | undefined = steps.stepsList[steps.currentStep];
+        let step: GenerateStep | undefined = GenerateStep.LoadArchetypes;
         const archetypeMetadata: ArchetypeMetadata = {
             groupId: "",
             artifactId: "",
@@ -28,15 +39,20 @@ export namespace ArchetypeModule {
             versions: [],
             isLoadMore: false
         };
-        while (steps.currentStep < steps.stepsList.length) {
-            if (step === undefined) {
-                if (steps.stepsList[steps.currentStep] === steps.stepLoadArchetypes) {
-                    throw new OperationCanceledError("Archetype not selected.");
-                } else if (steps.stepsList[steps.currentStep] === steps.stepSelectVersion) {
-                    throw new OperationCanceledError("Archetype version not selected.");
+        while (step !== GenerateStep.Finish) {
+            if (step !== undefined) {
+                const executor: IArchetypeGenerateExecutor | undefined = stepMap.get(step);
+                if (executor !== undefined) {
+                    step = await executor.execute(archetypeMetadata);
+                } else {
+                    throw new OperationCanceledError("Unknown generate exector.");
                 }
             } else {
-                step = await step.execute(archetypeMetadata);
+                if (step === GenerateStep.LoadArchetypes) {
+                    throw new OperationCanceledError("Archetype not selected.");
+                } else if (step === GenerateStep.SelectVersion) {
+                    throw new OperationCanceledError("Archetype version not selected.");
+                }
             }
         }
         return { artifactId: archetypeMetadata.artifactId, groupId: archetypeMetadata.groupId, version: archetypeMetadata.version };
@@ -143,11 +159,4 @@ export class ArchetypeMetadata {
     public versions: string[];
     public version: string;
     public isLoadMore: boolean;
-}
-
-export namespace steps {
-    export const stepLoadArchetypes: StepLoadArchetypes = new StepLoadArchetypes();
-    export const stepSelectVersion: StepSelectVersion = new StepSelectVersion();
-    export const stepsList: IStep[] = [stepLoadArchetypes, stepSelectVersion];
-    export let currentStep: number = 0;
 }
