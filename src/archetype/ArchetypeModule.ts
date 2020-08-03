@@ -11,27 +11,16 @@ import { executeInTerminal, getEmbeddedMavenWrapper, getMaven } from "../utils/m
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
-import { IArchetypeGenerateExecutor } from "./IArchetypeGenerateExecutor";
-import { LoadArchetypesExecutor } from "./LoadArchetypesExecutor";
-import { SelectVersionExecutor } from "./SelectVersionExecutor";
+import { finishStep } from "./finishStep";
+import { IStep } from "./IStep";
+import { loadArchetypesStep } from "./loadArchetypesStep";
 
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
-
-export enum GenerateStep {
-    LoadArchetypes = "LOADARCHETYPES",
-    SelectVersion = "SELECTVERSION",
-    Finish = "FINISH"
-}
-
-const stepMap: Map<GenerateStep, IArchetypeGenerateExecutor> = new Map<GenerateStep, IArchetypeGenerateExecutor>([
-    [GenerateStep.LoadArchetypes, new LoadArchetypesExecutor()],
-    [GenerateStep.SelectVersion, new SelectVersionExecutor()]
-]);
 
 export namespace ArchetypeModule {
 
     async function selectArchetype(): Promise<{ artifactId: string, groupId: string, version: string }> {
-        let step: GenerateStep | undefined = GenerateStep.LoadArchetypes;
+        let step: IStep | undefined = loadArchetypesStep;
         const archetypeMetadata: ArchetypeMetadata = {
             groupId: "",
             artifactId: "",
@@ -39,20 +28,11 @@ export namespace ArchetypeModule {
             versions: [],
             isLoadMore: false
         };
-        while (step !== GenerateStep.Finish) {
+        while (step !== finishStep) {
             if (step !== undefined) {
-                const executor: IArchetypeGenerateExecutor | undefined = stepMap.get(step);
-                if (executor !== undefined) {
-                    step = await executor.execute(archetypeMetadata);
-                } else {
-                    throw new OperationCanceledError("Unknown generate exector.");
-                }
+                step = await step.execute(archetypeMetadata);
             } else {
-                if (step === GenerateStep.LoadArchetypes) {
-                    throw new OperationCanceledError("Archetype not selected.");
-                } else if (step === GenerateStep.SelectVersion) {
-                    throw new OperationCanceledError("Archetype version not selected.");
-                }
+                throw new Error("Unknown generate step.");
             }
         }
         return { artifactId: archetypeMetadata.artifactId, groupId: archetypeMetadata.groupId, version: archetypeMetadata.version };

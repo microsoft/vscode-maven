@@ -2,16 +2,22 @@
 // Licensed under the MIT license.
 
 import { Disposable, QuickInputButtons, QuickPick, QuickPickItem, window } from "vscode";
-import { ArchetypeMetadata, GenerateStep } from "./ArchetypeModule";
-import { IArchetypeGenerateExecutor } from "./IArchetypeGenerateExecutor";
+import { OperationCanceledError } from "../utils/errorUtils";
+import { ArchetypeMetadata } from "./ArchetypeModule";
+import { finishStep } from "./finishStep";
+import { IStep } from "./IStep";
+import { loadArchetypesStep } from "./loadArchetypesStep";
 
-export class SelectVersionExecutor implements IArchetypeGenerateExecutor {
+class SelectVersionStep implements IStep {
 
-    public async execute(archetypeMetadata: ArchetypeMetadata): Promise<GenerateStep | undefined> {
+    public async execute(archetypeMetadata: ArchetypeMetadata): Promise<IStep | undefined> {
         if (await this.showQuickPickForVersions(archetypeMetadata) === false) {
-            return GenerateStep.LoadArchetypes;
+            return loadArchetypesStep;
         }
-        return GenerateStep.Finish;
+        if (archetypeMetadata.version === undefined) {
+            throw new OperationCanceledError("Archetype version not selected.");
+        }
+        return finishStep;
     }
 
     private async showQuickPickForVersions(archetypeMetadata: ArchetypeMetadata): Promise<boolean> {
@@ -50,3 +56,5 @@ export class SelectVersionExecutor implements IArchetypeGenerateExecutor {
         return result;
     }
 }
+
+export const selectVersionStep: SelectVersionStep = new SelectVersionStep();

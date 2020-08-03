@@ -6,20 +6,22 @@ import * as path from "path";
 import { Disposable, QuickInputButtons, QuickPick, QuickPickItem, window } from "vscode";
 import { getMavenLocalRepository } from "../utils/contextUtils";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
+import { OperationCanceledError } from "../utils/errorUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
-import { ArchetypeMetadata, ArchetypeModule, GenerateStep } from "./ArchetypeModule";
-import { IArchetypeGenerateExecutor } from "./IArchetypeGenerateExecutor";
+import { ArchetypeMetadata, ArchetypeModule } from "./ArchetypeModule";
+import { IStep } from "./IStep";
+import { selectVersionStep } from "./selectVersionStep";
 
 const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
 
-export class LoadArchetypesExecutor implements IArchetypeGenerateExecutor {
+class LoadArchetypesStep implements IStep {
 
     private archetypePickItems: (QuickPickItem & { value: Archetype | null; })[] = [];
 
     private allArchetypePickItems: (QuickPickItem & { value: Archetype | null; })[] = [];
 
-    public async execute(archetypeMetadata: ArchetypeMetadata): Promise<GenerateStep | undefined> {
+    public async execute(archetypeMetadata: ArchetypeMetadata): Promise<IStep | undefined> {
         if (archetypeMetadata.isLoadMore === true || await this.showQuickPickForArchetypes(archetypeMetadata) === null) {
             if (await this.showQuickPickForArchetypes(archetypeMetadata, true) === false) {
                 archetypeMetadata.isLoadMore = false;
@@ -27,9 +29,9 @@ export class LoadArchetypesExecutor implements IArchetypeGenerateExecutor {
             }
         }
         if (archetypeMetadata.groupId === undefined || archetypeMetadata.artifactId === undefined) {
-            return undefined;
+            throw new OperationCanceledError("Archetype not selected.");
         }
-        return GenerateStep.SelectVersion;
+        return selectVersionStep;
     }
 
     private async showQuickPickForArchetypes(archetypeMetadata: ArchetypeMetadata, all?: boolean): Promise<boolean | undefined | null> {
@@ -161,3 +163,5 @@ export class LoadArchetypesExecutor implements IArchetypeGenerateExecutor {
         }
     }
 }
+
+export const loadArchetypesStep: LoadArchetypesStep = new LoadArchetypesStep();
