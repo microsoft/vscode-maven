@@ -119,15 +119,23 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
         return expandHome(mvnPathFromSettings);
     }
 
-    const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
-    if (preferMavenWrapper && pomPath) {
+    if (pomPath) {
         const localMvnwPath: string | undefined = await getLocalMavenWrapper(path.dirname(pomPath));
         if (localMvnwPath) {
-            return localMvnwPath;
+            let useWrapper: boolean = false;
+            const preferMavenWrapper: boolean = !!Settings.Executable.preferMavenWrapper(pomPath);
+            if (!Settings.isPreferenceOverridden("maven.executable.preferMavenWrapper")) {
+                useWrapper = await promptForUsingWrapper(localMvnwPath);
+            } else {
+                useWrapper = preferMavenWrapper;
+            }
+
+            if (useWrapper) {
+                return localMvnwPath;
+            }
         }
     }
-
-    return await defaultMavenExecutable();
+    return defaultMavenExecutable();
 }
 
 export function getEmbeddedMavenWrapper(): string {
@@ -230,4 +238,23 @@ async function browseForMavenBinary(): Promise<string | undefined> {
 
 function isWin(): boolean {
     return process.platform.startsWith("win");
+}
+
+async function promptForUsingWrapper(mvnwPath: string): Promise<boolean> {
+    const RUN_ONCE = "Run once";
+    const ALWAYS = "Always";
+    const NEVER = "Never";
+    const option: string | undefined = await vscode.window.showInformationMessage(`Wrapper found: ${mvnwPath}. Do you want to run with it?`, RUN_ONCE, ALWAYS, NEVER);
+    switch (option) {
+        case RUN_ONCE:
+            return true;
+        case ALWAYS:
+            Settings.setPreferWrapper(true);
+            return true;
+        case NEVER:
+            Settings.setPreferWrapper(false);
+            return false;
+        default:
+            return false;
+    }
 }

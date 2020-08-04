@@ -411,19 +411,19 @@
             "type": "boolean",
             "default": "true",
             "description": "%configuration.maven.executable.preferMavenWrapper%",
-            "scope": "resource"
+            "scope": "machine"
           },
           "maven.executable.path": {
             "type": "string",
             "default": "",
             "description": "%configuration.maven.executable.path%",
-            "scope": "resource"
+            "scope": "machine"
           },
           "maven.executable.options": {
             "type": "string",
             "default": "",
             "description": "%configuration.maven.executable.options%",
-            "scope": "resource"
+            "scope": "machine"
           },
           "maven.terminal.useJavaHome": {
             "type": "boolean",
