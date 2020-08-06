@@ -3,35 +3,39 @@
 
 import * as fse from "fs-extra";
 import * as path from "path";
-import { QuickPickItem, Uri, window, workspace } from "vscode";
+import { Uri, workspace } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
-import { getMavenLocalRepository, getPathToExtensionRoot } from "../utils/contextUtils";
+import { getPathToExtensionRoot } from "../utils/contextUtils";
 import { OperationCanceledError } from "../utils/errorUtils";
 import { executeInTerminal, getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
 import { openDialogForFolder } from "../utils/uiUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
+import { finishStep } from "./finishStep";
+import { IStep } from "./IStep";
+import { loadArchetypesStep } from "./loadArchetypesStep";
 
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
-const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
 
 export namespace ArchetypeModule {
+
     async function selectArchetype(): Promise<{ artifactId: string, groupId: string, version: string }> {
-        let selectedArchetype: Archetype | undefined | null = await showQuickPickForArchetypes();
-        while (selectedArchetype === null) {
-            selectedArchetype = await showQuickPickForArchetypes(true);
+        let step: IStep | undefined = loadArchetypesStep;
+        const archetypeMetadata: ArchetypeMetadata = {
+            groupId: "",
+            artifactId: "",
+            version: "",
+            versions: [],
+            isLoadMore: false
+        };
+        while (step !== finishStep) {
+            if (step !== undefined) {
+                step = await step.execute(archetypeMetadata);
+            } else {
+                throw new Error("Unknown generate step.");
+            }
         }
-        if (selectedArchetype === undefined) {
-            throw new OperationCanceledError("Archetype not selected.");
-        }
-        const version: string | undefined = await window.showQuickPick(selectedArchetype.versions, {
-            placeHolder: "Select a version ..."
-        });
-        if (version === undefined) {
-            throw new OperationCanceledError("Archetype version not selected.");
-        }
-        const { artifactId, groupId } = selectedArchetype;
-        return { artifactId, groupId, version };
+        return { artifactId: archetypeMetadata.artifactId, groupId: archetypeMetadata.groupId, version: archetypeMetadata.version };
     }
 
     async function chooseTargetFolder(entry: Uri | undefined): Promise<string> {
@@ -99,55 +103,7 @@ export namespace ArchetypeModule {
         await fse.writeJSON(targetFilePath, archetypes);
     }
 
-    async function showQuickPickForArchetypes(all?: boolean): Promise<Archetype | undefined | null> {
-        const morePickItem: QuickPickItem & { value: null } = {
-            value: null,
-            label: "More...",
-            description: "",
-            detail: "Find more archetypes available in remote catalog."
-        };
-        return await window.showQuickPick<QuickPickItem & { value: Archetype | null }>(
-            loadArchetypePickItems(all).then(items => items.map(item => ({
-                value: item,
-                label: item.artifactId ? `$(package) ${item.artifactId} ` : "More...",
-                description: item.groupId ? `${item.groupId}` : "",
-                detail: item.description
-            }))).then(items => all ? items : [morePickItem, ...items]),
-            { matchOnDescription: true, placeHolder: "Select an archetype ..." }
-        ).then(selected => selected ? selected.value : undefined);
-    }
-
-    async function loadArchetypePickItems(all?: boolean): Promise<Archetype[]> {
-        // from local catalog
-        const localItems: Archetype[] = await getLocalArchetypeItems();
-        // from cached remote-catalog
-        const remoteItems: Archetype[] = await getCachedRemoteArchetypeItems();
-        const localOnlyItems: Archetype[] = localItems.filter(localItem => !remoteItems.find(remoteItem => remoteItem.identifier === localItem.identifier));
-        if (all) {
-            return [...localOnlyItems, ...remoteItems];
-        } else {
-            const recommendedItems: Archetype[] = await getRecommendedItems(remoteItems);
-            return [...localOnlyItems, ...recommendedItems];
-        }
-    }
-
-    async function getRecommendedItems(allItems: Archetype[]): Promise<Archetype[]> {
-        // Top popular archetypes according to usage data
-        let fixedList: string[] | undefined;
-        try {
-            const rawList: string = await Utils.downloadFile(POPULAR_ARCHETYPES_URL, true);
-            fixedList = JSON.parse(rawList);
-        } catch (error) {
-            console.error(error);
-        }
-        if (!fixedList) {
-            return [];
-        } else {
-            return <Archetype[]>fixedList.map((fullname: string) => allItems.find((item: Archetype) => fullname === `${item.groupId}:${item.artifactId}`)).filter(Boolean);
-        }
-    }
-
-    async function listArchetypeFromXml(xmlString: string): Promise<Archetype[]> {
+    export async function listArchetypeFromXml(xmlString: string): Promise<Archetype[]> {
         try {
             const xmlObject: any = await Utils.parseXmlContent(xmlString);
             const catalog: any = xmlObject && xmlObject["archetype-catalog"];
@@ -175,31 +131,12 @@ export namespace ArchetypeModule {
         }
         return [];
     }
+}
 
-    async function getLocalArchetypeItems(): Promise<Archetype[]> {
-        const localCatalogPath: string = path.join(getMavenLocalRepository(), "archetype-catalog.xml");
-        if (await fse.pathExists(localCatalogPath)) {
-            const buf: Buffer = await fse.readFile(localCatalogPath);
-            return listArchetypeFromXml(buf.toString());
-        } else {
-            return [];
-        }
-    }
-
-    async function getCachedRemoteArchetypeItems(): Promise<Archetype[]> {
-        const contentPath: string = getPathToExtensionRoot("resources", "archetypes.json");
-        if (await fse.pathExists(contentPath)) {
-            return (await fse.readJSON(contentPath)).map(
-                (rawItem: Archetype) => new Archetype(
-                    rawItem.artifactId,
-                    rawItem.groupId,
-                    rawItem.repository,
-                    rawItem.description,
-                    rawItem.versions
-                )
-            );
-        } else {
-            return [];
-        }
-    }
+export class ArchetypeMetadata {
+    public groupId: string;
+    public artifactId: string;
+    public versions: string[];
+    public version: string;
+    public isLoadMore: boolean;
 }
