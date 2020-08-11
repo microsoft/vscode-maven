@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.24.0
+#### Added
+- Add back buttons to the project creation wizard. [#520](https://github.com/microsoft/vscode-maven/pull/520)
+
+#### Fixed
+- Settings `maven.executable.*` are now limited to machine scope. Fix for [CVE-2020-0604](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2020-0604).
+
 ## 0.23.0
 #### Changed
 - Rename project explorer. [#512](https://github.com/microsoft/vscode-maven/pull/512)
