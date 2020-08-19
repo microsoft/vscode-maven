@@ -92,7 +92,9 @@ export async function trustWrapper(mvnw: string): Promise<boolean> {
         const YES: string = "Yes";
         const NO: string = "No";
         const choice: string | undefined = await window.showInformationMessage(msg, YES, NO);
-        EXTENSION_CONTEXT.workspaceState.update(key, choice === YES);
+        if (choice !== undefined) {
+            EXTENSION_CONTEXT.workspaceState.update(key, choice === YES);
+        }
         return choice === YES;
     } else {
         return trust;
