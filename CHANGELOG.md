@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.24.1
+#### Changed
+- Change `maven.executable.options` to `machine-overridable` scope.
+- Change `maven.executable.preferMavenWrapper` to `resource` scope.
+
 ## 0.24.0
 #### Added
 - Add back buttons to the project creation wizard. [#520](https://github.com/microsoft/vscode-maven/pull/520)
