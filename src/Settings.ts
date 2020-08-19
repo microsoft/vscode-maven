@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { Uri, workspace, WorkspaceConfiguration } from "vscode";
+import { Uri, workspace } from "vscode";
 
 export namespace Settings {
     export function excludedFolders(resource: Uri): string[] {
@@ -25,23 +25,6 @@ export namespace Settings {
         workspace.getConfiguration().update("maven.executable.path", mvnPath, true);
     }
 
-    export function setPreferWrapper(value: boolean): void {
-        workspace.getConfiguration().update("maven.executable.preferMavenWrapper", value, true);
-    }
-
-    export function isPreferenceOverridden(section: string): boolean {
-        const config: WorkspaceConfiguration = workspace.getConfiguration();
-        const inspect = config.inspect(section);
-        if (inspect === undefined) {
-            return false;
-        }
-        return inspect.workspaceFolderValue !== undefined ||
-            inspect.workspaceFolderLanguageValue !== undefined ||
-            inspect.workspaceValue !== undefined ||
-            inspect.workspaceLanguageValue !== undefined ||
-            inspect.globalValue !== undefined ||
-            inspect.globalLanguageValue !== undefined;
-    }
     export namespace External {
         export function javaHome(): string | undefined {
             return workspace.getConfiguration("java").get<string>("home");
@@ -75,8 +58,8 @@ export namespace Settings {
         export function options(resourceOrFilepath?: Uri | string): string | undefined {
             return _getMavenSection("executable.options", resourceOrFilepath);
         }
-        export function preferMavenWrapper(resourceOrFilepath?: Uri | string): boolean | undefined {
-            return _getMavenSection("executable.preferMavenWrapper", resourceOrFilepath);
+        export function preferMavenWrapper(resourceOrFilepath?: Uri | string): boolean {
+            return !!_getMavenSection("executable.preferMavenWrapper", resourceOrFilepath);
         }
     }
 
