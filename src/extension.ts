@@ -161,6 +161,9 @@ function registerConfigChangeListener(context: vscode.ExtensionContext): void {
             || e.affectsConfiguration("maven.pomfile.globPattern")) {
             mavenExplorerProvider.refresh();
         }
+        if (e.affectsConfiguration("maven.executable.preferMavenWrapper")) {
+            context.workspaceState.update("trustMavenWrapper", undefined);
+        }
     });
     context.subscriptions.push(configChangeListener);
 }
