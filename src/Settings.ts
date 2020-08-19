@@ -37,7 +37,7 @@ export namespace Settings {
 
     export namespace Terminal {
         export function useJavaHome(): boolean {
-            return !!_getMavenSection("terminal.useJavaHome");
+            return !!_getMavenSection<boolean>("terminal.useJavaHome");
         }
 
         export function customEnv(resourceOrFilepath?: Uri | string): {
@@ -59,7 +59,7 @@ export namespace Settings {
             return _getMavenSection("executable.options", resourceOrFilepath);
         }
         export function preferMavenWrapper(resourceOrFilepath?: Uri | string): boolean {
-            return !!_getMavenSection("executable.preferMavenWrapper", resourceOrFilepath);
+            return !!_getMavenSection<boolean>("executable.preferMavenWrapper", resourceOrFilepath);
         }
     }
 
