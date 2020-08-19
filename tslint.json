@@ -185,6 +185,7 @@
             "call-signature",
             "parameter",
             "property-declaration",
+            "variable-declaration",
             "member-variable-declaration"
         ],
         "underscore-consistent-invocation": true,
