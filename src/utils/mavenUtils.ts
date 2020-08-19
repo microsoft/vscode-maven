@@ -11,7 +11,7 @@ import * as which from "which";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
-import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
+import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage, trustWrapper } from "./contextUtils";
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
 
@@ -122,7 +122,7 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
     if (preferMavenWrapper && pomPath) {
         const localMvnwPath: string | undefined = await getLocalMavenWrapper(path.dirname(pomPath));
-        if (localMvnwPath) {
+        if (localMvnwPath && await trustWrapper(localMvnwPath)) {
             return localMvnwPath;
         }
     }

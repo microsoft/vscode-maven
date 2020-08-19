@@ -5,7 +5,7 @@ import * as fse from "fs-extra";
 import * as _ from "lodash";
 import * as os from "os";
 import * as path from "path";
-import { Extension, ExtensionContext, extensions } from "vscode";
+import { Extension, ExtensionContext, extensions, window } from "vscode";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { Utils } from "./Utils";
 
@@ -82,4 +82,19 @@ export function getPathToWorkspaceStorage(...args: string[]): string | undefined
     }
     fse.ensureDirSync(EXTENSION_CONTEXT.storagePath);
     return path.join(EXTENSION_CONTEXT.storagePath, ...args);
+}
+
+export async function trustWrapper(mvnw: string): Promise<boolean> {
+    const key: string = "trustMavenWrapper";
+    const trust: boolean | undefined = EXTENSION_CONTEXT.workspaceState.get<boolean | undefined>(key);
+    if (trust === undefined) {
+        const msg: string = `Maven Wrapper is found in this workspace, do you trust it? (${mvnw})`;
+        const YES: string = "Yes";
+        const NO: string = "No";
+        const choice: string | undefined = await window.showInformationMessage(msg, YES, NO);
+        EXTENSION_CONTEXT.workspaceState.update(key, choice === YES);
+        return choice === YES;
+    } else {
+        return trust;
+    }
 }
