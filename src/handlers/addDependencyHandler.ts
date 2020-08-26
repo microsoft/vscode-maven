@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as fse from "fs-extra";
+import * as path from "path";
 import * as vscode from "vscode";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { UserError } from "../utils/errorUtils";
@@ -9,10 +10,14 @@ import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
 import { selectProjectIfNecessary } from "../utils/uiUtils";
 
-export async function addDependencyHandler(options?: { pomPath?: string }): Promise<void> {
+export async function addDependencyHandler(options?: any): Promise<void> {
     let pomPath: string;
     if (options && options.pomPath) {
+        // for nodes from Maven explorer
         pomPath = options.pomPath;
+    } else if (options && options.projectBasePath) {
+        // for "Maven dependencies" nodes from Project Manager
+        pomPath = path.join(options.projectBasePath, "pom.xml");
     } else {
         // select a project(pomfile)
         const selectedProject: MavenProject | undefined = await selectProjectIfNecessary();
@@ -52,10 +57,6 @@ export async function addDependencyHandler(options?: { pomPath?: string }): Prom
 }
 
 async function addDependency(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
-    if (!vscode.window.activeTextEditor) {
-        throw new UserError("No POM file is open.");
-    }
-
     // Find out <dependencies> node and insert content.
     const contentBuf: Buffer = await fse.readFile(pomPath);
     const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
@@ -95,10 +96,8 @@ async function insertDependency(pomPath: string, targetNode: ElementNode, gid: s
         return;
     }
 
-    const targetRange: vscode.Range = new vscode.Range(insertPosition, insertPosition);
-    const textEdit: vscode.TextEdit = new vscode.TextEdit(targetRange, targetText);
     const edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
-    edit.set(currentDocument.uri, [textEdit]);
+    edit.insert(currentDocument.uri, insertPosition, targetText);
     await vscode.workspace.applyEdit(edit);
     const endingPosition: vscode.Position = currentDocument.positionAt(currentDocument.offsetAt(insertPosition) + targetText.length);
     textEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
