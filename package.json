@@ -168,7 +168,8 @@
       {
         "command": "maven.project.addDependency",
         "title": "%contributes.commands.maven.project.addDependency%",
-        "category": "Maven"
+        "category": "Maven",
+        "icon": "$(add)"
       },
       {
         "command": "maven.project.showDependencies",
@@ -388,6 +389,11 @@
         {
           "command": "maven.explorer.refresh",
           "when": "view == mavenProjects && viewItem == Menu",
+          "group": "inline"
+        },
+        {
+          "command": "maven.project.addDependency",
+          "when": "view == javaProjectExplorer && viewItem =~ /java:container(?=.*?\\b\\+maven\\b)/",
           "group": "inline"
         }
       ]
