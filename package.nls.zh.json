@@ -8,7 +8,7 @@
     "contributes.commands.maven.archetype.update": "更新 Maven 原型目录",
     "contributes.commands.maven.favorites": "收藏夹…",
     "contributes.commands.maven.history": "历史…",
-    "contributes.commands.maven.goal.execute": "执行命令",
+    "contributes.commands.maven.goal.execute": "执行命令...",
     "contributes.commands.maven.plugin.execute": "执行",
     "contributes.commands.maven.plugin.debug": "调试",
     "contributes.commands.maven.view.hierarchical": "切换到分层视图",

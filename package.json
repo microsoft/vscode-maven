@@ -400,6 +400,11 @@
           "command": "maven.project.addDependency",
           "when": "view == javaProjectExplorer && viewItem =~ /java:container(?=.*?\\b\\+maven\\b)/",
           "group": "inline"
+        },
+        {
+          "command": "maven.goal.execute",
+          "when": "view == javaProjectExplorer && viewItem =~ /java:project(?=.*?\\b\\+maven\\b)(?=.*?\\b\\+uri\\b)/",
+          "group": "maven"
         }
       ]
     },

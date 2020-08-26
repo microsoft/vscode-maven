@@ -77,7 +77,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
     registerCommand(context, "maven.history", mavenHistoryHandler);
     registerCommand(context, "maven.favorites", runFavoriteCommandsHandler);
-    registerCommand(context, "maven.goal.execute", async () => await Utils.executeMavenCommand());
+    registerCommand(context, "maven.goal.execute", Utils.executeMavenCommand);
     registerCommand(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.name, pomfile: pluginGoal.plugin.project.pomPath }));
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());
     registerCommand(context, "maven.view.hierarchical", () => Settings.changeToHierarchicalView());
