@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 "use strict";
+import * as path from "path";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
@@ -205,8 +206,16 @@ async function refreshExplorerHandler(item?: ITreeItem): Promise<void> {
     }
 }
 
-async function openPomHandler(node: MavenProject): Promise<void> {
-    if (node !== undefined && node.pomPath) {
-        await openFileIfExists(node.pomPath);
+async function openPomHandler(node: MavenProject | {uri: string}): Promise<void> {
+    if (node instanceof MavenProject) {
+        if (node.pomPath) {
+            await openFileIfExists(node.pomPath);
+        }
+    } else {
+        // for nodes from Project Manager
+        if (node.uri) {
+            const pomPath: string = path.join(Uri.parse(node.uri).fsPath, "pom.xml");
+            await openFileIfExists(pomPath);
+        }
     }
 }
