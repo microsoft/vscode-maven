@@ -367,6 +367,11 @@
           "group": "inline"
         },
         {
+          "command": "maven.project.openPom",
+          "when": "view == javaProjectExplorer && viewItem =~ /java:project(?=.*?\\b\\+maven\\b)(?=.*?\\b\\+uri\\b)/",
+          "group": "inline"
+        },
+        {
           "command": "maven.plugin.execute",
           "when": "view == mavenProjects && viewItem == PluginGoal",
           "group": "inline"
