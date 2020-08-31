@@ -145,7 +145,7 @@
       },
       {
         "command": "maven.goal.execute.fromProjectManager",
-        "title": "Run Maven Command...",
+        "title": "Run Maven Commands...",
         "category": "Maven"
       },
       {
