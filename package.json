@@ -38,6 +38,7 @@
     "onCommand:maven.goal.deploy",
     "onCommand:maven.goal.custom",
     "onCommand:maven.goal.execute",
+    "onCommand:maven.goal.execute.fromProjectManager",
     "onCommand:maven.project.effectivePom",
     "onCommand:maven.project.openPom",
     "onCommand:maven.archetype.generate",
@@ -140,6 +141,11 @@
       {
         "command": "maven.goal.execute",
         "title": "%contributes.commands.maven.goal.execute%",
+        "category": "Maven"
+      },
+      {
+        "command": "maven.goal.execute.fromProjectManager",
+        "title": "Run Maven Commands...",
         "category": "Maven"
       },
       {
@@ -254,6 +260,10 @@
         },
         {
           "command": "maven.project.showDependencies",
+          "when": "never"
+        },
+        {
+          "command": "maven.goal.execute.fromProjectManager",
           "when": "never"
         }
       ],
@@ -400,6 +410,11 @@
           "command": "maven.project.addDependency",
           "when": "view == javaProjectExplorer && viewItem =~ /java:container(?=.*?\\b\\+maven\\b)/",
           "group": "inline"
+        },
+        {
+          "command": "maven.goal.execute.fromProjectManager",
+          "when": "view == javaProjectExplorer && viewItem =~ /java:project(?=.*?\\b\\+maven\\b)(?=.*?\\b\\+uri\\b)/",
+          "group": "maven"
         }
       ]
     },

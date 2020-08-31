@@ -5,6 +5,7 @@ import * as fse from "fs-extra";
 import * as http from "http";
 import * as https from "https";
 import * as md5 from "md5";
+import * as path from "path";
 import * as url from "url";
 import { commands, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
@@ -232,9 +233,18 @@ export namespace Utils {
         }
     }
 
-    export async function executeMavenCommand(): Promise<void> {
+    export async function executeMavenCommand(node?: any): Promise<void> {
+        // for nodes from Project Manager
+        let selectedProject: MavenProject | undefined;
+        if (node && node.uri) {
+            const pomPath: string = path.join(Uri.parse(node.uri).fsPath, "pom.xml");
+            selectedProject = mavenExplorerProvider.mavenProjectNodes.find(project => project.pomPath.toLowerCase() === pomPath.toLowerCase());
+        }
         // select a project(pomfile)
-        const selectedProject: MavenProject | undefined = await selectProjectIfNecessary();
+        if (!selectedProject) {
+            selectedProject = await selectProjectIfNecessary();
+        }
+
         if (!selectedProject) {
             return;
         }
