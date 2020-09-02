@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.24.2
+#### Added
+- Register entries for commands in Project Manager extension.
+  - Add a dependency.
+  - Open POM file.
+  - Execute Maven Commands...
+
 ## 0.24.1
 #### Changed
 - Change `maven.executable.options` to `machine-overridable` scope.

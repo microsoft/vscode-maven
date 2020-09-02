@@ -17,3 +17,5 @@ resources/IndexData/index/*.si
 resources/IndexData/index/segments*
 
 .vs/*
+
+*.jar
