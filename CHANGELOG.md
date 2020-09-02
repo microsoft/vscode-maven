@@ -4,9 +4,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## 0.24.2
 #### Added
 - Register entries for commands in Project Manager extension.
-  - Add a dependency.
-  - Open POM file.
-  - Execute Maven Commands...
+  - Add a dependency. [#529](https://github.com/microsoft/vscode-maven/pull/529)
+  - Open POM file. [#530](https://github.com/microsoft/vscode-maven/pull/530)
+  - Execute Maven Commands... [#531](https://github.com/microsoft/vscode-maven/pull/531)
 
 ## 0.24.1
 #### Changed
