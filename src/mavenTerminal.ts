@@ -160,6 +160,10 @@ function toDefaultWslPath(p: string): string {
 }
 
 export async function toWslPath(filepath: string): Promise<string> {
+    if (filepath.startsWith("/")) { // unix-like absolute path
+        return filepath;
+    }
+
     try {
         return (await executeCommand("wsl", ["wslpath", "-u", `"${filepath.replace(/\\/g, "/")}"`])).trim();
     } catch (error) {
