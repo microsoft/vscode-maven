@@ -9,6 +9,10 @@ export namespace Settings {
         return ret !== undefined ? ret : [];
     }
 
+    export function showInExplorerContextMenu(): boolean {
+        return !!_getMavenSection<boolean>("maven.showInExplorerContextMenu");
+    }
+
     export function viewType(): string | undefined {
         return _getMavenSection("view");
     }

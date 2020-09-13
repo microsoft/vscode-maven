@@ -27,6 +27,7 @@
     "configuration.maven.terminal.customEnv.environmentVariable": "Name of the environment variable to set.",
     "configuration.maven.terminal.customEnv.value": "Value of the environment variable to set.",
     "configuration.maven.view": "Specifies the way of viewing Maven projects.",
+    "configuration.maven.showInExplorerContextMenu": "If this value is true, add a command to create Maven Projects in the Explorer context menu for folders.",
     "configuration.maven.terminal.favorites": "Specify pre-defined favorite commands to execute.",
     "configuration.maven.terminal.favorites.alias": "A short name for the command.",
     "configuration.maven.terminal.favorites.command": "Content of the favorite command.",
