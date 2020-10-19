@@ -270,6 +270,7 @@
       "explorer/context": [
         {
           "command": "maven.archetype.generate",
+          "when": "config.maven.showInExplorerContextMenu && explorerResourceIsFolder",
           "group": "maven@3"
         },
         {
@@ -522,6 +523,12 @@
             "default": "flat",
             "scope": "window",
             "description": "%configuration.maven.view%"
+          },
+          "maven.showInExplorerContextMenu": {
+            "type": "boolean",
+            "default": "true",
+            "description": "%configuration.maven.showInExplorerContextMenu%",
+            "scope": "resource"
           },
           "maven.pomfile.globPattern": {
             "type": "string",
