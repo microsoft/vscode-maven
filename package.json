@@ -380,7 +380,7 @@
         {
           "command": "maven.project.openPom",
           "when": "view == javaProjectExplorer && viewItem =~ /java:project(?=.*?\\b\\+maven\\b)(?=.*?\\b\\+uri\\b)/",
-          "group": "inline"
+          "group": "maven"
         },
         {
           "command": "maven.plugin.execute",
