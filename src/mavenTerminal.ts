@@ -160,7 +160,7 @@ function toDefaultWslPath(p: string): string {
 }
 
 export async function toWslPath(filepath: string): Promise<string> {
-    if (filepath.startsWith("/")) { // unix-like absolute path
+    if (path.posix.isAbsolute(filepath)) {
         return filepath;
     }
 
