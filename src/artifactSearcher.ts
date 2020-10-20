@@ -78,7 +78,7 @@ class TypeResolver {
             const length: number = document.offsetAt(diagnostic.range.end) - document.offsetAt(diagnostic.range.start);
             const param: any = {
                 className,
-                uri: document.uri.toString(),
+                uri: encodeBase64(document.uri.toString()),
                 line,
                 character,
                 length
@@ -118,7 +118,7 @@ class TypeResolver {
                 command: COMMAND_SEARCH_ARTIFACT,
                 arguments: [{
                     className,
-                    uri,
+                    uri: encodeBase64(uri),
                     line,
                     character,
                     length
@@ -149,6 +149,7 @@ class TypeResolver {
         if (pickItem === undefined) {
             return;
         }
+        param.uri = decodeBase64(param.uri);
         const edits: WorkspaceEdit[] = await getWorkSpaceEdits(pickItem, param);
         await applyEdits(Uri.parse(param.uri), edits);
     }
@@ -226,6 +227,15 @@ function diagnosticIndicatesUnresolvedType(diagnostic: Diagnostic, document: Tex
         UNDEFINED_NAME === diagnostic.code && startsWithCapitalLetter(document.getText(diagnostic.range))
     );
 }
+
+function encodeBase64(content: string): string {
+    return Buffer.from(content, "utf8").toString("base64");
+}
+
+function decodeBase64(content: string): string {
+    return Buffer.from(content, "base64").toString("utf8");
+}
+
 export interface IArtifactSearchResult {
     groupId: string;
     artifactId: string;
