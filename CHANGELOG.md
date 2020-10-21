@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.25.0
+#### Changed
+- Allow users to hide the "Create Maven Project" entry in File Explorer. [#536](https://github.com/microsoft/vscode-maven/pull/536)
+- Move "Open POM file" into context menu in Project Manager Explorer. [#541](https://github.com/microsoft/vscode-maven/pull/541)
+#### Fixed
+- Fix "Resolve unknown type" command when folder path contains whitespaces. [#535](https://github.com/microsoft/vscode-maven/pull/535)
+- Fix path conversion when using WSL as default integrated terminal. [#542](https://github.com/microsoft/vscode-maven/pull/542)
+
 ## 0.24.2
 #### Added
 - Register entries for commands in Project Manager extension.
