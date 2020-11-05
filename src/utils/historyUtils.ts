@@ -3,7 +3,7 @@
 
 import * as fse from "fs-extra";
 import * as md5 from "md5";
-import { getExtensionName, getPathToTempFolder } from "./contextUtils";
+import { getPathToTempFolder } from "./contextUtils";
 
 export interface ICommandHistory {
     pomPath: string;
