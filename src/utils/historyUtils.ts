@@ -3,7 +3,7 @@
 
 import * as fse from "fs-extra";
 import * as md5 from "md5";
-import { getExtensionName, getPathToTempFolder } from "./contextUtils";
+import { getPathToTempFolder } from "./contextUtils";
 
 export interface ICommandHistory {
     pomPath: string;
@@ -50,5 +50,5 @@ export async function getLRUCommands(pomPath: string): Promise<ICommandHistoryEn
 }
 
 function getCommandHistoryCachePath(pomXmlFilePath: string): string {
-    return getPathToTempFolder(getExtensionName(), md5(pomXmlFilePath), "commandHistory.json");
+    return getPathToTempFolder(md5(pomXmlFilePath), "commandHistory.json");
 }

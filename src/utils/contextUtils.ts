@@ -15,6 +15,7 @@ let EXTENSION_NAME: string;
 let EXTENSION_VERSION: string;
 let EXTENSION_AI_KEY: string;
 let MAVEN_LOCAL_REPOSITORY: string;
+let TEMP_FOLDER_PER_USER: string;
 
 export async function loadPackageInfo(context: ExtensionContext): Promise<void> {
     EXTENSION_CONTEXT = context;
@@ -24,6 +25,8 @@ export async function loadPackageInfo(context: ExtensionContext): Promise<void> 
     EXTENSION_PUBLISHER = publisher;
     EXTENSION_NAME = name;
     EXTENSION_VERSION = version;
+
+    TEMP_FOLDER_PER_USER = path.join(os.tmpdir(), `${EXTENSION_NAME}-${os.userInfo().username}`);
 
     // find Maven Local Repositry
     try {
@@ -65,7 +68,7 @@ export function getAiKey(): string {
 }
 
 export function getPathToTempFolder(...args: string[]): string {
-    return path.join(os.tmpdir(), ...args);
+    return path.join(TEMP_FOLDER_PER_USER, ...args);
 }
 
 export function getPathToExtensionRoot(...args: string[]): string {
