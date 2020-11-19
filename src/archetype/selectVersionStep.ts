@@ -26,6 +26,7 @@ class SelectVersionStep implements IStep {
         try {
             result = await new Promise<boolean>((resolve, reject) => {
                 const pickBox: QuickPick<QuickPickItem> = window.createQuickPick<QuickPickItem>();
+                pickBox.title = "Create Maven Project: Choose version";
                 pickBox.placeholder = "Select a version ...";
                 pickBox.items = archetypeMetadata.versions.map(version => ({
                     label: version
