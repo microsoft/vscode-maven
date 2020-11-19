@@ -45,6 +45,7 @@ class LoadArchetypesStep implements IStep {
         try {
             result = await new Promise<boolean | undefined | null>(async (resolve, reject) => {
                 const pickBox: QuickPick<QuickPickItem & { value: Archetype | null; }> = window.createQuickPick<QuickPickItem & { value: Archetype | null }>();
+                pickBox.title = "Create Maven Project: Choose archetype";
                 pickBox.placeholder = "Select an archetype ...";
                 pickBox.matchOnDescription = true;
                 if (all === undefined) {
