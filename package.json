@@ -192,7 +192,8 @@
       "explorer": [
         {
           "id": "mavenProjects",
-          "name": "%contributes.views.explorer.mavenProjects%"
+          "name": "%contributes.views.explorer.mavenProjects%",
+          "when": "workbenchState == empty || vscode-maven:activated"
         }
       ]
     },
