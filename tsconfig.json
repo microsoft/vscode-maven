@@ -1,10 +1,5 @@
 {
     "compilerOptions": {
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "strictNullChecks": true,
         "module": "commonjs",
         "target": "es6",
         "outDir": "out",
@@ -13,6 +8,13 @@
         ],
         "sourceMap": true,
         "rootDir": "src",
+        "noUnusedLocals": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": true,
+        "alwaysStrict": true,
         "skipLibCheck": true
     },
     "exclude": [
