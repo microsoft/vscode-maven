@@ -72,12 +72,16 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
                 reject(new Error(`Background process killed by signal ${signal}.`));
             }
         });
-        proc.stdout.on("data", (chunk: Buffer) => {
-            mavenOutputChannel.append(chunk.toString());
-        });
-        proc.stderr.on("data", (chunk: Buffer) => {
-            mavenOutputChannel.append(chunk.toString());
-        });
+        if (proc.stdout) {
+            proc.stdout.on("data", (chunk: Buffer) => {
+                mavenOutputChannel.append(chunk.toString());
+            });
+        }
+        if (proc.stderr) {
+            proc.stderr.on("data", (chunk: Buffer) => {
+                mavenOutputChannel.append(chunk.toString());
+            });
+        }
     });
 }
 
@@ -150,8 +154,8 @@ async function getLocalMavenWrapper(projectFolder: string): Promise<string | und
     return undefined;
 }
 
-async function defaultMavenExecutable(): Promise<string> {
-    return new Promise<string>((resolve) => {
+async function defaultMavenExecutable(): Promise<string | undefined> {
+    return new Promise<string | undefined>((resolve) => {
         which("mvn", (_err, filepath) => {
             if (filepath) {
                 resolve("mvn");

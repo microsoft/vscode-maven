@@ -10,10 +10,12 @@ export async function executeCommand(command: string, args: string[], options: c
         mavenOutputChannel.appendLine(`${command}, [${args.join(",")}]`);
         let result: string = "";
         const childProc: cp.ChildProcess = cp.spawn(command, args, options);
-        childProc.stdout.on("data", (data: string | Buffer) => {
-            data = data.toString();
-            result = result.concat(data);
-        });
+        if (childProc.stdout) {
+            childProc.stdout.on("data", (data: string | Buffer) => {
+                data = data.toString();
+                result = result.concat(data);
+            });
+        }
         childProc.on("error", reject);
         childProc.on("close", (code: number) => {
             if (code !== 0 || result.indexOf("ERROR") > -1) {
@@ -29,7 +31,7 @@ export async function executeCommandWithProgress(message: string, command: strin
     let result: string = "";
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: vscode.Progress<{}>) => {
         mavenOutputChannel.appendLine(`${command}, [${args.join(",")}]`);
-        return new Promise(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
+        return new Promise<void>(async (resolve, reject): Promise<void> => {
             p.report({ message });
             try {
                 result = await executeCommand(command, args, options);
