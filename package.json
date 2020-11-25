@@ -46,8 +46,7 @@
     "onCommand:maven.history",
     "onCommand:maven.plugin.execute",
     "onCommand:maven.project.addDependency",
-    "onView:mavenProjects",
-    "onLanguage:xml"
+    "onView:mavenProjects"
   ],
   "main": "./dist/extension",
   "contributes": {
