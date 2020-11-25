@@ -10,10 +10,12 @@ export async function executeCommand(command: string, args: string[], options: c
         mavenOutputChannel.appendLine(`${command}, [${args.join(",")}]`);
         let result: string = "";
         const childProc: cp.ChildProcess = cp.spawn(command, args, options);
-        childProc.stdout.on("data", (data: string | Buffer) => {
-            data = data.toString();
-            result = result.concat(data);
-        });
+        if (childProc.stdout) {
+            childProc.stdout.on("data", (data: string | Buffer) => {
+                data = data.toString();
+                result = result.concat(data);
+            });
+        }
         childProc.on("error", reject);
         childProc.on("close", (code: number) => {
             if (code !== 0 || result.indexOf("ERROR") > -1) {

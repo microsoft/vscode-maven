@@ -72,12 +72,16 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
                 reject(new Error(`Background process killed by signal ${signal}.`));
             }
         });
-        proc.stdout.on("data", (chunk: Buffer) => {
-            mavenOutputChannel.append(chunk.toString());
-        });
-        proc.stderr.on("data", (chunk: Buffer) => {
-            mavenOutputChannel.append(chunk.toString());
-        });
+        if (proc.stdout) {
+            proc.stdout.on("data", (chunk: Buffer) => {
+                mavenOutputChannel.append(chunk.toString());
+            });
+        }
+        if (proc.stderr) {
+            proc.stderr.on("data", (chunk: Buffer) => {
+                mavenOutputChannel.append(chunk.toString());
+            });
+        }
     });
 }
 
