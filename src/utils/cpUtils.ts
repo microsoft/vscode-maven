@@ -29,7 +29,7 @@ export async function executeCommandWithProgress(message: string, command: strin
     let result: string = "";
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: vscode.Progress<{}>) => {
         mavenOutputChannel.appendLine(`${command}, [${args.join(",")}]`);
-        return new Promise(async (resolve: () => void, reject: (e: Error) => void): Promise<void> => {
+        return new Promise<void>(async (resolve, reject): Promise<void> => {
             p.report({ message });
             try {
                 result = await executeCommand(command, args, options);

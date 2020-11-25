@@ -150,8 +150,8 @@ async function getLocalMavenWrapper(projectFolder: string): Promise<string | und
     return undefined;
 }
 
-async function defaultMavenExecutable(): Promise<string> {
-    return new Promise<string>((resolve) => {
+async function defaultMavenExecutable(): Promise<string | undefined> {
+    return new Promise<string | undefined>((resolve) => {
         which("mvn", (_err, filepath) => {
             if (filepath) {
                 resolve("mvn");
