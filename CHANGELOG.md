@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.26.0
+#### Changed
+- Hide Maven Explorer for non-Maven workspaces. [#549](https://github.com/microsoft/vscode-maven/issues/549)
+- No longer activate extension on opening xml files. [#555](https://github.com/microsoft/vscode-maven/pull/555)
+
+#### Fixed
+- Fix an error creating temporary directory for Remote-SSH scenario with multiple users. [#547](https://github.com/microsoft/vscode-maven/issues/547)
+- Fix title of wizard for creating a project. [#551](https://github.com/microsoft/vscode-maven/issues/551)
+
 ## 0.25.0
 #### Changed
 - Allow users to hide the "Create Maven Project" entry in File Explorer. [#536](https://github.com/microsoft/vscode-maven/pull/536)
