@@ -265,6 +265,10 @@
         {
           "command": "maven.goal.execute.fromProjectManager",
           "when": "never"
+        },
+        {
+          "command": "maven.archetype.generate",
+          "when": "!java:projectManagerActivated"
         }
       ],
       "explorer/context": [
