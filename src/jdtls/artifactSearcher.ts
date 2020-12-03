@@ -2,11 +2,10 @@
 // Licensed under the MIT license.
 
 import * as path from "path";
-import { CancellationToken, CodeAction, CodeActionContext, CodeActionKind, Command, Diagnostic, Hover, languages, MarkdownString, Position, ProviderResult, QuickPickItem, Range, Selection, TextDocument, TextEditor, TextEditorRevealType, Uri, window, workspace, WorkspaceEdit } from "vscode";
 import * as vscode from "vscode";
-import { registerCommand } from "./extension";
-import { executeJavaLanguageServerCommand, getJavaExtension, isJavaExtActivated } from "./jdtls/commands";
-import { applyWorkspaceEdit } from "./utils/editUtils";
+import { applyWorkspaceEdit } from "../utils/editUtils";
+import { registerCommand } from "../utils/uiUtils";
+import { executeJavaLanguageServerCommand, getJavaExtension, isJavaExtActivated } from "./commands";
 
 // Please refer to https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Fconstant-values.html
 const UNDEFINED_TYPE: string = "16777218"; // e.g. Unknown var;
@@ -22,14 +21,14 @@ export function registerArtifactSearcher(context: vscode.ExtensionContext): void
 
         registerCommand(context, COMMAND_SEARCH_ARTIFACT, async (param: any) => await resolver.pickAndAddDependency(param));
 
-        context.subscriptions.push(languages.registerHoverProvider("java", {
-            provideHover(document: TextDocument, position: Position, _token: CancellationToken): ProviderResult<Hover> {
+        context.subscriptions.push(vscode.languages.registerHoverProvider("java", {
+            provideHover(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
                 return resolver.getArtifactsHover(document, position);
             }
         }));
 
-        context.subscriptions.push(languages.registerCodeActionsProvider("java", {
-            provideCodeActions(document: TextDocument, range: Range | Selection, codeActionContext: CodeActionContext, _token: CancellationToken): ProviderResult<(Command | CodeAction)[]> {
+        context.subscriptions.push(vscode.languages.registerCodeActionsProvider("java", {
+            provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, codeActionContext: vscode.CodeActionContext, _token: vscode.CancellationToken): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
                 return resolver.getArtifactsCodeActions(document, codeActionContext, range);
             }
         }));
@@ -55,7 +54,7 @@ class TypeResolver {
         }
     }
 
-    public getArtifactsHover(document: TextDocument, position: Position): Hover | undefined {
+    public getArtifactsHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
         if (!isJavaExtActivated()) {
             return undefined;
         }
@@ -65,13 +64,13 @@ class TypeResolver {
             return undefined;
         }
 
-        const diagnostics: Diagnostic[] = languages.getDiagnostics(document.uri).filter(diagnostic => {
+        const diagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri).filter(diagnostic => {
             return diagnosticIndicatesUnresolvedType(diagnostic, document)
                 && position.isAfterOrEqual(diagnostic.range.start)
                 && position.isBeforeOrEqual(diagnostic.range.end);
         });
         if (diagnostics.length > 0) {
-            const diagnostic: Diagnostic = diagnostics[0];
+            const diagnostic: vscode.Diagnostic = diagnostics[0];
             const line: number = diagnostic.range.start.line;
             const character: number = diagnostic.range.start.character;
             const className: string = document.getText(diagnostic.range);
@@ -85,15 +84,15 @@ class TypeResolver {
             };
             const commandName: string = TITLE_RESOLVE_UNKNOWN_TYPE;
             const message: string = `\uD83D\uDC49 [${commandName}](command:${COMMAND_SEARCH_ARTIFACT}?${encodeURIComponent(JSON.stringify(param))} "${commandName}")`;
-            const hoverMessage: MarkdownString = new MarkdownString(message);
+            const hoverMessage: vscode.MarkdownString = new vscode.MarkdownString(message);
             hoverMessage.isTrusted = true;
-            return new Hover(hoverMessage);
+            return new vscode.Hover(hoverMessage);
         } else {
             return undefined;
         }
     }
 
-    public getArtifactsCodeActions(document: TextDocument, context: CodeActionContext, _selectRange: Range): CodeAction[] | undefined {
+    public getArtifactsCodeActions(document: vscode.TextDocument, context: vscode.CodeActionContext, _selectRange: vscode.Range): vscode.CodeAction[] | undefined {
         if (!isJavaExtActivated()) {
             return undefined;
         }
@@ -103,17 +102,17 @@ class TypeResolver {
             return undefined;
         }
 
-        const diagnostics: Diagnostic[] = context.diagnostics.filter(diagnostic => {
+        const diagnostics: vscode.Diagnostic[] = context.diagnostics.filter(diagnostic => {
             return diagnosticIndicatesUnresolvedType(diagnostic, document);
         });
         if (diagnostics.length > 0) {
-            const range: Range = diagnostics[0].range;
+            const range: vscode.Range = diagnostics[0].range;
             const className: string = document.getText(range);
             const uri: string = document.uri.toString();
             const line: number = range.start.line;
             const character: number = range.start.character;
             const length: number = document.offsetAt(range.end) - document.offsetAt(range.start);
-            const command: Command = {
+            const command: vscode.Command = {
                 title: TITLE_RESOLVE_UNKNOWN_TYPE,
                 command: COMMAND_SEARCH_ARTIFACT,
                 arguments: [{
@@ -124,10 +123,10 @@ class TypeResolver {
                     length
                 }]
             };
-            const codeAction: CodeAction = {
+            const codeAction: vscode.CodeAction = {
                 title: `${TITLE_RESOLVE_UNKNOWN_TYPE} '${className}'`,
                 command: command,
-                kind: CodeActionKind.QuickFix
+                kind: vscode.CodeActionKind.QuickFix
             };
             return [codeAction];
         } else {
@@ -145,23 +144,23 @@ class TypeResolver {
             return;
         }
 
-        const pickItem: QuickPickItem | undefined = await window.showQuickPick(getArtifactsPickItems(param.className), { placeHolder: "Select the artifact you want to add" });
+        const pickItem: vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(getArtifactsPickItems(param.className), { placeHolder: "Select the artifact you want to add" });
         if (pickItem === undefined) {
             return;
         }
         param.uri = decodeBase64(param.uri);
-        const edits: WorkspaceEdit[] = await getWorkSpaceEdits(pickItem, param);
-        await applyEdits(Uri.parse(param.uri), edits);
+        const edits: vscode.WorkspaceEdit[] = await getWorkSpaceEdits(pickItem, param);
+        await applyEdits(vscode.Uri.parse(param.uri), edits);
     }
 }
 
-async function getArtifactsPickItems(className: string): Promise<QuickPickItem[]> {
+async function getArtifactsPickItems(className: string): Promise<vscode.QuickPickItem[]> {
     const searchParam: ISearchArtifactParam = {
         searchType: SearchType.className,
         className: className
     };
     const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
-    const picks: QuickPickItem[] = [];
+    const picks: vscode.QuickPickItem[] = [];
     for (let i: number = 0; i < Math.min(Math.round(response.length / 5), 5); i += 1) {
         const arr: string[] = [response[i].groupId, " : ", response[i].artifactId, " : ", response[i].version];
         picks.push(
@@ -185,13 +184,13 @@ async function getArtifactsPickItems(className: string): Promise<QuickPickItem[]
     return picks;
 }
 
-async function applyEdits(uri: Uri, edits: any): Promise<void> {
+async function applyEdits(uri: vscode.Uri, edits: any): Promise<void> {
     // if the pom is invalid, no change occurs in edits[2]
     if (Object.keys(edits[2].changes).length > 0) {
         // 0: import 1: replace
         await applyWorkspaceEdit(edits[0]);
         await applyWorkspaceEdit(edits[1]);
-        let document: TextDocument = await workspace.openTextDocument(uri);
+        let document: vscode.TextDocument = await vscode.workspace.openTextDocument(uri);
         document.save();
 
         // 2: pom
@@ -200,20 +199,20 @@ async function applyEdits(uri: Uri, edits: any): Promise<void> {
             return;
         }
         await applyWorkspaceEdit(edits[2]);
-        document = await workspace.openTextDocument(Uri.parse(Object.keys(edits[2].changes)[0]));
+        document = await vscode.workspace.openTextDocument(vscode.Uri.parse(Object.keys(edits[2].changes)[0]));
         document.save();
         const LINE_OFFSET: number = 1;
         // tslint:disable-next-line: restrict-plus-operands
         const startLine: number = edits[2].changes[Object.keys(edits[2].changes)[0]][0].range.start.line + LINE_OFFSET; // skip blank line
         const lineNumber: number = edits[2].changes[Object.keys(edits[2].changes)[0]][0].newText.indexOf("<dependencies>") === -1 ? 5 : 7;
-        const editor: TextEditor = await window.showTextDocument(document, { selection: new Range(startLine, 0, startLine + lineNumber, 0), preview: false });
-        editor.revealRange(new Range(startLine, 0, startLine + lineNumber, 0), TextEditorRevealType.InCenter);
+        const editor: vscode.TextEditor = await vscode.window.showTextDocument(document, { selection: new vscode.Range(startLine, 0, startLine + lineNumber, 0), preview: false });
+        editor.revealRange(new vscode.Range(startLine, 0, startLine + lineNumber, 0), vscode.TextEditorRevealType.InCenter);
     } else {
-        window.showInformationMessage("Sorry, the pom.xml file is inexistent or invalid.");
+        vscode.window.showInformationMessage("Sorry, the pom.xml file is inexistent or invalid.");
     }
 }
 
-async function getWorkSpaceEdits(pickItem: QuickPickItem, param: any): Promise<WorkspaceEdit[]> {
+async function getWorkSpaceEdits(pickItem: vscode.QuickPickItem, param: any): Promise<vscode.WorkspaceEdit[]> {
     return await executeJavaLanguageServerCommand("java.maven.addDependency", pickItem.description, pickItem.detail, param.uri, param.line, param.character, param.length);
 }
 
@@ -221,7 +220,7 @@ function startsWithCapitalLetter(word: string): boolean {
     return word.charCodeAt(0) >= 65 && word.charCodeAt(0) <= 90;
 }
 
-function diagnosticIndicatesUnresolvedType(diagnostic: Diagnostic, document: TextDocument): boolean {
+function diagnosticIndicatesUnresolvedType(diagnostic: vscode.Diagnostic, document: vscode.TextDocument): boolean {
     return (
         UNDEFINED_TYPE === diagnostic.code ||
         UNDEFINED_NAME === diagnostic.code && startsWithCapitalLetter(document.getText(diagnostic.range))
