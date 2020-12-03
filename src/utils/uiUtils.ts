@@ -4,9 +4,11 @@
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
 import { OpenDialogOptions, Uri, window } from "vscode";
+import { instrumentOperation } from "vscode-extension-telemetry-wrapper";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { mavenOutputChannel } from "../mavenOutputChannel";
+import { generalErrorHandler } from "./errorUtils";
 
 const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
 
@@ -60,7 +62,7 @@ export async function showTroubleshootingDialog(errorMessage: string): Promise<v
 }
 
 export async function selectProjectIfNecessary(): Promise< MavenProject | undefined> {
-    if (!mavenExplorerProvider.mavenProjectNodes || mavenExplorerProvider.mavenProjectNodes.length === 0) {
+    if (mavenExplorerProvider.mavenProjectNodes === undefined || mavenExplorerProvider.mavenProjectNodes.length === 0) {
         return undefined;
     }
     if (mavenExplorerProvider.mavenProjectNodes.length === 1) {
@@ -75,4 +77,15 @@ export async function selectProjectIfNecessary(): Promise< MavenProject | undefi
         })),
         { placeHolder: "Select a Maven project ...", ignoreFocusOut: true }
     ).then(item => item ? item.value : undefined);
+}
+
+export function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
+    const callbackWithTroubleshooting: (...args: any[]) => any = instrumentOperation(commandName, async (_operationId: string, ...args: any[]) => {
+        try {
+            return withOperationIdAhead ? await func(_operationId, ...args) : await func(...args);
+        } catch (error) {
+            await generalErrorHandler(commandName, error);
+        }
+    });
+    context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
 }

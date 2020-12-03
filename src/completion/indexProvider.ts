@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { IArtifactSearchResult, ISearchArtifactParam, SearchType } from "../artifactSearcher";
+import { IArtifactSearchResult, ISearchArtifactParam, SearchType } from "../jdtls/artifactSearcher";
 import { executeJavaLanguageServerCommand } from "../jdtls/commands";
 import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
