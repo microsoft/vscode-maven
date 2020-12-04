@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
 import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
@@ -27,14 +30,8 @@ class DefinitionProvider implements vscode.DefinitionProvider {
         const artifactIdHint: string | undefined = artifactIdNode && artifactIdNode.text;
         const versionHint: string | undefined = versionNode && versionNode.text;
         if (groupIdHint && artifactIdHint) {
-          let version: string | undefined;
           const mavenProject: MavenProject | undefined = mavenExplorerProvider.getMavenProject(document.uri.fsPath);
-          if (mavenProject) {
-            version = mavenProject.getDependencyVersion(groupIdHint, artifactIdHint);
-          }
-          if (!version) {
-            version = versionHint;
-          }
+          const version: string | undefined = mavenProject?.getDependencyVersion(groupIdHint, artifactIdHint) || versionHint;
           if (version) {
             const pomPath: string = localPomPath(groupIdHint, artifactIdHint, version);
             return new vscode.Location(vscode.Uri.file(pomPath), new vscode.Position(0, 0));
