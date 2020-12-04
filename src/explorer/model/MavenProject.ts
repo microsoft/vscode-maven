@@ -30,7 +30,7 @@ export class MavenProject implements ITreeItem {
         this.ePomProvider = new EffectivePomProvider(pomPath);
         taskExecutor.execute(async () => {
             try {
-                await this.ePomProvider.calculateEffectivePom();
+                await this.getEffectivePom();
             } catch (error) {
                 // ignore
             }
@@ -146,6 +146,12 @@ export class MavenProject implements ITreeItem {
         } catch (error) {
             this._pom = undefined;
         }
+    }
+
+    public getDependencyVersion(gid: string, aid: string): string | undefined {
+        const deps: {}[] = this.dependencies;
+        const targetDep: {} | undefined = deps.find(elem => _.get(elem, "groupId[0]") === gid && _.get(elem, "artifactId[0]") === aid);
+        return targetDep && _.get(targetDep, "version[0]");
     }
 
     private async _refreshPom(): Promise<void> {
