@@ -3,7 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## 0.27.0
 - Support to navigate to dependency POM file with `Ctrl/Cmd + Click`. [#562](https://github.com/microsoft/vscode-maven/pull/562)
-- Use a unified command to create projects if Java Project Manager is enabled. [#488](https://github.com/microsoft/vscode-maven/pull/488)
+- Use a unified command to create projects if Project Manager for Java is enabled. [#488](https://github.com/microsoft/vscode-maven/pull/488)
 - Align with VS Code native UX. [#560](https://github.com/microsoft/vscode-maven/pull/560)
 
 ## 0.26.0
