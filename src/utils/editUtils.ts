@@ -1,9 +1,12 @@
-import { commands, Position, Range, Selection, TextEdit, TextEditor, Uri, window, workspace, WorkspaceEdit } from "vscode";
+import { commands, Position, Selection, TextEdit, TextEditor, window, workspace, WorkspaceEdit } from "vscode";
+import * as protocolConverter from "vscode-languageclient/lib/protocolConverter";
 import * as ls from "vscode-languageserver-protocol";
+
+const p2c: protocolConverter.Converter = protocolConverter.createConverter();
 
 // tslint:disable-next-line: export-name
 export async function applyWorkspaceEdit(edit: ls.WorkspaceEdit): Promise<void> {
-    const workspaceEdit: WorkspaceEdit = asWorkspaceEdit(edit);
+    const workspaceEdit: WorkspaceEdit = p2c.asWorkspaceEdit(edit);
     if (workspaceEdit) {
         await workspace.applyEdit(workspaceEdit);
         // By executing the range formatting command to correct the indention according to the VS Code editor settings.
@@ -42,74 +45,4 @@ async function executeRangeFormat(editor: TextEditor, startPosition: Position, l
     const endPosition: Position = editor.document.positionAt(editor.document.offsetAt(new Position(startPosition.line + lineOffset + 1, 0)) - 1);
     editor.selection = new Selection(startPosition, endPosition);
     await commands.executeCommand("editor.action.formatSelection");
-}
-
-function asPosition(value: undefined | null): undefined;
-function asPosition(value: ls.Position): Position;
-function asPosition(value: ls.Position | undefined | null): Position | undefined;
-function asPosition(value: ls.Position | undefined | null): Position | undefined {
-    if (!value) {
-        return undefined;
-    }
-    return new Position(value.line, value.character);
-}
-
-function asRange(value: undefined | null): undefined;
-function asRange(value: ls.Range): Range;
-function asRange(value: ls.Range | undefined | null): Range | undefined;
-function asRange(value: ls.Range | undefined | null): Range | undefined {
-    if (!value) {
-        return undefined;
-    }
-    return new Range(asPosition(value.start), asPosition(value.end));
-}
-
-function asTextEdit(edit: undefined | null): undefined;
-function asTextEdit(edit: ls.TextEdit): TextEdit;
-function asTextEdit(edit: ls.TextEdit | undefined | null): TextEdit | undefined {
-    if (!edit) {
-        return undefined;
-    }
-    return new TextEdit(asRange(edit.range), edit.newText);
-}
-
-function asTextEdits(items: ls.TextEdit[]): TextEdit[];
-function asTextEdits(items: undefined | null): undefined;
-function asTextEdits(items: ls.TextEdit[] | undefined | null): TextEdit[] | undefined;
-function asTextEdits(items: ls.TextEdit[] | undefined | null): TextEdit[] | undefined {
-    if (!items) {
-        return undefined;
-    }
-    return items.map(asTextEdit);
-}
-
-function asWorkspaceEdit(item: ls.WorkspaceEdit): WorkspaceEdit;
-function asWorkspaceEdit(item: undefined | null): undefined;
-function asWorkspaceEdit(item: ls.WorkspaceEdit | undefined | null): WorkspaceEdit | undefined;
-function asWorkspaceEdit(item: ls.WorkspaceEdit | undefined | null): WorkspaceEdit | undefined {
-    if (!item) {
-        return undefined;
-    }
-    const result: WorkspaceEdit = new WorkspaceEdit();
-    if (item.documentChanges) {
-        item.documentChanges.forEach((change: ls.TextDocumentEdit | ls.CreateFile | ls.RenameFile | ls.DeleteFile) => {
-            if (ls.CreateFile.is(change)) {
-                result.createFile(Uri.parse(change.uri), change.options);
-            } else if (ls.RenameFile.is(change)) {
-                result.renameFile(Uri.parse(change.oldUri), Uri.parse(change.newUri), change.options);
-            } else if (ls.DeleteFile.is(change)) {
-                result.deleteFile(Uri.parse(change.uri), change.options);
-            } else if (ls.TextDocumentEdit.is(change)) {
-                result.set(Uri.parse(change.textDocument.uri), asTextEdits(change.edits));
-            } else {
-                // to handle Unknown workspace edit change error
-            }
-        });
-    } else if (item.changes) {
-        Object.keys(item.changes).forEach((key: string) => {
-            // tslint:disable-next-line: no-non-null-assertion
-            result.set(Uri.parse(key), asTextEdits(item.changes![key]));
-        });
-    }
-    return result;
 }
