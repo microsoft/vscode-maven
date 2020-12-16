@@ -193,7 +193,7 @@
           "id": "mavenProjects",
           "name": "%contributes.views.explorer.mavenProjects%",
           "when": "workbenchState == empty || vscode-maven:activated",
-          "contextualTitle": "Java",
+          "contextualTitle": "%contributes.views.explorer.mavenProjects%",
           "icon": "resources/icons/dark/project.svg"
         }
       ]
