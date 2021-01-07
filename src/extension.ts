@@ -172,7 +172,9 @@ function registerPomFileAuthoringHelpers(context: vscode.ExtensionContext): void
     // hover
     context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
     // navigate to dependency pom
-    context.subscriptions.push(vscode.languages.registerDefinitionProvider(pomSelector, definitionProvider));
+    context.subscriptions.push(vscode.languages.registerDefinitionProvider([...pomSelector, {
+        pattern: "**/*.pom"
+    }], definitionProvider));
 }
 
 async function mavenHistoryHandler(item: MavenProject | undefined): Promise<void> {
