@@ -32,7 +32,7 @@ class DefinitionProvider implements vscode.DefinitionProvider {
         if (groupIdHint && artifactIdHint) {
           const mavenProject: MavenProject | undefined = mavenExplorerProvider.getMavenProject(document.uri.fsPath);
           const version: string | undefined = mavenProject?.getDependencyVersion(groupIdHint, artifactIdHint) || versionHint;
-          if (version) {
+          if (version && !version.match(/^\$\{.*\}$/)) { // skip for unresolved properties, e.g. ${azure.version}
             const pomPath: string = localPomPath(groupIdHint, artifactIdHint, version);
             return new vscode.Location(vscode.Uri.file(pomPath), new vscode.Position(0, 0));
           }
