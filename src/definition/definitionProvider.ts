@@ -14,10 +14,10 @@ class DefinitionProvider implements vscode.DefinitionProvider {
     const documentText: string = document.getText();
     const cursorOffset: number = document.offsetAt(position);
     const currentNode: ElementNode | undefined = getCurrentNode(documentText, cursorOffset);
-    if (currentNode === undefined || currentNode.contentStart === undefined) {
+    if (currentNode === undefined || currentNode.contentStart === undefined || currentNode.contentEnd === undefined) {
       return undefined;
     }
-
+    const selectionRange: vscode.Range = new vscode.Range(document.positionAt(currentNode.contentStart), document.positionAt(currentNode.contentEnd));
     switch (currentNode.tag) {
       case XmlTagName.GroupId:
       case XmlTagName.ArtifactId:
@@ -34,7 +34,12 @@ class DefinitionProvider implements vscode.DefinitionProvider {
           const version: string | undefined = mavenProject?.getDependencyVersion(groupIdHint, artifactIdHint) || versionHint;
           if (version && !version.match(/^\$\{.*\}$/)) { // skip for unresolved properties, e.g. ${azure.version}
             const pomPath: string = localPomPath(groupIdHint, artifactIdHint, version);
-            return new vscode.Location(vscode.Uri.file(pomPath), new vscode.Position(0, 0));
+            const definitionLink: vscode.LocationLink = {
+              targetRange: new vscode.Range(0, 0, 0, 0),
+              targetUri: vscode.Uri.file(pomPath),
+              originSelectionRange: selectionRange
+            };
+            return [definitionLink];
           }
         }
       }
