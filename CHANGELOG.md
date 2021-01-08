@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.27.1
+- Refine conceptual title of Maven explorer. [#567](https://github.com/microsoft/vscode-maven/pull/567)
+- Improve UX of dependencies navigation. [#571](https://github.com/microsoft/vscode-maven/pull/571) [#572](https://github.com/microsoft/vscode-maven/pull/572) [#573](https://github.com/microsoft/vscode-maven/pull/573)
+
 ## 0.27.0
 - Support to navigate to dependency POM file with `Ctrl/Cmd + Click`. [#562](https://github.com/microsoft/vscode-maven/pull/562)
 - Use a unified command to create projects if Project Manager for Java is enabled. [#488](https://github.com/microsoft/vscode-maven/pull/488)
