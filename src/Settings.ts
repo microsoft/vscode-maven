@@ -77,6 +77,12 @@ export namespace Settings {
             return ret !== undefined ? ret : "**/pom.xml";
         }
     }
+        
+    export namespace UserCustomSetting {
+        export function path(): string | undefined{
+            return workspace.getConfiguration("maven.custom").get<string>("settingFileLocation");
+        }
+    }
 
     function _getMavenSection<T>(section: string, resourceOrFilepath?: Uri | string): T | undefined {
         let resource: Uri | undefined;

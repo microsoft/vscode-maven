@@ -31,5 +31,6 @@
     "configuration.maven.terminal.favorites": "Specify pre-defined favorite commands to execute.",
     "configuration.maven.terminal.favorites.alias": "A short name for the command.",
     "configuration.maven.terminal.favorites.command": "Content of the favorite command.",
-    "configuration.maven.terminal.favorites.debug": "Whether to execute in debug mode."
+    "configuration.maven.terminal.favorites.debug": "Whether to execute in debug mode.",
+    "configuration.maven.custom.settingFileLocation":"Specifies absolute path of your maven configration file"
 }

@@ -272,4 +272,8 @@ export namespace Utils {
                 break;
         }
     }
+    
+    export async function userCustomSettingPath(): Promise<string|undefined> {
+        return Settings.UserCustomSetting.path()
+    }
 }

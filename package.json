@@ -429,6 +429,12 @@
       {
         "title": "Maven for Java",
         "properties": {
+          "maven.custom.settingFileLocation": {
+            "type": "string",
+            "default": "",
+            "description": "%configuration.maven.custom.settingFileLocation%",
+            "scope": "machine-overridable"
+          },
           "maven.excludedFolders": {
             "type": "array",
             "default": [
