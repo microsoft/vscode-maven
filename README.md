@@ -149,7 +149,7 @@ To speed up the searching of Maven projects, you can exclude folders in settings
 
 ```json
 {
-    "maven.projects.excludedFolders": [
+    "maven.excludedFolders": [
         "**/.*",                // exclude hidden folders
         "**/node_modules",      // exclude node modules to speed up
         "**/target"             // exclude duplicated pom file in target folder
@@ -182,7 +182,7 @@ Now right-click on an project item, and then click `Favorite ...`. The option `f
 
 | Name | Description | Default Value |
 |---|---|---|
-| `maven.excludedFolders` | Specifies file path pattern of folders to exclude while searching for Maven projects. | `[ "**/.*", "**/node_modules", "**/target", "**/bin" ]` |
+| `maven.excludedFolders` | Specifies file path pattern of folders to exclude while searching for Maven projects. | `[ "**/.*", "**/node_modules", "**/target", "**/bin", "**/archetype-resources" ]` |
 | `maven.executable.preferMavenWrapper` | Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' by walking up the parent folders. If false, or 'mvnw' is not found, it tries 'mvn' in PATH instead. | `true` |
 | `maven.executable.path` | Specifies absolute path of your 'mvn' executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to the value of 'maven.executable.preferMavenWrapper'. E.g. `/usr/local/apache-maven-3.6.0/bin/mvn` | ` ` |
 | `maven.executable.options` | Specifies default options for all mvn commands. E.g. `-o -DskipTests` | ` ` |
