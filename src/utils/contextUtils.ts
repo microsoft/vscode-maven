@@ -30,8 +30,8 @@ export async function loadPackageInfo(context: ExtensionContext): Promise<void> 
 
     // find Maven Local Repositry
     try {
-        var userSettingsPath: string | undefined = await Utils.userCustomSettingPath()
-        if(!userSettingsPath){
+        let userSettingsPath: string | undefined = await Utils.userCustomSettingPath();
+        if (!userSettingsPath) {
             userSettingsPath = path.join(os.homedir(), ".m2", "settings.xml");
         }
         const userSettings: {} | undefined = await Utils.parseXmlFile(userSettingsPath);
