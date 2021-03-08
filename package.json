@@ -435,7 +435,8 @@
               "**/.*",
               "**/node_modules",
               "**/target",
-              "**/bin"
+              "**/bin",
+              "**/archetype-resources"
             ],
             "description": "%configuration.maven.excludedFolders%",
             "scope": "resource"
@@ -593,7 +594,7 @@
     "lodash": "^4.17.19",
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
-    "vscode-extension-telemetry-wrapper": "^0.8.0",
+    "vscode-extension-telemetry-wrapper": "^0.9.0",
     "vscode-languageclient": "^6.1.3",
     "vscode-languageserver-protocol": "^3.15.3",
     "which": "^1.3.1",
