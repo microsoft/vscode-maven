@@ -52,7 +52,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
     }
     const spawnOptions: child_process.SpawnOptions = {
         cwd,
-        env: Object.assign({}, process.env, Settings.getEnvironment(pomfile)),
+        env: process.env,
         shell: true
     };
     return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {
