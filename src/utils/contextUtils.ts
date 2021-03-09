@@ -28,9 +28,9 @@ export async function loadPackageInfo(context: ExtensionContext): Promise<void> 
 
     TEMP_FOLDER_PER_USER = path.join(os.tmpdir(), `${EXTENSION_NAME}-${os.userInfo().username}`);
 
-    // find Maven Local Repositry
+    // find Maven Local Repository
     try {
-        let userSettingsPath: string | undefined = await Utils.userCustomSettingPath();
+        let userSettingsPath: string | undefined = await Utils.settingsFilePath();
         if (!userSettingsPath) {
             userSettingsPath = path.join(os.homedir(), ".m2", "settings.xml");
         }

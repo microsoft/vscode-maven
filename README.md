@@ -192,7 +192,7 @@ Now right-click on an project item, and then click `Favorite ...`. The option `f
 | `maven.terminal.customEnv` | Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed. <br /> `environmentVariable`: Name of the environment variable to set. <br /> `value`: Value of the environment variable to set. | `[]` |
 | `maven.terminal.favorites` | Specify pre-defined favorite commands to execute. <br /> `alias`: A short name for the command. <br /> `command`: Content of the favorite command. | `[]` |
 | `maven.view` | Specifies the way of viewing Maven projects. Possible values: `flat`, `hierarchical`. | `flat` |
-|`maven.custom.settingFileLocation`| Specifies the absolute path of a maven configuration file|`~/.m2/settings.xml`|
+| `maven.settingsFile` | Specifies the absolute path of a maven configuration file| `~/.m2/settings.xml` |
 
 ## Data/Telemetry
 

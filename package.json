@@ -429,10 +429,10 @@
       {
         "title": "Maven for Java",
         "properties": {
-          "maven.custom.settingFileLocation": {
-            "type": "string",
+          "maven.settingsFile": {
+            "type": ["string","null"],
             "default": "",
-            "description": "%configuration.maven.custom.settingFileLocation%",
+            "description": "%configuration.maven.settingsFile%",
             "scope": "machine-overridable"
           },
           "maven.excludedFolders": {

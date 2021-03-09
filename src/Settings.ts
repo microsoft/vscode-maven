@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { Uri, workspace } from "vscode";
+import { Uri, workspace, WorkspaceFolder } from "vscode";
 
 export namespace Settings {
     export function excludedFolders(resource: Uri): string[] {
@@ -78,9 +78,13 @@ export namespace Settings {
         }
     }
 
-    export namespace UserCustomSetting {
+    export namespace SettingsFile {
         export function path(): string | undefined {
-            return workspace.getConfiguration("maven.custom").get<string>("settingFileLocation");
+            let config : WorkspaceFolder | undefined ;
+            if (workspace.workspaceFolders !== undefined) {
+                config =  workspace.workspaceFolders[0];
+            }
+            return workspace.getConfiguration("maven", config).get<string>("settingsFile");
         }
     }
 

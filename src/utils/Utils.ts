@@ -273,7 +273,7 @@ export namespace Utils {
         }
     }
 
-    export async function userCustomSettingPath(): Promise<string|undefined> {
-        return Settings.UserCustomSetting.path();
+    export async function settingsFilePath(): Promise<string|undefined> {
+        return Settings.SettingsFile.path();
     }
 }
