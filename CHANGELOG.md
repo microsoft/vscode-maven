@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.28.0
+- Update extension icons. [#578](https://github.com/microsoft/vscode-maven/pull/578)
+- Exclude POMs in `archetype-resources` folder by default. [#580](https://github.com/microsoft/vscode-maven/issues/580)
+- Update setting `maven.terminal.customEnv` to only affect commands sent to terminal. [#584](https://github.com/microsoft/vscode-maven/pull/584) (Fix for [CVE-2021-27084](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-27084))
+
 ## 0.27.1
 - Refine conceptual title of Maven explorer. [#567](https://github.com/microsoft/vscode-maven/pull/567)
 - Improve UX of dependencies navigation. [#571](https://github.com/microsoft/vscode-maven/pull/571) [#572](https://github.com/microsoft/vscode-maven/pull/572) [#573](https://github.com/microsoft/vscode-maven/pull/573)
