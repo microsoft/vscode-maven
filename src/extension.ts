@@ -9,6 +9,7 @@ import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, se
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { completionProvider } from "./completion/completionProvider";
 import { definitionProvider } from "./definition/definitionProvider";
+import { initExpService } from "./experimentationService";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
@@ -45,6 +46,7 @@ export async function deactivate(): Promise<void> {
 
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     pluginInfoProvider.initialize(context);
+    initExpService(context);
     await vscode.commands.executeCommand("setContext", "vscode-maven:activated", true);
     // register tree view
     await mavenExplorerProvider.loadProjects();
