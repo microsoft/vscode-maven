@@ -68,7 +68,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public get dependencies(): any[] {
-        let deps: any[] | undefined;
+        let deps: any[] = [];
         if (_.has(this._ePom, "projects.project")) {
             // multi-module project
             const project: any = (<any[]>this._ePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
@@ -79,7 +79,7 @@ export class MavenProject implements ITreeItem {
             // single-project
             deps = _.get(this._ePom, "project.dependencies[0].dependency");
         }
-        return deps || [];
+        return deps;
     }
 
     /**

@@ -61,7 +61,7 @@ export class EffectivePomProvider {
       return promise;
     }
 
-    if (this.effectivePom) {
+    if (this.effectivePom !== undefined) {
       return this.effectivePom;
     }
 
