@@ -28,13 +28,15 @@ export class MavenProject implements ITreeItem {
     constructor(pomPath: string) {
         this.pomPath = pomPath;
         this.ePomProvider = new EffectivePomProvider(pomPath);
-        taskExecutor.execute(async () => {
-            try {
-                await this.getEffectivePom();
-            } catch (error) {
-                // ignore
-            }
-        });
+        if (Settings.Pomfile.prefetchEffectivePom()) {
+            taskExecutor.execute(async () => {
+                try {
+                    await this.getEffectivePom();
+                } catch (error) {
+                    // ignore
+                }
+            });
+        }
     }
 
     public get name(): string {
