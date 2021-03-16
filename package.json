@@ -548,6 +548,12 @@
             "default": false,
             "description": "%configuration.maven.pomfile.autoUpdateEffectivePOM%",
             "scope": "window"
+          },
+          "maven.pomfile.prefetchEffectivePom": {
+            "type": "boolean",
+            "default": false,
+            "description": "%configuration.maven.pomfile.prefetchEffectivePom%",
+            "scope": "application"
           }
         }
       }
