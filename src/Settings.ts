@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { Uri, workspace, WorkspaceFolder } from "vscode";
+import { ConfigurationScope, Uri, workspace } from "vscode";
 
 export namespace Settings {
     export function excludedFolders(resource: Uri): string[] {
@@ -80,9 +80,9 @@ export namespace Settings {
 
     export namespace SettingsFile {
         export function path(): string | undefined {
-            let config : WorkspaceFolder | undefined ;
-            if (workspace.workspaceFolders !== undefined) {
-                config =  workspace.workspaceFolders[0];
+            let config: ConfigurationScope | undefined;
+            if (workspace.workspaceFile !== undefined) {
+                config = workspace.workspaceFile;
             }
             return workspace.getConfiguration("maven", config).get<string>("settingsFile");
         }
