@@ -15,9 +15,23 @@ import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage,
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
 
-export async function rawEffectivePom(pomPath: string): Promise<string | undefined> {
+export async function rawEffectivePom(pomPath: string, options?: {force: boolean}): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
+    const mtimePath: string = `${outputPath}.mtime`;
+    const cachedMTimeMs: string | undefined = await readFileIfExists(mtimePath);
+    const stat: fse.Stats = await fse.stat(pomPath);
+    const mtimeMs: string = stat.mtimeMs.toString();
+
+    // read from cache if pom.xml not modified.
+    if (!options?.force &&  cachedMTimeMs === mtimeMs) {
+        const content: string | undefined = await readFileIfExists(outputPath);
+        if (content !== undefined) {
+            return content;
+        }
+    }
+
     await executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
+    await fse.writeFile(mtimePath, mtimeMs);
     return await readFileIfExists(outputPath);
 }
 
