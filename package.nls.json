@@ -22,6 +22,7 @@
     "configuration.maven.executable.options": "Specifies default options for all mvn commands.",
     "configuration.maven.pomfile.autoUpdateEffectivePOM": "Specifies whether to update effective-pom automatically whenever changes detected.",
     "configuration.maven.pomfile.globPattern": "Specifies the glob pattern used to look for pom.xml files.",
+    "configuration.maven.pomfile.prefetchEffectivePom": "Specifies whether to prefetch effective pom on startup.",
     "configuration.maven.terminal.useJavaHome": "If this value is true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created.",
     "configuration.maven.terminal.customEnv": "Specifies an array of environment variable names and values. These environment variable values will be added to the terminal session before Maven is first executed.",
     "configuration.maven.terminal.customEnv.environmentVariable": "Name of the environment variable to set.",

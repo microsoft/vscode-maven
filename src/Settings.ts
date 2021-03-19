@@ -76,6 +76,10 @@ export namespace Settings {
             const ret: string | undefined = _getMavenSection<string>("pomfile.globPattern");
             return ret !== undefined ? ret : "**/pom.xml";
         }
+
+        export function prefetchEffectivePom(): boolean {
+            return !!_getMavenSection<string>("pomfile.prefetchEffectivePom");
+        }
     }
 
     export namespace SettingsFile {

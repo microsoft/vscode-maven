@@ -36,7 +36,7 @@ export namespace Utils {
         return new Promise<{}>(
             (resolve: (value: {}) => void, reject: (e: Error) => void): void => {
                 xml2js.parseString(xmlString, opts, (err: Error, res: {}) => {
-                    if (err) {
+                    if (err !== null) {
                         reject(err);
                     } else {
                         resolve(res);
