@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { ConfigurationScope, Uri, workspace } from "vscode";
+import { Uri, workspace } from "vscode";
 
 export namespace Settings {
     export function excludedFolders(resource: Uri): string[] {
@@ -27,6 +27,10 @@ export namespace Settings {
 
     export function setMavenExecutablePath(mvnPath: string): void {
         workspace.getConfiguration().update("maven.executable.path", mvnPath, true);
+    }
+
+    export function getSettingsFilePath(): string | undefined {
+        return workspace.getConfiguration("maven").get<string>("settingsFile");
     }
 
     export namespace External {
@@ -79,16 +83,6 @@ export namespace Settings {
 
         export function prefetchEffectivePom(): boolean {
             return !!_getMavenSection<string>("pomfile.prefetchEffectivePom");
-        }
-    }
-
-    export namespace SettingsFile {
-        export function path(): string | undefined {
-            let config: ConfigurationScope | undefined;
-            if (workspace.workspaceFile !== undefined) {
-                config = workspace.workspaceFile;
-            }
-            return workspace.getConfiguration("maven", config).get<string>("settingsFile");
         }
     }
 

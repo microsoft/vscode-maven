@@ -430,10 +430,13 @@
         "title": "Maven for Java",
         "properties": {
           "maven.settingsFile": {
-            "type": ["string","null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "default": "",
             "description": "%configuration.maven.settingsFile%",
-            "scope": "machine-overridable"
+            "scope": "machine"
           },
           "maven.excludedFolders": {
             "type": "array",

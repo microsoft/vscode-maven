@@ -274,6 +274,6 @@ export namespace Utils {
     }
 
     export async function settingsFilePath(): Promise<string|undefined> {
-        return Settings.SettingsFile.path();
+        return Settings.getSettingsFilePath();
     }
 }
