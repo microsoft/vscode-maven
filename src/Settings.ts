@@ -30,7 +30,7 @@ export namespace Settings {
     }
 
     export function getSettingsFilePath(): string | undefined {
-        return workspace.getConfiguration("maven").get<string>("settingsFile");
+        return _getMavenSection<string>("settingsFile");
     }
 
     export namespace External {
