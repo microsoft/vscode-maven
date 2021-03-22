@@ -143,7 +143,7 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
 }
 
 function registerConfigChangeListener(context: vscode.ExtensionContext): void {
-    const configChangeListener: vscode.Disposable = vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
+    const configChangeListener: vscode.Disposable = vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
         // close all terminals with outdated JAVA related environment variables
         if (e.affectsConfiguration("maven.terminal.useJavaHome")
             || e.affectsConfiguration("maven.terminal.customEnv")
@@ -160,11 +160,7 @@ function registerConfigChangeListener(context: vscode.ExtensionContext): void {
         }
         // refresh MAVEN_LOCAL_REPOSITORY when change to a new settingsFile
         if (e.affectsConfiguration("maven.settingsFile")) {
-            loadMavenSettingsFilePath().then(
-                //do nothing
-            ).catch(
-                //do nothing
-            );
+            await loadMavenSettingsFilePath();
         }
     });
     context.subscriptions.push(configChangeListener);

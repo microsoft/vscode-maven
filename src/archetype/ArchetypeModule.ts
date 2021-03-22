@@ -117,7 +117,7 @@ export namespace ArchetypeModule {
                 const repository: string = archetype.repository && archetype.repository[0];
                 const identifier: string = `${groupId}:${artifactId}`;
 
-                if (!dict[identifier]) {
+                if (dict[identifier] !== undefined) {
                     dict[identifier] = new Archetype(artifactId, groupId, repository, description);
                 }
                 if (dict[identifier].versions.indexOf(version) < 0) {

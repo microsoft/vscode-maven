@@ -15,7 +15,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
     public async getGroupIdCandidates(groupIdHint: string): Promise<vscode.CompletionItem[]> {
         const packageSegments: string[] = groupIdHint.split(".");
         packageSegments.pop();
-        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments).catch(console.error) || [];
+        const validGroupIds: string[] = await this.searchForGroupIds(packageSegments);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "groupId", source: "maven-local" }]
@@ -34,7 +34,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
             return [];
         }
 
-        const validArtifactIds: string[] = await this.searchForArtifactIds(groupId).catch(console.error) || [];
+        const validArtifactIds: string[] = await this.searchForArtifactIds(groupId);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "artifactId", source: "maven-local" }]
@@ -54,7 +54,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
             return [];
         }
 
-        const validVersions: string[] = await this.searchForVersions(groupId, artifactId).catch(console.error) || [];
+        const validVersions: string[] = await this.searchForVersions(groupId, artifactId);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "version", source: "maven-local" }]
@@ -71,33 +71,42 @@ class LocalProvider implements IMavenCompletionItemProvider {
 
     private async searchForGroupIds(segments: string[]): Promise<string[]> {
         const cwd: string = path.join(getMavenLocalRepository(), ...segments);
-        return new Promise<string[]>((resolve, reject) => {
+        return new Promise<string[]>((resolve, _reject) => {
             fg.async(["**/*/*", "!**/*.*"], { onlyFiles: false, deep: 2, cwd }).then(entries => {
                 const validSegments: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
                 const prefix: string = _.isEmpty(segments) ? "" : [...segments, ""].join(".");
                 const groupIds: string[] = Array.from(new Set(validSegments)).map(seg => `${prefix}${seg}`);
                 resolve(groupIds);
-            }).catch(reject);
+            }).catch(_e => {
+                console.error(_e);
+                resolve([]);
+            });
         });
     }
 
     private async searchForArtifactIds(groupId: string): Promise<string[]> {
         const cwd: string = path.join(getMavenLocalRepository(), ...groupId.split("."));
-        return await new Promise<string[]>((resolve, reject) => {
+        return await new Promise<string[]>((resolve, _reject) => {
             fg.async(["**/*.pom"], { deep: 2, cwd }).then(entries => {
                 const validArtifactIds: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
                 resolve(Array.from(new Set(validArtifactIds)));
-            }).catch(reject);
+            }).catch(_e => {
+                console.error(_e);
+                resolve([]);
+            });
         });
     }
 
     private async searchForVersions(groupId: string, artifactId: string): Promise<string[]> {
         const cwd: string = path.join(getMavenLocalRepository(), ...groupId.split("."), artifactId);
-        return await new Promise<string[]>((resolve, reject) => {
+        return await new Promise<string[]>((resolve, _reject) => {
             fg.async(["*/*.pom"], { deep: 1, cwd }).then(entries => {
                 const validVersions: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
                 resolve(validVersions);
-            }).catch(reject);
+            }).catch(_e => {
+                console.error(_e);
+                resolve([]);
+            });
         });
     }
 
