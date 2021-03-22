@@ -7,7 +7,7 @@ const p2c: protocolConverter.Converter = protocolConverter.createConverter();
 // tslint:disable-next-line: export-name
 export async function applyWorkspaceEdit(edit: ls.WorkspaceEdit): Promise<void> {
     const workspaceEdit: WorkspaceEdit = p2c.asWorkspaceEdit(edit);
-    if (workspaceEdit) {
+    if (workspaceEdit !== undefined) {
         await workspace.applyEdit(workspaceEdit);
         // By executing the range formatting command to correct the indention according to the VS Code editor settings.
         // More details, see: https://github.com/redhat-developer/vscode-java/issues/557

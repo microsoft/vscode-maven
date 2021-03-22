@@ -10,7 +10,7 @@ export async function executeCommand(command: string, args: string[], options: c
         mavenOutputChannel.appendLine(`${command}, [${args.join(",")}]`);
         let result: string = "";
         const childProc: cp.ChildProcess = cp.spawn(command, args, options);
-        if (childProc.stdout) {
+        if (childProc.stdout !== null) {
             childProc.stdout.on("data", (data: string | Buffer) => {
                 data = data.toString();
                 result = result.concat(data);

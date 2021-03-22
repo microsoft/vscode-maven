@@ -151,9 +151,9 @@ export class MavenProject implements ITreeItem {
     }
 
     public getDependencyVersion(gid: string, aid: string): string | undefined {
-        const deps: {}[] = this.dependencies;
-        const targetDep: {} | undefined = deps.find(elem => _.get(elem, "groupId[0]") === gid && _.get(elem, "artifactId[0]") === aid);
-        return targetDep && _.get(targetDep, "version[0]");
+        const deps: any[] | undefined = this.dependencies;
+        const targetDep: any = deps?.find(elem => _.get(elem, "groupId[0]") === gid && _.get(elem, "artifactId[0]") === aid);
+        return targetDep?.version?.[0];
     }
 
     private async _refreshPom(): Promise<void> {

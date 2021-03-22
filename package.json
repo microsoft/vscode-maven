@@ -434,7 +434,7 @@
               "string",
               "null"
             ],
-            "default": "",
+            "default": null,
             "description": "%configuration.maven.settingsFile%",
             "scope": "machine"
           },
@@ -591,6 +591,7 @@
     "@types/xml2js": "^0.4.5",
     "glob": "^7.1.6",
     "gulp": "^4.0.2",
+    "gulp-cli": "^2.3.0",
     "mocha": "7.1.1",
     "ts-loader": "^4.4.2",
     "tslint": "^5.20.1",
