@@ -26,7 +26,7 @@ import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
-import { getAiKey, getExtensionId, getExtensionVersion, loadPackageInfo } from "./utils/contextUtils";
+import { getAiKey, getExtensionId, getExtensionVersion, loadMavenSettingsFilePath, loadPackageInfo } from "./utils/contextUtils";
 import { executeInTerminal } from "./utils/mavenUtils";
 import { openFileIfExists, registerCommand } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
@@ -158,6 +158,14 @@ function registerConfigChangeListener(context: vscode.ExtensionContext): void {
         if (e.affectsConfiguration("maven.executable.preferMavenWrapper")) {
             context.workspaceState.update("trustMavenWrapper", undefined);
         }
+        // refresh MAVEN_LOCAL_REPOSITORY when change to a new settingsFile
+        if (e.affectsConfiguration("maven.settingsFile")) {
+            loadMavenSettingsFilePath().then(
+                //do nothing
+            ).catch(
+                //do nothing
+            );
+        }
     });
     context.subscriptions.push(configChangeListener);
 }
@@ -203,7 +211,7 @@ async function refreshExplorerHandler(item?: ITreeItem): Promise<void> {
     }
 }
 
-async function openPomHandler(node: MavenProject | {uri: string}): Promise<void> {
+async function openPomHandler(node: MavenProject | { uri: string }): Promise<void> {
     if (node instanceof MavenProject) {
         if (node.pomPath) {
             await openFileIfExists(node.pomPath);

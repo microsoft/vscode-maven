@@ -28,18 +28,25 @@ export async function loadPackageInfo(context: ExtensionContext): Promise<void> 
 
     TEMP_FOLDER_PER_USER = path.join(os.tmpdir(), `${EXTENSION_NAME}-${os.userInfo().username}`);
 
-    // find Maven Local Repositry
+    await loadMavenSettingsFilePath();
+
+    if (!MAVEN_LOCAL_REPOSITORY) {
+        MAVEN_LOCAL_REPOSITORY = path.join(os.homedir(), ".m2", "repository");
+    }
+}
+
+export async function loadMavenSettingsFilePath(): Promise<void> {
+    // find Maven Local Repository
     try {
-        const userSettingsPath: string = path.join(os.homedir(), ".m2", "settings.xml");
+        let userSettingsPath: string | undefined = Utils.settingsFilePath();
+        if (!userSettingsPath) {
+            userSettingsPath = path.join(os.homedir(), ".m2", "settings.xml");
+        }
         const userSettings: {} | undefined = await Utils.parseXmlFile(userSettingsPath);
         MAVEN_LOCAL_REPOSITORY = path.resolve(_.get(userSettings, "settings.localRepository[0]"));
         mavenOutputChannel.appendLine(`local repository: ${MAVEN_LOCAL_REPOSITORY}`);
     } catch (error) {
         // ignore
-    }
-
-    if (!MAVEN_LOCAL_REPOSITORY) {
-        MAVEN_LOCAL_REPOSITORY = path.join(os.homedir(), ".m2", "repository");
     }
 }
 

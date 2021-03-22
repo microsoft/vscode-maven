@@ -29,6 +29,10 @@ export namespace Settings {
         workspace.getConfiguration().update("maven.executable.path", mvnPath, true);
     }
 
+    export function getSettingsFilePath(): string | undefined {
+        return _getMavenSection<string>("settingsFile");
+    }
+
     export namespace External {
         export function javaHome(): string | undefined {
             return workspace.getConfiguration("java").get<string>("home");

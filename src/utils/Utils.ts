@@ -272,4 +272,8 @@ export namespace Utils {
                 break;
         }
     }
+
+    export function settingsFilePath(): string | undefined {
+        return Settings.getSettingsFilePath();
+    }
 }
