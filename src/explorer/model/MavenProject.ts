@@ -40,7 +40,12 @@ export class MavenProject implements ITreeItem {
     }
 
     public get name(): string {
-        return _.get(this._pom, "project.artifactId[0]");
+        // use <name> if provided, fallback to <artifactId>
+        return this._pom?.project?.name?.[0] || this._pom?.project?.artifactId?.[0];
+    }
+
+    public get id(): string {
+        return `${this._pom?.project?.groupId?.[0]}:${this._pom?.project?.artifactId?.[0]}`;
     }
 
     public get packaging(): string {
@@ -106,6 +111,7 @@ export class MavenProject implements ITreeItem {
             dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
         };
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        treeItem.description = this.id;
         return treeItem;
     }
 
