@@ -24,7 +24,7 @@ export class EffectivePomProvider {
     });
   }
 
-  public async calculateEffectivePom(): Promise<void> {
+  public async calculateEffectivePom(options?: {cacheOnly?: boolean}): Promise<void> {
     if (this.isCalculating) {
       return new Promise<void>((resolve, reject) => {
         this.emitter.once("complete", resolve);
@@ -35,19 +35,23 @@ export class EffectivePomProvider {
     const pomPath: string = this.pomPath;
     try {
       this.isCalculating = true;
-      const ePomString: string | undefined = await rawEffectivePom(pomPath);
-      const ePom: any = await Utils.parseXmlContent(ePomString ? ePomString : "");
-      this.emitter.emit("complete", {
-        pomPath,
-        ePomString,
-        ePom
-      });
+      const ePomString: string | undefined = await rawEffectivePom(pomPath, options);
+      if (ePomString === undefined) {
+        this.emitter.emit("complete", undefined);
+      } else {
+        const ePom: any = await Utils.parseXmlContent(ePomString);
+        this.emitter.emit("complete", {
+          pomPath,
+          ePomString,
+          ePom
+        });
+      }
     } catch (error) {
       this.emitter.emit("error", error);
     }
   }
 
-  public async getEffectivePom(): Promise<IEffectivePom> {
+  public async getEffectivePom(options?: {cacheOnly?: boolean}): Promise<IEffectivePom> {
     const promise: Promise<IEffectivePom> = new Promise<IEffectivePom>((resolve, reject) => {
       this.emitter.once("complete", (resp: IEffectivePom) => {
         resolve(resp);
@@ -65,7 +69,7 @@ export class EffectivePomProvider {
       return this.effectivePom;
     }
 
-    this.calculateEffectivePom().catch(console.error);
+    this.calculateEffectivePom(options).catch(console.error);
     return promise;
   }
 }

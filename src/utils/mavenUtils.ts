@@ -15,19 +15,22 @@ import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage,
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
 
-export async function rawEffectivePom(pomPath: string, options?: {force: boolean}): Promise<string | undefined> {
+/**
+ * Get effective pom of a Maven project.
+ *
+ * @param pomPath absolute path of pom.xml
+ * @param options specify the way you want to get effective pom. By default it 1) reads from cache if exists 2) calculate if not.
+ * @returns full content of effective pom
+ */
+export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: boolean}): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
     const mtimePath: string = `${outputPath}.mtime`;
     const cachedMTimeMs: string | undefined = await readFileIfExists(mtimePath);
     const stat: fse.Stats = await fse.stat(pomPath);
     const mtimeMs: string = stat.mtimeMs.toString();
 
-    // read from cache if pom.xml not modified.
-    if (!options?.force &&  cachedMTimeMs === mtimeMs) {
-        const content: string | undefined = await readFileIfExists(outputPath);
-        if (content !== undefined) {
-            return content;
-        }
+    if (cachedMTimeMs === mtimeMs || options?.cacheOnly) {
+        return await readFileIfExists(outputPath);
     }
 
     await executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
