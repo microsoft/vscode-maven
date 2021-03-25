@@ -28,15 +28,14 @@ export class MavenProject implements ITreeItem {
     constructor(pomPath: string) {
         this.pomPath = pomPath;
         this.ePomProvider = new EffectivePomProvider(pomPath);
-        if (Settings.Pomfile.prefetchEffectivePom()) {
-            taskExecutor.execute(async () => {
-                try {
-                    await this.getEffectivePom();
-                } catch (error) {
-                    // ignore
-                }
-            });
-        }
+        const options: any = Settings.Pomfile.prefetchEffectivePom() ? undefined : { cacheOnly: true };
+        taskExecutor.execute(async () => {
+            try {
+                await this.getEffectivePom(options);
+            } catch (error) {
+                // ignore
+            }
+        });
     }
 
     public get name(): string {
@@ -133,13 +132,14 @@ export class MavenProject implements ITreeItem {
         await this.ePomProvider.calculateEffectivePom();
     }
 
-    public async getEffectivePom(): Promise<IEffectivePom> {
+    public async getEffectivePom(options?: { cacheOnly?: boolean }): Promise<IEffectivePom> {
         let res: IEffectivePom = { pomPath: this.pomPath };
         try {
-            res = await this.ePomProvider.getEffectivePom();
+            res = await this.ePomProvider.getEffectivePom(options);
             this._ePom = res.ePom;
         } catch (error) {
             console.error(error);
+            throw new Error("Failed to calculate Effective POM. Please check output window 'Maven for Java' for more details.");
         }
         return res;
     }
