@@ -39,7 +39,20 @@ export class MavenProject implements ITreeItem {
     }
 
     public get name(): string {
-        return _.get(this._pom, "project.artifactId[0]");
+        // use <name> if provided, fallback to <artifactId>
+        return this._pom?.project?.name?.[0] ?? this._pom?.project?.artifactId?.[0];
+    }
+
+    public get groupId(): string {
+        return this._pom?.project?.groupId?.[0] ?? this.parent?.groupId;
+    }
+
+    public get artifactId(): string {
+        return this._pom?.project?.artifactId?.[0];
+    }
+
+    public get id(): string {
+        return `${this.groupId}:${this.artifactId}`;
     }
 
     public get packaging(): string {
@@ -97,7 +110,7 @@ export class MavenProject implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         await this.parsePom();
-        const label: string = this.name ? this.name : "[Corrupted]";
+        const label: string = this.name ?? this.artifactId ?? "[Corrupted]";
         const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
@@ -105,6 +118,7 @@ export class MavenProject implements ITreeItem {
             dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
         };
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        treeItem.description = this.id;
         return treeItem;
     }
 

@@ -33,9 +33,12 @@ export class MavenPlugin implements ITreeItem {
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        const label: string = this.prefix ? `${this.prefix} (${this.pluginId})` : this.pluginId;
+        const label: string = this.prefix || this.pluginId;
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = new vscode.ThemeIcon("symbol-property");
+        if (this.prefix) {
+            treeItem.description = this.pluginId;
+        }
         return treeItem;
     }
 
