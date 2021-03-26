@@ -10,10 +10,10 @@ export class LifecycleItem implements ITreeItem {
     constructor(public project: MavenProject, public goal: string) {
     }
 
-    getContextValue(): string {
+    public getContextValue(): string {
         return "Lifecycle";
     }
-    getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.goal, vscode.TreeItemCollapsibleState.None);
         treeItem.iconPath = new vscode.ThemeIcon("gear");
         return treeItem;

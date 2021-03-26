@@ -13,9 +13,9 @@ import { EffectivePomProvider } from "../EffectivePomProvider";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { IEffectivePom } from "./IEffectivePom";
 import { ITreeItem } from "./ITreeItem";
+import { LifecycleMenu } from "./LifecycleMenu";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
-import { LifecycleMenu } from "./LifecycleMenu";
 const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
