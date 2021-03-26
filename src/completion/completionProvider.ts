@@ -58,7 +58,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const artifactIdHint: string = currentNode.text ? currentNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] =await indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
+                const indexItems: vscode.CompletionItem[] = await indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 let mergedItems: vscode.CompletionItem[] = [];
                 const ID_SEPARATOR: string = ":";
