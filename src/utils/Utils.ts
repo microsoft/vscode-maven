@@ -12,6 +12,7 @@ import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { IEffectivePom } from "../explorer/model/IEffectivePom";
+import { LifecycleItem } from "../explorer/model/LifecycleItem";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
@@ -234,12 +235,17 @@ export namespace Utils {
     }
 
     export async function executeMavenCommand(node?: any): Promise<void> {
-        // for nodes from Project Manager
         let selectedProject: MavenProject | undefined;
-        if (node && node.uri) {
+        let selectedCommand: string | undefined;
+        if (node instanceof LifecycleItem) {
+            selectedProject = node.project;
+            selectedCommand = node.goal;
+        } else if (node && node.uri) {
+            // for nodes from Project Manager
             const pomPath: string = path.join(Uri.parse(node.uri).fsPath, "pom.xml");
             selectedProject = mavenExplorerProvider.mavenProjectNodes.find(project => project.pomPath.toLowerCase() === pomPath.toLowerCase());
         }
+
         // select a project(pomfile)
         if (!selectedProject) {
             selectedProject = await selectProjectIfNecessary();
@@ -249,28 +255,31 @@ export namespace Utils {
             return;
         }
 
-        const LABEL_CUSTOM: string = "Custom ...";
-        const LABEL_FAVORITES: string = "Favorites ...";
-        // select a command
-        const selectedCommand: string | undefined = await window.showQuickPick(
-            [LABEL_FAVORITES, LABEL_CUSTOM, "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
-            { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }
-        );
+        // select a command if not provided
         if (!selectedCommand) {
-            return;
+            const LABEL_CUSTOM: string = "Custom ...";
+            const LABEL_FAVORITES: string = "Favorites ...";
+            selectedCommand = await window.showQuickPick(
+                [LABEL_FAVORITES, LABEL_CUSTOM, "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
+                { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }
+            );
+            if (!selectedCommand) {
+                return;
+            }
+
+            switch (selectedCommand) {
+                case LABEL_CUSTOM:
+                    await commands.executeCommand("maven.goal.custom", selectedProject);
+                    break;
+                case LABEL_FAVORITES:
+                    await commands.executeCommand("maven.favorites", selectedProject);
+                    break;
+                default:
+                    break;
+            }
         }
 
-        switch (selectedCommand) {
-            case LABEL_CUSTOM:
-                await commands.executeCommand("maven.goal.custom", selectedProject);
-                break;
-            case LABEL_FAVORITES:
-                await commands.executeCommand("maven.favorites", selectedProject);
-                break;
-            default:
-                await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
-                break;
-        }
+        await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
     }
 
     export function settingsFilePath(): string | undefined {

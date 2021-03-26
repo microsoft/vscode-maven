@@ -15,7 +15,7 @@ import { IEffectivePom } from "./IEffectivePom";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
-
+import { LifecycleMenu } from "./LifecycleMenu";
 const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
@@ -128,6 +128,7 @@ export class MavenProject implements ITreeItem {
 
     public getChildren(): ITreeItem[] {
         const ret: ITreeItem[] = [];
+        ret.push(new LifecycleMenu(this));
         ret.push(new PluginsMenu(this));
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {
             const projects: MavenProject[] = <MavenProject[]>this.modules.map(m => mavenExplorerProvider.getMavenProject(m)).filter(Boolean);

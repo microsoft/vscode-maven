@@ -148,6 +148,12 @@
         "category": "Maven"
       },
       {
+        "command": "maven.goal.execute.fromLifecycleMenu",
+        "title": "%contributes.commands.maven.plugin.execute%",
+        "category": "Maven",
+        "icon": "$(play)"
+      },
+      {
         "command": "maven.plugin.execute",
         "title": "%contributes.commands.maven.plugin.execute%",
         "category": "Maven",
@@ -253,6 +259,14 @@
           "when": "never"
         },
         {
+          "command": "maven.goal.execute.fromProjectManager",
+          "when": "never"
+        },
+        {
+          "command": "maven.goal.execute.fromLifecycleMenu",
+          "when": "never"
+        },
+        {
           "command": "maven.plugin.execute",
           "when": "never"
         },
@@ -262,10 +276,6 @@
         },
         {
           "command": "maven.project.showDependencies",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.execute.fromProjectManager",
           "when": "never"
         },
         {
@@ -422,6 +432,11 @@
           "command": "maven.goal.execute.fromProjectManager",
           "when": "view == javaProjectExplorer && viewItem =~ /java:project(?=.*?\\b\\+maven\\b)(?=.*?\\b\\+uri\\b)/",
           "group": "maven"
+        },
+        {
+          "command": "maven.goal.execute.fromLifecycleMenu",
+          "when": "view == mavenProjects && viewItem == Lifecycle",
+          "group": "inline"
         }
       ]
     },
