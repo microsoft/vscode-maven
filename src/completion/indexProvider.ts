@@ -3,13 +3,16 @@
 
 import * as vscode from "vscode";
 import { IArtifactSearchResult, ISearchArtifactParam, SearchType } from "../jdtls/artifactSearcher";
-import { executeJavaLanguageServerCommand } from "../jdtls/commands";
+import { executeJavaLanguageServerCommand, isJavaLangugageServerStarndard } from "../jdtls/commands";
 import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
 import { IMavenCompletionItemProvider } from "./IArtifactProvider";
 import { getSortText } from "./versionUtils";
 
 class IndexProvider implements IMavenCompletionItemProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
+        if (!isJavaLangugageServerStarndard()) {
+            return [];
+        }
         const searchParam: ISearchArtifactParam = {
             searchType: SearchType.identifier,
             groupId: groupIdHint,
@@ -31,6 +34,9 @@ class IndexProvider implements IMavenCompletionItemProvider {
     }
 
     public async getArtifactIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
+        if (!isJavaLangugageServerStarndard()) {
+            return [];
+        }
         const searchParam: ISearchArtifactParam = {
             searchType: SearchType.identifier,
             groupId: groupIdHint,
@@ -53,6 +59,9 @@ class IndexProvider implements IMavenCompletionItemProvider {
 
     public async getVersionCandidates(groupId: string, artifactId: string): Promise<vscode.CompletionItem[]> {
         if (!groupId && !artifactId) {
+            return [];
+        }
+        if (!isJavaLangugageServerStarndard()) {
             return [];
         }
         const searchParam: ISearchArtifactParam = {
