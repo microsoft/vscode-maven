@@ -3,7 +3,7 @@
 
 import * as vscode from "vscode";
 import { ITreeItem } from "./ITreeItem";
-import { LifecycleItem } from "./LifecycleItem";
+import { LifecyclePhase } from "./LifecyclePhase";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
 
@@ -13,8 +13,8 @@ export class LifecycleMenu extends Menu implements ITreeItem {
         this.name = "Lifecycle";
     }
 
-    public async getChildren() : Promise<LifecycleItem[]> {
-        return ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].map(goal => new LifecycleItem(this.project, goal));
+    public async getChildren() : Promise<LifecyclePhase[]> {
+        return ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].map(goal => new LifecyclePhase(this.project, goal));
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {

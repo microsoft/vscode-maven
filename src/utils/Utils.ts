@@ -12,7 +12,7 @@ import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { IEffectivePom } from "../explorer/model/IEffectivePom";
-import { LifecycleItem } from "../explorer/model/LifecycleItem";
+import { LifecyclePhase } from "../explorer/model/LifecyclePhase";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
@@ -237,9 +237,9 @@ export namespace Utils {
     export async function executeMavenCommand(node?: any): Promise<void> {
         let selectedProject: MavenProject | undefined;
         let selectedCommand: string | undefined;
-        if (node instanceof LifecycleItem) {
+        if (node instanceof LifecyclePhase) {
             selectedProject = node.project;
-            selectedCommand = node.goal;
+            selectedCommand = node.phase;
         } else if (node && node.uri) {
             // for nodes from Project Manager
             const pomPath: string = path.join(Uri.parse(node.uri).fsPath, "pom.xml");
