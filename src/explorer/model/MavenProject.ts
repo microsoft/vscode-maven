@@ -205,8 +205,8 @@ export class MavenProject implements ITreeItem {
     }
 
     private fillProperties(rawName: string): string {
-        const stringTemplatePattern = /\$\{.*?\}/g;
-        const matches = rawName.match(stringTemplatePattern);
+        const stringTemplatePattern: RegExp = /\$\{.*?\}/g;
+        const matches: RegExpMatchArray | null = rawName.match(stringTemplatePattern);
         if (matches === null) {
             return rawName;
         }
@@ -214,7 +214,7 @@ export class MavenProject implements ITreeItem {
         let name: string = rawName;
         for (const placeholder of matches) {
             const key: string = placeholder.slice(2, placeholder.length - 1);
-            const value = this.getProperty(key);
+            const value: string | undefined = this.getProperty(key);
             if (value !== undefined) {
                 name = name.replace(placeholder, value);
             }
@@ -225,14 +225,14 @@ export class MavenProject implements ITreeItem {
     /**
      * Get value of a property, including those inherited from parents
      * @param key property name
-     * @returns 
+     * @returns value of property
      */
     private getProperty(key: string): string | undefined {
         if (this.properties.has(key)) {
             return this.properties.get(key);
         }
 
-        let cur = this.parent;
+        let cur: MavenProject | undefined = this.parent;
         while (cur !== undefined) {
             if (cur.properties.has(key)) {
                 return cur.properties.get(key);
