@@ -29,3 +29,8 @@ export function isJavaExtActivated(): boolean {
 export function getJavaExtension(): vscode.Extension<any> | undefined {
     return vscode.extensions.getExtension(JAVA_EXTENSION_ID);
 }
+
+export function  isJavaLangugageServerStarndard(): boolean {
+    const javaExt: vscode.Extension<any> | undefined = getJavaExtension();
+    return javaExt?.exports?.api?.serverMode === "Standard";
+}

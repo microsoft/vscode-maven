@@ -13,9 +13,9 @@ import { EffectivePomProvider } from "../EffectivePomProvider";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { IEffectivePom } from "./IEffectivePom";
 import { ITreeItem } from "./ITreeItem";
+import { LifecycleMenu } from "./LifecycleMenu";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
-
 const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
@@ -24,23 +24,42 @@ export class MavenProject implements ITreeItem {
     private ePomProvider: EffectivePomProvider;
     private _ePom: any;
     private _pom: any;
+    private properties: Map<string, string> = new Map();
 
     constructor(pomPath: string) {
         this.pomPath = pomPath;
         this.ePomProvider = new EffectivePomProvider(pomPath);
-        if (Settings.Pomfile.prefetchEffectivePom()) {
-            taskExecutor.execute(async () => {
-                try {
-                    await this.getEffectivePom();
-                } catch (error) {
-                    // ignore
-                }
-            });
-        }
+        const options: any = Settings.Pomfile.prefetchEffectivePom() ? undefined : { cacheOnly: true };
+        taskExecutor.execute(async () => {
+            try {
+                await this.getEffectivePom(options);
+            } catch (error) {
+                // ignore
+            }
+        });
     }
 
     public get name(): string {
-        return _.get(this._pom, "project.artifactId[0]");
+        // use <name> if provided, fallback to <artifactId>
+        if (this._pom?.project?.name?.[0] !== undefined) {
+            const rawName: string = this._pom.project.name[0];
+            return this.fillProperties(rawName);
+        } else {
+            return this._pom?.project?.artifactId?.[0];
+        }
+
+    }
+
+    public get groupId(): string {
+        return this._pom?.project?.groupId?.[0] ?? this.parent?.groupId;
+    }
+
+    public get artifactId(): string {
+        return this._pom?.project?.artifactId?.[0];
+    }
+
+    public get id(): string {
+        return `${this.groupId}:${this.artifactId}`;
     }
 
     public get packaging(): string {
@@ -98,7 +117,7 @@ export class MavenProject implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         await this.parsePom();
-        const label: string = this.name ? this.name : "[Corrupted]";
+        const label: string = this.name ?? this.artifactId ?? "[Corrupted]";
         const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
@@ -106,6 +125,7 @@ export class MavenProject implements ITreeItem {
             dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
         };
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        treeItem.description = this.id;
         return treeItem;
     }
 
@@ -115,6 +135,7 @@ export class MavenProject implements ITreeItem {
 
     public getChildren(): ITreeItem[] {
         const ret: ITreeItem[] = [];
+        ret.push(new LifecycleMenu(this));
         ret.push(new PluginsMenu(this));
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {
             const projects: MavenProject[] = <MavenProject[]>this.modules.map(m => mavenExplorerProvider.getMavenProject(m)).filter(Boolean);
@@ -127,13 +148,14 @@ export class MavenProject implements ITreeItem {
         await this.ePomProvider.calculateEffectivePom();
     }
 
-    public async getEffectivePom(): Promise<IEffectivePom> {
+    public async getEffectivePom(options?: { cacheOnly?: boolean }): Promise<IEffectivePom> {
         let res: IEffectivePom = { pomPath: this.pomPath };
         try {
-            res = await this.ePomProvider.getEffectivePom();
+            res = await this.ePomProvider.getEffectivePom(options);
             this._ePom = res.ePom;
         } catch (error) {
             console.error(error);
+            throw new Error("Failed to calculate Effective POM. Please check output window 'Maven for Java' for more details.");
         }
         return res;
     }
@@ -145,6 +167,7 @@ export class MavenProject implements ITreeItem {
     public async parsePom(): Promise<void> {
         try {
             this._pom = await Utils.parseXmlFile(this.pomPath);
+            this.updateProperties();
         } catch (error) {
             this._pom = undefined;
         }
@@ -171,5 +194,52 @@ export class MavenProject implements ITreeItem {
             ));
         }
         return [];
+    }
+
+    private updateProperties(): void {
+        if (this?._pom?.project?.properties?.[0] !== undefined) {
+            for (const [key, value] of Object.entries<any>(this._pom.project.properties[0])) {
+                this.properties.set(key, value[0]);
+            }
+        }
+    }
+
+    private fillProperties(rawName: string): string {
+        const stringTemplatePattern: RegExp = /\$\{.*?\}/g;
+        const matches: RegExpMatchArray | null = rawName.match(stringTemplatePattern);
+        if (matches === null) {
+            return rawName;
+        }
+
+        let name: string = rawName;
+        for (const placeholder of matches) {
+            const key: string = placeholder.slice(2, placeholder.length - 1);
+            const value: string | undefined = this.getProperty(key);
+            if (value !== undefined) {
+                name = name.replace(placeholder, value);
+            }
+        }
+        return name;
+    }
+
+    /**
+     * Get value of a property, including those inherited from parents
+     * @param key property name
+     * @returns value of property
+     */
+    private getProperty(key: string): string | undefined {
+        if (this.properties.has(key)) {
+            return this.properties.get(key);
+        }
+
+        let cur: MavenProject | undefined = this.parent;
+        while (cur !== undefined) {
+            if (cur.properties.has(key)) {
+                return cur.properties.get(key);
+            }
+            cur = cur.parent;
+        }
+
+        return undefined;
     }
 }

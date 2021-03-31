@@ -28,14 +28,25 @@ export class MavenPlugin implements ITreeItem {
         taskExecutor.execute(async () => await this.loadMetadata());
     }
 
+    private get pluginId(): string {
+        let pluginId: string = `${this.groupId}:${this.artifactId}`;
+        if (this.version !== undefined) {
+            pluginId += `:${this.version}`;
+        }
+        return pluginId;
+    }
+
     public getContextValue(): string {
         return CONTEXT_VALUE;
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
-        const label: string = this.prefix ? `${this.prefix} (${this.pluginId})` : this.pluginId;
+        const label: string = this.prefix || this.pluginId;
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = new vscode.ThemeIcon("symbol-property");
+        if (this.prefix) {
+            treeItem.description = this.pluginId;
+        }
         return treeItem;
     }
 
@@ -65,11 +76,4 @@ export class MavenPlugin implements ITreeItem {
         mavenExplorerProvider.refresh(this);
     }
 
-    private get pluginId(): string {
-        let pluginId: string = `${this.groupId}:${this.artifactId}`;
-        if (this.version !== undefined) {
-            pluginId += `:${this.version}`;
-        }
-        return pluginId;
-    }
 }

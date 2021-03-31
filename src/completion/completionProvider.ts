@@ -3,7 +3,6 @@
 
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { isJavaExtActivated } from "../jdtls/commands";
 import { ElementNode, getCurrentNode, XmlTagName } from "../utils/lexerUtils";
 import { centralProvider } from "./centralProvider";
 import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
@@ -45,7 +44,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const groupIdHint: string = currentNode.text ? currentNode.text : "";
                 const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = isJavaExtActivated() ? await indexProvider.getGroupIdCandidates(groupIdHint, artifactIdHint) : [];
+                const indexItems: vscode.CompletionItem[] = await indexProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
                 const mergedItems: vscode.CompletionItem[] = this.deDuplicate(centralItems, indexItems, localItems, (item) => item.insertText);
                 mergedItems.forEach(item => item.range = targetRange);
@@ -59,7 +58,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const artifactIdHint: string = currentNode.text ? currentNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = isJavaExtActivated() ? await indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint) : [];
+                const indexItems: vscode.CompletionItem[] = await indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 let mergedItems: vscode.CompletionItem[] = [];
                 const ID_SEPARATOR: string = ":";
@@ -86,7 +85,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getVersionCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = isJavaExtActivated() ? await indexProvider.getVersionCandidates(groupIdHint, artifactIdHint) : [];
+                const indexItems: vscode.CompletionItem[] = await indexProvider.getVersionCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getVersionCandidates(groupIdHint, artifactIdHint);
                 const mergedItems: vscode.CompletionItem[] = this.deDuplicate(centralItems, indexItems, localItems, (item) => item.insertText);
                 mergedItems.forEach(item => item.range = targetRange);
