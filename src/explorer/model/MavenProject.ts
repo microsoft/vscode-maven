@@ -24,6 +24,7 @@ export class MavenProject implements ITreeItem {
     private ePomProvider: EffectivePomProvider;
     private _ePom: any;
     private _pom: any;
+    private properties: Map<string, string> = new Map();
 
     constructor(pomPath: string) {
         this.pomPath = pomPath;
@@ -40,7 +41,13 @@ export class MavenProject implements ITreeItem {
 
     public get name(): string {
         // use <name> if provided, fallback to <artifactId>
-        return this._pom?.project?.name?.[0] ?? this._pom?.project?.artifactId?.[0];
+        if (this._pom?.project?.name?.[0] !== undefined) {
+            const rawName: string = this._pom.project.name[0];
+            return this.fillProperties(rawName);
+        } else {
+            return this._pom?.project?.artifactId?.[0];
+        }
+
     }
 
     public get groupId(): string {
@@ -160,6 +167,7 @@ export class MavenProject implements ITreeItem {
     public async parsePom(): Promise<void> {
         try {
             this._pom = await Utils.parseXmlFile(this.pomPath);
+            this.updateProperties();
         } catch (error) {
             this._pom = undefined;
         }
@@ -186,5 +194,52 @@ export class MavenProject implements ITreeItem {
             ));
         }
         return [];
+    }
+
+    private updateProperties(): void {
+        if (this?._pom?.project?.properties?.[0] !== undefined) {
+            for (const [key, value] of Object.entries<any>(this._pom.project.properties[0])) {
+                this.properties.set(key, value[0]);
+            }
+        }
+    }
+
+    private fillProperties(rawName: string): string {
+        const stringTemplatePattern: RegExp = /\$\{.*?\}/g;
+        const matches: RegExpMatchArray | null = rawName.match(stringTemplatePattern);
+        if (matches === null) {
+            return rawName;
+        }
+
+        let name: string = rawName;
+        for (const placeholder of matches) {
+            const key: string = placeholder.slice(2, placeholder.length - 1);
+            const value: string | undefined = this.getProperty(key);
+            if (value !== undefined) {
+                name = name.replace(placeholder, value);
+            }
+        }
+        return name;
+    }
+
+    /**
+     * Get value of a property, including those inherited from parents
+     * @param key property name
+     * @returns value of property
+     */
+    private getProperty(key: string): string | undefined {
+        if (this.properties.has(key)) {
+            return this.properties.get(key);
+        }
+
+        let cur: MavenProject | undefined = this.parent;
+        while (cur !== undefined) {
+            if (cur.properties.has(key)) {
+                return cur.properties.get(key);
+            }
+            cur = cur.parent;
+        }
+
+        return undefined;
     }
 }
