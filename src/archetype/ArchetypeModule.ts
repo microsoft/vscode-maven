@@ -3,8 +3,10 @@
 
 import * as fse from "fs-extra";
 import * as path from "path";
-import { Uri, workspace } from "vscode";
+import * as vscode from "vscode";
+import { ShellExecution, Task, TaskScope, Uri, workspace } from "vscode";
 import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
+import { mavenTerminal } from "../mavenTerminal";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
 import { OperationCanceledError } from "../utils/errorUtils";
 import { executeInTerminal, getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
@@ -66,7 +68,40 @@ export namespace ArchetypeModule {
             mvnPath = getEmbeddedMavenWrapper();
             cwd = path.dirname(mvnPath);
         }
-        await executeInTerminal({ mvnPath, command: cmdArgs.join(" "), pomfile: undefined, terminalName: "Maven archetype", cwd });
+
+        const mvn: string | undefined = mvnPath ? mvnPath : await getMaven();
+        if (mvn === undefined) { return; }
+        const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvn));
+
+        const commandLine: string = [mvnString, ...cmdArgs].filter(Boolean).join(" ");
+        const execution = new vscode.ShellExecution(commandLine, { cwd, shellQuoting: shellQuotes.cmd });
+        const createProjectTask = new vscode.Task({ type: "maven", targetFolder}, vscode.TaskScope.Global, "createProject", "maven", execution);
+        vscode.tasks.executeTask(createProjectTask);
+
+
+        // const mvn: string | undefined = mvnPath ? mvnPath : await getMaven();
+        // if (mvn === undefined) { return; }
+
+        // const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvn));
+        // let fullCommand: string = [
+        //     mvnString,
+        //     cmdArgs.join(" ").trim()
+        // ].filter(Boolean).join(" ");
+
+        // fullCommand = await vscode.window.showInputBox() ?? "";
+        // // fullCommand = "";
+        // const taskDef = { type: "CreateMavenProject", targetFolder };
+        // const shellExec = new ShellExecution(fullCommand, { cwd, shellQuoting: shellQuotes.powershell });
+        // const task = new Task(taskDef, TaskScope.Global, "archetype", "maven", shellExec);
+        // const taskExec = await vscode.tasks.executeTask(task);
+        // vscode.tasks.onDidEndTask(e => {
+        //     if (e.execution.task.definition.type === "CreateMavenProject") {
+        //         console.log(e.execution.task.definition.targetFolder);
+        //     }
+        // });
+        // console.log("done");
+
+        // await executeInTerminal({ mvnPath, command: , pomfile: undefined, terminalName: "Maven archetype", cwd });
     }
 
     export async function generateFromArchetype(entry: Uri | undefined, operationId: string): Promise<void> {
@@ -140,3 +175,43 @@ export class ArchetypeMetadata {
     public version: string;
     public isLoadMore: boolean;
 }
+
+function wrappedWithQuotes(mvn: string): string {
+    if (mvn === "mvn") {
+        return mvn;
+    } else {
+        return `"${mvn}"`;
+    }
+}
+
+// see https://github.com/microsoft/vscode/blob/dddbfa61652de902c75436d250a50c71501da2d7/src/vs/workbench/contrib/tasks/browser/terminalTaskSystem.ts#L140
+const shellQuotes: { [key: string]: vscode.ShellQuotingOptions } = {
+    cmd: {
+        strong: "\""
+    },
+    powershell: {
+        escape: {
+            escapeChar: "`",
+            charsToEscape: " \"'()"
+        },
+        strong: "'",
+        weak: "\""
+    },
+    bash: {
+        escape: {
+            escapeChar: "\\",
+            charsToEscape: " \"'"
+        },
+        strong: "'",
+        weak: "\""
+    },
+    zsh: {
+        escape: {
+            escapeChar: "\\",
+            charsToEscape: " \"'"
+        },
+        strong: "'",
+        weak: "\""
+    }
+};
+

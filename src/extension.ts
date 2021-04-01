@@ -63,10 +63,34 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
     registerCommand(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
     registerCommand(context, "maven.project.openPom", openPomHandler);
+    // create project from archetype
     registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
         await ArchetypeModule.generateFromArchetype(entry, operationId);
     }, true);
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
+    context.subscriptions.push(vscode.tasks.onDidEndTask(async (e) => {
+        if (e.execution.task.name === "createProject" && e.execution.task.source === "maven") {
+            const { targetFolder } = e.execution.task.definition;
+            // Open project either is the same workspace or new workspace
+            const hasOpenFolder = vscode.workspace.workspaceFolders !== undefined;
+            const OPEN_IN_NEW_WORKSPACE = "Open";
+            const OPEN_IN_CURRENT_WORKSPACE = "Add to Workspace";
+            const candidates: string[] = [
+                OPEN_IN_NEW_WORKSPACE,
+                hasOpenFolder ? OPEN_IN_CURRENT_WORKSPACE : undefined,
+            ].filter(Boolean) as string[];
+            const choice = await vscode.window.showInformationMessage(`Successfully created. Location: ${targetFolder}`, ...candidates);
+
+            if (choice === OPEN_IN_NEW_WORKSPACE) {
+                vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(targetFolder), hasOpenFolder);
+            } else if (choice === OPEN_IN_CURRENT_WORKSPACE) {
+                if (!vscode.workspace.workspaceFolders?.find((workspaceFolder) => workspaceFolder.uri && targetFolder.startsWith(workspaceFolder.uri.fsPath))) {
+                    vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders!.length, null, { uri: vscode.Uri.file(targetFolder) });
+                }
+            }
+        }
+    }));
+
     registerCommand(context, "maven.history", mavenHistoryHandler);
     registerCommand(context, "maven.favorites", runFavoriteCommandsHandler);
     registerCommand(context, "maven.goal.execute", Utils.executeMavenCommand);
