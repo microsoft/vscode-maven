@@ -32,6 +32,7 @@ import { openFileIfExists, registerCommand } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
+    await initExpService(context);
     await loadPackageInfo(context);
     // Usage data statistics.
     if (getAiKey()) {
@@ -46,7 +47,6 @@ export async function deactivate(): Promise<void> {
 
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     pluginInfoProvider.initialize(context);
-    initExpService(context);
     await vscode.commands.executeCommand("setContext", "vscode-maven:activated", true);
     // register tree view
     await mavenExplorerProvider.loadProjects();

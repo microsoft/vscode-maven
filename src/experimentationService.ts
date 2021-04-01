@@ -3,7 +3,7 @@
 
 import * as vscode from "vscode";
 import { addContextProperty, sendInfo } from "vscode-extension-telemetry-wrapper";
-import { getExperimentationService, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from "vscode-tas-client";
+import { getExperimentationServiceAsync, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from "vscode-tas-client";
 import { getExtensionId, getExtensionVersion } from "./utils/contextUtils";
 
 class ExperimentationTelemetry implements IExperimentationTelemetry {
@@ -28,7 +28,7 @@ export function getExpService(): IExperimentationService {
     return expService;
 }
 
-export function initExpService(context: vscode.ExtensionContext): void {
-    expService = getExperimentationService(getExtensionId(), getExtensionVersion(),
+export async function initExpService(context: vscode.ExtensionContext): Promise<void> {
+    expService = await getExperimentationServiceAsync(getExtensionId(), getExtensionVersion(),
         TargetPopulation.Public, new ExperimentationTelemetry(), context.globalState);
 }
