@@ -37,6 +37,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     if (getAiKey()) {
         initialize(getExtensionId(), getExtensionVersion(), getAiKey(), { firstParty: true });
     }
+    await initExpService(context);
     await instrumentOperation("activation", doActivate)(context);
 }
 
@@ -46,7 +47,6 @@ export async function deactivate(): Promise<void> {
 
 async function doActivate(_operationId: string, context: vscode.ExtensionContext): Promise<void> {
     pluginInfoProvider.initialize(context);
-    initExpService(context);
     await vscode.commands.executeCommand("setContext", "vscode-maven:activated", true);
     // register tree view
     await mavenExplorerProvider.loadProjects();
