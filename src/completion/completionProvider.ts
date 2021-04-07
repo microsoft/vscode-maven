@@ -25,6 +25,8 @@ const pluginSnippetString: string = [
     "</plugin>"
 ].join("\n");
 
+const DEFAULT_GROUP_ID: string = "org.apache.maven.plugins";
+
 class CompletionProvider implements vscode.CompletionItemProvider {
 
     // tslint:disable-next-line:cyclomatic-complexity
@@ -81,8 +83,11 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
                 const groupIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
                 const artifactIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
-                const groupIdHint: string = groupIdNode && groupIdNode.text ? groupIdNode.text : "";
-                const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
+                const groupIdHint: string | undefined = groupIdNode?.text || DEFAULT_GROUP_ID;
+                const artifactIdHint: string | undefined = artifactIdNode?.text;
+                if (!groupIdHint || !artifactIdHint) {
+                    return [];
+                }
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getVersionCandidates(groupIdHint, artifactIdHint);
                 const indexItems: vscode.CompletionItem[] = await indexProvider.getVersionCandidates(groupIdHint, artifactIdHint);
