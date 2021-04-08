@@ -152,7 +152,7 @@ export class MavenProject implements ITreeItem {
         let res: IEffectivePom = { pomPath: this.pomPath };
         try {
             res = await this.ePomProvider.getEffectivePom(options);
-            this._ePom = res.ePom;
+            this._ePom = res?.ePom;
         } catch (error) {
             console.error(error);
             throw new Error("Failed to calculate Effective POM. Please check output window 'Maven for Java' for more details.");
