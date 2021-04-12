@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.29.0
+### Added
+- Add shortcuts for common lifecycle phases into Maven explorer. [#601](https://github.com/microsoft/vscode-maven/pull/601)
+- Add a new setting `maven.settingsFile` to specify location of settings.xml file. [#581](https://github.com/microsoft/vscode-maven/pull/581)
+
+### Changed
+- Only generate effective POMs on demand to improve overall performance. [#579](https://github.com/microsoft/vscode-maven/issues/579)
+- Display project name, groupId, artifactId in Maven explorer. [#590](https://github.com/microsoft/vscode-maven/issues/590)
+
+### Fixed
+- Fix auto-completion for `version` section. [#594](https://github.com/microsoft/vscode-maven/issues/594)
+- Fix auto-completion for `dependency` section when Java extension is working in lightweight mode. [#598](https://github.com/microsoft/vscode-maven/issues/598)
+
 ## 0.28.0
 - Update extension icons. [#578](https://github.com/microsoft/vscode-maven/pull/578)
 - Exclude POMs in `archetype-resources` folder by default. [#580](https://github.com/microsoft/vscode-maven/issues/580)
