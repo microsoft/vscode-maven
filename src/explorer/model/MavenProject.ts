@@ -51,8 +51,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public get groupId(): string {
-        return this._pom?.project?.groupId?.[0] ?? this._pom?.project?.parent?.[0]?.groupId?.[0];
-        //this.parent?.groupId;
+        return this._pom?.project?.groupId?.[0] ?? this._pom?.project?.parent?.[0]?.groupId?.[0] ?? this.parent?.groupId;
     }
 
     public get artifactId(): string {
