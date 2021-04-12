@@ -19,7 +19,7 @@ import { PluginsMenu } from "./PluginsMenu";
 const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
-    public parent?: MavenProject;
+    public parent?: MavenProject; // assigned if it's specified as one of parent project's modules
     public pomPath: string;
     private ePomProvider: EffectivePomProvider;
     private _ePom: any;
@@ -51,7 +51,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public get groupId(): string {
-        return this._pom?.project?.groupId?.[0] ?? this.parent?.groupId;
+        return this._pom?.project?.groupId?.[0] ?? this._pom?.project?.parent?.[0]?.groupId?.[0] ?? this.parent?.groupId;
     }
 
     public get artifactId(): string {
@@ -113,6 +113,14 @@ export class MavenProject implements ITreeItem {
                 return path.join(relative, "pom.xml");
             }
         });
+    }
+
+    /**
+     * Absolute path of parent POM, inferred from `parent.relativePath`.
+     */
+    public get parentPomPath(): string {
+        const relativePath : string = this._pom?.project?.parent?.[0]?.relativePath?.[0] ?? "../pom.xml";
+        return path.join(path.dirname(this.pomPath), relativePath);
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
@@ -232,12 +240,12 @@ export class MavenProject implements ITreeItem {
             return this.properties.get(key);
         }
 
-        let cur: MavenProject | undefined = this.parent;
+        let cur: MavenProject | undefined = mavenExplorerProvider.getMavenProject(this.parentPomPath) ?? this.parent;
         while (cur !== undefined) {
             if (cur.properties.has(key)) {
                 return cur.properties.get(key);
             }
-            cur = cur.parent;
+            cur = mavenExplorerProvider.getMavenProject(cur.parentPomPath) ?? cur.parent;
         }
 
         return undefined;

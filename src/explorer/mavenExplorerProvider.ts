@@ -101,7 +101,7 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         newProjects.forEach(p => {
             p.modules.forEach(m => {
                 const moduleNode: MavenProject | undefined = mavenExplorerProvider.getMavenProject(m);
-                if (moduleNode) {
+                if (moduleNode && moduleNode.parent === undefined) {
                     moduleNode.parent = p;
                 }
             });
