@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.28.0",
+  "version": "0.29.0-preview",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
