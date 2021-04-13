@@ -13,6 +13,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ### Fixed
 - Fix auto-completion for `version` section. [#594](https://github.com/microsoft/vscode-maven/issues/594)
 - Fix auto-completion for `dependency` section when Java extension is working in lightweight mode. [#598](https://github.com/microsoft/vscode-maven/issues/598)
+- Fix remote code execution vulnerability. [CVE-2021-28472](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-28472).
 
 ## 0.28.0
 - Update extension icons. [#578](https://github.com/microsoft/vscode-maven/pull/578)
