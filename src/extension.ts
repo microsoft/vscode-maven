@@ -68,8 +68,13 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         await ArchetypeModule.generateFromArchetype(entry, operationId);
     }, true);
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
-    context.subscriptions.push(vscode.tasks.onDidEndTask(async (e) => {
+    context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(async (e) => {
         if (e.execution.task.name === "createProject" && e.execution.task.source === "maven") {
+            if (e.exitCode !== 0) {
+                vscode.window.showErrorMessage("Failed to create the project, check logs in terminal for more details.");
+                return;
+            }
+
             const { targetFolder } = e.execution.task.definition;
             // Open project either is the same workspace or new workspace
             const hasOpenFolder = vscode.workspace.workspaceFolders !== undefined;
