@@ -117,7 +117,7 @@ export namespace ArchetypeModule {
                 const repository: string = archetype.repository && archetype.repository[0];
                 const identifier: string = `${groupId}:${artifactId}`;
 
-                if (dict[identifier] !== undefined) {
+                if (dict[identifier] === undefined) {
                     dict[identifier] = new Archetype(artifactId, groupId, repository, description);
                 }
                 if (dict[identifier].versions.indexOf(version) < 0) {
@@ -127,7 +127,7 @@ export namespace ArchetypeModule {
             return Object.keys(dict).map((k: string) => dict[k]);
 
         } catch (err) {
-            // do nothing
+            console.error(err);
         }
         return [];
     }
