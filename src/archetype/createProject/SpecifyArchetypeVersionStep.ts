@@ -2,45 +2,35 @@
 // Licensed under the MIT license.
 
 import { Disposable, QuickInputButtons, QuickPick, QuickPickItem, window } from "vscode";
-import { OperationCanceledError } from "../utils/errorUtils";
-import { ArchetypeMetadata } from "./ArchetypeModule";
-import { finishStep } from "./finishStep";
-import { IStep } from "./IStep";
-import { loadArchetypesStep } from "./loadArchetypesStep";
+import { IProjectCreationMetadata, IProjectCreationStep, StepResult } from "./types";
 
-class SelectVersionStep implements IStep {
-
-    public async execute(archetypeMetadata: ArchetypeMetadata): Promise<IStep | undefined> {
-        if (await this.showQuickPickForVersions(archetypeMetadata) === false) {
-            return loadArchetypesStep;
-        }
-        if (archetypeMetadata.version === undefined) {
-            throw new OperationCanceledError("Archetype version not selected.");
-        }
-        return finishStep;
-    }
-
-    private async showQuickPickForVersions(archetypeMetadata: ArchetypeMetadata): Promise<boolean> {
+export class SpecifyArchetypeVersionStep implements IProjectCreationStep {
+    public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
         const disposables: Disposable[] = [];
-        let result: boolean = false;
+        let result: StepResult;
         try {
-            result = await new Promise<boolean>((resolve, reject) => {
+            result = await new Promise<StepResult>((resolve, reject) => {
+                if (metadata.archetype?.versions === undefined) {
+                    reject();
+                    return;
+                }
+
                 const pickBox: QuickPick<QuickPickItem> = window.createQuickPick<QuickPickItem>();
                 pickBox.title = "Create Maven Project: Choose version";
                 pickBox.placeholder = "Select a version ...";
-                pickBox.items = archetypeMetadata.versions.map(version => ({
+                pickBox.items = metadata.archetype?.versions.map(version => ({
                     label: version
                 }));
                 pickBox.buttons = [(QuickInputButtons.Back)];
                 disposables.push(
                     pickBox.onDidTriggerButton((item) => {
                         if (item === QuickInputButtons.Back) {
-                            resolve(false);
+                            resolve(StepResult.PREVIOUS);
                         }
                     }),
                     pickBox.onDidAccept(() => {
-                        archetypeMetadata.version = pickBox.selectedItems[0].label;
-                        resolve(true);
+                        metadata.archetypeVersion = pickBox.selectedItems[0].label;
+                        resolve(StepResult.NEXT);
                     }),
                     pickBox.onDidHide(() => {
                         reject();
@@ -57,5 +47,3 @@ class SelectVersionStep implements IStep {
         return result;
     }
 }
-
-export const selectVersionStep: SelectVersionStep = new SelectVersionStep();

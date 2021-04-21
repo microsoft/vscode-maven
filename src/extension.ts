@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 "use strict";
+import * as assert from "assert";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
@@ -65,36 +66,10 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.project.openPom", openPomHandler);
     // create project from archetype
     registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
-        await ArchetypeModule.generateFromArchetype(entry, operationId);
+        await ArchetypeModule.createMavenProject(entry, operationId);
     }, true);
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
-    context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(async (e) => {
-        if (e.execution.task.name === "createProject" && e.execution.task.source === "maven") {
-            if (e.exitCode !== 0) {
-                vscode.window.showErrorMessage("Failed to create the project, check logs in terminal for more details.");
-                return;
-            }
-
-            const { targetFolder } = e.execution.task.definition;
-            // Open project either is the same workspace or new workspace
-            const hasOpenFolder = vscode.workspace.workspaceFolders !== undefined;
-            const OPEN_IN_NEW_WORKSPACE = "Open";
-            const OPEN_IN_CURRENT_WORKSPACE = "Add to Workspace";
-            const candidates: string[] = [
-                OPEN_IN_NEW_WORKSPACE,
-                hasOpenFolder ? OPEN_IN_CURRENT_WORKSPACE : undefined,
-            ].filter(Boolean) as string[];
-            const choice = await vscode.window.showInformationMessage(`Successfully created. Location: ${targetFolder}`, ...candidates);
-
-            if (choice === OPEN_IN_NEW_WORKSPACE) {
-                vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(targetFolder), hasOpenFolder);
-            } else if (choice === OPEN_IN_CURRENT_WORKSPACE) {
-                if (!vscode.workspace.workspaceFolders?.find((workspaceFolder) => workspaceFolder.uri && targetFolder.startsWith(workspaceFolder.uri.fsPath))) {
-                    vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders!.length, null, { uri: vscode.Uri.file(targetFolder) });
-                }
-            }
-        }
-    }));
+    registerProjectCreationEndListener(context);
 
     registerCommand(context, "maven.history", mavenHistoryHandler);
     registerCommand(context, "maven.favorites", runFavoriteCommandsHandler);
@@ -249,4 +224,37 @@ async function openPomHandler(node: MavenProject | { uri: string }): Promise<voi
             await openFileIfExists(pomPath);
         }
     }
+}
+
+function registerProjectCreationEndListener(context: vscode.ExtensionContext): void {
+    context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(async (e) => {
+        if (e.execution.task.name === "createProject" && e.execution.task.source === "maven") {
+            if (e.exitCode !== 0) {
+                vscode.window.showErrorMessage("Failed to create the project, check logs in terminal for more details.");
+                return;
+            }
+
+            const { targetFolder, artifactId } = e.execution.task.definition;
+            const projectFolder = path.join(targetFolder, artifactId);
+            // Open project either is the same workspace or new workspace
+            const hasOpenFolder = vscode.workspace.workspaceFolders !== undefined;
+            const OPEN_IN_NEW_WORKSPACE = "Open";
+            const OPEN_IN_CURRENT_WORKSPACE = "Add to Workspace";
+            const candidates: string[] = <string[]>[
+                OPEN_IN_NEW_WORKSPACE,
+                hasOpenFolder ? OPEN_IN_CURRENT_WORKSPACE : undefined
+            ].filter(Boolean);
+
+            const choice = await vscode.window.showInformationMessage(`Successfully created. Location: ${projectFolder}`, ...candidates);
+
+            if (choice === OPEN_IN_NEW_WORKSPACE) {
+                vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(projectFolder), hasOpenFolder);
+            } else if (choice === OPEN_IN_CURRENT_WORKSPACE) {
+                assert(vscode.workspace.workspaceFolders !== undefined);
+                if (!vscode.workspace.workspaceFolders?.find((workspaceFolder) => projectFolder.startsWith(workspaceFolder.uri?.fsPath))) {
+                    vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, null, { uri: vscode.Uri.file(projectFolder) });
+                }
+            }
+        }
+    }));
 }
