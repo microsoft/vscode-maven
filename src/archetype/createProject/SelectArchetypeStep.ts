@@ -3,21 +3,66 @@
 
 import * as fse from "fs-extra";
 import * as path from "path";
-import { QuickPickItem, window } from "vscode";
+import { Disposable, QuickInputButtons, QuickPick, QuickPickItem, window } from "vscode";
 import { getMavenLocalRepository, getPathToExtensionRoot } from "../../utils/contextUtils";
-import { Utils } from "../../utils/Utils";
 import { Archetype } from "../Archetype";
 import { ArchetypeModule } from "../ArchetypeModule";
 import { IProjectCreationMetadata, IProjectCreationStep, StepResult } from "./types";
-
-const POPULAR_ARCHETYPES_URL: string = "https://vscodemaventelemetry.blob.core.windows.net/public/popular_archetypes.json";
 
 interface IArchetypePickItem extends QuickPickItem {
     archetype?: Archetype;
 }
 
 export class SelectArchetypeStep implements IProjectCreationStep {
+    /**
+     * This has to be the first step, no back buttons provided for previous steps.
+     */
+    public readonly previousStep: undefined;
+
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
+
+        const disposables: Disposable[] = [];
+        const specifyAchetypePromise = new Promise<StepResult>(async (resolve, _reject) => {
+            const pickBox: QuickPick<IArchetypePickItem> = window.createQuickPick<IArchetypePickItem>();
+            pickBox.title = "Create Maven Project";
+            pickBox.placeholder = "Select an archetype ...";
+            pickBox.matchOnDescription = true;
+            pickBox.ignoreFocusOut = true;
+            pickBox.items = await this.getArchetypePickItems(false);
+            disposables.push(
+                pickBox.onDidTriggerButton(async (item) => {
+                    if (item === QuickInputButtons.Back) {
+                        pickBox.items = await this.getArchetypePickItems(false);
+                        pickBox.buttons = [];
+                    }
+                }),
+                pickBox.onDidAccept(async () => {
+                    if (pickBox.selectedItems[0].archetype === undefined) {
+                        pickBox.items = await this.getArchetypePickItems(true);
+                        pickBox.buttons = [QuickInputButtons.Back];
+                    } else {
+                        metadata.archetypeArtifactId = pickBox.selectedItems[0].archetype.artifactId;
+                        metadata.archetypeGroupId = pickBox.selectedItems[0].archetype.groupId;
+                        metadata.archetype = pickBox.selectedItems[0].archetype;
+                        resolve(StepResult.NEXT);
+                    }
+                }),
+                pickBox.onDidHide(() => {
+                    resolve(StepResult.STOP);
+                })
+            );
+            disposables.push(pickBox);
+            pickBox.show();
+        });
+
+        try {
+            return await specifyAchetypePromise;
+        } finally {
+            disposables.forEach(d => d.dispose());
+        }
+    }
+
+    public async run_simple(metadata: IProjectCreationMetadata): Promise<StepResult> {
         let choice = await window.showQuickPick(this.getArchetypePickItems(false), {
             placeHolder: "Select an archetype ...",
             ignoreFocusOut: true, matchOnDescription: true
@@ -74,8 +119,7 @@ export class SelectArchetypeStep implements IProjectCreationStep {
         // Top popular archetypes according to usage data
         let fixedList: string[] | undefined;
         try {
-            const rawList: string = await Utils.downloadFile(POPULAR_ARCHETYPES_URL, true);
-            fixedList = JSON.parse(rawList);
+            fixedList = await fse.readJSON(path.join(getPathToExtensionRoot(), "resources", "popular_archetypes.json"));
         } catch (error) {
             console.error(error);
         }

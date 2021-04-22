@@ -31,6 +31,9 @@ export interface IProjectCreationStep {
     run(metadata: IProjectCreationMetadata): Promise<StepResult>;
 }
 
+/**
+ * Indicates which step to go after running task in current step.
+ */
 export enum StepResult {
     NEXT,
     STOP,

@@ -230,7 +230,7 @@ function registerProjectCreationEndListener(context: vscode.ExtensionContext): v
     context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(async (e) => {
         if (e.execution.task.name === "createProject" && e.execution.task.source === "maven") {
             if (e.exitCode !== 0) {
-                vscode.window.showErrorMessage("Failed to create the project, check logs in terminal for more details.");
+                vscode.window.showErrorMessage("Failed to create the project, check terminal output for more details.");
                 return;
             }
 
@@ -245,7 +245,7 @@ function registerProjectCreationEndListener(context: vscode.ExtensionContext): v
                 hasOpenFolder ? OPEN_IN_CURRENT_WORKSPACE : undefined
             ].filter(Boolean);
 
-            const choice = await vscode.window.showInformationMessage(`Successfully created. Location: ${projectFolder}`, ...candidates);
+            const choice = await vscode.window.showInformationMessage(`Maven project [${artifactId}] is created under: ${targetFolder}`, ...candidates);
 
             if (choice === OPEN_IN_NEW_WORKSPACE) {
                 vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(projectFolder), hasOpenFolder);
