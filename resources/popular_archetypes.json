@@ -1,0 +1,11 @@
+[
+    "org.apache.maven.archetypes:maven-archetype-quickstart",
+    "com.github.ngeor:archetype-quickstart-jdk8",
+    "am.ik.archetype:maven-reactjs-blank-archetype",
+    "org.apache.maven.archetypes:maven-archetype-webapp",
+    "am.ik.archetype:spring-boot-blank-archetype",
+    "com.vaadin:vaadin-archetype-application",
+    "am.ik.archetype:mvc-1.0-blank-archetype",
+    "org.apache.maven.archetypes:maven-archetype-archetype",
+    "org.apache.maven.archetypes:maven-archetype-j2ee-simple"
+]
