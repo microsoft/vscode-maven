@@ -76,7 +76,15 @@ export namespace ArchetypeModule {
         const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvn));
 
         const commandLine: string = [mvnString, ...cmdArgs].filter(Boolean).join(" ");
-        const execution = new vscode.ShellExecution(commandLine, { cwd, shellQuoting: shellQuotes.cmd });
+        const options: vscode.ShellExecutionOptions = { cwd };
+        if (process.platform === "win32") {
+            options.shellQuoting = shellQuotes.cmd;
+            options.executable = "cmd.exe";
+            options.shellArgs = ["/c"];
+        } else {
+            options.shellQuoting = shellQuotes.bash;
+        }
+        const execution = new vscode.ShellExecution(commandLine, options);
         const createProjectTask = new vscode.Task({ type: "maven", targetFolder, artifactId }, vscode.TaskScope.Global, "createProject", "maven", execution);
         vscode.tasks.executeTask(createProjectTask);
     }
