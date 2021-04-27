@@ -94,6 +94,7 @@ export function getPathToWorkspaceStorage(...args: string[]): string | undefined
     return path.join(EXTENSION_CONTEXT.storagePath, ...args);
 }
 
+/** TODO: apply workspace trust API when it's ready */
 export async function trustWrapper(mvnw: string): Promise<boolean> {
     const key: string = "trustMavenWrapper";
     const trust: boolean | undefined = EXTENSION_CONTEXT.workspaceState.get<boolean | undefined>(key);

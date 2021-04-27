@@ -10,6 +10,11 @@
   "engines": {
     "vscode": "^1.43.0"
   },
+  "enableProposedApi": true,
+  "workspaceTrust": {
+    "request": "onDemand",
+    "description": "Extension can execute Maven commands using Maven wrapper contained in your project."
+  },
   "categories": [
     "Programming Languages",
     "Other"
