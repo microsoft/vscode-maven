@@ -3,95 +3,32 @@
 
 import * as fse from "fs-extra";
 import * as path from "path";
+import * as vscode from "vscode";
 import { Uri, workspace } from "vscode";
-import { instrumentOperationStep, sendInfo } from "vscode-extension-telemetry-wrapper";
+import { sendInfo } from "vscode-extension-telemetry-wrapper";
+import { mavenTerminal } from "../mavenTerminal";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
-import { OperationCanceledError } from "../utils/errorUtils";
-import { executeInTerminal, getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
-import { openDialogForFolder } from "../utils/uiUtils";
+import { getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
-import { finishStep } from "./finishStep";
-import { IStep } from "./IStep";
-import { loadArchetypesStep } from "./loadArchetypesStep";
-
+import { runSteps, selectArchetypeStep, specifyArchetypeVersionStep, specifyArtifactIdStep, specifyGroupIdStep, specifyTargetFolderStep } from "./createProject";
+import { IProjectCreationMetadata, IProjectCreationStep } from "./createProject/types";
 const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
 
 export namespace ArchetypeModule {
 
-    async function selectArchetype(): Promise<{ artifactId: string, groupId: string, version: string }> {
-        let step: IStep | undefined = loadArchetypesStep;
-        const archetypeMetadata: ArchetypeMetadata = {
-            groupId: "",
-            artifactId: "",
-            version: "",
-            versions: [],
-            isLoadMore: false
+    export async function createMavenProject(entry: Uri | undefined, _operationId: string): Promise<void> {
+        const targetFolder: string | undefined = entry?.fsPath ?? workspace.workspaceFolders?.[0].uri.fsPath;
+        // default metadata
+        const metadata: IProjectCreationMetadata = {
+            targetFolder,
+            groupId: "com.example",
+            artifactId: "demo"
         };
-        while (step !== finishStep) {
-            if (step !== undefined) {
-                step = await step.execute(archetypeMetadata);
-            } else {
-                throw new Error("Unknown generate step.");
-            }
-        }
-        return { artifactId: archetypeMetadata.artifactId, groupId: archetypeMetadata.groupId, version: archetypeMetadata.version };
-    }
-
-    async function chooseTargetFolder(entry: Uri | undefined): Promise<string> {
-        const result: Uri | undefined = await openDialogForFolder({
-            defaultUri: entry,
-            openLabel: "Select Destination Folder"
-        });
-        const cwd: string | undefined = result !== undefined ? result.fsPath : undefined;
-        if (!cwd) {
-            throw new OperationCanceledError("Target folder not selected.");
-        }
-        return cwd;
-    }
-
-    async function executeInTerminalHandler(archetypeGroupId: string, archetypeArtifactId: string, archetypeVersion: string, targetFolder: string): Promise<void> {
-        const cmdArgs: string[] = [
-            // explicitly using 3.1.2 as maven-archetype-plugin:3.0.1 ignores -DoutputDirectory
-            // see https://github.com/microsoft/vscode-maven/issues/478
-            "org.apache.maven.plugins:maven-archetype-plugin:3.1.2:generate",
-            `-DarchetypeArtifactId="${archetypeArtifactId}"`,
-            `-DarchetypeGroupId="${archetypeGroupId}"`,
-            `-DarchetypeVersion="${archetypeVersion}"`
-        ];
-        let mvnPath: string | undefined;
-        let cwd: string = targetFolder;
-        if (!await getMaven()) {
-            cmdArgs.push(`-DoutputDirectory="${targetFolder}"`);
-            mvnPath = getEmbeddedMavenWrapper();
-            cwd = path.dirname(mvnPath);
-        }
-        await executeInTerminal({ mvnPath, command: cmdArgs.join(" "), pomfile: undefined, terminalName: "Maven archetype", cwd });
-    }
-
-    export async function generateFromArchetype(entry: Uri | undefined, operationId: string): Promise<void> {
-        try {
-            // select archetype.
-            const { artifactId, groupId, version } = await instrumentOperationStep(operationId, "selectArchetype", selectArchetype)();
-            sendInfo(operationId, { archetypeArtifactId: artifactId, archetypeGroupId: groupId, archetypeVersion: version });
-
-            // choose target folder.
-            let targetFolderHint: Uri | undefined;
-            if (entry) {
-                targetFolderHint = entry;
-            } else if (workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
-                targetFolderHint = workspace.workspaceFolders[0].uri;
-            }
-            const cwd: string = await instrumentOperationStep(operationId, "chooseTargetFolder", chooseTargetFolder)(targetFolderHint);
-
-            // execute in terminal.
-            await instrumentOperationStep(operationId, "executeInTerminal", executeInTerminalHandler)(groupId, artifactId, version, cwd);
-        } catch (error) {
-            if (error instanceof OperationCanceledError) {
-                // swallow
-            } else {
-                throw error;
-            }
+        const steps: IProjectCreationStep[] = [selectArchetypeStep, specifyArchetypeVersionStep, specifyGroupIdStep, specifyArtifactIdStep, specifyTargetFolderStep];
+        const success: boolean = await runSteps(steps, metadata);
+        if (success) {
+            await executeInTerminalHandler(metadata);
         }
     }
 
@@ -101,6 +38,55 @@ export namespace ArchetypeModule {
         const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
         await fse.ensureFile(targetFilePath);
         await fse.writeJSON(targetFilePath, archetypes);
+    }
+
+    async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Promise<void> {
+        const {
+            archetypeArtifactId,
+            archetypeGroupId,
+            archetypeVersion,
+            groupId,
+            artifactId,
+            targetFolder
+        } = metadata;
+        if (archetypeArtifactId === undefined || archetypeGroupId === undefined || archetypeVersion === undefined) {
+            throw new Error("Archetype information is incomplete.");
+        }
+        sendInfo("", { archetypeArtifactId, archetypeGroupId, archetypeVersion });
+        const cmdArgs: string[] = [
+            // explicitly using 3.1.2 as maven-archetype-plugin:3.0.1 ignores -DoutputDirectory
+            // see https://github.com/microsoft/vscode-maven/issues/478
+            "org.apache.maven.plugins:maven-archetype-plugin:3.1.2:generate",
+            `-DarchetypeArtifactId="${archetypeArtifactId}"`,
+            `-DarchetypeGroupId="${archetypeGroupId}"`,
+            `-DarchetypeVersion="${archetypeVersion}"`,
+            `-DgroupId="${groupId}"`,
+            `-DartifactId="${artifactId}"`
+        ];
+        let mvnPath: string | undefined;
+        let cwd: string | undefined = targetFolder;
+        if (!await getMaven()) {
+            cmdArgs.push(`-DoutputDirectory="${targetFolder}"`);
+            mvnPath = getEmbeddedMavenWrapper();
+            cwd = path.dirname(mvnPath);
+        }
+
+        const mvn: string | undefined = mvnPath ? mvnPath : await getMaven();
+        if (mvn === undefined) { return; }
+        const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvn));
+
+        const commandLine: string = [mvnString, ...cmdArgs].filter(Boolean).join(" ");
+        const options: vscode.ShellExecutionOptions = { cwd };
+        if (process.platform === "win32") {
+            options.shellQuoting = shellQuotes.cmd;
+            options.executable = "cmd.exe";
+            options.shellArgs = ["/c"];
+        } else {
+            options.shellQuoting = shellQuotes.bash;
+        }
+        const execution = new vscode.ShellExecution(commandLine, options);
+        const createProjectTask = new vscode.Task({ type: "maven", targetFolder, artifactId }, vscode.TaskScope.Global, "createProject", "maven", execution);
+        vscode.tasks.executeTask(createProjectTask);
     }
 
     export async function listArchetypeFromXml(xmlString: string): Promise<Archetype[]> {
@@ -117,7 +103,7 @@ export namespace ArchetypeModule {
                 const repository: string = archetype.repository && archetype.repository[0];
                 const identifier: string = `${groupId}:${artifactId}`;
 
-                if (dict[identifier] !== undefined) {
+                if (dict[identifier] === undefined) {
                     dict[identifier] = new Archetype(artifactId, groupId, repository, description);
                 }
                 if (dict[identifier].versions.indexOf(version) < 0) {
@@ -127,7 +113,7 @@ export namespace ArchetypeModule {
             return Object.keys(dict).map((k: string) => dict[k]);
 
         } catch (err) {
-            // do nothing
+            console.error(err);
         }
         return [];
     }
@@ -140,3 +126,42 @@ export class ArchetypeMetadata {
     public version: string;
     public isLoadMore: boolean;
 }
+
+function wrappedWithQuotes(mvn: string): string {
+    if (mvn === "mvn") {
+        return mvn;
+    } else {
+        return `"${mvn}"`;
+    }
+}
+
+// see https://github.com/microsoft/vscode/blob/dddbfa61652de902c75436d250a50c71501da2d7/src/vs/workbench/contrib/tasks/browser/terminalTaskSystem.ts#L140
+const shellQuotes: { [key: string]: vscode.ShellQuotingOptions } = {
+    cmd: {
+        strong: "\""
+    },
+    powershell: {
+        escape: {
+            escapeChar: "`",
+            charsToEscape: " \"'()"
+        },
+        strong: "'",
+        weak: "\""
+    },
+    bash: {
+        escape: {
+            escapeChar: "\\",
+            charsToEscape: " \"'"
+        },
+        strong: "'",
+        weak: "\""
+    },
+    zsh: {
+        escape: {
+            escapeChar: "\\",
+            charsToEscape: " \"'"
+        },
+        strong: "'",
+        weak: "\""
+    }
+};
