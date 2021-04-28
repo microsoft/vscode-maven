@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.30.0
+### Changed
+- Improved user experience for Maven project creation. [#604](https://github.com/microsoft/vscode-maven/issues/604)
+
+### Fixed
+- Archetype catalog could not be update. [#618](https://github.com/microsoft/vscode-maven/pull/618)
+
 ## 0.29.0
 ### Added
 - Add shortcuts for common lifecycle phases into Maven explorer. [#601](https://github.com/microsoft/vscode-maven/pull/601)
