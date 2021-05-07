@@ -63,24 +63,24 @@ export namespace ArchetypeModule {
             `-DgroupId="${groupId}"`,
             `-DartifactId="${artifactId}"`
         ];
-        let mvnPath: string | undefined;
         let cwd: string | undefined = targetFolder;
-        if (!await getMaven()) {
+        let mvnPath: string | undefined = await getMaven();
+        if (mvnPath === undefined) {
             cmdArgs.push(`-DoutputDirectory="${targetFolder}"`);
             mvnPath = getEmbeddedMavenWrapper();
             cwd = path.dirname(mvnPath);
         }
 
-        const mvn: string | undefined = mvnPath ? mvnPath : await getMaven();
-        if (mvn === undefined) { return; }
-        const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvn));
+        if (mvnPath === undefined) { return; }
+        const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvnPath));
 
-        const commandLine: string = [mvnString, ...cmdArgs].filter(Boolean).join(" ");
+        let commandLine: string = [mvnString, ...cmdArgs].filter(Boolean).join(" ");
         const options: vscode.ShellExecutionOptions = { cwd };
         if (process.platform === "win32") {
             options.shellQuoting = shellQuotes.cmd;
             options.executable = "cmd.exe";
             options.shellArgs = ["/c"];
+            commandLine = `"${commandLine}"`; // wrap full command with quotation marks, cmd /c "<fullcommand>", see https://stackoverflow.com/a/6378038
         } else {
             options.shellQuoting = shellQuotes.bash;
         }
