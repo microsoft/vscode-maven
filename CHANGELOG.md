@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.30.1
+### Fixed
+- Fixed Maven project creation on Windows. [#623](https://github.com/microsoft/vscode-maven/issues/623)
+
 ## 0.30.0
 ### Changed
 - Improved user experience for Maven project creation. [#604](https://github.com/microsoft/vscode-maven/issues/604)
