@@ -76,7 +76,7 @@ export namespace ArchetypeModule {
 
         let commandLine: string = [mvnString, ...cmdArgs].filter(Boolean).join(" ");
         const options: vscode.ShellExecutionOptions = { cwd };
-        if (process.platform === "win32") {
+        if (vscode.env.remoteName === undefined && process.platform === "win32") { // VS Code launched in Windows Desktop.
             options.shellQuoting = shellQuotes.cmd;
             options.executable = "cmd.exe";
             options.shellArgs = ["/c"];
