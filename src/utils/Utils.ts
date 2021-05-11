@@ -270,10 +270,10 @@ export namespace Utils {
             switch (selectedCommand) {
                 case LABEL_CUSTOM:
                     await commands.executeCommand("maven.goal.custom", selectedProject);
-                    break;
+                    return;
                 case LABEL_FAVORITES:
                     await commands.executeCommand("maven.favorites", selectedProject);
-                    break;
+                    return;
                 default:
                     break;
             }
