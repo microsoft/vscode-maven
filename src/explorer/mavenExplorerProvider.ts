@@ -9,9 +9,9 @@ import { MavenProject } from "./model/MavenProject";
 import { WorkspaceFolder } from "./model/WorkspaceFolder";
 
 class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
-    public readonly onDidChangeTreeData: vscode.Event<ITreeItem>;
+    public readonly onDidChangeTreeData: vscode.Event<ITreeItem | undefined>;
 
-    private _onDidChangeTreeData: vscode.EventEmitter<ITreeItem>;
+    private _onDidChangeTreeData: vscode.EventEmitter<ITreeItem | undefined>;
     private _projectMap: Map<string, MavenProject> = new Map();
 
     constructor() {
