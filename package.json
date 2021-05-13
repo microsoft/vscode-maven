@@ -291,6 +291,18 @@
         {
           "command": "maven.archetype.generate",
           "when": "!java:projectManagerActivated"
+        },
+        {
+          "command": "maven.favorites",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "maven.history",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "maven.goal.execute",
+          "when": "isWorkspaceTrusted"
         }
       ],
       "explorer/context": [

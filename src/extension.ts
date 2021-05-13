@@ -52,6 +52,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // register tree view
     await mavenExplorerProvider.loadProjects();
     context.subscriptions.push(vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true }));
+    context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(_e => {
+        mavenExplorerProvider.refresh();
+    }));
     // pom.xml listener to refresh tree view
     registerPomFileWatcher(context);
     // register output, terminal, taskExecutor
