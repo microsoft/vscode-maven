@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
+import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { completionProvider } from "./completion/completionProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { initExpService } from "./experimentationService";
@@ -189,6 +190,7 @@ function registerPomFileAuthoringHelpers(context: vscode.ExtensionContext): void
     context.subscriptions.push(vscode.languages.registerDefinitionProvider([...pomSelector, {
         pattern: "**/*.pom"
     }], definitionProvider));
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(pomSelector, codeActionProvider))
 }
 
 async function mavenHistoryHandler(item: MavenProject | undefined): Promise<void> {
