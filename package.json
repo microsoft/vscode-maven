@@ -12,6 +12,7 @@
   },
   "enableProposedApi": false,
   "capabilities": {
+    "virtualWorkspaces": false,
     "untrustedWorkspaces": {
       "supported": "limited",
       "restrictedConfigurations": [
