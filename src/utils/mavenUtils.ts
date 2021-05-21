@@ -11,7 +11,7 @@ import * as which from "which";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
 import { Settings } from "../Settings";
-import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage, trustWrapper } from "./contextUtils";
+import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
 
@@ -141,9 +141,9 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
-    if (preferMavenWrapper && pomPath) {
+    if (preferMavenWrapper && pomPath && vscode.workspace.isTrusted) {
         const localMvnwPath: string | undefined = await getLocalMavenWrapper(path.dirname(pomPath));
-        if (localMvnwPath && await trustWrapper(localMvnwPath)) {
+        if (localMvnwPath) {
             return localMvnwPath;
         }
     }
@@ -167,6 +167,12 @@ async function getLocalMavenWrapper(projectFolder: string): Promise<string | und
             return potentialMvnwPath;
         }
         current = path.dirname(current);
+
+        const folderUri = vscode.Uri.file(current);
+        if (vscode.workspace.getWorkspaceFolder(folderUri) === undefined) {
+            // traverse up to workspace root as trust granted
+            return undefined;
+        }
     }
     return undefined;
 }

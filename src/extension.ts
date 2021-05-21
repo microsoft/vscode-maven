@@ -29,7 +29,7 @@ import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadMavenSettingsFilePath, loadPackageInfo } from "./utils/contextUtils";
 import { executeInTerminal } from "./utils/mavenUtils";
-import { openFileIfExists, registerCommand } from "./utils/uiUtils";
+import { openFileIfExists, registerCommand, registerCommandRequiringTrust } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -52,17 +52,20 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // register tree view
     await mavenExplorerProvider.loadProjects();
     context.subscriptions.push(vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true }));
+    context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(_e => {
+        mavenExplorerProvider.refresh();
+    }));
     // pom.xml listener to refresh tree view
     registerPomFileWatcher(context);
     // register output, terminal, taskExecutor
     context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
     // register common goals
     ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
-        registerCommand(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
+        registerCommandRequiringTrust(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
     });
     registerCommand(context, "maven.explorer.refresh", refreshExplorerHandler);
-    registerCommand(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
-    registerCommand(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
+    registerCommandRequiringTrust(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
+    registerCommandRequiringTrust(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
     registerCommand(context, "maven.project.openPom", openPomHandler);
     // create project from archetype
     registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
@@ -71,12 +74,12 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
     registerProjectCreationEndListener(context);
 
-    registerCommand(context, "maven.history", mavenHistoryHandler);
-    registerCommand(context, "maven.favorites", runFavoriteCommandsHandler);
-    registerCommand(context, "maven.goal.execute", Utils.executeMavenCommand);
-    registerCommand(context, "maven.goal.execute.fromProjectManager", Utils.executeMavenCommand);
-    registerCommand(context, "maven.goal.execute.fromLifecycleMenu", Utils.executeMavenCommand);
-    registerCommand(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.name, pomfile: pluginGoal.plugin.project.pomPath }));
+    registerCommandRequiringTrust(context, "maven.history", mavenHistoryHandler);
+    registerCommandRequiringTrust(context, "maven.favorites", runFavoriteCommandsHandler);
+    registerCommandRequiringTrust(context, "maven.goal.execute", Utils.executeMavenCommand);
+    registerCommandRequiringTrust(context, "maven.goal.execute.fromProjectManager", Utils.executeMavenCommand);
+    registerCommandRequiringTrust(context, "maven.goal.execute.fromLifecycleMenu", Utils.executeMavenCommand);
+    registerCommandRequiringTrust(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.name, pomfile: pluginGoal.plugin.project.pomPath }));
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());
     registerCommand(context, "maven.view.hierarchical", () => Settings.changeToHierarchicalView());
 

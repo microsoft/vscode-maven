@@ -89,3 +89,24 @@ export function registerCommand(context: vscode.ExtensionContext, commandName: s
     });
     context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
 }
+
+export function registerCommandRequiringTrust(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
+    const instrumentedFunc = async (...args: any[]) => {
+        if (vscode.workspace.isTrusted) {
+            await func(...args);
+        } else {
+            await promptToManageWorkspaceTrust();
+        }
+    };
+    registerCommand(context, commandName, instrumentedFunc, withOperationIdAhead);
+}
+
+async function promptToManageWorkspaceTrust(): Promise<void> {
+    const COMMAND_MANAGE_TRUST = "workbench.action.manageTrust";
+    const OPTION_MANAGE_TRUST = "Manage Workspace Trust";
+    const information = "For security concern, this command requires your trust on current workspace before it can be executed.";
+    const choiceForDetails: string | undefined = await window.showInformationMessage(information, OPTION_MANAGE_TRUST);
+    if (choiceForDetails === OPTION_MANAGE_TRUST) {
+        vscode.commands.executeCommand(COMMAND_MANAGE_TRUST);
+    }
+}

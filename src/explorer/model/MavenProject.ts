@@ -16,6 +16,7 @@ import { ITreeItem } from "./ITreeItem";
 import { LifecycleMenu } from "./LifecycleMenu";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
+
 const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
@@ -119,7 +120,7 @@ export class MavenProject implements ITreeItem {
      * Absolute path of parent POM, inferred from `parent.relativePath`.
      */
     public get parentPomPath(): string {
-        const relativePath : string = this._pom?.project?.parent?.[0]?.relativePath?.[0] ?? "../pom.xml";
+        const relativePath: string = this._pom?.project?.parent?.[0]?.relativePath?.[0] ?? "../pom.xml";
         return path.join(path.dirname(this.pomPath), relativePath);
     }
 
