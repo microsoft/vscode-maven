@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.31.0
+### Added
+- Add code action `add a dependency` when cursor is within `<dependencies>` node. [#634](https://github.com/microsoft/vscode-maven/pull/634)
+
+### Fixed
+- Fixed error when executing "Custom..." or "Favorites..." from command palette. [#628](https://github.com/microsoft/vscode-maven/pull/628)
+
 ## 0.30.1
 ### Fixed
 - Fixed Maven project creation on Windows. [#623](https://github.com/microsoft/vscode-maven/issues/623)
