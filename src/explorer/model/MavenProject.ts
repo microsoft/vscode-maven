@@ -16,7 +16,7 @@ import { ITreeItem } from "./ITreeItem";
 import { LifecycleMenu } from "./LifecycleMenu";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
-import { UntrustedWorkspaceHint } from "./UntrustedWorkspaceHint";
+
 const CONTEXT_VALUE: string = "MavenProject";
 
 export class MavenProject implements ITreeItem {
@@ -143,10 +143,6 @@ export class MavenProject implements ITreeItem {
     }
 
     public getChildren(): ITreeItem[] {
-        if (!vscode.workspace.isTrusted) {
-            return [new UntrustedWorkspaceHint()];
-        }
-
         const ret: ITreeItem[] = [];
         ret.push(new LifecycleMenu(this));
         ret.push(new PluginsMenu(this));
