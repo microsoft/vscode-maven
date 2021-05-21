@@ -214,6 +214,13 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "mavenProjects",
+        "contents": "%contributes.viewsWelcome.mavenProjects.untrustedWorkspaces%",
+        "when": "!isWorkspaceTrusted"
+      }
+    ],
     "menus": {
       "commandPalette": [
         {

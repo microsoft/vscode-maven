@@ -65,6 +65,9 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         });
     }
     public async getChildren(element?: ITreeItem): Promise<ITreeItem[] | undefined> {
+        if (!vscode.workspace.isTrusted) {
+            return undefined;
+        }
         if (element === undefined) {
             if (!vscode.workspace.workspaceFolders) {
                 return undefined;
