@@ -7,6 +7,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ### Fixed
 - Fixed error when executing "Custom..." or "Favorites..." from command palette. [#628](https://github.com/microsoft/vscode-maven/pull/628)
+- Fixed missing entries when resolving unknown types. [#638](https://github.com/microsoft/vscode-maven/pull/638)
 
 ## 0.30.1
 ### Fixed
