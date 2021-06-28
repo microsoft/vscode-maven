@@ -9,6 +9,7 @@ import { Settings } from "../../Settings";
 import { taskExecutor } from "../../taskExecutor";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Utils } from "../../utils/Utils";
+import { DependenciesMenu} from "./DependenciesMenu";
 import { EffectivePomProvider } from "../EffectivePomProvider";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { IEffectivePom } from "./IEffectivePom";
@@ -16,7 +17,6 @@ import { ITreeItem } from "./ITreeItem";
 import { LifecycleMenu } from "./LifecycleMenu";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
-import { DependenciesMenu} from "./DependenciesMenu";
 
 const CONTEXT_VALUE: string = "MavenProject";
 

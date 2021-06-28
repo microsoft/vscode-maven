@@ -7,17 +7,17 @@ import { ITreeItem } from "./ITreeItem";
 const DUPLICATE_VALUE: string = "omitted for duplicate";
 const CONFLICT_VALUE: string = "omitted for conflict";
 
-export class Dependencies implements ITreeItem{
+export class Dependencies implements ITreeItem {
     public dependency: string;
     public pomPath: string;
     private curDep: string;
     private separator: string;
-    private CollapsedState: vscode.TreeItemCollapsibleState;
+    private collapsedState: vscode.TreeItemCollapsibleState;
 
     constructor(dependency: string, separator: string, collapsedState: vscode.TreeItemCollapsibleState, pomPath: string) {
         this.dependency = dependency;
-        this.separator = separator + "   ";//three spaces
-        this.CollapsedState = collapsedState;
+        this.separator = separator + "   "; //three spaces
+        this.collapsedState = collapsedState;
         this.pomPath = pomPath;
     }
 
@@ -33,12 +33,12 @@ export class Dependencies implements ITreeItem{
         this.curDep = this.dependency.split(this.separator, 1)[0];
         //handle the version switch in conflict
         if (this.curDep.indexOf(CONFLICT_VALUE) !== -1) {
-            var re = /([\w.]+:[\w.-]+:)([\w.-]+)(:[\w/.(\s]+):\s([\w.-]+)\)/gm;
+            const re = /([\w.]+:[\w.-]+:)([\w.-]+)(:[\w/.(\s]+):\s([\w.-]+)\)/gm;
             this.curDep = this.curDep.replace(re, "$1$4$3 with $2)");
         }
-        var indexCut: number = this.curDep.indexOf("(");
-        var depLabel: string;
-        var depDescription: string = "";
+        const indexCut: number = this.curDep.indexOf("(");
+        let depLabel: string;
+        let depDescription: string = "";
         if (indexCut === -1) {
             depLabel = this.curDep;
         } else {
@@ -46,8 +46,8 @@ export class Dependencies implements ITreeItem{
             depDescription = this.curDep.substr(indexCut);
         }
         //highlight for conflict and description for duplicate
-        var treeItem: vscode.TreeItem = new vscode.TreeItem(depLabel, this.CollapsedState);
-        if(this.curDep.indexOf(DUPLICATE_VALUE) !== -1) {
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(depLabel, this.collapsedState);
+        if (this.curDep.indexOf(DUPLICATE_VALUE) !== -1) {
             treeItem.iconPath = new vscode.ThemeIcon("trash");
             treeItem.description = depDescription;
         } else if (this.curDep.indexOf(CONFLICT_VALUE) !== -1) {
@@ -61,19 +61,17 @@ export class Dependencies implements ITreeItem{
 
     private getDepsInString(treecontent: string): Dependencies[] {
         if (treecontent) {
-            const treeChildren: string[] = treecontent.split(this.separator+"+-").splice(1, ); //delelte first line
+            const treeChildren: string[] = treecontent.split(this.separator + "+-").splice(1); //delelte first line
             const toDep = (treeChild: string): Dependencies => {
                 if (treeChild.indexOf("\r\n") === -1){
                     return new Dependencies(treeChild, this.separator, vscode.TreeItemCollapsibleState.None, this.pomPath);
                 } else {
                     return new Dependencies(treeChild, this.separator, vscode.TreeItemCollapsibleState.Collapsed, this.pomPath);
                 }
-            }
-            const childrenDep = treeChildren.map(dep => toDep(dep));
-            return childrenDep;
+            };
+            return treeChildren.map(dep => toDep(dep));
         } else {
             return [];
         }
     }
 }
-
