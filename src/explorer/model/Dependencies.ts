@@ -16,7 +16,7 @@ export class Dependencies implements ITreeItem {
 
     constructor(dependency: string, separator: string, collapsedState: vscode.TreeItemCollapsibleState, pomPath: string) {
         this.dependency = dependency;
-        this.separator = separator + "   "; //three spaces
+        this.separator = `${separator}   `; // three spaces
         this.collapsedState = collapsedState;
         this.pomPath = pomPath;
     }
@@ -61,15 +61,15 @@ export class Dependencies implements ITreeItem {
 
     private getDepsInString(treecontent: string): Dependencies[] {
         if (treecontent) {
-            const treeChildren: string[] = treecontent.split(this.separator + "+-").splice(1); //delelte first line
+            const treeChildren: string[] = treecontent.split(`${this.separator}+-`).splice(1); //delelte first line
             const toDep = (treeChild: string): Dependencies => {
-                if (treeChild.indexOf("\r\n") === -1){
+                if (treeChild.indexOf("\r\n") === -1) {
                     return new Dependencies(treeChild, this.separator, vscode.TreeItemCollapsibleState.None, this.pomPath);
                 } else {
                     return new Dependencies(treeChild, this.separator, vscode.TreeItemCollapsibleState.Collapsed, this.pomPath);
                 }
             };
-            return treeChildren.map(dep => toDep(dep));
+            return treeChildren.map(toDep);
         } else {
             return [];
         }

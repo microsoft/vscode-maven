@@ -46,7 +46,7 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
 export async function rawDependencyTree(pomPath: string): Promise<any> {
     let outputPath: string;
     {
-        outputPath = path.dirname(pomPath) + "\\target\\dependency-graph.txt";
+        outputPath = `${path.dirname(pomPath)}\\target\\dependency-graph.txt`;
         await executeInBackground(`depgraph:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds`, pomPath);
     }
     return await readFileIfExists(outputPath);
