@@ -38,9 +38,17 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
     return await readFileIfExists(outputPath);
 }
 
-export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
-    const outputPath: string = getTempFolder(pomPath);
-    await executeInBackground(`dependency:tree -Dverbose -DoutputFile="${outputPath}"`, pomPath);
+// export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
+//     const outputPath: string = getTempFolder(pomPath);
+//     await executeInBackground(`dependency:tree -Dverbose -DoutputFile="${outputPath}"`, pomPath);
+//     return await readFileIfExists(outputPath);
+// }
+export async function rawDependencyTree(pomPath: string): Promise<any> {
+    let outputPath: string;
+    {
+        outputPath = path.dirname(pomPath) + "\\target\\dependency-graph.txt";
+        await executeInBackground(`depgraph:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds`, pomPath);
+    }
     return await readFileIfExists(outputPath);
 }
 
@@ -83,7 +91,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
                 if (code === 0) {
                     resolve(code);
                 } else {
-                    reject(new Error(`Background process terminated with code ${code}.`));
+                    reject(new Error(`Background process terminated with code ${code} and the failed command can be found in output channel.`));
                 }
             } else {
                 reject(new Error(`Background process killed by signal ${signal}.`));
