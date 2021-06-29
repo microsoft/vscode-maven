@@ -19,3 +19,4 @@ resources/IndexData/index/segments*
 .vs/*
 
 *.jar
+*.tgz
