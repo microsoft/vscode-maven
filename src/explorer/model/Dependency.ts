@@ -11,12 +11,8 @@ const CONFLICT_INDICATOR: string = "omitted for conflict";
 
 export class Dependency implements ITreeItem {
     private treeNode: TreeNode;
-    private label: string = "";
+    private label: string = ""; // groupId:artifactId:version:scope
     private description: string = "";
-    private groupId: string = "";
-    private artifactId: string = "";
-    private version: string = "";
-    private scope: string = "";
     constructor(treeNode: TreeNode) {
         this.treeNode = treeNode;
         const dependency: string = treeNode.value;
@@ -27,7 +23,6 @@ export class Dependency implements ITreeItem {
         } else {
             this.label = dependency;
         }
-        [this.groupId, this.artifactId, this.version, this.scope] = this.label.split(":");
     }
 
     public getContextValue(): string {
