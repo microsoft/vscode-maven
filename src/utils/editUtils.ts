@@ -1,8 +1,8 @@
 import { commands, Position, Selection, TextEdit, TextEditor, window, workspace, WorkspaceEdit } from "vscode";
-import * as protocolConverter from "vscode-languageclient/lib/protocolConverter";
+import * as protocolConverter from "vscode-languageclient/lib/common/protocolConverter";
 import * as ls from "vscode-languageserver-protocol";
 
-const p2c: protocolConverter.Converter = protocolConverter.createConverter();
+const p2c: protocolConverter.Converter = protocolConverter.createConverter(undefined, undefined);
 
 // tslint:disable-next-line: export-name
 export async function applyWorkspaceEdit(edit: ls.WorkspaceEdit): Promise<void> {
