@@ -9,9 +9,9 @@ import { Settings } from "../../Settings";
 import { taskExecutor } from "../../taskExecutor";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Utils } from "../../utils/Utils";
-import { DependenciesMenu} from "./DependenciesMenu";
 import { EffectivePomProvider } from "../EffectivePomProvider";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
+import { DependenciesMenu} from "./DependenciesMenu";
 import { IEffectivePom } from "./IEffectivePom";
 import { ITreeItem } from "./ITreeItem";
 import { LifecycleMenu } from "./LifecycleMenu";
@@ -147,7 +147,7 @@ export class MavenProject implements ITreeItem {
         const ret: ITreeItem[] = [];
         ret.push(new LifecycleMenu(this));
         ret.push(new PluginsMenu(this));
-        if (this.packaging !== "pom") { // parent pom does not have dependencies
+        if (this.packaging !== "pom") { // hide the "Dependencies" item for "pom" project
             ret.push(new DependenciesMenu(this));
         }
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {

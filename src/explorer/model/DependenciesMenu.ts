@@ -2,11 +2,12 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { getDependencyTree } from "../../handlers/showDependenciesHandler";
-import { Dependencies } from "./Dependencies";
+import { parseRawDependencyDataHandler } from "../../handlers/parseRawDependencyDataHandler";
+import { Dependency } from "./Dependency";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
+import { TreeNode } from "./TreeNode";
 
 export class DependenciesMenu extends Menu implements ITreeItem {
     constructor(project: MavenProject) {
@@ -14,16 +15,9 @@ export class DependenciesMenu extends Menu implements ITreeItem {
         this.name = "Dependencies";
     }
 
-    public async getChildren() : Promise<Dependencies[]> {
-        const dependencyTree: string | undefined = await getDependencyTree( this.project.pomPath);
-        if (dependencyTree === undefined) {
-            throw new Error("Failed to generate dependency tree.");
-        }
-        let treeContent: string = dependencyTree.slice(0, -1); //delete last "\n"
-        treeContent = treeContent.replace(/\|/g, " ");
-        treeContent = treeContent.replace(/\\/g, "+");
-        treeContent = treeContent.replace(/\n/g, "\r\n");
-        return Promise.resolve(this.getDepsInString(treeContent));
+    public async getChildren() : Promise<Dependency[]> {
+        const rootNode = await parseRawDependencyDataHandler(this.project);
+        return Promise.resolve(parseDependency(rootNode));
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -31,20 +25,12 @@ export class DependenciesMenu extends Menu implements ITreeItem {
         treeItem.iconPath = new vscode.ThemeIcon("library");
         return treeItem;
     }
+}
 
-    private getDepsInString(treecontent: string): Dependencies[] {
-        if (treecontent) {
-            const treeChildren: string[] = treecontent.split(`\r\n+-`).splice(1); // delete first line
-            const toDep = (treeChild: string): Dependencies => {
-                if (treeChild.indexOf("\r\n") === -1) {
-                    return new Dependencies(treeChild, "\r\n", vscode.TreeItemCollapsibleState.None, this.project.pomPath);
-                } else {
-                    return new Dependencies(treeChild, "\r\n", vscode.TreeItemCollapsibleState.Collapsed, this.project.pomPath);
-                }
-            };
-            return treeChildren.map(toDep);
-        } else {
-            return [];
-        }
+export function parseDependency(parentNode: TreeNode): Dependency[] {
+    if (parentNode.children) {
+        return parentNode.children.map(childNode => new Dependency(childNode));
+    } else {
+        return [];
     }
 }

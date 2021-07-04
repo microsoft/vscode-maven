@@ -38,18 +38,11 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
     return await readFileIfExists(outputPath);
 }
 
-// export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
-//     const outputPath: string = getTempFolder(pomPath);
-//     await executeInBackground(`dependency:tree -Dverbose -DoutputFile="${outputPath}"`, pomPath);
-//     return await readFileIfExists(outputPath);
-// }
 export async function rawDependencyTree(pomPath: string): Promise<any> {
-    let outputPath: string;
-    {
-        outputPath = `${path.dirname(pomPath)}\\target\\dependency-graph.txt`;
-        await executeInBackground(`depgraph:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds`, pomPath);
-    }
-    return await readFileIfExists(outputPath);
+    const outputDirectory: string = path.dirname(pomPath);
+    const outputFileName: string = "dependency-graph";
+    await executeInBackground(`depgraph:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}"`, pomPath);
+    return await readFileIfExists(`${outputDirectory}\\${outputFileName}.txt`);
 }
 
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {
