@@ -84,7 +84,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
                 if (code === 0) {
                     resolve(code);
                 } else {
-                    reject(new Error(`Background process terminated with code ${code} and the failed command can be found in output channel.`));
+                    reject(new Error(`Background process terminated with code ${code}`));
                 }
             } else {
                 reject(new Error(`Background process killed by signal ${signal}.`));
