@@ -2,26 +2,23 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { parseDependency } from "./DependenciesMenu";
 import { ITreeItem } from "./ITreeItem";
 import { TreeNode } from "./TreeNode";
 
 const DUPLICATE_INDICATOR: string = "omitted for duplicate";
 const CONFLICT_INDICATOR: string = "omitted for conflict";
 
-export class Dependency implements ITreeItem {
-    private treeNode: TreeNode;
+export class Dependency extends TreeNode implements ITreeItem {
     private label: string = ""; // groupId:artifactId:version:scope
     private description: string = "";
-    constructor(treeNode: TreeNode) {
-        this.treeNode = treeNode;
-        const dependency: string = treeNode.value;
-        const indexCut: number = dependency.indexOf("(");
+    constructor(value: string) {
+        super(value);
+        const indexCut: number = value.indexOf("(");
         if (indexCut !== -1) {
-            this.description = dependency.substr(indexCut);
-            this.label = dependency.substr(0, indexCut);
+            this.description = value.substr(indexCut);
+            this.label = value.substr(0, indexCut);
         } else {
-            this.label = dependency;
+            this.label = value;
         }
     }
 
@@ -30,13 +27,12 @@ export class Dependency implements ITreeItem {
     }
 
     public async getChildren(): Promise<Dependency[] | undefined> {
-        return Promise.resolve(parseDependency(this.treeNode));
+        return Promise.resolve(<Dependency[]> this.children);
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        //highlight for conflict and description for duplicate
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.label);
-        if (this.treeNode.children.length !== 0) {
+        if (this.children.length !== 0) {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         } else {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;

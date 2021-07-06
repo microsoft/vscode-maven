@@ -40,9 +40,9 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
 
 export async function rawDependencyTree(pomPath: string): Promise<any> {
     const outputDirectory: string = path.dirname(pomPath);
-    const outputFileName: string = "dependency-graph";
-    await executeInBackground(`depgraph:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}"`, pomPath);
-    return await readFileIfExists(`${outputDirectory}\\${outputFileName}.txt`);
+    const outputFileName: string = "dependency-graph.txt";
+    await executeInBackground(`com.github.ferstl:depgraph-maven-plugin:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}"`, pomPath);
+    return await readFileIfExists(path.join(outputDirectory, outputFileName));
 }
 
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {

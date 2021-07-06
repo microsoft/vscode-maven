@@ -7,7 +7,6 @@ import { Dependency } from "./Dependency";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
-import { TreeNode } from "./TreeNode";
 
 export class DependenciesMenu extends Menu implements ITreeItem {
     constructor(project: MavenProject) {
@@ -16,21 +15,13 @@ export class DependenciesMenu extends Menu implements ITreeItem {
     }
 
     public async getChildren() : Promise<Dependency[]> {
-        const rootNode = await parseRawDependencyDataHandler(this.project);
-        return Promise.resolve(parseDependency(rootNode));
+        const treeNodes = await parseRawDependencyDataHandler(this.project);
+        return Promise.resolve(treeNodes);
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = new vscode.ThemeIcon("library");
         return treeItem;
-    }
-}
-
-export function parseDependency(parentNode: TreeNode): Dependency[] {
-    if (parentNode.children) {
-        return parentNode.children.map(childNode => new Dependency(childNode));
-    } else {
-        return [];
     }
 }
