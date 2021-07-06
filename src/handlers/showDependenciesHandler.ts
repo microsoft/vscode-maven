@@ -17,7 +17,7 @@ export async function showDependenciesHandler(project: MavenProject): Promise<vo
     await vscode.window.showTextDocument(document, { viewColumn: vscode.ViewColumn.Active, preview: false });
 }
 
-async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
+export async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
     let pomPath: string;
     let name: string;
     if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {

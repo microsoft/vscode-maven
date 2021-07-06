@@ -38,10 +38,11 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
     return await readFileIfExists(outputPath);
 }
 
-export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
-    const outputPath: string = getTempFolder(pomPath);
-    await executeInBackground(`dependency:tree -Dverbose -DoutputFile="${outputPath}"`, pomPath);
-    return await readFileIfExists(outputPath);
+export async function rawDependencyTree(pomPath: string): Promise<any> {
+    const outputDirectory: string = path.dirname(pomPath);
+    const outputFileName: string = "dependency-graph.txt";
+    await executeInBackground(`com.github.ferstl:depgraph-maven-plugin:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}"`, pomPath);
+    return await readFileIfExists(path.join(outputDirectory, outputFileName));
 }
 
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {
@@ -83,7 +84,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
                 if (code === 0) {
                     resolve(code);
                 } else {
-                    reject(new Error(`Background process terminated with code ${code}.`));
+                    reject(new Error(`Background process terminated with code ${code}`));
                 }
             } else {
                 reject(new Error(`Background process killed by signal ${signal}.`));
