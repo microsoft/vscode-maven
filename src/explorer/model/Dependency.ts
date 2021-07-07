@@ -11,7 +11,12 @@ const CONFLICT_INDICATOR: string = "omitted for conflict";
 export class Dependency extends TreeNode implements ITreeItem {
     private label: string = ""; // groupId:artifactId:version:scope
     private description: string = "";
-    constructor(value: string) {
+    private projectPomPath: string = "";
+    private groupId: string = "";
+    private artifactId: string = "";
+    private version: string = "";
+    private scope: string = "";
+    constructor(value: string, projectPomPath: string) {
         super(value);
         const indexCut: number = value.indexOf("(");
         if (indexCut !== -1) {
@@ -20,10 +25,12 @@ export class Dependency extends TreeNode implements ITreeItem {
         } else {
             this.label = value;
         }
+        [this.groupId, this.artifactId, this.version, this.scope] = this.label.split(":");
+        this.projectPomPath = projectPomPath;
     }
 
     public getContextValue(): string {
-        return "Dependencies";
+        return "Dependency";
     }
 
     public async getChildren(): Promise<Dependency[] | undefined> {

@@ -3,8 +3,9 @@
 
 export class TreeNode {
     protected value: string;
-    protected children: TreeNode[] = [];
-    protected parent?: TreeNode | undefined;
+    public children: TreeNode[] = [];
+    public parent?: TreeNode | undefined;
+    public oldestAncestor?: TreeNode | undefined;
     constructor(value: string) {
         this.value = value;
     }

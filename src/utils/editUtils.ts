@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { commands, Position, Selection, TextEdit, TextEditor, window, workspace, WorkspaceEdit } from "vscode";
 import * as protocolConverter from "vscode-languageclient/lib/common/protocolConverter";
 import * as ls from "vscode-languageserver-protocol";
@@ -45,4 +46,12 @@ async function executeRangeFormat(editor: TextEditor, startPosition: Position, l
     const endPosition: Position = editor.document.positionAt(editor.document.offsetAt(new Position(startPosition.line + lineOffset + 1, 0)) - 1);
     editor.selection = new Selection(startPosition, endPosition);
     await commands.executeCommand("editor.action.formatSelection");
+}
+
+export function getIndentation(document: vscode.TextDocument, offset: number): string {
+    const closingTagPosition: vscode.Position = document.positionAt(offset);
+    return document.getText(new vscode.Range(
+        new vscode.Position(closingTagPosition.line, 0),
+        closingTagPosition
+    ));
 }

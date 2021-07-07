@@ -24,22 +24,24 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const indent: string = "   "; // three spaces
     const separator: string = "\r\n";
     const starter: string = "+- ";
-    return parseTreeNodes(treeContent, separator, indent, starter, eol);
+    const treeNodes: Dependency[] = parseTreeNodes(treeContent, separator, indent, starter, eol, project.pomPath);
+    setOldestAncestor(treeNodes);
+    return treeNodes;
 }
 
-function parseTreeNodes(treecontent: string, separator: string, indent: string, starter: string, eol: string): Dependency[] {
+function parseTreeNodes(treecontent: string, separator: string, indent: string, starter: string, eol: string, projectPomPath: string): Dependency[] {
     const treeNodes: Dependency[] = [];
     if (treecontent) {
         const treeChildren: string[] = treecontent.split(`${separator}${starter}`).splice(1); // delete first line
         const toTreeNode = (treeChild: string): Dependency => {
             let curNode: Dependency;
             if (treeChild.indexOf(eol) === -1) {
-                curNode = new Dependency(treeChild);
+                curNode = new Dependency(treeChild, projectPomPath);
             } else {
                 const curValue: string = treeChild.split(separator, 1)[0];
-                curNode = new Dependency(curValue);
+                curNode = new Dependency(curValue, projectPomPath);
                 const nextSeparator = `${separator}${indent}`;
-                const childrenNodes: Dependency[] = parseTreeNodes(treeChild, nextSeparator, indent, starter, eol);
+                const childrenNodes: Dependency[] = parseTreeNodes(treeChild, nextSeparator, indent, starter, eol, projectPomPath);
                 curNode.addChildren(childrenNodes);
             }
             return curNode;
@@ -47,4 +49,21 @@ function parseTreeNodes(treecontent: string, separator: string, indent: string, 
         treeChildren.forEach(treeChild => treeNodes.push(toTreeNode(treeChild)));
     }
     return treeNodes;
+}
+
+function setOldestAncestor(treeNodes: Dependency[]): void {
+    if (treeNodes) {
+        treeNodes.forEach(node => {
+            if (node.parent) {
+                if (node.parent.oldestAncestor === undefined) {
+                    node.children.forEach(child => child.oldestAncestor = node.parent);
+                } else {
+                    node.children.forEach(child => child.oldestAncestor = node.parent?.oldestAncestor);
+                }
+            } else {
+                node.children.forEach(child => child.oldestAncestor = node);
+            }
+            setOldestAncestor(<Dependency[]> node.children);
+        });
+    }
 }

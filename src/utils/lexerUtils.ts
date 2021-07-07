@@ -7,6 +7,7 @@ export enum XmlTagName {
     ArtifactId = "artifactId",
     Version = "version",
     Dependencies = "dependencies",
+    Exclusions = "exclusions",
     Plugins = "plugins",
     Project = "project"
 }
