@@ -5,7 +5,7 @@ export class TreeNode {
     protected value: string;
     public children: TreeNode[] = [];
     public parent?: TreeNode | undefined;
-    public oldestAncestor?: TreeNode | undefined;
+    public root?: TreeNode | undefined;
     constructor(value: string) {
         this.value = value;
     }

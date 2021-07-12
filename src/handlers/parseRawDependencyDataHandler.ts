@@ -20,50 +20,51 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const re = /([\w.]+:[\w.-]+:)([\w.-]+)(:[\w/.(\s]+):\s([\w.-]+)\)/gm;
     treeContent = treeContent.replace(re, "$1$4$3 with $2)");
 
-    const eol: string = "\r\n";
     const indent: string = "   "; // three spaces
     const separator: string = "\r\n";
     const starter: string = "+- ";
-    const treeNodes: Dependency[] = parseTreeNodes(treeContent, separator, indent, starter, eol, project.pomPath);
-    setOldestAncestor(treeNodes);
-    return treeNodes;
+    return parseTreeNodes(treeContent, separator, indent, starter, project.pomPath);
 }
 
-function parseTreeNodes(treecontent: string, separator: string, indent: string, starter: string, eol: string, projectPomPath: string): Dependency[] {
+function parseTreeNodes(treecontent: string, separator: string, indent: string, starter: string, projectPomPath: string): Dependency[] {
     const treeNodes: Dependency[] = [];
     if (treecontent) {
-        const treeChildren: string[] = treecontent.split(`${separator}${starter}`).splice(1); // delete first line
-        const toTreeNode = (treeChild: string): Dependency => {
-            let curNode: Dependency;
-            if (treeChild.indexOf(eol) === -1) {
-                curNode = new Dependency(treeChild, projectPomPath);
+        let curNode: Dependency;
+        let preNode: Dependency;
+        let parentNode: Dependency;
+        let rootNode: Dependency;
+        let curIndex: number;
+        let preIndex: number = 1;
+        const treeChildren: string[] = treecontent.split(separator).splice(1); // delete first line
+        treeChildren.forEach(treeChild => {
+            curIndex = treeChild.indexOf(starter);
+            const label: string = treeChild.slice(curIndex + starter.length);
+            curNode = new Dependency(label, projectPomPath);
+            if (curIndex === 0) {
+                curNode.root = curNode;
+                rootNode = curNode;
+                parentNode = curNode;
             } else {
-                const curValue: string = treeChild.split(separator, 1)[0];
-                curNode = new Dependency(curValue, projectPomPath);
-                const nextSeparator = `${separator}${indent}`;
-                const childrenNodes: Dependency[] = parseTreeNodes(treeChild, nextSeparator, indent, starter, eol, projectPomPath);
-                curNode.addChildren(childrenNodes);
-            }
-            return curNode;
-        };
-        treeChildren.forEach(treeChild => treeNodes.push(toTreeNode(treeChild)));
-    }
-    return treeNodes;
-}
-
-function setOldestAncestor(treeNodes: Dependency[]): void {
-    if (treeNodes) {
-        treeNodes.forEach(node => {
-            if (node.parent) {
-                if (node.parent.oldestAncestor === undefined) {
-                    node.children.forEach(child => child.oldestAncestor = node.parent);
+                curNode.root = rootNode;
+                if (curIndex === preIndex) {
+                    parentNode.addChild(curNode);
+                } else if (curIndex > preIndex) {
+                    parentNode = preNode;
+                    parentNode.addChild(curNode);
                 } else {
-                    node.children.forEach(child => child.oldestAncestor = node.parent?.oldestAncestor);
+                    const level: number = (preIndex - curIndex) / indent.length;
+                    for (let i = level; i > 0; i -= 1) {
+                        parentNode = <Dependency> parentNode.parent;
+                    }
+                    parentNode.addChild(curNode);
                 }
-            } else {
-                node.children.forEach(child => child.oldestAncestor = node);
             }
-            setOldestAncestor(<Dependency[]> node.children);
+            if (curIndex === 0 && curIndex < preIndex) {
+                treeNodes.push(rootNode);
+            }
+            preIndex = curIndex === 0 ? 1 : curIndex;
+            preNode = curNode;
         });
     }
+    return treeNodes;
 }
