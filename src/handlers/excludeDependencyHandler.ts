@@ -3,24 +3,25 @@
 
 import * as fse from "fs-extra";
 import * as vscode from "vscode";
+import { Dependency } from "../explorer/model/Dependency";
 import { getIndentation } from "../utils/editUtils";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 
-export async function excludeDependencyHandler(options?: any): Promise<void> {
-    if (options.root === undefined || options.label === options.root.label) { //user cannot exclude the dependencies written in pom.xml
+export async function excludeDependencyHandler(toExclude?: Dependency): Promise<void> {
+    if (toExclude === undefined) {
+        throw new UserError("Only Dependency can be excluded.");
+    }
+    const root: Dependency | undefined =  toExclude.root ? <Dependency> toExclude.root : undefined;
+    if (root === undefined || toExclude.fullName === root.fullName) {
         vscode.window.showInformationMessage("The dependency written in pom can not be excluded.");
         return;
     }
-    const pomPath: string = options.projectPomPath;
+    const pomPath: string = toExclude.ProjectPomPath;
     if (!await fse.pathExists(pomPath)) {
         throw new UserError("Specified POM file does not exist on file system.");
     }
-    let groupId: string;
-    let artifactId: string;
-    [groupId, artifactId] = options.label.split(":");
-    const rootAid: string = options.root.label.split(":")[1];
-    await excludeDependency(pomPath, groupId, artifactId, rootAid);
+    await excludeDependency(pomPath, toExclude.groupId, toExclude.artifactId, root.artifactId);
 }
 
 async function excludeDependency(pomPath: string, gid: string, aid: string, rootAid: string): Promise<void> {
@@ -35,7 +36,7 @@ async function excludeDependency(pomPath: string, gid: string, aid: string, root
     const dependenciesNode: ElementNode | undefined = projectNode.children && projectNode.children.find(node => node.tag === XmlTagName.Dependencies);
     const dependencyNode: ElementNode | undefined = dependenciesNode?.children && dependenciesNode?.children.find(node => node.children && node.children[1].tag === XmlTagName.ArtifactId && node.children[1].text === rootAid);
     if (dependencyNode === undefined) {
-        throw new UserError("Cannot find the root dependency where to insert Exclusions.");
+        throw new Error(`Failed to find the dependency where ${gid}:${aid} is introduced.`);
     } else {
         await insertExcludeDependency(pomPath, dependencyNode, gid, aid);
     }
