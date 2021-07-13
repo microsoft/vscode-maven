@@ -71,43 +71,38 @@ class LocalProvider implements IMavenCompletionItemProvider {
 
     private async searchForGroupIds(segments: string[]): Promise<string[]> {
         const cwd: string = path.join(getMavenLocalRepository(), ...segments);
-        return new Promise<string[]>((resolve, _reject) => {
-            fg.async(["**/*/*", "!**/*.*"], { onlyFiles: false, deep: 2, cwd }).then(entries => {
-                const validSegments: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
-                const prefix: string = _.isEmpty(segments) ? "" : [...segments, ""].join(".");
-                const groupIds: string[] = Array.from(new Set(validSegments)).map(seg => `${prefix}${seg}`);
-                resolve(groupIds);
-            }).catch(_e => {
-                console.error(_e);
-                resolve([]);
-            });
-        });
+        try {
+            const entries = await fg(["**/*/*", "!**/*.*"], { onlyFiles: false, deep: 2, cwd });
+            const validSegments: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
+            const prefix: string = _.isEmpty(segments) ? "" : [...segments, ""].join(".");
+            return Array.from(new Set(validSegments)).map(seg => `${prefix}${seg}`);
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 
     private async searchForArtifactIds(groupId: string): Promise<string[]> {
         const cwd: string = path.join(getMavenLocalRepository(), ...groupId.split("."));
-        return await new Promise<string[]>((resolve, _reject) => {
-            fg.async(["**/*.pom"], { deep: 2, cwd }).then(entries => {
-                const validArtifactIds: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
-                resolve(Array.from(new Set(validArtifactIds)));
-            }).catch(_e => {
-                console.error(_e);
-                resolve([]);
-            });
-        });
+        try {
+            const entries = await fg(["**/*.pom"], { deep: 2, cwd });
+            const validArtifactIds: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
+            return Array.from(new Set(validArtifactIds));
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 
     private async searchForVersions(groupId: string, artifactId: string): Promise<string[]> {
         const cwd: string = path.join(getMavenLocalRepository(), ...groupId.split("."), artifactId);
-        return await new Promise<string[]>((resolve, _reject) => {
-            fg.async(["*/*.pom"], { deep: 1, cwd }).then(entries => {
-                const validVersions: string[] = entries.map((e: string) => e.substring(0, e.indexOf("/")));
-                resolve(validVersions);
-            }).catch(_e => {
-                console.error(_e);
-                resolve([]);
-            });
-        });
+        try {
+            const entries = await fg(["*/*.pom"], { deep: 1, cwd });
+            return entries.map((e: string) => e.substring(0, e.indexOf("/")));
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 
 }
