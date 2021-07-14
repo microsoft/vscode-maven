@@ -17,7 +17,7 @@ export async function excludeDependencyHandler(toExclude?: Dependency): Promise<
         vscode.window.showInformationMessage("The dependency written in pom can not be excluded.");
         return;
     }
-    const pomPath: string = toExclude.ProjectPomPath;
+    const pomPath: string = toExclude.projectPomPath;
     if (!await fse.pathExists(pomPath)) {
         throw new UserError("Specified POM file does not exist on file system.");
     }

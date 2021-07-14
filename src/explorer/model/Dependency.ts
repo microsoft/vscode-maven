@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { join } from "lodash";
 import * as vscode from "vscode";
 import { ITreeItem } from "./ITreeItem";
 import { TreeNode } from "./TreeNode";
@@ -11,42 +10,42 @@ const CONFLICT_INDICATOR: string = "omitted for conflict";
 
 export class Dependency extends TreeNode implements ITreeItem {
     private fullArtifactName: string = ""; // groupId:artifactId:version:scope
-    private projectPomPath: string;
-    private gid: string;
-    private aid: string;
-    private version: string;
-    private scope: string;
+    private _projectPomPath: string;
+    private _gid: string;
+    private _aid: string;
+    private _version: string;
+    private _scope: string;
     private supplement: string = "";
     constructor(gid: string, aid: string, version: string, scope: string, supplement: string, projectPomPath: string) {
         super();
-        this.gid = gid;
-        this.aid = aid;
-        this.version = version;
-        this.scope = scope;
-        this.fullArtifactName = join([gid, aid, version, scope], ":");
+        this._gid = gid;
+        this._aid = aid;
+        this._version = version;
+        this._scope = scope;
+        this.fullArtifactName = [gid, aid, version, scope].join(":");
         this.supplement = supplement;
-        this.projectPomPath = projectPomPath;
+        this._projectPomPath = projectPomPath;
     }
 
-    public get ProjectPomPath(): string {
-        return this.projectPomPath;
+    public get projectPomPath(): string {
+        return this._projectPomPath;
     }
     public get fullName(): string {
         return this.fullArtifactName;
     }
 
     public get groupId(): string {
-        return this.gid;
+        return this._gid;
     }
 
     public get artifactId(): string {
-        return this.aid;
+        return this._aid;
     }
-    public get Version(): string {
-        return this.version;
+    public get version(): string {
+        return this._version;
     }
-    public get Scope(): string {
-        return this.scope;
+    public get scope(): string {
+        return this._scope;
     }
 
     public getContextValue(): string {
