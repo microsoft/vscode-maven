@@ -9,21 +9,47 @@ const DUPLICATE_INDICATOR: string = "omitted for duplicate";
 const CONFLICT_INDICATOR: string = "omitted for conflict";
 
 export class Dependency extends TreeNode implements ITreeItem {
-    private label: string = ""; // groupId:artifactId:version:scope
-    private description: string = "";
-    constructor(value: string) {
-        super(value);
-        const indexCut: number = value.indexOf("(");
-        if (indexCut !== -1) {
-            this.description = value.substr(indexCut);
-            this.label = value.substr(0, indexCut);
-        } else {
-            this.label = value;
-        }
+    private fullArtifactName: string = ""; // groupId:artifactId:version:scope
+    private _projectPomPath: string;
+    private _gid: string;
+    private _aid: string;
+    private _version: string;
+    private _scope: string;
+    private supplement: string = "";
+    constructor(gid: string, aid: string, version: string, scope: string, supplement: string, projectPomPath: string) {
+        super();
+        this._gid = gid;
+        this._aid = aid;
+        this._version = version;
+        this._scope = scope;
+        this.fullArtifactName = [gid, aid, version, scope].join(":");
+        this.supplement = supplement;
+        this._projectPomPath = projectPomPath;
+    }
+
+    public get projectPomPath(): string {
+        return this._projectPomPath;
+    }
+    public get fullName(): string {
+        return this.fullArtifactName;
+    }
+
+    public get groupId(): string {
+        return this._gid;
+    }
+
+    public get artifactId(): string {
+        return this._aid;
+    }
+    public get version(): string {
+        return this._version;
+    }
+    public get scope(): string {
+        return this._scope;
     }
 
     public getContextValue(): string {
-        return "Dependencies";
+        return "Dependency";
     }
 
     public async getChildren(): Promise<Dependency[] | undefined> {
@@ -31,19 +57,19 @@ export class Dependency extends TreeNode implements ITreeItem {
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.label);
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.fullArtifactName);
         if (this.children.length !== 0) {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         } else {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         }
 
-        if (this.description.indexOf(DUPLICATE_INDICATOR) !== -1) {
+        if (this.supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
             treeItem.iconPath = new vscode.ThemeIcon("trash");
-            treeItem.description = this.description;
-        } else if (this.description.indexOf(CONFLICT_INDICATOR) !== -1) {
+            treeItem.description = this.supplement;
+        } else if (this.supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
             treeItem.iconPath = new vscode.ThemeIcon("warning");
-            treeItem.description = this.description;
+            treeItem.description = this.supplement;
         } else {
             treeItem.iconPath = new vscode.ThemeIcon("library");
         }

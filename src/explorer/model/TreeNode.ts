@@ -2,22 +2,13 @@
 // Licensed under the MIT license.
 
 export class TreeNode {
-    protected value: string;
-    protected children: TreeNode[] = [];
-    protected parent?: TreeNode | undefined;
-    constructor(value: string) {
-        this.value = value;
-    }
+    public children: TreeNode[] = [];
+    public parent?: TreeNode | undefined;
+    public root?: TreeNode | undefined;
 
-    public addChild(valueOrNode: string | TreeNode): void {
-        let child: TreeNode;
-        if (typeof valueOrNode === "string") {
-            child = new TreeNode(valueOrNode);
-        } else {
-            child = valueOrNode;
-        }
-        child.parent = this;
-        this.children.push(child);
+    public addChild(node: TreeNode): void {
+        node.parent = this;
+        this.children.push(node);
     }
 
     public addChildren(nodes: TreeNode[]): void {

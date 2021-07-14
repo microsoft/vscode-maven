@@ -20,31 +20,61 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const re = /([\w.]+:[\w.-]+:)([\w.-]+)(:[\w/.(\s]+):\s([\w.-]+)\)/gm;
     treeContent = treeContent.replace(re, "$1$4$3 with $2)");
 
-    const eol: string = "\r\n";
     const indent: string = "   "; // three spaces
-    const separator: string = "\r\n";
-    const starter: string = "+- ";
-    return parseTreeNodes(treeContent, separator, indent, starter, eol);
+    const eol: string = "\r\n";
+    const prefix: string = "+- ";
+    return parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
 }
 
-function parseTreeNodes(treecontent: string, separator: string, indent: string, starter: string, eol: string): Dependency[] {
+function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Dependency[] {
     const treeNodes: Dependency[] = [];
     if (treecontent) {
-        const treeChildren: string[] = treecontent.split(`${separator}${starter}`).splice(1); // delete first line
-        const toTreeNode = (treeChild: string): Dependency => {
-            let curNode: Dependency;
-            if (treeChild.indexOf(eol) === -1) {
-                curNode = new Dependency(treeChild);
-            } else {
-                const curValue: string = treeChild.split(separator, 1)[0];
-                curNode = new Dependency(curValue);
-                const nextSeparator = `${separator}${indent}`;
-                const childrenNodes: Dependency[] = parseTreeNodes(treeChild, nextSeparator, indent, starter, eol);
-                curNode.addChildren(childrenNodes);
+        let curNode: Dependency;
+        let preNode: Dependency;
+        let parentNode: Dependency;
+        let rootNode: Dependency;
+        let curIndentCnt: number;
+        let preIndentCnt: number;
+        const lines: string[] = treecontent.split(eol).splice(1); // delete project name
+        const toDependency = (line: string): Dependency => {
+            let name: string = line.slice(curIndentCnt + prefix.length);
+            const indexCut: number = name.indexOf("(");
+            let supplement: string = "";
+            if (indexCut !== -1) {
+                supplement = name.substr(indexCut);
+                name = name.substr(0, indexCut);
             }
-            return curNode;
+            const [gid, aid, version, scope] = name.split(":");
+            return new Dependency(gid, aid, version, scope, supplement, projectPomPath);
         };
-        treeChildren.forEach(treeChild => treeNodes.push(toTreeNode(treeChild)));
+        lines.forEach(line => {
+            curIndentCnt = line.indexOf(prefix);
+            curNode = toDependency(line);
+            if (curIndentCnt === 0) {
+                curNode.root = curNode;
+                rootNode = curNode;
+                parentNode = curNode;
+            } else {
+                curNode.root = rootNode;
+                if (curIndentCnt === preIndentCnt) {
+                    parentNode.addChild(curNode);
+                } else if (curIndentCnt > preIndentCnt) {
+                    parentNode = preNode;
+                    parentNode.addChild(curNode);
+                } else {
+                    const level: number = (preIndentCnt - curIndentCnt) / indent.length;
+                    for (let i = level; i > 0; i -= 1) {
+                        parentNode = <Dependency> parentNode.parent;
+                    }
+                    parentNode.addChild(curNode);
+                }
+            }
+            if (curIndentCnt === 0) {
+                treeNodes.push(rootNode);
+            }
+            preIndentCnt = curIndentCnt;
+            preNode = curNode;
+        });
     }
     return treeNodes;
 }

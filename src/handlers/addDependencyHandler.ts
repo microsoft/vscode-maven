@@ -5,6 +5,7 @@ import * as fse from "fs-extra";
 import * as path from "path";
 import * as vscode from "vscode";
 import { MavenProject } from "../explorer/model/MavenProject";
+import { getIndentation } from "../utils/editUtils";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
@@ -125,12 +126,4 @@ function constructDependenciesNode(gid: string, aid: string, version: string, ba
         `${indent}</dependency>`,
         `</dependencies>${eol}`
     ].join(`${eol}${baseIndent}${indent}`);
-}
-
-function getIndentation(document: vscode.TextDocument, offset: number): string {
-    const closingTagPosition: vscode.Position = document.positionAt(offset);
-    return document.getText(new vscode.Range(
-        new vscode.Position(closingTagPosition.line, 0),
-        closingTagPosition
-    ));
 }
