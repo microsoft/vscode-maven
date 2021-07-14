@@ -14,6 +14,10 @@ export class DependenciesMenu extends Menu implements ITreeItem {
         this.name = "Dependencies";
     }
 
+    public getContextValue(): string {
+        return "DependenciesMenu";
+    }
+
     public async getChildren() : Promise<Dependency[]> {
         const treeNodes = await parseRawDependencyDataHandler(this.project);
         return Promise.resolve(treeNodes);
