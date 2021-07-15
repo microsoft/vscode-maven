@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { ITreeItem } from "./ITreeItem";
 import { TreeNode } from "./TreeNode";
 
@@ -65,10 +66,18 @@ export class Dependency extends TreeNode implements ITreeItem {
         }
 
         if (this.supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
-            treeItem.iconPath = new vscode.ThemeIcon("trash");
+            const iconFile: string = "library-remove.svg";
+            treeItem.iconPath = {
+                light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
+                dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
+            };
             treeItem.description = this.supplement;
         } else if (this.supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
-            treeItem.iconPath = new vscode.ThemeIcon("warning");
+            const iconFile: string = "library-warning.svg";
+            treeItem.iconPath = {
+                light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
+                dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
+            };
             treeItem.description = this.supplement;
         } else {
             treeItem.iconPath = new vscode.ThemeIcon("library");
