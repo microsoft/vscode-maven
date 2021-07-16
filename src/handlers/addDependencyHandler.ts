@@ -19,6 +19,9 @@ export async function addDependencyHandler(options?: any): Promise<void> {
     } else if (options && options.projectBasePath) {
         // for "Maven dependencies" nodes from Project Manager
         pomPath = path.join(options.projectBasePath, "pom.xml");
+    } else if (options?.project?.pomPath) {
+        // for "Dependencies" node from module in Maven explorer
+        pomPath = options.project.pomPath;
     } else {
         // select a project(pomfile)
         const selectedProject: MavenProject | undefined = await selectProjectIfNecessary();

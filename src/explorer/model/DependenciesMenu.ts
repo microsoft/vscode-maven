@@ -3,6 +3,7 @@
 
 import * as vscode from "vscode";
 import { parseRawDependencyDataHandler } from "../../handlers/parseRawDependencyDataHandler";
+import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Dependency } from "./Dependency";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
@@ -14,6 +15,10 @@ export class DependenciesMenu extends Menu implements ITreeItem {
         this.name = "Dependencies";
     }
 
+    public getContextValue(): string {
+        return "DependenciesMenu";
+    }
+
     public async getChildren() : Promise<Dependency[]> {
         const treeNodes = await parseRawDependencyDataHandler(this.project);
         return Promise.resolve(treeNodes);
@@ -21,7 +26,11 @@ export class DependenciesMenu extends Menu implements ITreeItem {
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
-        treeItem.iconPath = new vscode.ThemeIcon("library");
+        const iconFile: string = "library-folder.svg";
+        treeItem.iconPath = {
+            light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
+            dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
+        };
         return treeItem;
     }
 }
