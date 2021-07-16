@@ -45,7 +45,7 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
                 name = name.substr(0, indexCut);
             }
             const [gid, aid, version, scope] = name.split(":");
-            return new Dependency(gid, aid, version, scope, supplement, projectPomPath);
+            return new Dependency(gid, aid, version, scope, supplement, projectPomPath, treecontent);
         };
         lines.forEach(line => {
             curIndentCnt = line.indexOf(prefix);

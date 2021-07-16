@@ -5,7 +5,7 @@ import * as fse from "fs-extra";
 import * as path from "path";
 import * as vscode from "vscode";
 import { MavenProject } from "../explorer/model/MavenProject";
-import { getIndentation } from "../utils/editUtils";
+import { constructDependenciesNode, constructDependencyNode, getIndentation } from "../utils/editUtils";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
@@ -102,28 +102,4 @@ async function insertDependency(pomPath: string, targetNode: ElementNode, gid: s
     await vscode.workspace.applyEdit(edit);
     const endingPosition: vscode.Position = currentDocument.positionAt(currentDocument.offsetAt(insertPosition) + targetText.length);
     textEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
-}
-
-function constructDependencyNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
-    return [
-        eol,
-        "<dependency>",
-        `${indent}<groupId>${gid}</groupId>`,
-        `${indent}<artifactId>${aid}</artifactId>`,
-        `${indent}<version>${version}</version>`,
-        `</dependency>${eol}`
-    ].join(`${eol}${baseIndent}${indent}`);
-}
-
-function constructDependenciesNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
-    return [
-        eol,
-        "<dependencies>",
-        `${indent}<dependency>`,
-        `${indent}${indent}<groupId>${gid}</groupId>`,
-        `${indent}${indent}<artifactId>${aid}</artifactId>`,
-        `${indent}${indent}<version>${version}</version>`,
-        `${indent}</dependency>`,
-        `</dependencies>${eol}`
-    ].join(`${eol}${baseIndent}${indent}`);
 }
