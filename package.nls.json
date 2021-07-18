@@ -16,6 +16,7 @@
     "contributes.commands.maven.project.addDependency": "Add a dependency...",
     "contributes.commands.maven.project.showDependencies": "Show dependencies",
     "contributes.commands.maven.project.excludeDependency": "Exclude dependency",
+    "contributes.commands.maven.project.jumpToDefinition": "Jump to Definition",
     "contributes.views.explorer.mavenProjects": "Maven",
     "contributes.viewsWelcome.mavenProjects.untrustedWorkspaces": "Advanced features (e.g. executing lifecycle phases and plugin goals) are disabled in Restricted Mode for security concern.\nPOM editing assistance (e.g. [add a dependency](command:maven.project.addDependency)) is still available.\nLearn more about [Workspace Trust](https://aka.ms/vscode-workspace-trust).\n[Manage Workspace Trust](command:workbench.action.manageTrust)",
     "configuration.maven.excludedFolders": "Specifies file path pattern of folders to exclude while searching for Maven projects.",
