@@ -18,7 +18,13 @@ export async function setDependencyVersionHandler(selectedItem?: Dependency): Pr
         throw new UserError("Specified POM file does not exist on file system.");
     }
 
-    const effectiveVersion: string = selectedItem.version;
+    let effectiveVersion: string;
+    if (selectedItem.supplement !== "") {
+        const re = /\(omitted for conflict with ([\w.-]+)\)/gm;
+        effectiveVersion = selectedItem.supplement.replace(re, "$1");
+    } else {
+        effectiveVersion = selectedItem.version;
+    }
     const gid: string = selectedItem.groupId;
     const aid: string = selectedItem.artifactId;
     const versions: string[] = getAllVersionsInTree(selectedItem.fullDependencyText, gid, aid);

@@ -17,7 +17,7 @@ export class Dependency extends TreeNode implements ITreeItem {
     private _aid: string;
     private _version: string;
     private _scope: string;
-    private supplement: string = "";
+    private _supplement: string = "";
     constructor(gid: string, aid: string, version: string, scope: string, supplement: string, projectPomPath: string, fullDependencyText: string) {
         super();
         this._gid = gid;
@@ -25,9 +25,12 @@ export class Dependency extends TreeNode implements ITreeItem {
         this._version = version;
         this._scope = scope;
         this.fullArtifactName = [gid, aid, version, scope].join(":");
-        this.supplement = supplement;
+        this._supplement = supplement;
         this._projectPomPath = projectPomPath;
         this._fullDependencyText = fullDependencyText;
+    }
+    public get supplement(): string {
+        return this._supplement;
     }
 
     public get fullDependencyText(): string {
