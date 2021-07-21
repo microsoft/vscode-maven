@@ -58,7 +58,6 @@
     "onCommand:maven.plugin.execute",
     "onCommand:maven.project.addDependency",
     "onCommand:maven.project.excludeDependency",
-    "onCommand:maven.project.jumpToDefinition",
     "onView:mavenProjects"
   ],
   "main": "./dist/extension",
@@ -206,8 +205,8 @@
         "category": "Maven"
       },
       {
-        "command": "maven.project.jumpToDefinition",
-        "title": "%contributes.commands.maven.project.jumpToDefinition%",
+        "command": "maven.project.goToDefinition",
+        "title": "%contributes.commands.maven.project.goToDefinition%",
         "category": "Maven",
         "icon": "$(go-to-file)"
       },
@@ -314,7 +313,7 @@
           "when": "never"
         },
         {
-          "command": "maven.project.jumpToDefinition",
+          "command": "maven.project.goToDefinition",
           "when": "never"
         },
         {
@@ -445,7 +444,7 @@
           "group": "0-dependency@0"
         },
         {
-          "command": "maven.project.jumpToDefinition",
+          "command": "maven.project.goToDefinition",
           "when": "view == mavenProjects && viewItem == Dependency",
           "group": "inline"
         },

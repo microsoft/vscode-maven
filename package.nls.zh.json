@@ -15,7 +15,7 @@
     "contributes.commands.maven.view.flat": "切换到扁平视图",
     "contributes.commands.maven.project.addDependency": "添加依赖…",
     "contributes.commands.maven.project.showDependencies": "显示所有依赖",
-    "contributes.commands.maven.project.jumpToDefinition": "打开定义位置",
+    "contributes.commands.maven.project.goToDefinition": "转到定义",
     "contributes.commands.maven.project.excludeDependency": "删除依赖",
     "contributes.views.explorer.mavenProjects": "Maven",
     "configuration.maven.excludedFolders": "指定搜索 Maven 项目时要排除的文件夹。",
