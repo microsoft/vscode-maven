@@ -12,13 +12,12 @@ const CONFLICT_INDICATOR: string = "omitted for conflict";
 export class Dependency extends TreeNode implements ITreeItem {
     private fullArtifactName: string = ""; // groupId:artifactId:version:scope
     private _projectPomPath: string;
-    private _fullDependencyText: string;
     private _gid: string;
     private _aid: string;
     private _version: string;
     private _scope: string;
     private _supplement: string = "";
-    constructor(gid: string, aid: string, version: string, scope: string, supplement: string, projectPomPath: string, fullDependencyText: string) {
+    constructor(gid: string, aid: string, version: string, scope: string, supplement: string, projectPomPath: string) {
         super();
         this._gid = gid;
         this._aid = aid;
@@ -27,14 +26,9 @@ export class Dependency extends TreeNode implements ITreeItem {
         this.fullArtifactName = [gid, aid, version, scope].join(":");
         this._supplement = supplement;
         this._projectPomPath = projectPomPath;
-        this._fullDependencyText = fullDependencyText;
     }
     public get supplement(): string {
         return this._supplement;
-    }
-
-    public get fullDependencyText(): string {
-        return this._fullDependencyText;
     }
 
     public get projectPomPath(): string {

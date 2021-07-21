@@ -19,6 +19,7 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     // output = (groupId:artifactId:)(version2)(:scope (omitted for conflict) with (version1))
     const re = /([\w.]+:[\w.-]+:)([\w.-]+)(:[\w/.(\s]+):\s([\w.-]+)\)/gm;
     treeContent = treeContent.replace(re, "$1$4$3 with $2)");
+    project.fullText = treeContent;
 
     const indent: string = "   "; // three spaces
     const eol: string = "\r\n";
@@ -45,7 +46,7 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
                 name = name.substr(0, indexCut);
             }
             const [gid, aid, version, scope] = name.split(":");
-            return new Dependency(gid, aid, version, scope, supplement, projectPomPath, treecontent);
+            return new Dependency(gid, aid, version, scope, supplement, projectPomPath);
         };
         lines.forEach(line => {
             curIndentCnt = line.indexOf(prefix);

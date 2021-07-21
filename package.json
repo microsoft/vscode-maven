@@ -58,7 +58,6 @@
     "onCommand:maven.plugin.execute",
     "onCommand:maven.project.addDependency",
     "onCommand:maven.project.excludeDependency",
-    "onCommand:maven.project.setDependencyVersion",
     "onView:mavenProjects"
   ],
   "main": "./dist/extension",

@@ -3,15 +3,19 @@
 
 import * as fse from "fs-extra";
 import * as vscode from "vscode";
+import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { Dependency } from "../explorer/model/Dependency";
+import { MavenProject } from "../explorer/model/MavenProject";
 import { constructDependenciesNode, constructDependencyNode, getIndentation } from "../utils/editUtils";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getVersions } from "../utils/requestUtils";
 
+const CONFLICT_INDICATOR: string = "omitted for conflict";
+
 export async function setDependencyVersionHandler(selectedItem?: Dependency): Promise<void> {
     if (selectedItem === undefined) {
-        throw new UserError("Only can set Dependency version.");
+        throw new UserError("No dependency node specified.");
     }
     const pomPath: string = selectedItem.projectPomPath;
     if (!await fse.pathExists(pomPath)) {
@@ -19,15 +23,16 @@ export async function setDependencyVersionHandler(selectedItem?: Dependency): Pr
     }
 
     let effectiveVersion: string;
-    if (selectedItem.supplement !== "") {
+    if (selectedItem.supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
         const re = /\(omitted for conflict with ([\w.-]+)\)/gm;
         effectiveVersion = selectedItem.supplement.replace(re, "$1");
     } else {
         effectiveVersion = selectedItem.version;
     }
+
     const gid: string = selectedItem.groupId;
     const aid: string = selectedItem.artifactId;
-    const versions: string[] = getAllVersionsInTree(selectedItem.fullDependencyText, gid, aid);
+    const versions: string[] = getAllVersionsInTree(pomPath, gid, aid);
     const searchCommand: string = "Search versions from Maven Central Repository...";
     versions.push(searchCommand);
 
@@ -66,15 +71,14 @@ async function setDependencyVersion(pomPath: string, gid: string, aid: string, v
     }
 
     const projectNode: ElementNode = projectNodes[0];
-    const dependenciesNode:  ElementNode | undefined = projectNode.children && projectNode.children.find(node => node.tag === XmlTagName.Dependencies);
-    const dependencyManagementNode: ElementNode | undefined = projectNode.children && projectNode.children.find(node => node.tag === XmlTagName.DependencyManagement);
+    const dependenciesNode:  ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
+    const dependencyManagementNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.DependencyManagement);
     // find ${gid:aid} dependency node in <dependencies> to delete
-    let deleteNode: ElementNode | undefined;
-    if (dependenciesNode !== undefined && dependenciesNode.children !== undefined) {
-        deleteNode =  dependenciesNode.children.find(node =>
-            node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid) !== undefined
-        );
-    }
+    const deleteNode: ElementNode | undefined = dependenciesNode?.children?.find(node =>
+        node.children?.find(id => id.tag === XmlTagName.GroupId && id.text === gid) !== undefined &&
+        node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid) !== undefined
+    );
+
     if (dependencyManagementNode !== undefined) {
         await insertDependencyManagement(pomPath, dependencyManagementNode, deleteNode, gid, aid, version);
     } else {
@@ -104,7 +108,10 @@ async function insertDependencyManagement(pomPath: string, targetNode: ElementNo
         }
         insertPosition = currentDocument.positionAt(dependenciesNode.contentStart);
         // find ${gid:aid} dependency node that already in dependency management to delete
-        dependencyNodeInManagement = dependenciesNode.children?.find(node => node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid));
+        dependencyNodeInManagement = dependenciesNode.children?.find(node =>
+            node.children?.find(id => id.tag === XmlTagName.GroupId && id.text === gid) &&
+            node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid)
+        );
         targetText = constructDependencyNode(gid, aid, version, `${baseIndent}${indent}`, indent, eol);
     } else if (targetNode.tag === XmlTagName.DependencyManagement && dependenciesNode === undefined) {
         insertPosition = currentDocument.positionAt(targetNode.contentStart);
@@ -148,9 +155,14 @@ async function insertDependencyManagement(pomPath: string, targetNode: ElementNo
     vscode.workspace.saveAll();
 }
 
-function getAllVersionsInTree(rawDependencyTree: string, gid: string, aid: string): string[] {
+function getAllVersionsInTree(pomPath: string, gid: string, aid: string): string[] {
+    const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
+    if (project === undefined) {
+        throw new UserError("Failed to get maven projects.");
+    }
+    const fullText: string = project.fullText;
     const re = new RegExp(`${gid}:${aid}:[\\w.-]+`, "gm");
-    const artifacts: string[] | null = rawDependencyTree.match(re);
+    const artifacts: string[] | null = fullText.match(re);
     let versions: string[] = [];
     if (artifacts !== null) {
         artifacts.forEach(a => { versions.push(a.slice(gid.length + aid.length + 2)); });
