@@ -58,29 +58,35 @@ export class Dependency extends TreeNode implements ITreeItem {
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.fullArtifactName);
-        if (this.children.length !== 0) {
-            treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+        let treeItem: vscode.TreeItem;
+        if (this.fullArtifactName === ":::") { // empty node
+            treeItem = new vscode.TreeItem("");
+            treeItem.description = "No dependencies";
         } else {
-            treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
-        }
+            treeItem = new vscode.TreeItem(this.fullArtifactName);
+            if (this.children.length !== 0) {
+                treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+            } else {
+                treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
+            }
 
-        if (this.supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
-            const iconFile: string = "library-remove.svg";
-            treeItem.iconPath = {
-                light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
-                dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
-            };
-            treeItem.description = this.supplement;
-        } else if (this.supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
-            const iconFile: string = "library-warning.svg";
-            treeItem.iconPath = {
-                light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
-                dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
-            };
-            treeItem.description = this.supplement;
-        } else {
-            treeItem.iconPath = new vscode.ThemeIcon("library");
+            if (this.supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
+                const iconFile: string = "library-remove.svg";
+                treeItem.iconPath = {
+                    light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
+                    dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
+                };
+                treeItem.description = this.supplement;
+            } else if (this.supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
+                const iconFile: string = "library-warning.svg";
+                treeItem.iconPath = {
+                    light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
+                    dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
+                };
+                treeItem.description = this.supplement;
+            } else {
+                treeItem.iconPath = new vscode.ThemeIcon("library");
+            }
         }
         return treeItem;
     }

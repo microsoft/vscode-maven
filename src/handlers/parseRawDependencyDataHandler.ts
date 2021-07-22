@@ -76,5 +76,8 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
             preNode = curNode;
         });
     }
+    if (treeNodes.length === 0) {
+        treeNodes.push(new Dependency("", "", "", "", "", projectPomPath));
+    }
     return treeNodes;
 }
