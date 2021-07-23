@@ -3,7 +3,11 @@
 
 import { Dependency } from "../explorer/model/Dependency";
 import { MavenProject } from "../explorer/model/MavenProject";
+import { IOmittedStatus } from "../explorer/model/OmittedStatus";
 import { getDependencyTree } from "../handlers/showDependenciesHandler";
+
+const DUPLICATE_INDICATOR: string = "omitted for duplicate";
+const CONFLICT_INDICATOR: string = "omitted for conflict";
 
 export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[]> {
     const dependencyTree: string | undefined = await getDependencyTree(project.pomPath);
@@ -46,7 +50,18 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
                 name = name.substr(0, indexCut);
             }
             const [gid, aid, version, scope] = name.split(":");
-            return new Dependency(gid, aid, version, scope, supplement, projectPomPath);
+            let effectiveVersion: string;
+            let omittedStatus: IOmittedStatus;
+            if (supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
+                const re = /\(omitted for conflict with ([\w.-]+)\)/gm;
+                effectiveVersion = supplement.replace(re, "$1");
+                omittedStatus = {status: "conflict", effectiveVersion: effectiveVersion, description: supplement};
+            } else if (supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
+                omittedStatus = {status: "duplicate", effectiveVersion: version, description: supplement};
+            } else {
+                omittedStatus = {status: "normal", effectiveVersion: version};
+            }
+            return new Dependency(gid, aid, version, scope, omittedStatus, projectPomPath);
         };
         lines.forEach(line => {
             curIndentCnt = line.indexOf(prefix);

@@ -6,12 +6,10 @@ import * as vscode from "vscode";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { Dependency } from "../explorer/model/Dependency";
 import { MavenProject } from "../explorer/model/MavenProject";
-import { constructDependenciesNode, constructDependencyNode, getIndentation } from "../utils/editUtils";
+import { constructDependenciesNode, constructDependencyManagementNode, constructDependencyNode, getIndentation } from "../utils/editUtils";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getVersions } from "../utils/requestUtils";
-
-const CONFLICT_INDICATOR: string = "omitted for conflict";
 
 export async function setDependencyVersionHandler(selectedItem?: Dependency): Promise<void> {
     if (selectedItem === undefined) {
@@ -22,44 +20,34 @@ export async function setDependencyVersionHandler(selectedItem?: Dependency): Pr
         throw new UserError("Specified POM file does not exist on file system.");
     }
 
-    let effectiveVersion: string;
-    if (selectedItem.supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
-        const re = /\(omitted for conflict with ([\w.-]+)\)/gm;
-        effectiveVersion = selectedItem.supplement.replace(re, "$1");
-    } else {
-        effectiveVersion = selectedItem.version;
-    }
-
+    const effectiveVersion: string = selectedItem.omittedStatus.effectiveVersion;
     const gid: string = selectedItem.groupId;
     const aid: string = selectedItem.artifactId;
     const versions: string[] = getAllVersionsInTree(pomPath, gid, aid);
-    const searchCommand: string = "Search versions from Maven Central Repository...";
-    versions.push(searchCommand);
+    const OPTION_SEARCH_MAVEN_CENTRAL: string = "Search versions from Maven Central Repository...";
+    versions.push(OPTION_SEARCH_MAVEN_CENTRAL);
 
-    const selectedVersion: string | undefined = await vscode.window.showQuickPick(
-        versions.map(version => ({ value: version, label: version !== searchCommand ? `$(package) ${version}` : version, description: version === effectiveVersion ? "effective" : ""})),
+    let selectedVersion: string | undefined = await vscode.window.showQuickPick(
+        versions.map(version => ({ value: version, label: version !== OPTION_SEARCH_MAVEN_CENTRAL ? `$(package) ${version}` : version, description: version === effectiveVersion ? "effective" : undefined})),
         { placeHolder: `Select a version for ${gid}:${aid}...`,
             ignoreFocusOut: true}
     ).then(version => version ? version.value : undefined);
-    if (!selectedVersion) {
+    if (selectedVersion === undefined) {
         return;
     }
-    if (selectedVersion === searchCommand) {
-        const selectedVersionFromOrigin: string | undefined = await vscode.window.showQuickPick<vscode.QuickPickItem & { value: string }>(
-            getVersions(gid, aid).then(artifacts => artifacts.map(artifact => ({value: artifact.v, label: `$(package) ${artifact.v}`, description: artifact.v === effectiveVersion ? "effective" : "" }))),
+    if (selectedVersion === OPTION_SEARCH_MAVEN_CENTRAL) {
+        const selectedVersionFromMavenCentral: string | undefined = await vscode.window.showQuickPick<vscode.QuickPickItem & { value: string }>(
+            getVersions(gid, aid).then(artifacts => artifacts.map(artifact => ({value: artifact.v, label: `$(package) ${artifact.v}`, description: artifact.v === effectiveVersion ? "effective" : undefined }))),
             { placeHolder: `Select a version for ${gid}:${aid}...`,
                 ignoreFocusOut: true }
         ).then(artifact => artifact ? artifact.value : undefined);
-        if (!selectedVersionFromOrigin) {
+        if (selectedVersionFromMavenCentral === undefined) {
             return;
         }
-        if (selectedVersionFromOrigin !== effectiveVersion) {
-            await setDependencyVersion(pomPath, gid, aid, selectedVersionFromOrigin);
-        }
-    } else {
-        if (selectedVersion !== effectiveVersion) {
-            await setDependencyVersion(pomPath, gid, aid, selectedVersion);
-        }
+        selectedVersion = selectedVersionFromMavenCentral;
+    }
+    if (selectedVersion !== effectiveVersion) {
+        await setDependencyVersion(pomPath, gid, aid, selectedVersion);
     }
 }
 
@@ -118,7 +106,7 @@ async function insertDependencyManagement(pomPath: string, targetNode: ElementNo
         targetText = constructDependenciesNode(gid, aid, version, baseIndent, indent, eol);
     } else if (targetNode.tag === XmlTagName.Project) {
         insertPosition = currentDocument.positionAt(targetNode.contentEnd);
-        targetText = constructDepedencyManagementNode(gid, aid, version, baseIndent, indent, eol);
+        targetText = constructDependencyManagementNode(gid, aid, version, baseIndent, indent, eol);
     } else {
         return;
     }
@@ -152,13 +140,13 @@ async function insertDependencyManagement(pomPath: string, targetNode: ElementNo
     await vscode.workspace.applyEdit(edit);
     const endingPosition: vscode.Position = currentDocument.positionAt(currentDocument.offsetAt(insertPosition) + targetText.length);
     textEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
-    vscode.workspace.saveAll();
+    textEditor.document.save();
 }
 
 function getAllVersionsInTree(pomPath: string, gid: string, aid: string): string[] {
     const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
     if (project === undefined) {
-        throw new UserError("Failed to get maven projects.");
+        throw new Error("Failed to get maven projects.");
     }
     const fullText: string = project.fullText;
     const re = new RegExp(`${gid}:${aid}:[\\w.-]+`, "gm");
@@ -169,30 +157,30 @@ function getAllVersionsInTree(pomPath: string, gid: string, aid: string): string
     }
 
     function compare(v1: string, v2: string): number {
-        if (v1 < v2) {
-            return 1;
-        } else if (v1 > v2) {
-            return -1;
-        } else {
-            return 0;
+        const indexCut1: number = v1.indexOf("-"); // filter char
+        const indexCut2: number = v2.indexOf("-");
+        if (indexCut1 !== -1) {
+            v1 = v1.substr(0, indexCut1);
         }
+        if (indexCut2 !== -1) {
+            v2 = v2.substr(0, indexCut2);
+        }
+        const numbers1: number[] = v1.split(".").map(Number);
+        const numbers2: number[] = v2.split(".").map(Number);
+        const minLen: number = numbers1.length < numbers2.length ? numbers1.length : numbers2.length;
+        let i: number = 0;
+        while (i < minLen) {
+            if (numbers1[i] < numbers2[i]) {
+                return 1;
+            } else if (numbers1[i] > numbers2[i]) {
+                return -1;
+            } else {
+                i += 1;
+            }
+        }
+        return 0;
     }
 
-    versions = Array.from(new Set(versions.sort(compare)));
+    versions = Array.from(new Set(versions)).sort(compare);
     return versions;
-}
-
-function constructDepedencyManagementNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
-    return [
-        eol,
-        "<dependencyManagement>",
-        `${indent}<dependencies>`,
-        `${indent}${indent}<dependency>`,
-        `${indent}${indent}${indent}<groupId>${gid}</groupId>`,
-        `${indent}${indent}${indent}<artifactId>${aid}</artifactId>`,
-        `${indent}${indent}${indent}<version>${version}</version>`,
-        `${indent}${indent}</dependency>`,
-        `${indent}</dependencies>`,
-        `</dependencyManagement>${eol}`
-    ].join(`${eol}${baseIndent}${indent}`);
 }
