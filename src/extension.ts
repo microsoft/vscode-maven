@@ -20,6 +20,7 @@ import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
 import { debugHandler } from "./handlers/debugHandler";
 import { excludeDependencyHandler } from "./handlers/excludeDependencyHandler";
+import { jumpToDefinitionHandler } from "./handlers/jumpToDefinitionHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
 import { setDependencyVersionHandler } from "./handlers/setDependencyVersionHandler";
 import { showDependenciesHandler } from "./handlers/showDependenciesHandler";
@@ -116,6 +117,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.project.showDependencies", showDependenciesHandler);
     registerCommand(context, "maven.project.excludeDependency", excludeDependencyHandler);
     registerCommand(context, "maven.project.setDependencyVersion", setDependencyVersionHandler);
+    registerCommand(context, "maven.project.goToDefinition", jumpToDefinitionHandler);
 
     // debug
     registerCommand(context, "maven.plugin.debug", debugHandler);
