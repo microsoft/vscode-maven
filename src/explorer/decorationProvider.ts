@@ -5,10 +5,9 @@ import * as vscode from "vscode";
 import { Disposable } from "vscode";
 
 class DecorationProvider implements vscode.FileDecorationProvider {
-    private disposables: Disposable[];
+    private disposables: Disposable[] = [];
     private decoration: vscode.FileDecoration = new vscode.FileDecoration("", "has conflicts", new vscode.ThemeColor("inputValidation.warningBorder"));
     constructor() {
-        this.disposables = [];
         this.decoration.propagate = true;
         this.disposables.push(vscode.window.registerFileDecorationProvider(this));
     }
