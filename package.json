@@ -205,6 +205,11 @@
         "category": "Maven"
       },
       {
+        "command": "maven.project.setDependencyVersion",
+        "title": "%contributes.commands.maven.project.setDependencyVersion%",
+        "category": "Maven"
+      },
+      {
         "command": "maven.project.goToDefinition",
         "title": "%contributes.commands.maven.project.goToDefinition%",
         "category": "Maven",
@@ -310,6 +315,10 @@
         },
         {
           "command": "maven.project.excludeDependency",
+          "when": "never"
+        },
+        {
+          "command": "maven.project.setDependencyVersion",
           "when": "never"
         },
         {
@@ -442,6 +451,11 @@
           "command": "maven.project.excludeDependency",
           "when": "view == mavenProjects && viewItem == Dependency",
           "group": "0-dependency@0"
+        },
+        {
+          "command": "maven.project.setDependencyVersion",
+          "when": "view == mavenProjects && viewItem == Dependency",
+          "group": "0-dependency@1"
         },
         {
           "command": "maven.project.goToDefinition",

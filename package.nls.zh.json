@@ -17,6 +17,7 @@
     "contributes.commands.maven.project.showDependencies": "显示所有依赖",
     "contributes.commands.maven.project.goToDefinition": "转到定义",
     "contributes.commands.maven.project.excludeDependency": "删除依赖",
+    "contributes.commands.maven.project.setDependencyVersion": "指定依赖版本为...",
     "contributes.views.explorer.mavenProjects": "Maven",
     "configuration.maven.excludedFolders": "指定搜索 Maven 项目时要排除的文件夹。",
     "configuration.maven.executable.preferMavenWrapper": "指定是否优先使用 Maven Wrapper。如果为 true，则尝试向上遍历父文件夹寻找 mvnw 作为可执行文件；如果为 false，或者找不到 mvnw，则尝试使用系统 PATH 中的 mvn。",

@@ -22,6 +22,7 @@ import { debugHandler } from "./handlers/debugHandler";
 import { excludeDependencyHandler } from "./handlers/excludeDependencyHandler";
 import { jumpToDefinitionHandler } from "./handlers/jumpToDefinitionHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
+import { setDependencyVersionHandler } from "./handlers/setDependencyVersionHandler";
 import { showDependenciesHandler } from "./handlers/showDependenciesHandler";
 import { hoverProvider } from "./hover/hoverProvider";
 import { registerArtifactSearcher } from "./jdtls/artifactSearcher";
@@ -115,6 +116,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.project.addDependency", addDependencyHandler);
     registerCommand(context, "maven.project.showDependencies", showDependenciesHandler);
     registerCommand(context, "maven.project.excludeDependency", excludeDependencyHandler);
+    registerCommand(context, "maven.project.setDependencyVersion", setDependencyVersionHandler);
     registerCommand(context, "maven.project.goToDefinition", jumpToDefinitionHandler);
 
     // debug
