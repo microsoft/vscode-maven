@@ -42,12 +42,13 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
         let preIndentCnt: number;
         const lines: string[] = treecontent.split(eol).splice(1); // delete project name
         const toDependency = (line: string): Dependency => {
-            let name: string = line.slice(curIndentCnt + prefix.length);
-            const indexCut: number = name.indexOf("(");
+            const fullName: string = line.slice(curIndentCnt + prefix.length);
+            let name: string = fullName;
+            const indexCut: number = fullName.indexOf("(");
             let supplement: string = "";
             if (indexCut !== -1) {
-                supplement = name.substr(indexCut);
-                name = name.substr(0, indexCut);
+                supplement = fullName.substr(indexCut);
+                name = fullName.substr(0, indexCut);
             }
             const [gid, aid, version, scope] = name.split(":");
             let effectiveVersion: string;
@@ -83,6 +84,15 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
                         parentNode = <Dependency> parentNode.parent;
                     }
                     parentNode.addChild(curNode);
+                }
+                if (curNode.conflictMessages.length !== 0) {
+                    let tmpNode = curNode;
+                    const message = tmpNode.conflictMessages;
+                    while (tmpNode.parent !== undefined) {
+                        const parent = <Dependency> tmpNode.parent;
+                        parent.conflictMessages = parent.conflictMessages.concat(message);
+                        tmpNode = parent;
+                    }
                 }
             }
             if (curIndentCnt === 0) {
