@@ -6,6 +6,8 @@ import { UserError } from "../../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../../utils/lexerUtils";
 import { Dependency } from "./Dependency";
 
+export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
+
 class IDiagnostic {
     private _collection: vscode.DiagnosticCollection;
     public set collection(collection: vscode.DiagnosticCollection) {
@@ -26,9 +28,9 @@ class IDiagnostic {
         const diagnostics: vscode.Diagnostic[] = [];
         const range: vscode.Range = await this.findConflictRange(root.projectPomPath, root.groupId, root.artifactId);
         // TODO: change message
-        const message: string = `${root.artifactId} has conflict dependencies: ${node.groupId}:${node.artifactId} ${node.version} conflict with ${node.omittedStatus.effectiveVersion}`;
+        const message: string = `${root.artifactId} has conflict dependencies: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus.effectiveVersion}`;
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
-        diagnostic.code = "Maven dependency conflict";
+        diagnostic.code = MAVEN_DEPENDENCY_CONFLICT;
         diagnostics.push(diagnostic);
         return diagnostics;
     }
