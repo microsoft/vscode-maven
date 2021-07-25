@@ -69,7 +69,7 @@ async function addDependency(pomPath: string, gid: string, aid: string, version:
     }
 
     const projectNode: ElementNode = projectNodes[0];
-    const dependenciesNode: ElementNode | undefined = projectNode.children && projectNode.children.find(node => node.tag === XmlTagName.Dependencies);
+    const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
     if (dependenciesNode !== undefined) {
         await insertDependency(pomPath, dependenciesNode, gid, aid, version);
     } else {
