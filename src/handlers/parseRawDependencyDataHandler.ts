@@ -2,10 +2,11 @@
 // Licensed under the MIT license.
 
 import { Dependency } from "../explorer/model/Dependency";
+import { HintNode } from "../explorer/model/HintNode";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { getDependencyTree } from "../handlers/showDependenciesHandler";
 
-export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[]> {
+export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[] | HintNode[]> {
     const dependencyTree: string | undefined = await getDependencyTree(project.pomPath);
     if (dependencyTree === undefined) {
         throw new Error("Failed to generate dependency tree.");
@@ -26,8 +27,8 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     return parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
 }
 
-function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Dependency[] {
-    const treeNodes: Dependency[] = [];
+function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Dependency[] | HintNode[] {
+    const treeNodes: Dependency[] | HintNode[] = [];
     if (treecontent) {
         let curNode: Dependency;
         let preNode: Dependency;
@@ -77,7 +78,8 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
         });
     }
     if (treeNodes.length === 0) {
-        treeNodes.push(new Dependency("", "", "", "", "", projectPomPath));
+        return [new HintNode()];
+    } else {
+        return treeNodes;
     }
-    return treeNodes;
 }

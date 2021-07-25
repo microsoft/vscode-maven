@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { parseRawDependencyDataHandler } from "../../handlers/parseRawDependencyDataHandler";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Dependency } from "./Dependency";
+import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
@@ -19,7 +20,7 @@ export class DependenciesMenu extends Menu implements ITreeItem {
         return "DependenciesMenu";
     }
 
-    public async getChildren() : Promise<Dependency[]> {
+    public async getChildren() : Promise<Dependency[] | HintNode[]> {
         const treeNodes = await parseRawDependencyDataHandler(this.project);
         return Promise.resolve(treeNodes);
     }
