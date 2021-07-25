@@ -13,6 +13,7 @@ import { completionProvider } from "./completion/completionProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { initExpService } from "./experimentationService";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
+import { iDiagnostic } from "./explorer/model/iDiagnostic";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
@@ -136,6 +137,12 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     if (isJavaExtEnabled()) {
         registerArtifactSearcher(context);
     }
+
+    //diagnostic
+    const dependencyCollection = vscode.languages.createDiagnosticCollection("Dependency");
+    iDiagnostic.collection = dependencyCollection;
+    context.subscriptions.push(dependencyCollection);
+    context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc => dependencyCollection.delete(doc.uri)));
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {

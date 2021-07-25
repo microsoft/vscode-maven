@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-
+import * as vscode from "vscode";
 import { Dependency } from "../explorer/model/Dependency";
+import { iDiagnostic } from "../explorer/model/iDiagnostic";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { IOmittedStatus } from "../explorer/model/OmittedStatus";
 import { getDependencyTree } from "../handlers/showDependenciesHandler";
@@ -28,11 +29,12 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const indent: string = "   "; // three spaces
     const eol: string = "\r\n";
     const prefix: string = "+- ";
-    return parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
+    return await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
 }
 
-function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Dependency[] {
+async function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Promise<Dependency[]> {
     const treeNodes: Dependency[] = [];
+    const conflictNodes: Dependency[] = [];
     if (treecontent) {
         let curNode: Dependency;
         let preNode: Dependency;
@@ -85,6 +87,9 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
                     parentNode.addChild(curNode);
                 }
             }
+            if (curNode.omittedStatus.status === "conflict") {
+                conflictNodes.push(curNode);
+            }
             if (curIndentCnt === 0) {
                 treeNodes.push(rootNode);
             }
@@ -92,5 +97,6 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
             preNode = curNode;
         });
     }
+    await iDiagnostic.refreshDiagnostics(vscode.Uri.file(projectPomPath), conflictNodes);
     return treeNodes;
 }
