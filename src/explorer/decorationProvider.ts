@@ -12,13 +12,13 @@ class DecorationProvider implements vscode.FileDecorationProvider {
     }
 
     public provideFileDecoration(uri: vscode.Uri): vscode.ProviderResult<vscode.FileDecoration> {
-        const endWithMessage: string | undefined = uri.toString().split("/").pop();
-        if (endWithMessage === "hasConflict") {
+        if (uri.query === "hasConflict") {
             return this.decoration;
         } else {
             return null;
         }
     }
+
     public dispose(): void {
         this.disposables.forEach(d => d.dispose());
     }

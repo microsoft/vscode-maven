@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as path from "path";
+import * as vscode from "vscode";
 import { Dependency } from "../explorer/model/Dependency";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { IOmittedStatus } from "../explorer/model/OmittedStatus";
@@ -66,10 +68,13 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
         lines.forEach(line => {
             curIndentCnt = line.indexOf(prefix);
             curNode = toDependency(line);
+            let uri: vscode.Uri;
+            let curFilePath: string;
             if (curIndentCnt === 0) {
                 curNode.root = curNode;
                 rootNode = curNode;
                 parentNode = curNode;
+                curFilePath = `${curNode.groupId}.${curNode.artifactId}`;
             } else {
                 curNode.root = rootNode;
                 if (curIndentCnt === preIndentCnt) {
@@ -84,15 +89,25 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
                     }
                     parentNode.addChild(curNode);
                 }
-                if (curNode.conflictMessages.length !== 0) {
-                    let tmpNode = curNode;
-                    const message = tmpNode.conflictMessages;
-                    while (tmpNode.parent !== undefined) {
-                        const parent = <Dependency> tmpNode.parent;
-                        parent.conflictMessages = parent.conflictMessages.concat(message);
-                        tmpNode = parent;
+                const parentFilePath: string = parentNode.uri.path;
+                curFilePath = path.join(parentFilePath, `${curNode.groupId}.${curNode.artifactId}`);
+            }
+            // set uri
+            uri = vscode.Uri.file(curFilePath);
+            uri = uri.with({authority: projectPomPath});
+            if (curNode.omittedStatus.status === "conflict") {
+                curNode.uri = uri.with({query: "hasConflict"});
+                // find all parent and set hasConflict upforward
+                let tmpNode = curNode;
+                while (tmpNode.parent !== undefined) {
+                    const parent = <Dependency> tmpNode.parent;
+                    if (parent.uri.query !== "hasConflict") {
+                        parent.uri = uri.with({query: "hasConflict"});
                     }
+                    tmpNode = parent;
                 }
+            } else {
+                curNode.uri = uri;
             }
             if (curIndentCnt === 0) {
                 treeNodes.push(rootNode);

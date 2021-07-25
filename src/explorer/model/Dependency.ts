@@ -2,8 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { getPathToExtensionRoot, localPomPath } from "../../utils/contextUtils";
-import { IConflictMessage } from "./IConflictMessage";
+import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { ITreeItem } from "./ITreeItem";
 import { IOmittedStatus } from "./OmittedStatus";
 import { TreeNode } from "./TreeNode";
@@ -16,7 +15,7 @@ export class Dependency extends TreeNode implements ITreeItem {
     private _version: string;
     private _scope: string;
     private _omittedStatus: IOmittedStatus;
-    public conflictMessages: IConflictMessage[] = [];
+    private _uri: vscode.Uri;
     constructor(gid: string, aid: string, version: string, scope: string, omittedStatus: IOmittedStatus, projectPomPath: string) {
         super();
         this._gid = gid;
@@ -26,10 +25,6 @@ export class Dependency extends TreeNode implements ITreeItem {
         this.fullArtifactName = [gid, aid, version, scope].join(":");
         this._omittedStatus = omittedStatus;
         this._projectPomPath = projectPomPath;
-        if (omittedStatus.status === "conflict") {
-            const conflictMessage: IConflictMessage = {gid: gid, aid: aid, version1: version, version2: omittedStatus.effectiveVersion};
-            this.conflictMessages.push(conflictMessage);
-        }
     }
     public get omittedStatus(): IOmittedStatus {
         return this._omittedStatus;
@@ -57,13 +52,11 @@ export class Dependency extends TreeNode implements ITreeItem {
     }
 
     public get uri(): vscode.Uri {
-        const filePath: string = localPomPath(this._gid, this._aid, this._version);
-        let uri: vscode.Uri = vscode.Uri.file(filePath);
-        uri = uri.with({authority: this.projectPomPath});
-        if (this.conflictMessages.length !== 0) {
-            uri = vscode.Uri.joinPath(uri, "hasConflict");
-        }
-        return uri;
+        return this._uri;
+    }
+
+    public set uri(uri: vscode.Uri) {
+        this._uri = uri;
     }
 
     public getContextValue(): string {
@@ -77,6 +70,7 @@ export class Dependency extends TreeNode implements ITreeItem {
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.fullArtifactName);
         treeItem.resourceUri = this.uri;
+        treeItem.tooltip = this.fullArtifactName;
         if (this.children.length !== 0) {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         } else {
