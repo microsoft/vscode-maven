@@ -74,7 +74,7 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
                 curNode.root = curNode;
                 rootNode = curNode;
                 parentNode = curNode;
-                curFilePath = path.join(`${curNode.groupId}`, `${curNode.artifactId}`);
+                curFilePath = path.join(curNode.groupId, curNode.artifactId);
             } else {
                 curNode.root = rootNode;
                 if (curIndentCnt === preIndentCnt) {
@@ -90,7 +90,7 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
                     parentNode.addChild(curNode);
                 }
                 const parentFilePath: string = parentNode.uri.path;
-                curFilePath = path.join(parentFilePath, path.join(`${curNode.groupId}`, `${curNode.artifactId}`));
+                curFilePath = path.join(parentFilePath, path.join(curNode.groupId, curNode.artifactId));
             }
             // set uri
             uri = vscode.Uri.file(curFilePath);
