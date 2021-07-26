@@ -7,7 +7,6 @@ class DecorationProvider implements vscode.FileDecorationProvider {
     private disposables: vscode.Disposable[] = [];
     private decoration: vscode.FileDecoration = {color: new vscode.ThemeColor("list.warningForeground")};
     constructor() {
-        this.decoration.propagate = true;
         this.disposables.push(vscode.window.registerFileDecorationProvider(this));
     }
 

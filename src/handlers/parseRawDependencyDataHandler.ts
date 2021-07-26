@@ -94,7 +94,7 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
             }
             // set uri
             uri = vscode.Uri.file(curFilePath);
-            uri = uri.with({authority: projectPomPath});
+            uri = uri.with({authority: projectPomPath}); // distinguish dependency in multi-module project
             if (curNode.omittedStatus.status === "conflict") {
                 curNode.uri = uri.with({query: "hasConflict"});
                 // find all parent and set hasConflict upforward
