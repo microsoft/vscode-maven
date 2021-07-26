@@ -28,7 +28,7 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
 }
 
 function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Dependency[] | HintNode[] {
-    const treeNodes: Dependency[] | HintNode[] = [];
+    const treeNodes: Dependency[] = [];
     if (treecontent) {
         let curNode: Dependency;
         let preNode: Dependency;
@@ -78,7 +78,7 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
         });
     }
     if (treeNodes.length === 0) {
-        return [new HintNode()];
+        return [new HintNode("No dependencies")];
     } else {
         return treeNodes;
     }
