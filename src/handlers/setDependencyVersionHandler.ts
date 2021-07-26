@@ -31,7 +31,7 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
     const gid: string = selectedItem.groupId;
     const aid: string = selectedItem.artifactId;
     const versions: string[] = getAllVersionsInTree(pomPath, gid, aid);
-    const OPTION_SEARCH_MAVEN_CENTRAL: string = "Search versions from Maven Central Repository...";
+    const OPTION_SEARCH_MAVEN_CENTRAL: string = "Search Maven Central Repository...";
     versions.push(OPTION_SEARCH_MAVEN_CENTRAL);
 
     let selectedVersion: string | undefined = await vscode.window.showQuickPick(

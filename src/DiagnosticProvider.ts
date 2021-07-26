@@ -2,16 +2,20 @@
 // Licensed under the MIT license.
 import * as fse from "fs-extra";
 import * as vscode from "vscode";
-import { UserError } from "../../utils/errorUtils";
-import { ElementNode, getNodesByTag, XmlTagName } from "../../utils/lexerUtils";
-import { Dependency } from "./Dependency";
+import { Dependency } from "./explorer/model/Dependency";
+import { UserError } from "./utils/errorUtils";
+import { ElementNode, getNodesByTag, XmlTagName } from "./utils/lexerUtils";
 
 export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
 
-class IDiagnostic {
+class DiagnosticProvider {
     private _collection: vscode.DiagnosticCollection;
-    public set collection(collection: vscode.DiagnosticCollection) {
-        this._collection = collection;
+
+    public initialize(context: vscode.ExtensionContext): void {
+        const dependencyCollection = vscode.languages.createDiagnosticCollection("Dependency");
+        this._collection = dependencyCollection;
+        context.subscriptions.push(this._collection);
+        context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc => dependencyCollection.delete(doc.uri)));
     }
 
     public async refreshDiagnostics(uri: vscode.Uri, conflictNodes: Dependency[]): Promise<vscode.Diagnostic[]> {
@@ -27,8 +31,7 @@ class IDiagnostic {
         const root: Dependency = <Dependency> node.root;
         const diagnostics: vscode.Diagnostic[] = [];
         const range: vscode.Range = await this.findConflictRange(root.projectPomPath, root.groupId, root.artifactId);
-        // TODO: change message
-        const message: string = `${root.artifactId} has conflict dependencies: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus.effectiveVersion}`;
+        const message: string = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus.effectiveVersion}`;
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
         diagnostic.code = MAVEN_DEPENDENCY_CONFLICT;
         diagnostics.push(diagnostic);
@@ -61,4 +64,4 @@ class IDiagnostic {
     }
 }
 
-export const iDiagnostic: IDiagnostic = new IDiagnostic();
+export const diagnosticProvider: DiagnosticProvider = new DiagnosticProvider();

@@ -12,9 +12,9 @@ import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { completionProvider } from "./completion/completionProvider";
 import { definitionProvider } from "./definition/definitionProvider";
+import { diagnosticProvider } from "./DiagnosticProvider";
 import { initExpService } from "./experimentationService";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
-import { iDiagnostic } from "./explorer/model/iDiagnostic";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
@@ -140,10 +140,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     }
 
     //diagnostic
-    const dependencyCollection = vscode.languages.createDiagnosticCollection("Dependency");
-    iDiagnostic.collection = dependencyCollection;
-    context.subscriptions.push(dependencyCollection);
-    context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc => dependencyCollection.delete(doc.uri)));
+    diagnosticProvider.initialize(context);
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {

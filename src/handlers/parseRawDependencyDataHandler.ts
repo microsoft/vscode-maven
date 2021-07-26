@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import * as vscode from "vscode";
+
 import { Dependency } from "../explorer/model/Dependency";
-import { iDiagnostic } from "../explorer/model/iDiagnostic";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { IOmittedStatus } from "../explorer/model/OmittedStatus";
 import { getDependencyTree } from "../handlers/showDependenciesHandler";
@@ -10,7 +9,7 @@ import { getDependencyTree } from "../handlers/showDependenciesHandler";
 const DUPLICATE_INDICATOR: string = "omitted for duplicate";
 const CONFLICT_INDICATOR: string = "omitted for conflict";
 
-export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[]> {
+export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[][]> {
     const dependencyTree: string | undefined = await getDependencyTree(project.pomPath);
     if (dependencyTree === undefined) {
         throw new Error("Failed to generate dependency tree.");
@@ -32,7 +31,7 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     return await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
 }
 
-async function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Promise<Dependency[]> {
+async function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Promise<Dependency[][]> {
     const treeNodes: Dependency[] = [];
     const conflictNodes: Dependency[] = [];
     if (treecontent) {
@@ -97,6 +96,5 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
             preNode = curNode;
         });
     }
-    await iDiagnostic.refreshDiagnostics(vscode.Uri.file(projectPomPath), conflictNodes);
-    return treeNodes;
+    return [treeNodes, conflictNodes];
 }

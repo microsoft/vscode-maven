@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { MAVEN_DEPENDENCY_CONFLICT } from "../DiagnosticProvider";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
-import { MAVEN_DEPENDENCY_CONFLICT } from "../explorer/model/iDiagnostic";
 
 export class ConflictResolver implements vscode.CodeActionProvider {
     public static readonly providedCodeActionKinds: vscode.CodeActionKind[] = [
@@ -17,13 +17,12 @@ export class ConflictResolver implements vscode.CodeActionProvider {
     }
 
     private createCommandCodeAction(diagnostic: vscode.Diagnostic, document: vscode.TextDocument): vscode.CodeAction {
-        // handle diagnostic.message: get arguments gid, aid, version
-        // message = `${root.artifactId} has conflict dependencies: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus.effectiveVersion}`;
-        const re = /([\w.-]+) has conflict dependencies: ([\w.-]+):([\w.-]+):([\w.-]+) conflict with ([\w.-]+)/gm;
+        // TODO: diagnostic message
+        const re = /Dependency conflict in ([\w.-]+): ([\w.-]+):([\w.-]+):([\w.-]+) conflict with ([\w.-]+)/gm;
         const message: string = diagnostic.message.replace(re, "$2,$3,$5");
         const [gid, aid, effectiveVersion] = message.split(",");
 
-        const actionSetVersion = new vscode.CodeAction(`Set version for ${gid}:${aid}`, vscode.CodeActionKind.QuickFix);
+        const actionSetVersion = new vscode.CodeAction(`Resolve conflict for ${gid}:${aid}`, vscode.CodeActionKind.QuickFix);
         actionSetVersion.command = {
             command: "maven.project.setDependencyVersion",
             title: "set version to",
