@@ -14,6 +14,7 @@ import { completionProvider } from "./completion/completionProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { diagnosticProvider } from "./DiagnosticProvider";
 import { initExpService } from "./experimentationService";
+import { decorationProvider } from "./explorer/decorationProvider";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
@@ -141,6 +142,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
     //diagnostic
     diagnosticProvider.initialize(context);
+    //fileDecoration
+    context.subscriptions.push(decorationProvider);
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
