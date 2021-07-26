@@ -26,6 +26,9 @@ export class DependenciesMenu extends Menu implements ITreeItem {
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
+        const uri: vscode.Uri = vscode.Uri.file("");
+        treeItem.resourceUri = uri.with({authority: this.project.pomPath}); // distinguish dependenciesMenu in multi-module project
+        treeItem.tooltip = this.name;
         const iconFile: string = "library-folder.svg";
         treeItem.iconPath = {
             light: getPathToExtensionRoot("resources", "icons", "light", iconFile),

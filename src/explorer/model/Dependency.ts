@@ -15,6 +15,7 @@ export class Dependency extends TreeNode implements ITreeItem {
     private _version: string;
     private _scope: string;
     private _omittedStatus: IOmittedStatus;
+    private _uri: vscode.Uri;
     constructor(gid: string, aid: string, version: string, scope: string, omittedStatus: IOmittedStatus, projectPomPath: string) {
         super();
         this._gid = gid;
@@ -50,6 +51,14 @@ export class Dependency extends TreeNode implements ITreeItem {
         return this._scope;
     }
 
+    public get uri(): vscode.Uri {
+        return this._uri;
+    }
+
+    public set uri(uri: vscode.Uri) {
+        this._uri = uri;
+    }
+
     public getContextValue(): string {
         return "Dependency";
     }
@@ -60,6 +69,8 @@ export class Dependency extends TreeNode implements ITreeItem {
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.fullArtifactName);
+        treeItem.resourceUri = this.uri;
+        treeItem.tooltip = this.fullArtifactName;
         if (this.children.length !== 0) {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         } else {

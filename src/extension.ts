@@ -12,6 +12,7 @@ import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { completionProvider } from "./completion/completionProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { initExpService } from "./experimentationService";
+import { decorationProvider } from "./explorer/decorationProvider";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
@@ -136,6 +137,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     if (isJavaExtEnabled()) {
         registerArtifactSearcher(context);
     }
+    //fileDecoration
+    context.subscriptions.push(decorationProvider);
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
