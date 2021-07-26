@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { diagnosticProvider } from "../../DiagnosticProvider";
 import { parseRawDependencyDataHandler } from "../../handlers/parseRawDependencyDataHandler";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Dependency } from "./Dependency";
@@ -20,7 +21,8 @@ export class DependenciesMenu extends Menu implements ITreeItem {
     }
 
     public async getChildren() : Promise<Dependency[]> {
-        const treeNodes = await parseRawDependencyDataHandler(this.project);
+        const [treeNodes, conflictNodes] = await parseRawDependencyDataHandler(this.project);
+        await diagnosticProvider.refreshDiagnostics(vscode.Uri.file(this.project.pomPath), conflictNodes);
         return Promise.resolve(treeNodes);
     }
 

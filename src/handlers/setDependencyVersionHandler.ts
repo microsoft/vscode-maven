@@ -11,20 +11,27 @@ import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getVersions } from "../utils/requestUtils";
 
-export async function setDependencyVersionHandler(selectedItem?: Dependency): Promise<void> {
-    if (selectedItem === undefined) {
+export async function setDependencyVersionHandler(selectedItem?: any): Promise<void> {
+    let pomPath: string;
+    let effectiveVersion: string;
+    if (selectedItem && selectedItem.pomPath) { // codeAction
+        pomPath = selectedItem.pomPath;
+        effectiveVersion = selectedItem.effectiveVersion;
+    } else if (selectedItem && selectedItem instanceof Dependency) {
+        pomPath = selectedItem.projectPomPath;
+        effectiveVersion = selectedItem.omittedStatus.effectiveVersion;
+    } else {
         throw new UserError("No dependency node specified.");
     }
-    const pomPath: string = selectedItem.projectPomPath;
+
     if (!await fse.pathExists(pomPath)) {
         throw new UserError("Specified POM file does not exist on file system.");
     }
 
-    const effectiveVersion: string = selectedItem.omittedStatus.effectiveVersion;
     const gid: string = selectedItem.groupId;
     const aid: string = selectedItem.artifactId;
     const versions: string[] = getAllVersionsInTree(pomPath, gid, aid);
-    const OPTION_SEARCH_MAVEN_CENTRAL: string = "Search versions from Maven Central Repository...";
+    const OPTION_SEARCH_MAVEN_CENTRAL: string = "Search Maven Central Repository...";
     versions.push(OPTION_SEARCH_MAVEN_CENTRAL);
 
     let selectedVersion: string | undefined = await vscode.window.showQuickPick(

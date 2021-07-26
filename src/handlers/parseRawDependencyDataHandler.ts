@@ -11,7 +11,7 @@ import { getDependencyTree } from "../handlers/showDependenciesHandler";
 const DUPLICATE_INDICATOR: string = "omitted for duplicate";
 const CONFLICT_INDICATOR: string = "omitted for conflict";
 
-export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[]> {
+export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[][]> {
     const dependencyTree: string | undefined = await getDependencyTree(project.pomPath);
     if (dependencyTree === undefined) {
         throw new Error("Failed to generate dependency tree.");
@@ -30,11 +30,12 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const indent: string = "   "; // three spaces
     const eol: string = "\r\n";
     const prefix: string = "+- ";
-    return parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
+    return await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
 }
 
-function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Dependency[] {
+async function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Promise<Dependency[][]> {
     const treeNodes: Dependency[] = [];
+    const conflictNodes: Dependency[] = [];
     if (treecontent) {
         let curNode: Dependency;
         let preNode: Dependency;
@@ -111,6 +112,9 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
             } else {
                 curNode.uri = uri;
             }
+            if (curNode.omittedStatus.status === "conflict") {
+                conflictNodes.push(curNode);
+            }
             if (curIndentCnt === 0) {
                 treeNodes.push(rootNode);
             }
@@ -118,5 +122,5 @@ function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix
             preNode = curNode;
         });
     }
-    return treeNodes;
+    return [treeNodes, conflictNodes];
 }
