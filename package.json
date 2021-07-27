@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -205,6 +205,17 @@
         "category": "Maven"
       },
       {
+        "command": "maven.project.setDependencyVersion",
+        "title": "%contributes.commands.maven.project.setDependencyVersion%",
+        "category": "Maven"
+      },
+      {
+        "command": "maven.project.goToDefinition",
+        "title": "%contributes.commands.maven.project.goToDefinition%",
+        "category": "Maven",
+        "icon": "$(go-to-file)"
+      },
+      {
         "command": "maven.favorites",
         "title": "%contributes.commands.maven.favorites%",
         "category": "Maven"
@@ -304,6 +315,14 @@
         },
         {
           "command": "maven.project.excludeDependency",
+          "when": "never"
+        },
+        {
+          "command": "maven.project.setDependencyVersion",
+          "when": "never"
+        },
+        {
+          "command": "maven.project.goToDefinition",
           "when": "never"
         },
         {
@@ -432,6 +451,16 @@
           "command": "maven.project.excludeDependency",
           "when": "view == mavenProjects && viewItem == Dependency",
           "group": "0-dependency@0"
+        },
+        {
+          "command": "maven.project.setDependencyVersion",
+          "when": "view == mavenProjects && viewItem == Dependency",
+          "group": "0-dependency@1"
+        },
+        {
+          "command": "maven.project.goToDefinition",
+          "when": "view == mavenProjects && viewItem == Dependency",
+          "group": "inline"
         },
         {
           "command": "maven.project.openPom",

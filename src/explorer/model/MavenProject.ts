@@ -23,6 +23,7 @@ const CONTEXT_VALUE: string = "MavenProject";
 export class MavenProject implements ITreeItem {
     public parent?: MavenProject; // assigned if it's specified as one of parent project's modules
     public pomPath: string;
+    public _fullDependencyText: string;
     private ePomProvider: EffectivePomProvider;
     private _ePom: any;
     private _pom: any;
@@ -50,6 +51,14 @@ export class MavenProject implements ITreeItem {
             return this._pom?.project?.artifactId?.[0];
         }
 
+    }
+
+    public get fullText(): string {
+        return this._fullDependencyText;
+    }
+
+    public set fullText(text: string) {
+        this._fullDependencyText = text;
     }
 
     public get groupId(): string {

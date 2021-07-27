@@ -4,10 +4,8 @@
 import * as vscode from "vscode";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { ITreeItem } from "./ITreeItem";
+import { IOmittedStatus } from "./OmittedStatus";
 import { TreeNode } from "./TreeNode";
-
-const DUPLICATE_INDICATOR: string = "omitted for duplicate";
-const CONFLICT_INDICATOR: string = "omitted for conflict";
 
 export class Dependency extends TreeNode implements ITreeItem {
     private fullArtifactName: string = ""; // groupId:artifactId:version:scope
@@ -16,16 +14,20 @@ export class Dependency extends TreeNode implements ITreeItem {
     private _aid: string;
     private _version: string;
     private _scope: string;
-    private supplement: string = "";
-    constructor(gid: string, aid: string, version: string, scope: string, supplement: string, projectPomPath: string) {
+    private _omittedStatus: IOmittedStatus;
+    private _uri: vscode.Uri;
+    constructor(gid: string, aid: string, version: string, scope: string, omittedStatus: IOmittedStatus, projectPomPath: string) {
         super();
         this._gid = gid;
         this._aid = aid;
         this._version = version;
         this._scope = scope;
         this.fullArtifactName = [gid, aid, version, scope].join(":");
-        this.supplement = supplement;
+        this._omittedStatus = omittedStatus;
         this._projectPomPath = projectPomPath;
+    }
+    public get omittedStatus(): IOmittedStatus {
+        return this._omittedStatus;
     }
 
     public get projectPomPath(): string {
@@ -49,6 +51,14 @@ export class Dependency extends TreeNode implements ITreeItem {
         return this._scope;
     }
 
+    public get uri(): vscode.Uri {
+        return this._uri;
+    }
+
+    public set uri(uri: vscode.Uri) {
+        this._uri = uri;
+    }
+
     public getContextValue(): string {
         return "Dependency";
     }
@@ -59,26 +69,28 @@ export class Dependency extends TreeNode implements ITreeItem {
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.fullArtifactName);
+        treeItem.resourceUri = this.uri;
+        treeItem.tooltip = this.fullArtifactName;
         if (this.children.length !== 0) {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         } else {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         }
 
-        if (this.supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
+        if (this._omittedStatus.status === "duplicate") {
             const iconFile: string = "library-remove.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
-            treeItem.description = this.supplement;
-        } else if (this.supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
+            treeItem.description = this._omittedStatus.description;
+        } else if (this._omittedStatus.status === "conflict") {
             const iconFile: string = "library-warning.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
-            treeItem.description = this.supplement;
+            treeItem.description = this._omittedStatus.description;
         } else {
             treeItem.iconPath = new vscode.ThemeIcon("library");
         }

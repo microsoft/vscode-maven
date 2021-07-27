@@ -93,3 +93,7 @@ export function getPathToWorkspaceStorage(...args: string[]): string | undefined
     fse.ensureDirSync(EXTENSION_CONTEXT.storagePath);
     return path.join(EXTENSION_CONTEXT.storagePath, ...args);
 }
+
+export function localPomPath(gid: string, aid: string, version: string): string {
+    return path.join(getMavenLocalRepository(), ...gid.split("."), aid, version, `${aid}-${version}.pom`);
+}
