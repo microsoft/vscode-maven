@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.32.0
+### Added
+- [Preview] Improve Dependency management experience. [#261](https://github.com/microsoft/vscode-maven/issues/261)
+  - Visualize dependencies in Maven explorer.
+  - Resolve dependency conflicts.
+
+### Fixed
+- Environment varibles not loaded on calculating effective POM. [#637](https://github.com/microsoft/vscode-maven/issues/637)
+
 ## 0.31.0
 ### Added
 - Add code action `add a dependency` when cursor is within `<dependencies>` node. [#634](https://github.com/microsoft/vscode-maven/pull/634)
