@@ -2,8 +2,9 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { MAVEN_DEPENDENCY_CONFLICT } from "../DiagnosticProvider";
+import { diagnosticProvider, MAVEN_DEPENDENCY_CONFLICT } from "../DiagnosticProvider";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
+import { Dependency } from "../explorer/model/Dependency";
 
 export class ConflictResolver implements vscode.CodeActionProvider {
     public static readonly providedCodeActionKinds: vscode.CodeActionKind[] = [
@@ -17,10 +18,13 @@ export class ConflictResolver implements vscode.CodeActionProvider {
     }
 
     private createCommandCodeAction(diagnostic: vscode.Diagnostic, document: vscode.TextDocument): vscode.CodeAction {
-        // TODO: diagnostic message
-        const re = /Dependency conflict in ([\w.-]+): ([\w.-]+):([\w.-]+):([\w.-]+) conflict with ([\w.-]+)/gm;
-        const message: string = diagnostic.message.replace(re, "$2,$3,$5");
-        const [gid, aid, effectiveVersion] = message.split(",");
+        const node: Dependency | undefined = diagnosticProvider.map.get(diagnostic);
+        if (node === undefined) {
+            throw new Error("Failed to find Dependency.");
+        }
+        const gid: string = node.groupId;
+        const aid: string = node.artifactId;
+        const effectiveVersion: string = node.omittedStatus.effectiveVersion;
 
         const actionSetVersion = new vscode.CodeAction(`Resolve conflict for ${gid}:${aid}`, vscode.CodeActionKind.QuickFix);
         actionSetVersion.command = {

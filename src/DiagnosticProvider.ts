@@ -10,6 +10,7 @@ export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
 
 class DiagnosticProvider {
     private _collection: vscode.DiagnosticCollection;
+    private _map: Map<vscode.Diagnostic, Dependency> = new Map();
 
     public initialize(context: vscode.ExtensionContext): void {
         const dependencyCollection = vscode.languages.createDiagnosticCollection("Dependency");
@@ -18,24 +19,28 @@ class DiagnosticProvider {
         context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc => dependencyCollection.delete(doc.uri)));
     }
 
+    public get map(): Map<vscode.Diagnostic, Dependency> {
+        return this._map;
+    }
+
     public async refreshDiagnostics(uri: vscode.Uri, conflictNodes: Dependency[]): Promise<vscode.Diagnostic[]> {
-        let diagnostics: vscode.Diagnostic[] = [];
+        const diagnostics: vscode.Diagnostic[] = [];
         for (const node of conflictNodes) {
-            diagnostics = diagnostics.concat(await this.createDiagnostics(node));
+            const diagnostic = await this.createDiagnostics(node);
+            diagnostics.push(diagnostic);
+            this._map.set(diagnostic, node);
         }
         this._collection.set(uri, diagnostics);
         return diagnostics;
     }
 
-    public async createDiagnostics(node: Dependency): Promise<vscode.Diagnostic[]> {
+    public async createDiagnostics(node: Dependency): Promise<vscode.Diagnostic> {
         const root: Dependency = <Dependency> node.root;
-        const diagnostics: vscode.Diagnostic[] = [];
         const range: vscode.Range = await this.findConflictRange(root.projectPomPath, root.groupId, root.artifactId);
         const message: string = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus.effectiveVersion}`;
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
         diagnostic.code = MAVEN_DEPENDENCY_CONFLICT;
-        diagnostics.push(diagnostic);
-        return diagnostics;
+        return diagnostic;
     }
 
     public async findConflictRange(filePath: string, gid: string, aid: string): Promise<vscode.Range> {
