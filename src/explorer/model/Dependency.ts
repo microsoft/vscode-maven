@@ -68,7 +68,8 @@ export class Dependency extends TreeNode implements ITreeItem {
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.fullArtifactName);
+        const label = [this.groupId, this.artifactId, this.version].join(":");
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.resourceUri = this.uri;
         treeItem.tooltip = this.fullArtifactName;
         if (this.children.length !== 0) {
@@ -77,23 +78,32 @@ export class Dependency extends TreeNode implements ITreeItem {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         }
 
+        // icons
         if (this._omittedStatus.status === "duplicate") {
             const iconFile: string = "library-remove.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
-            treeItem.description = this._omittedStatus.description;
         } else if (this._omittedStatus.status === "conflict") {
             const iconFile: string = "library-warning.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
-            treeItem.description = this._omittedStatus.description;
         } else {
             treeItem.iconPath = new vscode.ThemeIcon("library");
         }
+
+        // description
+        const descriptions: string[] = [];
+        if (!this.scope.includes("compile")) {
+            descriptions.push(`(${this.scope})`);
+        }
+        if (this._omittedStatus.description !== undefined) {
+            descriptions.push(this._omittedStatus.description);
+        }
+        treeItem.description = descriptions.join(" ");
         return treeItem;
     }
 }
