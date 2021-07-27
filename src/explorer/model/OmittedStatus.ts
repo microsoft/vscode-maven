@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 export interface IOmittedStatus {
-    status: string;
+    status: "conflict" | "duplicate" | "normal";
     effectiveVersion: string;
     description?: string;
 }

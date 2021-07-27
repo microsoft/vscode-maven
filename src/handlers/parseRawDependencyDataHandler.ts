@@ -109,6 +109,8 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
                         break;
                     }
                 }
+            } else if (curNode.omittedStatus.status === "duplicate") {
+                curNode.uri = uri.with({query: "isDuplicate"});
             } else {
                 curNode.uri = uri;
             }
