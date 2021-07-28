@@ -25,7 +25,10 @@ export async function getDependencyTree(pomPathOrMavenProject: string | MavenPro
     } else {
         return undefined;
     }
-    return await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: vscode.Progress<{ message?: string }>) => new Promise<string | undefined>(
+    return await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Window,
+        cancellable: false
+    }, async (p: vscode.Progress<{ message?: string }>, _token: vscode.CancellationToken) => new Promise<string | undefined>(
         async (resolve, reject): Promise<void> => {
             p.report({ message: `Generating Dependency Tree: ${name}` });
             try {
