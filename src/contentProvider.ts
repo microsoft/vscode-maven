@@ -10,7 +10,7 @@ import { Utils } from "./utils/Utils";
 
 class MavenContentProvider implements vscode.TextDocumentContentProvider {
 
-    readonly onDidChange: vscode.Event<vscode.Uri>;
+    public readonly onDidChange: vscode.Event<vscode.Uri>;
     private _onDidChangeEmitter: vscode.EventEmitter<vscode.Uri>;
 
     constructor() {
@@ -18,7 +18,7 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
         this.onDidChange = this._onDidChangeEmitter.event;
     }
 
-    public invalidate(uri: vscode.Uri) {
+    public invalidate(uri: vscode.Uri): void {
         this._onDidChangeEmitter.fire(uri);
     }
 

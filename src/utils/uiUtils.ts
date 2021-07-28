@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 import * as fs from "fs-extra";
-import * as vscode from "vscode";
 import * as path from "path";
+import * as vscode from "vscode";
 import { OpenDialogOptions, Uri, window } from "vscode";
 import { instrumentOperation } from "vscode-extension-telemetry-wrapper";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
@@ -112,12 +112,12 @@ async function promptToManageWorkspaceTrust(): Promise<void> {
     }
 }
 
-export function effectivePomContentUri(pomPath: string) {
+export function effectivePomContentUri(pomPath: string): vscode.Uri {
     const displayName = "EffectivePOM.xml";
     return Uri.parse("vscode-maven://effective-pom").with({ path: `/${path.join(pomPath, displayName)}`, query: pomPath });
 }
 
-export function dependenciesContentUri(pomPath: string) {
+export function dependenciesContentUri(pomPath: string): vscode.Uri {
     const displayName = "Dependencies";
     return vscode.Uri.parse("vscode-maven://dependencies").with({ path: `/${path.join(pomPath, displayName)}`, query: pomPath });
 }
