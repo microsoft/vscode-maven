@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.32.1
+### Fixed
+- A text file was wrongly created in workspace when calculating depenencies.
+
 ## 0.32.0
 ### Added
 - [Preview] Improve dependency management experience. [#261](https://github.com/microsoft/vscode-maven/issues/261)
