@@ -18,7 +18,7 @@ import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } f
 import { MavenNotFoundError } from "./errorUtils";
 import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
 import { executeInTerminal, getMaven, pluginDescription, rawEffectivePom } from "./mavenUtils";
-import { selectProjectIfNecessary } from "./uiUtils";
+import { effectivePomContentUri, selectProjectIfNecessary } from "./uiUtils";
 
 export namespace Utils {
 
@@ -135,8 +135,7 @@ export namespace Utils {
             throw new MavenNotFoundError();
         }
 
-        const displayName = "EffectivePOM.xml";
-        const uri = Uri.parse("vscode-maven://effective-pom").with({ path: `/${path.join(pomPath, displayName)}`, query: pomPath });
+        const uri = effectivePomContentUri(pomPath);
         await window.showTextDocument(uri);
     }
 

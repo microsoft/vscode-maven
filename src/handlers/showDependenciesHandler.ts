@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as path from "path";
 import * as vscode from "vscode";
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { rawDependencyTree } from "../utils/mavenUtils";
+import { dependenciesContentUri } from "../utils/uiUtils";
 
 export async function showDependenciesHandler(project: MavenProject): Promise<void> {
-    const displayName = "Dependencies";
-    const uri = vscode.Uri.parse("vscode-maven://dependencies").with({path: `/${path.join(project.pomPath, displayName)}`, query: project.pomPath});
+    const uri = dependenciesContentUri(project.pomPath);
     await vscode.window.showTextDocument(uri);
 }
 

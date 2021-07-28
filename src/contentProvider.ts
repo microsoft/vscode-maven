@@ -9,6 +9,19 @@ import { getDependencyTree } from "./handlers/showDependenciesHandler";
 import { Utils } from "./utils/Utils";
 
 class MavenContentProvider implements vscode.TextDocumentContentProvider {
+
+    public readonly onDidChange: vscode.Event<vscode.Uri>;
+    private _onDidChangeEmitter: vscode.EventEmitter<vscode.Uri>;
+
+    constructor() {
+        this._onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
+        this.onDidChange = this._onDidChangeEmitter.event;
+    }
+
+    public invalidate(uri: vscode.Uri): void {
+        this._onDidChangeEmitter.fire(uri);
+    }
+
     public async provideTextDocumentContent(uri: vscode.Uri, _token: vscode.CancellationToken): Promise<string | undefined> {
         if (uri.scheme !== "vscode-maven") {
             throw new Error(`Scheme ${uri.scheme} not supported by this content provider.`);
