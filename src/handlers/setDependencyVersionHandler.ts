@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as fse from "fs-extra";
+import * as semver from "semver";
 import * as vscode from "vscode";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { Dependency } from "../explorer/model/Dependency";
@@ -164,28 +165,12 @@ function getAllVersionsInTree(pomPath: string, gid: string, aid: string): string
     }
 
     function compare(v1: string, v2: string): number {
-        const indexCut1: number = v1.indexOf("-"); // filter char
-        const indexCut2: number = v2.indexOf("-");
-        if (indexCut1 !== -1) {
-            v1 = v1.substr(0, indexCut1);
-        }
-        if (indexCut2 !== -1) {
-            v2 = v2.substr(0, indexCut2);
-        }
-        const numbers1: number[] = v1.split(".").map(Number);
-        const numbers2: number[] = v2.split(".").map(Number);
-        const minLen: number = numbers1.length < numbers2.length ? numbers1.length : numbers2.length;
-        let i: number = 0;
-        while (i < minLen) {
-            if (numbers1[i] < numbers2[i]) {
-                return 1;
-            } else if (numbers1[i] > numbers2[i]) {
-                return -1;
-            } else {
-                i += 1;
-            }
-        }
-        return 0;
+        // correct versions that do not follow SemVer Policy
+        const s1: semver.SemVer | null = semver.coerce(v1);
+        const s2: semver.SemVer | null = semver.coerce(v2);
+        const version1: semver.SemVer | string = s1 === null ? v1 : s1;
+        const version2: semver.SemVer | string = s2 === null ? v2 : s2;
+        return semver.rcompare(version1, version2);
     }
 
     versions = Array.from(new Set(versions)).sort(compare);
