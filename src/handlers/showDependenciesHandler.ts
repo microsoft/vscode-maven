@@ -1,20 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as path from "path";
 import * as vscode from "vscode";
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { rawDependencyTree } from "../utils/mavenUtils";
 
 export async function showDependenciesHandler(project: MavenProject): Promise<void> {
-    const dependencyTree : string | undefined = await getDependencyTree(project);
-    if (dependencyTree === undefined) {
-        throw new Error("Failed to generate dependency tree.");
-    }
-
-    const treeContent: string = dependencyTree.replace(/\|/g, " ");
-    const document: vscode.TextDocument = await vscode.workspace.openTextDocument({ language: "plain", content: treeContent });
-    await vscode.window.showTextDocument(document, { viewColumn: vscode.ViewColumn.Active, preview: false });
+    const displayName = `Dependencies`;
+    const uri = vscode.Uri.parse("maven://dependencies").with({path: "/" + path.join(project.pomPath, displayName), query: project.pomPath});
+    await vscode.window.showTextDocument(uri);
 }
 
 export async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {

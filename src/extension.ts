@@ -11,6 +11,7 @@ import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { completionProvider } from "./completion/completionProvider";
+import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { diagnosticProvider } from "./DiagnosticProvider";
 import { initExpService } from "./experimentationService";
@@ -144,6 +145,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     diagnosticProvider.initialize(context);
     //fileDecoration
     context.subscriptions.push(decorationProvider);
+    //textDocument based output (e.g. effective-pom, dependencies)
+    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("maven", contentProvider));
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
