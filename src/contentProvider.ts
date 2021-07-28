@@ -10,7 +10,7 @@ import { Utils } from "./utils/Utils";
 
 class MavenContentProvider implements vscode.TextDocumentContentProvider {
     public async provideTextDocumentContent(uri: vscode.Uri, _token: vscode.CancellationToken): Promise<string | undefined> {
-        if (uri.scheme !== "maven") {
+        if (uri.scheme !== "vscode-maven") {
             throw new Error(`Scheme ${uri.scheme} not supported by this content provider.`);
         }
 

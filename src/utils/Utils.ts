@@ -136,7 +136,7 @@ export namespace Utils {
         }
 
         const displayName = "EffectivePOM.xml";
-        const uri = Uri.parse("maven://effective-pom").with({ path: "/" + path.join(pomPath, displayName), query: pomPath });
+        const uri = Uri.parse("vscode-maven://effective-pom").with({ path: "/" + path.join(pomPath, displayName), query: pomPath });
         await window.showTextDocument(uri);
     }
 
