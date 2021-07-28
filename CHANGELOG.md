@@ -7,8 +7,12 @@ All notable changes to the "vscode-maven" extension will be documented in this f
   - Visualize dependencies in Maven explorer.
   - Resolve dependency conflicts.
 
+### Changed
+- Present Effective POMs better with content provider API. [#680](https://github.com/microsoft/vscode-maven/pull/680)
+
 ### Fixed
 - Environment varibles not loaded on calculating effective POM. [#637](https://github.com/microsoft/vscode-maven/issues/637)
+- Effective POM was not update-to-date. [#681](https://github.com/microsoft/vscode-maven/pull/681)
 
 ## 0.31.0
 ### Added
