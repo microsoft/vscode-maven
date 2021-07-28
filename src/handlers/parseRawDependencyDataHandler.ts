@@ -50,7 +50,7 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
             let supplement: string = "";
             if (indexCut !== -1) {
                 supplement = name.substr(indexCut);
-                name = name.substr(0, indexCut-1);
+                name = name.substr(0, indexCut - 1);
             }
             const [gid, aid, version, scope] = name.split(":");
             let effectiveVersion: string;
