@@ -8,18 +8,15 @@ import { IEffectivePom } from "./model/IEffectivePom";
 
 export class EffectivePomProvider {
   private pomPath: string;
-  private effectivePom: IEffectivePom;
   private emitter: EventEmitter = new EventEmitter();
   private isCalculating: boolean = false;
 
   constructor(pomPath: string) {
     this.pomPath = pomPath;
-    this.emitter.on("complete", (resp: IEffectivePom) => {
-      this.effectivePom = resp;
+    this.emitter.on("complete", (_resp: IEffectivePom) => {
       this.isCalculating = false;
     });
     this.emitter.on("error", (_error) => {
-      this.effectivePom = { pomPath };
       this.isCalculating = false;
     });
   }
@@ -63,10 +60,6 @@ export class EffectivePomProvider {
 
     if (this.isCalculating) {
       return promise;
-    }
-
-    if (this.effectivePom !== undefined) {
-      return this.effectivePom;
     }
 
     this.calculateEffectivePom(options).catch(console.error);

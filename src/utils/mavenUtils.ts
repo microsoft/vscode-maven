@@ -24,18 +24,19 @@ import { updateLRUCommands } from "./historyUtils";
  */
 export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: boolean}): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
+    const epomPath: string = `${outputPath}.epom`;
     const mtimePath: string = `${outputPath}.mtime`;
     const cachedMTimeMs: string | undefined = await readFileIfExists(mtimePath);
     const stat: fse.Stats = await fse.stat(pomPath);
     const mtimeMs: string = stat.mtimeMs.toString();
 
     if (cachedMTimeMs === mtimeMs || options?.cacheOnly) {
-        return await readFileIfExists(outputPath);
+        return await readFileIfExists(epomPath);
     }
 
-    await executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
+    await executeInBackground(`help:effective-pom -Doutput="${epomPath}"`, pomPath);
     await fse.writeFile(mtimePath, mtimeMs);
-    return await readFileIfExists(outputPath);
+    return await readFileIfExists(epomPath);
 }
 
 export async function rawDependencyTree(pomPath: string): Promise<any> {
