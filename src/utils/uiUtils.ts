@@ -3,6 +3,7 @@
 
 import * as fs from "fs-extra";
 import * as vscode from "vscode";
+import * as path from "path";
 import { OpenDialogOptions, Uri, window } from "vscode";
 import { instrumentOperation } from "vscode-extension-telemetry-wrapper";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
@@ -109,4 +110,14 @@ async function promptToManageWorkspaceTrust(): Promise<void> {
     if (choiceForDetails === OPTION_MANAGE_TRUST) {
         vscode.commands.executeCommand(COMMAND_MANAGE_TRUST);
     }
+}
+
+export function effectivePomContentUri(pomPath: string) {
+    const displayName = "EffectivePOM.xml";
+    return Uri.parse("vscode-maven://effective-pom").with({ path: `/${path.join(pomPath, displayName)}`, query: pomPath });
+}
+
+export function dependenciesContentUri(pomPath: string) {
+    const displayName = "Dependencies";
+    return vscode.Uri.parse("vscode-maven://dependencies").with({ path: `/${path.join(pomPath, displayName)}`, query: pomPath });
 }
