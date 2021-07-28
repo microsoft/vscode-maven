@@ -3,7 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## 0.32.0
 ### Added
-- [Preview] Improve Dependency management experience. [#261](https://github.com/microsoft/vscode-maven/issues/261)
+- [Preview] Improve dependency management experience. [#261](https://github.com/microsoft/vscode-maven/issues/261)
   - Visualize dependencies in Maven explorer.
   - Resolve dependency conflicts.
 
