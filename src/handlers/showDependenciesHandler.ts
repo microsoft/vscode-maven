@@ -8,8 +8,8 @@ import { MavenProject } from "../explorer/model/MavenProject";
 import { rawDependencyTree } from "../utils/mavenUtils";
 
 export async function showDependenciesHandler(project: MavenProject): Promise<void> {
-    const displayName = `Dependencies`;
-    const uri = vscode.Uri.parse("vscode-maven://dependencies").with({path: "/" + path.join(project.pomPath, displayName), query: project.pomPath});
+    const displayName = "Dependencies";
+    const uri = vscode.Uri.parse("vscode-maven://dependencies").with({path: `/${path.join(project.pomPath, displayName)}`, query: project.pomPath});
     await vscode.window.showTextDocument(uri);
 }
 
