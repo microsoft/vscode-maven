@@ -16,15 +16,17 @@ export class Dependency extends TreeNode implements ITreeItem {
     private _scope: string;
     private _omittedStatus: IOmittedStatus;
     private _uri: vscode.Uri;
-    constructor(gid: string, aid: string, version: string, scope: string, omittedStatus: IOmittedStatus, projectPomPath: string) {
+    constructor(gid: string, aid: string, version: string, scope: string, projectPomPath: string, omittedStatus?: IOmittedStatus) {
         super();
         this._gid = gid;
         this._aid = aid;
         this._version = version;
         this._scope = scope;
         this.fullArtifactName = [gid, aid, version, scope].join(":");
-        this._omittedStatus = omittedStatus;
         this._projectPomPath = projectPomPath;
+        if (omittedStatus) {
+            this._omittedStatus = omittedStatus;
+        }
     }
     public get omittedStatus(): IOmittedStatus {
         return this._omittedStatus;
@@ -79,7 +81,9 @@ export class Dependency extends TreeNode implements ITreeItem {
         }
 
         // icons
-        if (this._omittedStatus.status === "duplicate") {
+        if (this._omittedStatus === undefined) {
+            treeItem.iconPath = new vscode.ThemeIcon("library");
+        } else if (this._omittedStatus.status === "duplicate") {
             const iconFile: string = "library-remove.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
@@ -91,8 +95,6 @@ export class Dependency extends TreeNode implements ITreeItem {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
-        } else {
-            treeItem.iconPath = new vscode.ThemeIcon("library");
         }
 
         // description
@@ -100,7 +102,7 @@ export class Dependency extends TreeNode implements ITreeItem {
         if (!this.scope.includes("compile")) {
             descriptions.push(`(${this.scope})`);
         }
-        if (this._omittedStatus.description !== undefined) {
+        if (this._omittedStatus !== undefined) {
             descriptions.push(this._omittedStatus.description);
         }
         treeItem.description = descriptions.join(" ");

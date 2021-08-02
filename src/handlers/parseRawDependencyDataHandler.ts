@@ -62,9 +62,9 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
             } else if (supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
                 omittedStatus = {status: "duplicate", effectiveVersion: version, description: supplement};
             } else {
-                omittedStatus = {status: "normal", effectiveVersion: version};
+                return new Dependency(gid, aid, version, scope, projectPomPath);
             }
-            return new Dependency(gid, aid, version, scope, omittedStatus, projectPomPath);
+            return new Dependency(gid, aid, version, scope, projectPomPath, omittedStatus);
         };
         lines.forEach(line => {
             curIndentCnt = line.indexOf(prefix);
@@ -96,7 +96,9 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
             // set uri
             uri = vscode.Uri.file(curFilePath);
             uri = uri.with({authority: projectPomPath}); // distinguish dependency in multi-module project
-            if (curNode.omittedStatus.status === "conflict") {
+            if (curNode.omittedStatus === undefined) {
+                curNode.uri = uri;
+            } else if (curNode.omittedStatus.status === "conflict") {
                 curNode.uri = uri.with({query: "hasConflict"});
                 // find all parent and set hasConflict upforward
                 let tmpNode = curNode;
@@ -109,13 +111,9 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
                         break;
                     }
                 }
+                conflictNodes.push(curNode);
             } else if (curNode.omittedStatus.status === "duplicate") {
                 curNode.uri = uri.with({query: "isDuplicate"});
-            } else {
-                curNode.uri = uri;
-            }
-            if (curNode.omittedStatus.status === "conflict") {
-                conflictNodes.push(curNode);
             }
             if (curIndentCnt === 0) {
                 treeNodes.push(rootNode);
