@@ -19,7 +19,7 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
         effectiveVersion = selectedItem.effectiveVersion;
     } else if (selectedItem && selectedItem instanceof Dependency) {
         pomPath = selectedItem.projectPomPath;
-        effectiveVersion = selectedItem.omittedStatus ? selectedItem.omittedStatus.effectiveVersion : selectedItem.version;
+        effectiveVersion = selectedItem.omittedStatus?.effectiveVersion ?? selectedItem.version;
     } else {
         throw new UserError("No dependency node specified.");
     }

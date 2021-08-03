@@ -54,15 +54,13 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
             }
             const [gid, aid, version, scope] = name.split(":");
             let effectiveVersion: string;
-            let omittedStatus: IOmittedStatus;
+            let omittedStatus: IOmittedStatus | undefined;
             if (supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
                 const re = /\(omitted for conflict with ([\w.-]+)\)/gm;
                 effectiveVersion = supplement.replace(re, "$1");
                 omittedStatus = {status: "conflict", effectiveVersion: effectiveVersion, description: supplement};
             } else if (supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
                 omittedStatus = {status: "duplicate", effectiveVersion: version, description: supplement};
-            } else {
-                return new Dependency(gid, aid, version, scope, projectPomPath);
             }
             return new Dependency(gid, aid, version, scope, projectPomPath, omittedStatus);
         };

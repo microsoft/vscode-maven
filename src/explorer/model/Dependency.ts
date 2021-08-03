@@ -8,57 +8,23 @@ import { IOmittedStatus } from "./OmittedStatus";
 import { TreeNode } from "./TreeNode";
 
 export class Dependency extends TreeNode implements ITreeItem {
-    private fullArtifactName: string = ""; // groupId:artifactId:version:scope
-    private _projectPomPath: string;
-    private _gid: string;
-    private _aid: string;
-    private _version: string;
-    private _scope: string;
-    private _omittedStatus: IOmittedStatus;
-    private _uri: vscode.Uri;
+    public fullArtifactName: string = ""; // groupId:artifactId:version:scope
+    public projectPomPath: string;
+    public groupId: string;
+    public artifactId: string;
+    public version: string;
+    public scope: string;
+    public omittedStatus?: IOmittedStatus;
+    public uri: vscode.Uri;
     constructor(gid: string, aid: string, version: string, scope: string, projectPomPath: string, omittedStatus?: IOmittedStatus) {
         super();
-        this._gid = gid;
-        this._aid = aid;
-        this._version = version;
-        this._scope = scope;
+        this.groupId = gid;
+        this.artifactId = aid;
+        this.version = version;
+        this.scope = scope;
         this.fullArtifactName = [gid, aid, version, scope].join(":");
-        this._projectPomPath = projectPomPath;
-        if (omittedStatus) {
-            this._omittedStatus = omittedStatus;
-        }
-    }
-    public get omittedStatus(): IOmittedStatus {
-        return this._omittedStatus;
-    }
-
-    public get projectPomPath(): string {
-        return this._projectPomPath;
-    }
-    public get fullName(): string {
-        return this.fullArtifactName;
-    }
-
-    public get groupId(): string {
-        return this._gid;
-    }
-
-    public get artifactId(): string {
-        return this._aid;
-    }
-    public get version(): string {
-        return this._version;
-    }
-    public get scope(): string {
-        return this._scope;
-    }
-
-    public get uri(): vscode.Uri {
-        return this._uri;
-    }
-
-    public set uri(uri: vscode.Uri) {
-        this._uri = uri;
+        this.projectPomPath = projectPomPath;
+        this.omittedStatus = omittedStatus;
     }
 
     public getContextValue(): string {
@@ -81,15 +47,15 @@ export class Dependency extends TreeNode implements ITreeItem {
         }
 
         // icons
-        if (this._omittedStatus === undefined) {
+        if (this.omittedStatus === undefined) {
             treeItem.iconPath = new vscode.ThemeIcon("library");
-        } else if (this._omittedStatus.status === "duplicate") {
+        } else if (this.omittedStatus.status === "duplicate") {
             const iconFile: string = "library-remove.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
-        } else if (this._omittedStatus.status === "conflict") {
+        } else if (this.omittedStatus.status === "conflict") {
             const iconFile: string = "library-warning.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
@@ -102,8 +68,8 @@ export class Dependency extends TreeNode implements ITreeItem {
         if (!this.scope.includes("compile")) {
             descriptions.push(`(${this.scope})`);
         }
-        if (this._omittedStatus !== undefined) {
-            descriptions.push(this._omittedStatus.description);
+        if (this.omittedStatus !== undefined) {
+            descriptions.push(this.omittedStatus.description);
         }
         treeItem.description = descriptions.join(" ");
         return treeItem;
