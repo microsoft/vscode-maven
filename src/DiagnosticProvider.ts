@@ -10,25 +10,25 @@ export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
 
 class DiagnosticProvider {
     private _collection: vscode.DiagnosticCollection;
-    private _map: Map<vscode.Diagnostic, Dependency> = new Map();
+    public map: Map<vscode.Diagnostic, Dependency> = new Map();
 
     public initialize(context: vscode.ExtensionContext): void {
         const dependencyCollection = vscode.languages.createDiagnosticCollection("Dependency");
         this._collection = dependencyCollection;
         context.subscriptions.push(this._collection);
-        context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc => dependencyCollection.delete(doc.uri)));
-    }
-
-    public get map(): Map<vscode.Diagnostic, Dependency> {
-        return this._map;
+        context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc => {
+            dependencyCollection.delete(doc.uri);
+            this.map.clear();
+        }));
     }
 
     public async refreshDiagnostics(uri: vscode.Uri, conflictNodes: Dependency[]): Promise<vscode.Diagnostic[]> {
+        this.map.clear();
         const diagnostics: vscode.Diagnostic[] = [];
         for (const node of conflictNodes) {
             const diagnostic = await this.createDiagnostics(node);
             diagnostics.push(diagnostic);
-            this._map.set(diagnostic, node);
+            this.map.set(diagnostic, node);
         }
         this._collection.set(uri, diagnostics);
         return diagnostics;
