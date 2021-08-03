@@ -7,11 +7,10 @@ import * as https from "https";
 import * as md5 from "md5";
 import * as path from "path";
 import * as url from "url";
-import { commands, Progress, ProgressLocation, RelativePattern, TextDocument, Uri, ViewColumn, window, workspace, WorkspaceFolder } from "vscode";
+import { commands, Progress, ProgressLocation, RelativePattern, Uri, window, workspace, WorkspaceFolder } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
-import { IEffectivePom } from "../explorer/model/IEffectivePom";
 import { LifecyclePhase } from "../explorer/model/LifecyclePhase";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
@@ -19,7 +18,7 @@ import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } f
 import { MavenNotFoundError } from "./errorUtils";
 import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
 import { executeInTerminal, getMaven, pluginDescription, rawEffectivePom } from "./mavenUtils";
-import { selectProjectIfNecessary } from "./uiUtils";
+import { effectivePomContentUri, selectProjectIfNecessary } from "./uiUtils";
 
 export namespace Utils {
 
@@ -136,22 +135,8 @@ export namespace Utils {
             throw new MavenNotFoundError();
         }
 
-        let pomxml: string | undefined;
-        const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
-        if (project) {
-            const effectivePom: IEffectivePom = await project.getEffectivePom();
-            pomxml = effectivePom.ePomString;
-        } else {
-            pomxml = await getEffectivePom(pomPath);
-        }
-        if (!pomxml) {
-            const error: Error = new Error("Fail to get effective pom.");
-            setUserError(error);
-            throw error;
-        }
-
-        const document: TextDocument = await workspace.openTextDocument({ language: "xml", content: pomxml });
-        await window.showTextDocument(document, ViewColumn.Active);
+        const uri = effectivePomContentUri(pomPath);
+        await window.showTextDocument(uri);
     }
 
     export async function getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {

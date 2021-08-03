@@ -62,14 +62,14 @@ export async function addDependencyHandler(options?: any): Promise<void> {
 
 async function addDependency(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
     // Find out <dependencies> node and insert content.
-    const contentBuf: Buffer = await fse.readFile(pomPath);
-    const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
+    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
+    const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
 
     const projectNode: ElementNode = projectNodes[0];
-    const dependenciesNode: ElementNode | undefined = projectNode.children && projectNode.children.find(node => node.tag === XmlTagName.Dependencies);
+    const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
     if (dependenciesNode !== undefined) {
         await insertDependency(pomPath, dependenciesNode, gid, aid, version);
     } else {

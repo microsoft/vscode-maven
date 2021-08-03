@@ -11,6 +11,7 @@ import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { completionProvider } from "./completion/completionProvider";
+import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { diagnosticProvider } from "./DiagnosticProvider";
 import { initExpService } from "./experimentationService";
@@ -36,7 +37,7 @@ import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadMavenSettingsFilePath, loadPackageInfo } from "./utils/contextUtils";
 import { executeInTerminal } from "./utils/mavenUtils";
-import { openFileIfExists, registerCommand, registerCommandRequiringTrust } from "./utils/uiUtils";
+import { dependenciesContentUri, effectivePomContentUri, openFileIfExists, registerCommand, registerCommandRequiringTrust } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -144,6 +145,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     diagnosticProvider.initialize(context);
     //fileDecoration
     context.subscriptions.push(decorationProvider);
+    //textDocument based output (e.g. effective-pom, dependencies)
+    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("vscode-maven", contentProvider));
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
@@ -152,6 +155,10 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
     watcher.onDidChange(async (e: Uri) => {
         const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(e.fsPath);
         if (project) {
+            // notify dependencies/effectivePOM to update
+            contentProvider.invalidate(effectivePomContentUri(project.pomPath));
+            contentProvider.invalidate(dependenciesContentUri(project.pomPath));
+
             await project.refresh();
             if (Settings.Pomfile.autoUpdateEffectivePOM()) {
                 taskExecutor.execute(async () => {
