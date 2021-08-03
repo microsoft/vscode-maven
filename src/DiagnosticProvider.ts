@@ -31,7 +31,7 @@ class DiagnosticProvider {
         const root: Dependency = <Dependency> node.root;
         const diagnostics: vscode.Diagnostic[] = [];
         const range: vscode.Range = await this.findConflictRange(root.projectPomPath, root.groupId, root.artifactId);
-        const message: string = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus.effectiveVersion}`;
+        const message: string = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus?.effectiveVersion}`;
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
         diagnostic.code = MAVEN_DEPENDENCY_CONFLICT;
         diagnostics.push(diagnostic);
