@@ -26,8 +26,8 @@ export async function excludeDependencyHandler(toExclude?: Dependency): Promise<
 
 async function excludeDependency(pomPath: string, gid: string, aid: string, rootGid: string, rootAid: string): Promise<void> {
     //find out <dependencies> node with artifactId === rootAid and insert <exclusions> node
-    const contentBuf: Buffer = await fse.readFile(pomPath);
-    const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
+    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
+    const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
