@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import * as fse from "fs-extra";
 import * as vscode from "vscode";
 import { Dependency } from "../explorer/model/Dependency";
 import { localPomPath } from "../utils/contextUtils";
@@ -24,8 +23,8 @@ export async function jumpToDefinitionHandler(node?: Dependency): Promise<void> 
 }
 
 async function goToDefinition(pomPath: string, gid: string, aid: string): Promise<void> {
-    const contentBuf: Buffer = await fse.readFile(pomPath);
-    const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
+    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
+    const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }

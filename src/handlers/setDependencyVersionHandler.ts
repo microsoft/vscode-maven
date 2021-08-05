@@ -20,7 +20,7 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
         effectiveVersion = selectedItem.effectiveVersion;
     } else if (selectedItem && selectedItem instanceof Dependency) {
         pomPath = selectedItem.projectPomPath;
-        effectiveVersion = selectedItem.omittedStatus.effectiveVersion;
+        effectiveVersion = selectedItem.omittedStatus?.effectiveVersion ?? selectedItem.version;
     } else {
         throw new UserError("No dependency node specified.");
     }
@@ -60,8 +60,8 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
 }
 
 async function setDependencyVersion(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
-    const contentBuf: Buffer = await fse.readFile(pomPath);
-    const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
+    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
+    const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
