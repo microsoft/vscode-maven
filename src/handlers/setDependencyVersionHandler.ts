@@ -170,7 +170,7 @@ function getAllVersionsInTree(pomPath: string, gid: string, aid: string): string
         const s2: semver.SemVer | null = semver.coerce(v2);
         const version1: semver.SemVer | string = s1 === null ? v1 : s1;
         const version2: semver.SemVer | string = s2 === null ? v2 : s2;
-        return semver.rcompare(version1, version2);
+        return semver.rcompare(version1, version2, true);
     }
 
     versions = Array.from(new Set(versions)).sort(compare);
