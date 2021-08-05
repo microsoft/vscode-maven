@@ -24,7 +24,7 @@ export class ConflictResolver implements vscode.CodeActionProvider {
         }
         const gid: string = node.groupId;
         const aid: string = node.artifactId;
-        const effectiveVersion: string = node.omittedStatus.effectiveVersion;
+        const effectiveVersion: string = node.omittedStatus?.effectiveVersion ?? node.version;
 
         const actionSetVersion = new vscode.CodeAction(`Resolve conflict for ${gid}:${aid}`, vscode.CodeActionKind.QuickFix);
         actionSetVersion.command = {
