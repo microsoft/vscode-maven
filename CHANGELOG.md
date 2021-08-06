@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.32.2
+### Fixed
+- Failed to create project when an empty workspace is opened. [#689](https://github.com/microsoft/vscode-maven/issues/689)
+- Malformed dependency node was inserted when pom.xml is dirty. [#690](https://github.com/microsoft/vscode-maven/pull/690) [#691](https://github.com/microsoft/vscode-maven/pull/691)
+
 ## 0.32.1
 ### Fixed
 - A text file was wrongly created in workspace when calculating depenencies.
