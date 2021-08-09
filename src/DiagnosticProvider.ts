@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import * as fse from "fs-extra";
 import * as vscode from "vscode";
 import { Dependency } from "./explorer/model/Dependency";
 import { UserError } from "./utils/errorUtils";
@@ -10,22 +9,25 @@ export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
 
 class DiagnosticProvider {
     private _collection: vscode.DiagnosticCollection;
+    public conflictNodes: Dependency[];
     public map: Map<vscode.Diagnostic, Dependency> = new Map();
 
     public initialize(context: vscode.ExtensionContext): void {
         const dependencyCollection = vscode.languages.createDiagnosticCollection("Dependency");
         this._collection = dependencyCollection;
         context.subscriptions.push(this._collection);
-        context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc => {
-            dependencyCollection.delete(doc.uri);
-            this.map.clear();
+        context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(
+        async e => {
+            if (e.document.fileName.endsWith("pom.xml")) {
+                await this.refreshDiagnostics(e.document.uri);
+            }
         }));
     }
 
-    public async refreshDiagnostics(uri: vscode.Uri, conflictNodes: Dependency[]): Promise<vscode.Diagnostic[]> {
+    public async refreshDiagnostics(uri: vscode.Uri): Promise<vscode.Diagnostic[]> {
         this.map.clear();
         const diagnostics: vscode.Diagnostic[] = [];
-        for (const node of conflictNodes) {
+        for (const node of this.conflictNodes) {
             const diagnostic = await this.createDiagnostics(node);
             diagnostics.push(diagnostic);
             this.map.set(diagnostic, node);
@@ -44,8 +46,8 @@ class DiagnosticProvider {
     }
 
     public async findConflictRange(filePath: string, gid: string, aid: string): Promise<vscode.Range> {
-        const contentBuf: Buffer = await fse.readFile(filePath);
-        const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
+        const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(filePath), {preserveFocus: true});
+        const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
         if (projectNodes === undefined || projectNodes.length !== 1) {
             throw new UserError("Only support POM file with single <project> node.");
         }
