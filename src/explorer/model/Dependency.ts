@@ -4,49 +4,27 @@
 import * as vscode from "vscode";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { ITreeItem } from "./ITreeItem";
+import { IOmittedStatus } from "./OmittedStatus";
 import { TreeNode } from "./TreeNode";
 
-const DUPLICATE_INDICATOR: string = "omitted for duplicate";
-const CONFLICT_INDICATOR: string = "omitted for conflict";
-
 export class Dependency extends TreeNode implements ITreeItem {
-    private fullArtifactName: string = ""; // groupId:artifactId:version:scope
-    private _projectPomPath: string;
-    private _gid: string;
-    private _aid: string;
-    private _version: string;
-    private _scope: string;
-    private supplement: string = "";
-    constructor(gid: string, aid: string, version: string, scope: string, supplement: string, projectPomPath: string) {
+    public fullArtifactName: string = ""; // groupId:artifactId:version:scope
+    public projectPomPath: string;
+    public groupId: string;
+    public artifactId: string;
+    public version: string;
+    public scope: string;
+    public omittedStatus?: IOmittedStatus;
+    public uri: vscode.Uri;
+    constructor(gid: string, aid: string, version: string, scope: string, projectPomPath: string, omittedStatus?: IOmittedStatus) {
         super();
-        this._gid = gid;
-        this._aid = aid;
-        this._version = version;
-        this._scope = scope;
+        this.groupId = gid;
+        this.artifactId = aid;
+        this.version = version;
+        this.scope = scope;
         this.fullArtifactName = [gid, aid, version, scope].join(":");
-        this.supplement = supplement;
-        this._projectPomPath = projectPomPath;
-    }
-
-    public get projectPomPath(): string {
-        return this._projectPomPath;
-    }
-    public get fullName(): string {
-        return this.fullArtifactName;
-    }
-
-    public get groupId(): string {
-        return this._gid;
-    }
-
-    public get artifactId(): string {
-        return this._aid;
-    }
-    public get version(): string {
-        return this._version;
-    }
-    public get scope(): string {
-        return this._scope;
+        this.projectPomPath = projectPomPath;
+        this.omittedStatus = omittedStatus;
     }
 
     public getContextValue(): string {
@@ -58,30 +36,42 @@ export class Dependency extends TreeNode implements ITreeItem {
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.fullArtifactName);
+        const label = [this.groupId, this.artifactId, this.version].join(":");
+        const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
+        treeItem.resourceUri = this.uri;
+        treeItem.tooltip = this.fullArtifactName;
         if (this.children.length !== 0) {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         } else {
             treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         }
 
-        if (this.supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
+        // icons
+        if (this.omittedStatus === undefined) {
+            treeItem.iconPath = new vscode.ThemeIcon("library");
+        } else if (this.omittedStatus.status === "duplicate") {
             const iconFile: string = "library-remove.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
-            treeItem.description = this.supplement;
-        } else if (this.supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
+        } else if (this.omittedStatus.status === "conflict") {
             const iconFile: string = "library-warning.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
-            treeItem.description = this.supplement;
-        } else {
-            treeItem.iconPath = new vscode.ThemeIcon("library");
         }
+
+        // description
+        const descriptions: string[] = [];
+        if (!this.scope.includes("compile")) {
+            descriptions.push(`(${this.scope})`);
+        }
+        if (this.omittedStatus !== undefined) {
+            descriptions.push(this.omittedStatus.description);
+        }
+        treeItem.description = descriptions.join(" ");
         return treeItem;
     }
 }

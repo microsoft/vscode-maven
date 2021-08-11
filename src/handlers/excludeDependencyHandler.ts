@@ -13,7 +13,7 @@ export async function excludeDependencyHandler(toExclude?: Dependency): Promise<
         throw new UserError("Only Dependency can be excluded.");
     }
     const root: Dependency | undefined =  toExclude.root ? <Dependency> toExclude.root : undefined;
-    if (root === undefined || toExclude.fullName === root.fullName) {
+    if (root === undefined || toExclude.fullArtifactName === root.fullArtifactName) {
         vscode.window.showInformationMessage("The dependency written in pom can not be excluded.");
         return;
     }
@@ -21,20 +21,23 @@ export async function excludeDependencyHandler(toExclude?: Dependency): Promise<
     if (!await fse.pathExists(pomPath)) {
         throw new UserError("Specified POM file does not exist on file system.");
     }
-    await excludeDependency(pomPath, toExclude.groupId, toExclude.artifactId, root.artifactId);
+    await excludeDependency(pomPath, toExclude.groupId, toExclude.artifactId, root.groupId, root.artifactId);
 }
 
-async function excludeDependency(pomPath: string, gid: string, aid: string, rootAid: string): Promise<void> {
+async function excludeDependency(pomPath: string, gid: string, aid: string, rootGid: string, rootAid: string): Promise<void> {
     //find out <dependencies> node with artifactId === rootAid and insert <exclusions> node
-    const contentBuf: Buffer = await fse.readFile(pomPath);
-    const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
+    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
+    const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
 
     const projectNode: ElementNode = projectNodes[0];
-    const dependenciesNode: ElementNode | undefined = projectNode.children && projectNode.children.find(node => node.tag === XmlTagName.Dependencies);
-    const dependencyNode: ElementNode | undefined = dependenciesNode?.children && dependenciesNode?.children.find(node => node.children && node.children[1].tag === XmlTagName.ArtifactId && node.children[1].text === rootAid);
+    const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
+    const dependencyNode: ElementNode | undefined = dependenciesNode?.children?.find(node =>
+        node.children?.find(id => id.tag === XmlTagName.GroupId && id.text === rootGid) &&
+        node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === rootAid)
+    );
     if (dependencyNode === undefined) {
         throw new Error(`Failed to find the dependency where ${gid}:${aid} is introduced.`);
     } else {
@@ -54,7 +57,7 @@ async function insertExcludeDependency(pomPath: string, targetNode: ElementNode,
     const eol: string = currentDocument.eol === vscode.EndOfLine.LF ? "\n" : "\r\n";
     let insertPosition: vscode.Position;
     let targetText: string;
-    const exclusionNode: ElementNode | undefined = targetNode.children && targetNode.children.find(node => node.tag === XmlTagName.Exclusions);
+    const exclusionNode: ElementNode | undefined = targetNode.children?.find(node => node.tag === XmlTagName.Exclusions);
     if (exclusionNode === undefined) {
         insertPosition = currentDocument.positionAt(targetNode.contentEnd);
         targetText = constructExclusionsNode(gid, aid, baseIndent, indent, eol);
@@ -70,7 +73,7 @@ async function insertExcludeDependency(pomPath: string, targetNode: ElementNode,
     await vscode.workspace.applyEdit(edit);
     const endingPosition: vscode.Position = currentDocument.positionAt(currentDocument.offsetAt(insertPosition) + targetText.length);
     textEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
-    vscode.workspace.saveAll();
+    textEditor.document.save();
 }
 
 function constructExclusionsNode(gid: string, aid: string, baseIndent: string, indent: string, eol: string): string {

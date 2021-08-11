@@ -5,16 +5,11 @@ import * as vscode from "vscode";
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { rawDependencyTree } from "../utils/mavenUtils";
+import { dependenciesContentUri } from "../utils/uiUtils";
 
 export async function showDependenciesHandler(project: MavenProject): Promise<void> {
-    const dependencyTree : string | undefined = await getDependencyTree(project);
-    if (dependencyTree === undefined) {
-        throw new Error("Failed to generate dependency tree.");
-    }
-
-    const treeContent: string = dependencyTree.replace(/\|/g, " ");
-    const document: vscode.TextDocument = await vscode.workspace.openTextDocument({ language: "plain", content: treeContent });
-    await vscode.window.showTextDocument(document, { viewColumn: vscode.ViewColumn.Active, preview: false });
+    const uri = dependenciesContentUri(project.pomPath);
+    await vscode.window.showTextDocument(uri);
 }
 
 export async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
@@ -30,7 +25,10 @@ export async function getDependencyTree(pomPathOrMavenProject: string | MavenPro
     } else {
         return undefined;
     }
-    return await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: vscode.Progress<{ message?: string }>) => new Promise<string | undefined>(
+    return await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Window,
+        cancellable: false
+    }, async (p: vscode.Progress<{ message?: string }>, _token: vscode.CancellationToken) => new Promise<string | undefined>(
         async (resolve, reject): Promise<void> => {
             p.report({ message: `Generating Dependency Tree: ${name}` });
             try {

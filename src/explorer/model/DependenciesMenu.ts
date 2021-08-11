@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { diagnosticProvider } from "../../DiagnosticProvider";
 import { parseRawDependencyDataHandler } from "../../handlers/parseRawDependencyDataHandler";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Dependency } from "./Dependency";
@@ -21,7 +22,8 @@ export class DependenciesMenu extends Menu implements ITreeItem {
     }
 
     public async getChildren() : Promise<Dependency[] | HintNode[]> {
-        const treeNodes = await parseRawDependencyDataHandler(this.project);
+        const [treeNodes, conflictNodes] = await parseRawDependencyDataHandler(this.project);
+        await diagnosticProvider.refreshDiagnostics(vscode.Uri.file(this.project.pomPath), conflictNodes);
         if (treeNodes.length === 0) {
             const hintNode: HintNode[] = [new HintNode("No dependencies")];
             return Promise.resolve(hintNode);
@@ -32,6 +34,9 @@ export class DependenciesMenu extends Menu implements ITreeItem {
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
+        const uri: vscode.Uri = vscode.Uri.file("");
+        treeItem.resourceUri = uri.with({authority: this.project.pomPath}); // distinguish dependenciesMenu in multi-module project
+        treeItem.tooltip = this.name;
         const iconFile: string = "library-folder.svg";
         treeItem.iconPath = {
             light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
