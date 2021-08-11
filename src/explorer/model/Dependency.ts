@@ -29,8 +29,11 @@ export class Dependency extends TreeNode implements ITreeItem {
 
     public getContextValue(): string {
         const root = <Dependency> this.root;
-        if(root.fullArtifactName === this.fullArtifactName) {
+        if (root.fullArtifactName === this.fullArtifactName) {
             return "rootDependency";
+        }
+        if (this.omittedStatus?.status === "conflict") {
+            return "conflictDependency";
         }
         return "Dependency";
     }
