@@ -49,6 +49,7 @@ async function locateInFile(pomPath: string, targetNode: ElementNode): Promise<v
     }
     const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
     const textEditor: vscode.TextEditor = await vscode.window.showTextDocument(currentDocument, {preview: false});
+    vscode.languages.setTextDocumentLanguage(currentDocument, "xml");
     const start = currentDocument.positionAt(targetNode.contentStart);
     textEditor.selection = new vscode.Selection(start, start);
     textEditor.revealRange(new vscode.Range(start, start), vscode.TextEditorRevealType.InCenter);
