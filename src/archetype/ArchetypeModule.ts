@@ -18,7 +18,7 @@ const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/mave
 export namespace ArchetypeModule {
 
     export async function createMavenProject(entry: Uri | undefined, _operationId: string): Promise<void> {
-        const targetFolder: string | undefined = entry?.fsPath ?? workspace.workspaceFolders?.[0].uri.fsPath;
+        const targetFolder: string | undefined = entry?.fsPath ?? workspace.workspaceFolders?.[0]?.uri.fsPath;
         // default metadata
         const metadata: IProjectCreationMetadata = {
             targetFolder,
