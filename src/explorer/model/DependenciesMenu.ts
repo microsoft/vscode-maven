@@ -22,7 +22,12 @@ export class DependenciesMenu extends Menu implements ITreeItem {
 
     public async getChildren() : Promise<Dependency[] | HintNode[]> {
         const treeNodes = await parseRawDependencyDataHandler(this.project);
-        return Promise.resolve(treeNodes);
+        if (treeNodes.length === 0) {
+            const hintNode: HintNode[] = [new HintNode("No dependencies")];
+            return Promise.resolve(hintNode);
+        } else {
+            return Promise.resolve(treeNodes);
+        }
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
