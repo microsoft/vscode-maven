@@ -454,7 +454,7 @@
         },
         {
           "command": "maven.project.setDependencyVersion",
-          "when": "view == mavenProjects && viewItem == Dependency",
+          "when": "view == mavenProjects && viewItem =~ /\\w*Dependency/",
           "group": "0-dependency@1"
         },
         {
