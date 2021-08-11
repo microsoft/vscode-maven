@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+import * as _ from "lodash";
 import * as vscode from "vscode";
 import { Dependency } from "./explorer/model/Dependency";
 import { UserError } from "./utils/errorUtils";
@@ -19,12 +20,13 @@ class DiagnosticProvider {
         context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(
         async e => {
             if (e.document.fileName.endsWith("pom.xml")) {
-                await this.refreshDiagnostics(e.document.uri);
+                await this.debouncedRefresh(e.document.uri);
             }
         }));
     }
+    private debouncedRefresh: _.DebouncedFunc<((uri: vscode.Uri) => Promise<void>)> = _.debounce(this.refreshDiagnostics, 400);
 
-    public async refreshDiagnostics(uri: vscode.Uri): Promise<vscode.Diagnostic[]> {
+    public async refreshDiagnostics(uri: vscode.Uri): Promise<void> {
         this.map.clear();
         const diagnostics: vscode.Diagnostic[] = [];
         for (const node of this.conflictNodes) {
@@ -33,7 +35,6 @@ class DiagnosticProvider {
             this.map.set(diagnostic, node);
         }
         this._collection.set(uri, diagnostics);
-        return diagnostics;
     }
 
     public async createDiagnostics(node: Dependency): Promise<vscode.Diagnostic> {
