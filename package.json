@@ -449,7 +449,7 @@
         },
         {
           "command": "maven.project.excludeDependency",
-          "when": "viewItem == Dependency || viewItem == conflictDependency && view == mavenProjects",
+          "when": "view == mavenProjects && viewItem =~ /^(Dependency)|(conflictDependency)$/",
           "group": "0-dependency@0"
         },
         {
