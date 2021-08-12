@@ -521,6 +521,11 @@
           "command": "maven.goal.execute.fromLifecycleMenu",
           "when": "view == mavenProjects && viewItem == Lifecycle",
           "group": "inline"
+        },
+        {
+          "command": "maven.goal.execute.fromLifecycleMenu",
+          "when": "view == mavenProjects && viewItem == Lifecycle",
+          "group": "1@1"
         }
       ]
     },
