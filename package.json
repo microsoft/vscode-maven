@@ -449,12 +449,12 @@
         },
         {
           "command": "maven.project.excludeDependency",
-          "when": "view == mavenProjects && viewItem == Dependency",
+          "when": "view == mavenProjects && viewItem =~ /^(Dependency)|(conflictDependency)$/",
           "group": "0-dependency@0"
         },
         {
           "command": "maven.project.setDependencyVersion",
-          "when": "view == mavenProjects && viewItem == Dependency",
+          "when": "view == mavenProjects && viewItem == conflictDependency",
           "group": "0-dependency@1"
         },
         {
