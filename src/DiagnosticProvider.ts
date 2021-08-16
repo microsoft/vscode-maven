@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 import * as _ from "lodash";
+import { performance } from "perf_hooks";
 import * as vscode from "vscode";
+import { getRequestDelay, lruCache, MovingAverage } from "./debouncing";
 import { Dependency } from "./explorer/model/Dependency";
 import { UserError } from "./utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "./utils/lexerUtils";
@@ -24,7 +26,22 @@ class DiagnosticProvider {
             }
         }));
     }
-    private debouncedRefresh: _.DebouncedFunc<((uri: vscode.Uri) => Promise<void>)> = _.debounce(this.refreshDiagnostics, 400);
+
+    private updateNodeForDocumentTimeout: NodeJS.Timer;
+    private async debouncedRefresh(uri: vscode.Uri): Promise<void> {
+        if (this.updateNodeForDocumentTimeout) {
+            clearTimeout(this.updateNodeForDocumentTimeout);
+        }
+        const timeout: number = getRequestDelay(uri);
+        this.updateNodeForDocumentTimeout = setTimeout(async () => {
+            const startTime: number = performance.now();
+            await this.refreshDiagnostics(uri);
+            const executionTime: number = performance.now() - startTime;
+            const movingAverage: MovingAverage = lruCache.get(uri) || new MovingAverage();
+            movingAverage.update(executionTime);
+            lruCache.set(uri, movingAverage);
+        }, timeout);
+    }
 
     public async refreshDiagnostics(uri: vscode.Uri): Promise<void> {
         this.map.clear();
