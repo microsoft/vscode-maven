@@ -12,6 +12,7 @@ import { Utils } from "../../utils/Utils";
 import { EffectivePomProvider } from "../EffectivePomProvider";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { DependenciesMenu} from "./DependenciesMenu";
+import { Dependency } from "./Dependency";
 import { IEffectivePom } from "./IEffectivePom";
 import { ITreeItem } from "./ITreeItem";
 import { LifecycleMenu } from "./LifecycleMenu";
@@ -24,6 +25,7 @@ export class MavenProject implements ITreeItem {
     public parent?: MavenProject; // assigned if it's specified as one of parent project's modules
     public pomPath: string;
     public _fullDependencyText: string;
+    public conflictNodes: Dependency[];
     private ePomProvider: EffectivePomProvider;
     private _ePom: any;
     private _pom: any;

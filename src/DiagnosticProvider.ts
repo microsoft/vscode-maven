@@ -4,7 +4,9 @@ import * as _ from "lodash";
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { getRequestDelay, lruCache, MovingAverage } from "./debouncing";
+import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { Dependency } from "./explorer/model/Dependency";
+import { MavenProject } from "./explorer/model/MavenProject";
 import { UserError } from "./utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "./utils/lexerUtils";
 
@@ -12,7 +14,6 @@ export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
 
 class DiagnosticProvider {
     private _collection: vscode.DiagnosticCollection;
-    public conflictNodes: Dependency[];
     public map: Map<vscode.Diagnostic, Dependency> = new Map();
 
     public initialize(context: vscode.ExtensionContext): void {
@@ -44,9 +45,14 @@ class DiagnosticProvider {
     }
 
     public async refreshDiagnostics(uri: vscode.Uri): Promise<void> {
-        this.map.clear();
         const diagnostics: vscode.Diagnostic[] = [];
-        for (const node of this.conflictNodes) {
+        const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(uri.fsPath);
+        if (project === undefined) {
+            throw new Error("Failed to get maven projects.");
+        }
+
+        const conflictNodes: Dependency[] = project.conflictNodes;
+        for (const node of conflictNodes) {
             const diagnostic = await this.createDiagnostics(node);
             diagnostics.push(diagnostic);
             this.map.set(diagnostic, node);

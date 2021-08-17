@@ -22,7 +22,7 @@ export class DependenciesMenu extends Menu implements ITreeItem {
 
     public async getChildren() : Promise<Dependency[]> {
         const [treeNodes, conflictNodes] = await parseRawDependencyDataHandler(this.project);
-        diagnosticProvider.conflictNodes = conflictNodes;
+        this.project.conflictNodes = conflictNodes;
         await diagnosticProvider.refreshDiagnostics(vscode.Uri.file(this.project.pomPath));
         return Promise.resolve(treeNodes);
     }
