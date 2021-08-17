@@ -449,12 +449,12 @@
         },
         {
           "command": "maven.project.excludeDependency",
-          "when": "view == mavenProjects && viewItem == Dependency",
+          "when": "view == mavenProjects && viewItem =~ /^(Dependency)|(conflictDependency)$/",
           "group": "0-dependency@0"
         },
         {
           "command": "maven.project.setDependencyVersion",
-          "when": "view == mavenProjects && viewItem == Dependency",
+          "when": "view == mavenProjects && viewItem == conflictDependency",
           "group": "0-dependency@1"
         },
         {
@@ -521,6 +521,11 @@
           "command": "maven.goal.execute.fromLifecycleMenu",
           "when": "view == mavenProjects && viewItem == Lifecycle",
           "group": "inline"
+        },
+        {
+          "command": "maven.goal.execute.fromLifecycleMenu",
+          "when": "view == mavenProjects && viewItem == Lifecycle",
+          "group": "1@1"
         }
       ]
     },
