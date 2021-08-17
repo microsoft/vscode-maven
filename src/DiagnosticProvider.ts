@@ -48,7 +48,7 @@ class DiagnosticProvider {
         const diagnostics: vscode.Diagnostic[] = [];
         const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(uri.fsPath);
         if (project === undefined) {
-            throw new Error("Failed to get maven projects.");
+            throw new Error("Failed to get maven project.");
         }
 
         const conflictNodes: Dependency[] = project.conflictNodes;
