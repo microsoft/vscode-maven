@@ -44,7 +44,7 @@ export async function rawDependencyTree(pomPath: string): Promise<any> {
     const dependencyGraphPath: string = `${outputPath}.deps.txt`;
     const outputDirectory: string = path.dirname(dependencyGraphPath);
     const outputFileName: string = path.basename(dependencyGraphPath);
-    await executeInBackground(`com.github.ferstl:depgraph-maven-plugin:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}"`, pomPath);
+    await executeInBackground(`-N com.github.ferstl:depgraph-maven-plugin:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}"`, pomPath);
     return await readFileIfExists(path.join(outputDirectory, outputFileName));
 }
 
