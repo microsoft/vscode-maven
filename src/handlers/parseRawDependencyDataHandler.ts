@@ -11,7 +11,7 @@ import { getDependencyTree } from "../handlers/showDependenciesHandler";
 const DUPLICATE_INDICATOR: string = "omitted for duplicate";
 const CONFLICT_INDICATOR: string = "omitted for conflict";
 
-export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[][]> {
+export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[]> {
     const dependencyTree: string | undefined = await getDependencyTree(project.pomPath);
     if (dependencyTree === undefined) {
         throw new Error("Failed to generate dependency tree.");
@@ -30,7 +30,9 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const indent: string = "   "; // three spaces
     const eol: string = "\r\n";
     const prefix: string = "+- ";
-    return await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
+    const [treeNodes, conflictNodes] = await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
+    project.conflictNodes = conflictNodes;
+    return treeNodes;
 }
 
 async function parseTreeNodes(treecontent: string, eol: string, indent: string, prefix: string, projectPomPath: string): Promise<Dependency[][]> {
