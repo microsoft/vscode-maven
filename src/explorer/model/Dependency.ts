@@ -29,13 +29,14 @@ export class Dependency extends TreeNode implements ITreeItem {
 
     public getContextValue(): string {
         const root = <Dependency> this.root;
+        let contextValue: string = "Dependency";
         if (root.fullArtifactName === this.fullArtifactName) {
-            return "rootDependency";
+            contextValue = `${contextValue}+root`;
         }
         if (this.omittedStatus?.status === "conflict") {
-            return "conflictDependency";
+           contextValue = `${contextValue}+conflict`;
         }
-        return "Dependency";
+        return contextValue;
     }
 
     public async getChildren(): Promise<Dependency[] | undefined> {
