@@ -158,9 +158,7 @@ export class MavenProject implements ITreeItem {
         const ret: ITreeItem[] = [];
         ret.push(new LifecycleMenu(this));
         ret.push(new PluginsMenu(this));
-        if (this.packaging !== "pom") { // hide the "Dependencies" item for "pom" project
-            ret.push(new DependenciesMenu(this));
-        }
+        ret.push(new DependenciesMenu(this));
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {
             const projects: MavenProject[] = <MavenProject[]>this.modules.map(m => mavenExplorerProvider.getMavenProject(m)).filter(Boolean);
             ret.push(...projects);

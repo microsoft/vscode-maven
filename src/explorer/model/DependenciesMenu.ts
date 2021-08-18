@@ -6,6 +6,7 @@ import { diagnosticProvider } from "../../DiagnosticProvider";
 import { parseRawDependencyDataHandler } from "../../handlers/parseRawDependencyDataHandler";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Dependency } from "./Dependency";
+import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
@@ -23,7 +24,12 @@ export class DependenciesMenu extends Menu implements ITreeItem {
     public async getChildren() : Promise<Dependency[]> {
         const treeNodes = await parseRawDependencyDataHandler(this.project);
         await diagnosticProvider.refreshDiagnostics(vscode.Uri.file(this.project.pomPath));
-        return Promise.resolve(treeNodes);
+        if (treeNodes.length === 0) {
+            const hintNodes: HintNode[] = [new HintNode("No dependencies")];
+            return Promise.resolve(hintNodes);
+        } else {
+            return Promise.resolve(treeNodes);
+        }
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
