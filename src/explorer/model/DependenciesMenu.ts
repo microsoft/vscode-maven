@@ -21,7 +21,7 @@ export class DependenciesMenu extends Menu implements ITreeItem {
         return "DependenciesMenu";
     }
 
-    public async getChildren() : Promise<Dependency[]> {
+    public async getChildren() : Promise<Dependency[] | HintNode[]> {
         const treeNodes = await parseRawDependencyDataHandler(this.project);
         await diagnosticProvider.refreshDiagnostics(vscode.Uri.file(this.project.pomPath));
         if (treeNodes.length === 0) {
