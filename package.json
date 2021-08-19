@@ -449,17 +449,17 @@
         },
         {
           "command": "maven.project.excludeDependency",
-          "when": "view == mavenProjects && viewItem =~ /^(Dependency)|(conflictDependency)$/",
+          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?!.*?\\b\\+root\\b)/",
           "group": "0-dependency@0"
         },
         {
           "command": "maven.project.setDependencyVersion",
-          "when": "view == mavenProjects && viewItem == conflictDependency",
+          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
           "group": "0-dependency@1"
         },
         {
           "command": "maven.project.goToDefinition",
-          "when": "view == mavenProjects && viewItem == Dependency",
+          "when": "view == mavenProjects && viewItem =~ /maven:dependency/",
           "group": "inline"
         },
         {
