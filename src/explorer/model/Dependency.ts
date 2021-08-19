@@ -29,7 +29,7 @@ export class Dependency extends TreeNode implements ITreeItem {
 
     public getContextValue(): string {
         const root = <Dependency> this.root;
-        let contextValue: string = "Dependency";
+        let contextValue: string = "maven:dependency";
         if (root.fullArtifactName === this.fullArtifactName) {
             contextValue = `${contextValue}+root`;
         }
