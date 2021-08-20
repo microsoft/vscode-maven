@@ -3,13 +3,19 @@
 
 import { Disposable } from "vscode";
 
-class Queue<T> {
+export class Queue<T> {
     private _store: T[] = [];
     public push(val: T): void {
         this._store.push(val);
     }
     public pop(): T | undefined {
         return this._store.shift();
+    }
+    public empty(): boolean {
+        if (this._store.length === 0) {
+            return true;
+        }
+        return false;
     }
 }
 

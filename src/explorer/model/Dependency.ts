@@ -3,7 +3,10 @@
 
 import * as vscode from "vscode";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
+import { mavenExplorerProvider } from "../mavenExplorerProvider";
+import { DependenciesMenu } from "./DependenciesMenu";
 import { ITreeItem } from "./ITreeItem";
+import { MavenProject } from "./MavenProject";
 import { IOmittedStatus } from "./OmittedStatus";
 import { TreeNode } from "./TreeNode";
 
@@ -40,6 +43,18 @@ export class Dependency extends TreeNode implements ITreeItem {
 
     public async getChildren(): Promise<Dependency[] | undefined> {
         return Promise.resolve(<Dependency[]> this.children);
+    }
+    public async getParent(): Promise<ITreeItem | undefined> {
+        const root = <Dependency> this.root;
+        if (root.fullArtifactName === this.fullArtifactName) {
+            const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(this.projectPomPath);
+            if (project === undefined) {
+                throw new Error("Fail to find maven projects.");
+            }
+            const dependenciesMenu: DependenciesMenu = <DependenciesMenu> project.getChildren()[2];
+            return Promise.resolve(dependenciesMenu);
+        }
+        return  Promise.resolve(<Dependency> this.parent);
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {

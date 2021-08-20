@@ -17,6 +17,7 @@ import { diagnosticProvider } from "./DiagnosticProvider";
 import { initExpService } from "./experimentationService";
 import { decorationProvider } from "./explorer/decorationProvider";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
+import { Dependency } from "./explorer/model/Dependency";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
@@ -24,6 +25,7 @@ import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
 import { debugHandler } from "./handlers/debugHandler";
 import { excludeDependencyHandler } from "./handlers/excludeDependencyHandler";
+import { goToEffectiveHandler } from "./handlers/goToEffectiveHandler";
 import { jumpToDefinitionHandler } from "./handlers/jumpToDefinitionHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
 import { setDependencyVersionHandler } from "./handlers/setDependencyVersionHandler";
@@ -59,7 +61,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     await vscode.commands.executeCommand("setContext", "vscode-maven:activated", true);
     // register tree view
     await mavenExplorerProvider.loadProjects();
-    context.subscriptions.push(vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true }));
+    const view = vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true });
+    context.subscriptions.push(view);
+    registerCommand(context, "maven.project.goToEffective", (node?: Dependency) => goToEffectiveHandler(view, node));
     context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(_e => {
         mavenExplorerProvider.refresh();
     }));
