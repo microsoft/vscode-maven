@@ -46,7 +46,7 @@ export async function runFavoriteCommandsHandler(project: MavenProject | undefin
     const config: IDebugOptions = {
         command: selectedCommand.command,
         pomfile: selectedProject.pomPath,
-        projectName: selectedProject.name
+        projectName: selectedProject.artifactId
     };
     if (selectedCommand.debug) {
         await debugCommand(config);
