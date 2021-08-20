@@ -12,7 +12,7 @@ export async function debugHandler(goal: PluginGoal): Promise<void> {
     await debugCommand({
         command: goal.name,
         pomfile: goal.plugin.project.pomPath,
-        projectName: goal.plugin.project.name
+        projectName: goal.plugin.project.artifactId
     });
 }
 
