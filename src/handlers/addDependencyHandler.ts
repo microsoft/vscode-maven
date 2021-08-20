@@ -5,6 +5,7 @@ import * as fse from "fs-extra";
 import * as path from "path";
 import * as vscode from "vscode";
 import { MavenProject } from "../explorer/model/MavenProject";
+import { constructDependenciesNode, constructDependencyNode, getIndentation } from "../utils/editUtils";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
@@ -18,6 +19,9 @@ export async function addDependencyHandler(options?: any): Promise<void> {
     } else if (options && options.projectBasePath) {
         // for "Maven dependencies" nodes from Project Manager
         pomPath = path.join(options.projectBasePath, "pom.xml");
+    } else if (options?.project?.pomPath) {
+        // for "Dependencies" node from module in Maven explorer
+        pomPath = options.project.pomPath;
     } else {
         // select a project(pomfile)
         const selectedProject: MavenProject | undefined = await selectProjectIfNecessary();
@@ -58,14 +62,14 @@ export async function addDependencyHandler(options?: any): Promise<void> {
 
 async function addDependency(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
     // Find out <dependencies> node and insert content.
-    const contentBuf: Buffer = await fse.readFile(pomPath);
-    const projectNodes: ElementNode[] = getNodesByTag(contentBuf.toString(), XmlTagName.Project);
+    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
+    const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
 
     const projectNode: ElementNode = projectNodes[0];
-    const dependenciesNode: ElementNode | undefined = projectNode.children && projectNode.children.find(node => node.tag === XmlTagName.Dependencies);
+    const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
     if (dependenciesNode !== undefined) {
         await insertDependency(pomPath, dependenciesNode, gid, aid, version);
     } else {
@@ -101,36 +105,4 @@ async function insertDependency(pomPath: string, targetNode: ElementNode, gid: s
     await vscode.workspace.applyEdit(edit);
     const endingPosition: vscode.Position = currentDocument.positionAt(currentDocument.offsetAt(insertPosition) + targetText.length);
     textEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
-}
-
-function constructDependencyNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
-    return [
-        eol,
-        "<dependency>",
-        `${indent}<groupId>${gid}</groupId>`,
-        `${indent}<artifactId>${aid}</artifactId>`,
-        `${indent}<version>${version}</version>`,
-        `</dependency>${eol}`
-    ].join(`${eol}${baseIndent}${indent}`);
-}
-
-function constructDependenciesNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
-    return [
-        eol,
-        "<dependencies>",
-        `${indent}<dependency>`,
-        `${indent}${indent}<groupId>${gid}</groupId>`,
-        `${indent}${indent}<artifactId>${aid}</artifactId>`,
-        `${indent}${indent}<version>${version}</version>`,
-        `${indent}</dependency>`,
-        `</dependencies>${eol}`
-    ].join(`${eol}${baseIndent}${indent}`);
-}
-
-function getIndentation(document: vscode.TextDocument, offset: number): string {
-    const closingTagPosition: vscode.Position = document.positionAt(offset);
-    return document.getText(new vscode.Range(
-        new vscode.Position(closingTagPosition.line, 0),
-        closingTagPosition
-    ));
 }

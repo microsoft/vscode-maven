@@ -2,11 +2,10 @@
 // Licensed under the MIT license.
 
 import * as _ from "lodash";
-import * as path from "path";
 import * as vscode from "vscode";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
-import { getMavenLocalRepository } from "../utils/contextUtils";
+import { localPomPath } from "../utils/contextUtils";
 import { ElementNode, getCurrentNode, XmlTagName } from "../utils/lexerUtils";
 
 class DefinitionProvider implements vscode.DefinitionProvider {
@@ -47,10 +46,6 @@ class DefinitionProvider implements vscode.DefinitionProvider {
         return undefined;
     }
   }
-}
-
-function localPomPath(gid: string, aid: string, version: string): string {
-  return path.join(getMavenLocalRepository(), ...gid.split("."), aid, version, `${aid}-${version}.pom`);
 }
 
 export const definitionProvider: DefinitionProvider = new DefinitionProvider();

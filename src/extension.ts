@@ -9,9 +9,13 @@ import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
+import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { completionProvider } from "./completion/completionProvider";
+import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
+import { diagnosticProvider } from "./DiagnosticProvider";
 import { initExpService } from "./experimentationService";
+import { decorationProvider } from "./explorer/decorationProvider";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
@@ -19,7 +23,10 @@ import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
 import { debugHandler } from "./handlers/debugHandler";
+import { excludeDependencyHandler } from "./handlers/excludeDependencyHandler";
+import { jumpToDefinitionHandler } from "./handlers/jumpToDefinitionHandler";
 import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
+import { setDependencyVersionHandler } from "./handlers/setDependencyVersionHandler";
 import { showDependenciesHandler } from "./handlers/showDependenciesHandler";
 import { hoverProvider } from "./hover/hoverProvider";
 import { registerArtifactSearcher } from "./jdtls/artifactSearcher";
@@ -30,7 +37,7 @@ import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadMavenSettingsFilePath, loadPackageInfo } from "./utils/contextUtils";
 import { executeInTerminal } from "./utils/mavenUtils";
-import { openFileIfExists, registerCommand, registerCommandRequiringTrust } from "./utils/uiUtils";
+import { dependenciesContentUri, effectivePomContentUri, openFileIfExists, registerCommand, registerCommandRequiringTrust } from "./utils/uiUtils";
 import { Utils } from "./utils/Utils";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -112,6 +119,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // dependency
     registerCommand(context, "maven.project.addDependency", addDependencyHandler);
     registerCommand(context, "maven.project.showDependencies", showDependenciesHandler);
+    registerCommand(context, "maven.project.excludeDependency", excludeDependencyHandler);
+    registerCommand(context, "maven.project.setDependencyVersion", setDependencyVersionHandler);
+    registerCommand(context, "maven.project.goToDefinition", jumpToDefinitionHandler);
 
     // debug
     registerCommand(context, "maven.plugin.debug", debugHandler);
@@ -130,6 +140,13 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     if (isJavaExtEnabled()) {
         registerArtifactSearcher(context);
     }
+
+    //diagnostic
+    diagnosticProvider.initialize(context);
+    //fileDecoration
+    context.subscriptions.push(decorationProvider);
+    //textDocument based output (e.g. effective-pom, dependencies)
+    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("vscode-maven", contentProvider));
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
@@ -138,6 +155,10 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
     watcher.onDidChange(async (e: Uri) => {
         const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(e.fsPath);
         if (project) {
+            // notify dependencies/effectivePOM to update
+            contentProvider.invalidate(effectivePomContentUri(project.pomPath));
+            contentProvider.invalidate(dependenciesContentUri(project.pomPath));
+
             await project.refresh();
             if (Settings.Pomfile.autoUpdateEffectivePOM()) {
                 taskExecutor.execute(async () => {
@@ -192,6 +213,8 @@ function registerPomFileAuthoringHelpers(context: vscode.ExtensionContext): void
     }], definitionProvider));
     // add a dependency
     context.subscriptions.push(vscode.languages.registerCodeActionsProvider(pomSelector, codeActionProvider));
+    // add quick fix for conflict dependencies
+    context.subscriptions.push(vscode.languages.registerCodeActionsProvider(pomSelector, conflictResolver, {providedCodeActionKinds: ConflictResolver.providedCodeActionKinds}));
 }
 
 async function mavenHistoryHandler(item: MavenProject | undefined): Promise<void> {

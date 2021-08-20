@@ -24,24 +24,28 @@ import { updateLRUCommands } from "./historyUtils";
  */
 export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: boolean}): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
+    const epomPath: string = `${outputPath}.epom`;
     const mtimePath: string = `${outputPath}.mtime`;
     const cachedMTimeMs: string | undefined = await readFileIfExists(mtimePath);
     const stat: fse.Stats = await fse.stat(pomPath);
     const mtimeMs: string = stat.mtimeMs.toString();
 
     if (cachedMTimeMs === mtimeMs || options?.cacheOnly) {
-        return await readFileIfExists(outputPath);
+        return await readFileIfExists(epomPath);
     }
 
-    await executeInBackground(`help:effective-pom -Doutput="${outputPath}"`, pomPath);
+    await executeInBackground(`help:effective-pom -Doutput="${epomPath}"`, pomPath);
     await fse.writeFile(mtimePath, mtimeMs);
-    return await readFileIfExists(outputPath);
+    return await readFileIfExists(epomPath);
 }
 
-export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
+export async function rawDependencyTree(pomPath: string): Promise<any> {
     const outputPath: string = getTempFolder(pomPath);
-    await executeInBackground(`dependency:tree -Dverbose -DoutputFile="${outputPath}"`, pomPath);
-    return await readFileIfExists(outputPath);
+    const dependencyGraphPath: string = `${outputPath}.deps.txt`;
+    const outputDirectory: string = path.dirname(dependencyGraphPath);
+    const outputFileName: string = path.basename(dependencyGraphPath);
+    await executeInBackground(`-N com.github.ferstl:depgraph-maven-plugin:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}"`, pomPath);
+    return await readFileIfExists(path.join(outputDirectory, outputFileName));
 }
 
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {
@@ -69,7 +73,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
     }
     const spawnOptions: child_process.SpawnOptions = {
         cwd,
-        env: process.env,
+        env: Object.assign({}, process.env, Settings.getEnvironment(pomfile)),
         shell: true
     };
     return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {

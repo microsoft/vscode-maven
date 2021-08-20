@@ -1,8 +1,9 @@
+import * as vscode from "vscode";
 import { commands, Position, Selection, TextEdit, TextEditor, window, workspace, WorkspaceEdit } from "vscode";
-import * as protocolConverter from "vscode-languageclient/lib/protocolConverter";
+import * as protocolConverter from "vscode-languageclient/lib/common/protocolConverter";
 import * as ls from "vscode-languageserver-protocol";
 
-const p2c: protocolConverter.Converter = protocolConverter.createConverter();
+const p2c: protocolConverter.Converter = protocolConverter.createConverter(undefined, undefined);
 
 // tslint:disable-next-line: export-name
 export async function applyWorkspaceEdit(edit: ls.WorkspaceEdit): Promise<void> {
@@ -45,4 +46,51 @@ async function executeRangeFormat(editor: TextEditor, startPosition: Position, l
     const endPosition: Position = editor.document.positionAt(editor.document.offsetAt(new Position(startPosition.line + lineOffset + 1, 0)) - 1);
     editor.selection = new Selection(startPosition, endPosition);
     await commands.executeCommand("editor.action.formatSelection");
+}
+
+export function getIndentation(document: vscode.TextDocument, offset: number): string {
+    const closingTagPosition: vscode.Position = document.positionAt(offset);
+    return document.getText(new vscode.Range(
+        new vscode.Position(closingTagPosition.line, 0),
+        closingTagPosition
+    ));
+}
+
+export function constructDependencyNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
+    return [
+        eol,
+        "<dependency>",
+        `${indent}<groupId>${gid}</groupId>`,
+        `${indent}<artifactId>${aid}</artifactId>`,
+        `${indent}<version>${version}</version>`,
+        `</dependency>${eol}`
+    ].join(`${eol}${baseIndent}${indent}`);
+}
+
+export function constructDependenciesNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
+    return [
+        eol,
+        "<dependencies>",
+        `${indent}<dependency>`,
+        `${indent}${indent}<groupId>${gid}</groupId>`,
+        `${indent}${indent}<artifactId>${aid}</artifactId>`,
+        `${indent}${indent}<version>${version}</version>`,
+        `${indent}</dependency>`,
+        `</dependencies>${eol}`
+    ].join(`${eol}${baseIndent}${indent}`);
+}
+
+export function constructDependencyManagementNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
+    return [
+        eol,
+        "<dependencyManagement>",
+        `${indent}<dependencies>`,
+        `${indent}${indent}<dependency>`,
+        `${indent}${indent}${indent}<groupId>${gid}</groupId>`,
+        `${indent}${indent}${indent}<artifactId>${aid}</artifactId>`,
+        `${indent}${indent}${indent}<version>${version}</version>`,
+        `${indent}${indent}</dependency>`,
+        `${indent}</dependencies>`,
+        `</dependencyManagement>${eol}`
+    ].join(`${eol}${baseIndent}${indent}`);
 }
