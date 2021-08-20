@@ -40,6 +40,7 @@ export class DependenciesMenu extends Menu implements ITreeItem {
         const uri: vscode.Uri = vscode.Uri.file("");
         treeItem.resourceUri = uri.with({authority: this.project.pomPath}); // distinguish dependenciesMenu in multi-module project
         treeItem.tooltip = this.name;
+        // TODO: switch to codicon folder-library after vscode's next release in early Sept.
         const iconFile: string = "library-folder.svg";
         treeItem.iconPath = {
             light: getPathToExtensionRoot("resources", "icons", "light", iconFile),

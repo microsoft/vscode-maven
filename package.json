@@ -207,7 +207,8 @@
       {
         "command": "maven.project.setDependencyVersion",
         "title": "%contributes.commands.maven.project.setDependencyVersion%",
-        "category": "Maven"
+        "category": "Maven",
+        "icon": "$(wrench)"
       },
       {
         "command": "maven.project.goToEffective",
@@ -217,8 +218,7 @@
       {
         "command": "maven.project.goToDefinition",
         "title": "%contributes.commands.maven.project.goToDefinition%",
-        "category": "Maven",
-        "icon": "$(go-to-file)"
+        "category": "Maven"
       },
       {
         "command": "maven.favorites",
@@ -458,13 +458,13 @@
         },
         {
           "command": "maven.project.excludeDependency",
-          "when": "view == mavenProjects && viewItem =~ /^(Dependency)|(conflictDependency)$/",
+          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?!.*?\\b\\+root\\b)/",
           "group": "0-dependency@0"
         },
         {
           "command": "maven.project.setDependencyVersion",
-          "when": "view == mavenProjects && viewItem == conflictDependency",
-          "group": "0-dependency@1"
+          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
+          "group": "inline"
         },
         {
           "command": "maven.project.goToEffective",
@@ -473,8 +473,8 @@
         },
         {
           "command": "maven.project.goToDefinition",
-          "when": "view == mavenProjects && viewItem == Dependency",
-          "group": "inline"
+          "when": "view == mavenProjects && viewItem =~ /maven:dependency/",
+          "group": "0-dependency@1"
         },
         {
           "command": "maven.project.openPom",
