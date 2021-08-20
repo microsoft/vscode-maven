@@ -7,7 +7,7 @@ import { MavenProject } from "../explorer/model/MavenProject";
 import { Settings } from "../Settings";
 import { executeInTerminal } from "../utils/mavenUtils";
 import { selectProjectIfNecessary } from "../utils/uiUtils";
-import { debugCommand } from "./debugHandler";
+import { debugCommand, IDebugOptions } from "./debugHandler";
 
 type FavoriteCommand = { command: string, alias: string, debug?: boolean };
 export async function runFavoriteCommandsHandler(project: MavenProject | undefined): Promise<void> {
@@ -43,7 +43,11 @@ export async function runFavoriteCommandsHandler(project: MavenProject | undefin
         return;
     }
 
-    const config: any = { command: selectedCommand.command, pomfile: selectedProject.pomPath };
+    const config: IDebugOptions = {
+        command: selectedCommand.command,
+        pomfile: selectedProject.pomPath,
+        projectName: selectedProject.artifactId
+    };
     if (selectedCommand.debug) {
         await debugCommand(config);
     } else {
