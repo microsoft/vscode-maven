@@ -207,13 +207,13 @@
       {
         "command": "maven.project.setDependencyVersion",
         "title": "%contributes.commands.maven.project.setDependencyVersion%",
-        "category": "Maven"
+        "category": "Maven",
+        "icon": "$(wrench)"
       },
       {
         "command": "maven.project.goToDefinition",
         "title": "%contributes.commands.maven.project.goToDefinition%",
-        "category": "Maven",
-        "icon": "$(go-to-file)"
+        "category": "Maven"
       },
       {
         "command": "maven.favorites",
@@ -455,12 +455,12 @@
         {
           "command": "maven.project.setDependencyVersion",
           "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
-          "group": "0-dependency@1"
+          "group": "inline"
         },
         {
           "command": "maven.project.goToDefinition",
           "when": "view == mavenProjects && viewItem =~ /maven:dependency/",
-          "group": "inline"
+          "group": "0-dependency@1"
         },
         {
           "command": "maven.project.openPom",
