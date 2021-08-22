@@ -19,7 +19,7 @@ import { LifecycleMenu } from "./LifecycleMenu";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
 
-const CONTEXT_VALUE: string = "MavenProject";
+const CONTEXT_VALUE: string = "maven:project";
 
 export class MavenProject implements ITreeItem {
     public parent?: MavenProject; // assigned if it's specified as one of parent project's modules

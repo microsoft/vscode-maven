@@ -18,7 +18,7 @@ export class DependenciesMenu extends Menu implements ITreeItem {
     }
 
     public getContextValue(): string {
-        return "DependenciesMenu";
+        return "maven:dependenciesMenu";
     }
 
     public async getChildren() : Promise<Dependency[] | HintNode[]> {

@@ -11,7 +11,7 @@ export class HintNode implements ITreeItem {
     }
 
     public getContextValue(): string {
-        return "HintNode";
+        return "maven:hint";
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {

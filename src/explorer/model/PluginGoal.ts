@@ -15,7 +15,7 @@ export class PluginGoal implements ITreeItem {
     }
 
     public getContextValue(): string {
-        return "PluginGoal";
+        return "maven:pluginGoal";
     }
     public getTreeItem(): vscode.TreeItem {
         return new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.None);
