@@ -13,6 +13,10 @@ export namespace Settings {
         return !!_getMavenSection<boolean>("maven.showInExplorerContextMenu");
     }
 
+    export function warnConflictsInDiagnostics(): boolean {
+        return !!_getMavenSection<boolean>("warnConflictsInDiagnostics");
+    }
+
     export function viewType(): string | undefined {
         return _getMavenSection("view");
     }

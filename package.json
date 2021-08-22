@@ -667,6 +667,12 @@
             "default": false,
             "description": "%configuration.maven.pomfile.prefetchEffectivePom%",
             "scope": "application"
+          },
+          "maven.warnConflictsInDiagnostics": {
+            "type": "boolean",
+            "default": "true",
+            "description": "%configuration.maven.warnConflictsInDiagnostics%",
+            "scope": "resource"
           }
         }
       }
