@@ -9,7 +9,7 @@ import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { PluginGoal } from "./PluginGoal";
 
-const CONTEXT_VALUE: string = "MavenPlugin";
+const CONTEXT_VALUE: string = "maven:plugin";
 
 export class MavenPlugin implements ITreeItem {
     public project: MavenProject;

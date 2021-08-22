@@ -11,7 +11,7 @@ export class LifecyclePhase implements ITreeItem {
     }
 
     public getContextValue(): string {
-        return "Lifecycle";
+        return "maven:lifecycle";
     }
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.phase, vscode.TreeItemCollapsibleState.None);

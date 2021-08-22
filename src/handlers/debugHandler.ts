@@ -9,29 +9,37 @@ import { Settings } from "../Settings";
 import { executeInTerminal } from "../utils/mavenUtils";
 
 export async function debugHandler(goal: PluginGoal): Promise<void> {
-    const pomfile: string = goal.plugin.project.pomPath;
-    const command: string = goal.name;
-    await debugCommand({ command, pomfile });
+    await debugCommand({
+        command: goal.name,
+        pomfile: goal.plugin.project.pomPath,
+        projectName: goal.plugin.project.artifactId
+    });
 }
 
-export async function debugCommand(options: { pomfile: string; command: string }): Promise<void> {
+export interface IDebugOptions {
+    readonly command: string;
+    readonly pomfile: string;
+    readonly projectName: string;
+}
+
+export async function debugCommand(options: IDebugOptions): Promise<void> {
     if (!isJavaDebuggerEnabled()) {
         await guideToInstallJavaDebugger();
         return;
     }
-    await debug(options.pomfile, options.command);
+    await debug(options);
 }
 
-async function debug(pomPath: string, command: string): Promise<void> {
+async function debug({ command, pomfile, projectName }: IDebugOptions): Promise<void> {
     const freePort: number = await getPort();
     const mavenOpts: string = [
-        Settings.getEnvironment(pomPath).MAVEN_OPTS, // user-setting MAVEN_OPTS
+        Settings.getEnvironment(pomfile).MAVEN_OPTS, // user-setting MAVEN_OPTS
         `-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=${freePort}` // MAVEN_DEBUG_OPTS
     ].filter(Boolean).join(" ");
     const sessionId: string = createUuid().substr(0, 6);
     const debugTerminal: vscode.Terminal | undefined = await executeInTerminal({
         command,
-        pomfile: pomPath,
+        pomfile,
         terminalName: `mvnDebug ${sessionId}: ${command}`,
         env: { MAVEN_OPTS: mavenOpts }
     });
@@ -45,6 +53,7 @@ async function debug(pomPath: string, command: string): Promise<void> {
         request: "attach",
         hostName: "localhost",
         port: freePort,
+        projectName,
         terminalName: debugTerminal.name
     };
     setTimeout(async () => {

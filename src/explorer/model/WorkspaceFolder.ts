@@ -5,10 +5,11 @@ import * as vscode from "vscode";
 import { TreeItemCollapsibleState } from "vscode";
 import { Settings } from "../../Settings";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
+import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 
-const CONTEXT_VALUE: string = "WorkspaceFolder";
+const CONTEXT_VALUE: string = "maven:workspaceFolder";
 
 export class WorkspaceFolder implements ITreeItem {
     private _workspaceFolder: vscode.WorkspaceFolder;
@@ -24,10 +25,7 @@ export class WorkspaceFolder implements ITreeItem {
     public async getChildren(): Promise<ITreeItem[]> {
         const allProjects: MavenProject[] = await mavenExplorerProvider.loadProjects(this._workspaceFolder);
         if (allProjects.length === 0) {
-            return [{
-                getTreeItem: () => new vscode.TreeItem("No Maven project found."),
-                getContextValue: () => "EmptyNode"
-            }];
+            return [new HintNode("No Maven project found.")];
         }
 
         switch (Settings.viewType()) {
