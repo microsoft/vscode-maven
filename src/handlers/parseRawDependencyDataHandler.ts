@@ -3,6 +3,7 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
+import { DependenciesMenu } from "../explorer/model/DependenciesMenu";
 import { Dependency } from "../explorer/model/Dependency";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { IOmittedStatus } from "../explorer/model/OmittedStatus";
@@ -31,6 +32,10 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const eol: string = "\r\n";
     const prefix: string = "+- ";
     const [treeNodes, conflictNodes] = await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
+    const dependenciesMenu: DependenciesMenu = <DependenciesMenu> project.getChildren()[2];
+    for (const treenode of treeNodes) {
+        treenode.parent = dependenciesMenu;
+    }
     project.conflictNodes = conflictNodes;
     project.treeNodes = treeNodes;
     return treeNodes;
@@ -103,8 +108,8 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
                 curNode.uri = uri.with({query: "hasConflict"});
                 // find all parent and set hasConflict upforward
                 let tmpNode = curNode;
-                while (tmpNode.parent !== undefined) {
-                    const parent = <Dependency> tmpNode.parent;
+                while (tmpNode.parent instanceof Dependency) {
+                    const parent = tmpNode.parent;
                     if (parent.uri.query !== "hasConflict") {
                         parent.uri = uri.with({query: "hasConflict"});
                         tmpNode = parent;

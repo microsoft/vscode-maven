@@ -468,7 +468,7 @@
         },
         {
           "command": "maven.project.goToEffective",
-          "when": "view == mavenProjects && viewItem == conflictDependency",
+          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
           "group": "0-dependency@2"
         },
         {

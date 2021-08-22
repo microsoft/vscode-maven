@@ -3,14 +3,11 @@
 
 import * as vscode from "vscode";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
-import { mavenExplorerProvider } from "../mavenExplorerProvider";
-import { DependenciesMenu } from "./DependenciesMenu";
 import { ITreeItem } from "./ITreeItem";
-import { MavenProject } from "./MavenProject";
+import { ITreeNode } from "./ITreeNode";
 import { IOmittedStatus } from "./OmittedStatus";
-import { TreeNode } from "./TreeNode";
 
-export class Dependency extends TreeNode implements ITreeItem {
+export class Dependency implements ITreeItem, ITreeNode {
     public fullArtifactName: string = ""; // groupId:artifactId:version:scope
     public projectPomPath: string;
     public groupId: string;
@@ -19,8 +16,10 @@ export class Dependency extends TreeNode implements ITreeItem {
     public scope: string;
     public omittedStatus?: IOmittedStatus;
     public uri: vscode.Uri;
+    public children: Dependency[] = [];
+    public root: Dependency;
+    public parent: Dependency | ITreeItem ;
     constructor(gid: string, aid: string, version: string, scope: string, projectPomPath: string, omittedStatus?: IOmittedStatus) {
-        super();
         this.groupId = gid;
         this.artifactId = aid;
         this.version = version;
@@ -30,8 +29,13 @@ export class Dependency extends TreeNode implements ITreeItem {
         this.omittedStatus = omittedStatus;
     }
 
+    public addChild(node: Dependency): void {
+        node.parent = this;
+        this.children.push(node);
+    }
+
     public getContextValue(): string {
-        const root = <Dependency> this.root;
+        const root = this.root;
         let contextValue: string = "maven:dependency";
         if (root.fullArtifactName === this.fullArtifactName) {
             contextValue = `${contextValue}+root`;
@@ -46,16 +50,7 @@ export class Dependency extends TreeNode implements ITreeItem {
         return Promise.resolve(<Dependency[]> this.children);
     }
     public async getParent(): Promise<ITreeItem | undefined> {
-        const root = <Dependency> this.root;
-        if (root.fullArtifactName === this.fullArtifactName) {
-            const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(this.projectPomPath);
-            if (project === undefined) {
-                throw new Error("Fail to find maven projects.");
-            }
-            const dependenciesMenu: DependenciesMenu = <DependenciesMenu> project.getChildren()[2];
-            return Promise.resolve(dependenciesMenu);
-        }
-        return  Promise.resolve(<Dependency> this.parent);
+        return  Promise.resolve(this.parent);
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
