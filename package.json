@@ -681,6 +681,23 @@
             "default": false,
             "description": "%configuration.maven.pomfile.prefetchEffectivePom%",
             "scope": "application"
+          },
+          "maven.dependency.enableConflictDiagnostics": {
+            "type": "boolean",
+            "default": "true",
+            "description": "%configuration.maven.dependency.enableConflictDiagnostics%",
+            "scope": "window"
+          },
+          "maven.projectOpenBehavior": {
+            "default": "Interactive",
+            "type": "string",
+            "scope": "window",
+            "description": "%configuration.maven.projectOpenBehavior%",
+            "enum": [
+              "Interactive",
+              "Open",
+              "Add to Workspace"
+            ]
           }
         }
       }

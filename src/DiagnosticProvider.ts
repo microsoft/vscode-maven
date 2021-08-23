@@ -7,6 +7,7 @@ import { getRequestDelay, lruCache, MovingAverage } from "./debouncing";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { Dependency } from "./explorer/model/Dependency";
 import { MavenProject } from "./explorer/model/MavenProject";
+import { Settings } from "./Settings";
 import { UserError } from "./utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "./utils/lexerUtils";
 
@@ -46,6 +47,10 @@ class DiagnosticProvider {
 
     public async refreshDiagnostics(uri: vscode.Uri): Promise<void> {
         const diagnostics: vscode.Diagnostic[] = [];
+        if (Settings.enableConflictDiagnostics() === false) {
+            this._collection.set(uri, diagnostics);
+            return;
+        }
         const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(uri.fsPath);
         if (project === undefined) {
             throw new Error("Failed to get maven project.");
