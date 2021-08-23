@@ -668,11 +668,11 @@
             "description": "%configuration.maven.pomfile.prefetchEffectivePom%",
             "scope": "application"
           },
-          "maven.warnConflictsInDiagnostics": {
+          "maven.dependency.enableConflictDiagnostics": {
             "type": "boolean",
             "default": "true",
-            "description": "%configuration.maven.warnConflictsInDiagnostics%",
-            "scope": "resource"
+            "description": "%configuration.maven.dependency.enableConflictDiagnostics%",
+            "scope": "window"
           }
         }
       }

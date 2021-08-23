@@ -38,5 +38,5 @@
     "configuration.maven.terminal.favorites.command": "Content of the favorite command.",
     "configuration.maven.terminal.favorites.debug": "Whether to execute in debug mode.",
     "configuration.maven.settingsFile": "Specifies the absolute path of your maven configuration file, the default value is ~/.m2/settings.xml",
-    "configuration.maven.warnConflictsInDiagnostics": "Specify whether to show conflict dependencies in pom.xml files or Problems channel."
+    "configuration.maven.dependency.enableConflictDiagnostics": "Specify whether to show diagnostics for conflict dependencies."
 }

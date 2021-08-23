@@ -47,7 +47,7 @@ class DiagnosticProvider {
 
     public async refreshDiagnostics(uri: vscode.Uri): Promise<void> {
         const diagnostics: vscode.Diagnostic[] = [];
-        if (Settings.warnConflictsInDiagnostics() === false) {
+        if (Settings.enableConflictDiagnostics() === false) {
             this._collection.set(uri, diagnostics);
             return;
         }
