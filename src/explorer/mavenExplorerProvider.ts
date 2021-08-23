@@ -81,8 +81,12 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
             return element.getChildren ? element.getChildren() : undefined;
         }
     }
-    public async getParent(element: Dependency): Promise<Dependency | undefined> {
-        return element ? element.parent : undefined;
+    public async getParent(element: ITreeItem): Promise<ITreeItem | undefined> {
+        if (element instanceof Dependency) {
+            return element.parent;
+        } else {
+            return undefined;
+        }
     }
 
     public refresh(item?: ITreeItem): void {
