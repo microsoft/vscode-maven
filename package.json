@@ -673,6 +673,17 @@
             "default": "true",
             "description": "%configuration.maven.dependency.enableConflictDiagnostics%",
             "scope": "window"
+          },
+          "maven.defaultOpenProjectMethod": {
+            "default": "Interactive",
+            "type": "string",
+            "scope": "window",
+            "description": "%configuration.maven.defaultOpenProjectMethod%",
+            "enum": [
+              "Interactive",
+              "Open",
+              "Add to Workspace"
+            ]
           }
         }
       }
