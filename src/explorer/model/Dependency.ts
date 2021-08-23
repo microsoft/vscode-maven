@@ -55,21 +55,7 @@ export class Dependency extends TreeNode implements ITreeItem {
         }
 
         // icons
-        if (this.omittedStatus === undefined) {
-            treeItem.iconPath = new vscode.ThemeIcon("library");
-        } else if (this.omittedStatus.status === "duplicate") {
-            const iconFile: string = "library-remove.svg";
-            treeItem.iconPath = {
-                light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
-                dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
-            };
-        } else if (this.omittedStatus.status === "conflict") {
-            const iconFile: string = "library-warning.svg";
-            treeItem.iconPath = {
-                light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
-                dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
-            };
-        }
+        treeItem.iconPath = new vscode.ThemeIcon("library");
 
         // description
         const descriptions: string[] = [];
