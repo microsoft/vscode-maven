@@ -211,8 +211,8 @@
         "icon": "$(wrench)"
       },
       {
-        "command": "maven.project.goToEffective",
-        "title": "%contributes.commands.maven.project.goToEffective%",
+        "command": "maven.dependency.goToEffective",
+        "title": "%contributes.commands.maven.dependency.goToEffective%",
         "category": "Maven"
       },
       {
@@ -327,7 +327,7 @@
           "when": "never"
         },
         {
-          "command": "maven.project.goToEffective",
+          "command": "maven.dependency.goToEffective",
           "when": "never"
         },
         {
@@ -467,7 +467,7 @@
           "group": "inline"
         },
         {
-          "command": "maven.project.goToEffective",
+          "command": "maven.dependency.goToEffective",
           "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
           "group": "0-dependency@2"
         },

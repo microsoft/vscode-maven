@@ -16,13 +16,13 @@ export async function goToEffectiveHandler(view: vscode.TreeView<ITreeItem>, nod
     const pomPath: string = node.projectPomPath;
     const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
     if (project === undefined) {
-        throw new Error("Fail to find maven projects.");
+        throw new Error("Failed to find maven projects.");
     }
 
     const treeNodes = project.treeNodes;
     const treeItem: Dependency | undefined = await searchFirstEffective(treeNodes, fullArtifactName);
     if (treeItem === undefined) {
-        throw new Error("Fail to find dependency.");
+        throw new Error("Failed to find dependency.");
     }
     view.reveal(treeItem, { focus: true});
 
@@ -37,7 +37,7 @@ async function searchFirstEffective(treeNodes: Dependency[], fullArtifactName: s
     while (queue.empty() === false) {
         const node: Dependency | undefined = queue.pop();
         if (node === undefined) {
-            throw new Error("Failed to find Dependency.");
+            throw new Error("Failed to find dependency.");
         }
         if (node.fullArtifactName === fullArtifactName) {
             targetItem = node;

@@ -3,7 +3,6 @@
 
 import * as vscode from "vscode";
 import { Dependency } from "../explorer/model/Dependency";
-import { ITreeItem } from "../explorer/model/ITreeItem";
 import { localPomPath } from "../utils/contextUtils";
 import { UserError } from "../utils/errorUtils";
 import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
@@ -14,11 +13,11 @@ export async function jumpToDefinitionHandler(node?: Dependency): Promise<void> 
     }
 
     let selectedPath: string;
-    const parent: Dependency | ITreeItem = node.parent;
-    if (parent instanceof Dependency) {
-        selectedPath = localPomPath(parent.groupId, parent.artifactId, parent.version);
-    } else {
+    if (node.parent === undefined) {
         selectedPath = node.projectPomPath;
+    } else {
+        const parent: Dependency = node.parent;
+        selectedPath = localPomPath(parent.groupId, parent.artifactId, parent.version);
     }
     await goToDefinition(selectedPath, node.groupId, node.artifactId);
 }

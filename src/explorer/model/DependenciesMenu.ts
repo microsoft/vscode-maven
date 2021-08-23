@@ -31,9 +31,6 @@ export class DependenciesMenu extends Menu implements ITreeItem {
             return Promise.resolve(treeNodes);
         }
     }
-    public async getParent(): Promise<ITreeItem> {
-        return Promise.resolve(this.project);
-    }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);

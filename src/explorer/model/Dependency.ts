@@ -18,7 +18,7 @@ export class Dependency implements ITreeItem, ITreeNode {
     public uri: vscode.Uri;
     public children: Dependency[] = [];
     public root: Dependency;
-    public parent: Dependency | ITreeItem ;
+    public parent: Dependency;
     constructor(gid: string, aid: string, version: string, scope: string, projectPomPath: string, omittedStatus?: IOmittedStatus) {
         this.groupId = gid;
         this.artifactId = aid;
@@ -48,9 +48,6 @@ export class Dependency implements ITreeItem, ITreeNode {
 
     public async getChildren(): Promise<Dependency[] | undefined> {
         return Promise.resolve(<Dependency[]> this.children);
-    }
-    public async getParent(): Promise<ITreeItem | undefined> {
-        return  Promise.resolve(this.parent);
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {

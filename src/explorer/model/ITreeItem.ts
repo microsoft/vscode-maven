@@ -11,7 +11,6 @@ export interface ITreeItem {
      * If implemented, it will be triggered to get children items.
      */
     getChildren?(): ITreeItem[] | undefined | Promise<ITreeItem[] | undefined>;
-    getParent?(): ITreeItem | undefined | Promise<ITreeItem | undefined>;
     /**
      * If implemented, it will be triggered to refresh tree item.
      */

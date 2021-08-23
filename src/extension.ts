@@ -63,7 +63,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     await mavenExplorerProvider.loadProjects();
     const view = vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true });
     context.subscriptions.push(view);
-    registerCommand(context, "maven.project.goToEffective", (node?: Dependency) => goToEffectiveHandler(view, node));
+    registerCommand(context, "maven.dependency.goToEffective", (node?: Dependency) => goToEffectiveHandler(view, node));
     context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(_e => {
         mavenExplorerProvider.refresh();
     }));
