@@ -73,7 +73,6 @@ async function insertExcludeDependency(pomPath: string, targetNode: ElementNode,
     await vscode.workspace.applyEdit(edit);
     const endingPosition: vscode.Position = currentDocument.positionAt(currentDocument.offsetAt(insertPosition) + targetText.length);
     textEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
-    textEditor.document.save();
 }
 
 function constructExclusionsNode(gid: string, aid: string, baseIndent: string, indent: string, eol: string): string {

@@ -148,7 +148,6 @@ async function insertDependencyManagement(pomPath: string, targetNode: ElementNo
     await vscode.workspace.applyEdit(edit);
     const endingPosition: vscode.Position = currentDocument.positionAt(currentDocument.offsetAt(insertPosition) + targetText.length);
     textEditor.revealRange(new vscode.Range(insertPosition, endingPosition));
-    textEditor.document.save();
 }
 
 function getAllVersionsInTree(pomPath: string, gid: string, aid: string): string[] {
