@@ -260,13 +260,22 @@ function registerProjectCreationEndListener(context: vscode.ExtensionContext): v
     const OPEN_IN_CURRENT_WORKSPACE = "Add to Workspace";
 
     const specifyOpenMethod = async (hasOpenFolder: boolean, projectName: string, projectLocation: string) => {
-        let openMethod = vscode.workspace.getConfiguration("maven").get<string>("defaultOpenProjectMethod");
-        if (openMethod !== OPEN_IN_CURRENT_WORKSPACE && openMethod !== OPEN_IN_NEW_WORKSPACE) {
+        let openMethod = vscode.workspace.getConfiguration("maven").get<string>("projectOpenBehavior");
+        if (openMethod === OPEN_IN_CURRENT_WORKSPACE || openMethod === OPEN_IN_NEW_WORKSPACE) {
+            sendInfo("", {
+                name: "projectOpenBehavior(from setting)",
+                value: openMethod
+            }, {});
+        } else {
             const candidates: string[] = <string[]>[
                 OPEN_IN_NEW_WORKSPACE,
                 hasOpenFolder ? OPEN_IN_CURRENT_WORKSPACE : undefined
             ].filter(Boolean);
             openMethod = await vscode.window.showInformationMessage(`Maven project [${projectName}] is created under: ${projectLocation}`, ...candidates);
+            sendInfo("", {
+                name: "projectOpenBehavior(from choice)",
+                value: openMethod ?? "cancelled"
+            }, {});
         }
         return openMethod;
     };

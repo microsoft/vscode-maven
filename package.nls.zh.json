@@ -37,5 +37,5 @@
     "configuration.maven.terminal.favorites.debug": "是否以调试模式运行。",
     "configuration.maven.settingsFile": "指定 maven 配置文件的绝对路径, 默认是 ~/.m2/settings.xml",
     "configuration.maven.dependency.enableConflictDiagnostics": "指定是否在 POM 文件中显示依赖冲突。",
-    "configuration.maven.defaultOpenProjectMethod": "新建项目的默认打开方式"
+    "configuration.maven.projectOpenBehavior": "新建项目的默认打开方式"
 }
