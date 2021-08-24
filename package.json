@@ -211,6 +211,11 @@
         "icon": "$(wrench)"
       },
       {
+        "command": "maven.dependency.goToEffective",
+        "title": "%contributes.commands.maven.dependency.goToEffective%",
+        "category": "Maven"
+      },
+      {
         "command": "maven.project.goToDefinition",
         "title": "%contributes.commands.maven.project.goToDefinition%",
         "category": "Maven"
@@ -319,6 +324,10 @@
         },
         {
           "command": "maven.project.setDependencyVersion",
+          "when": "never"
+        },
+        {
+          "command": "maven.dependency.goToEffective",
           "when": "never"
         },
         {
@@ -456,6 +465,11 @@
           "command": "maven.project.setDependencyVersion",
           "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
           "group": "inline"
+        },
+        {
+          "command": "maven.dependency.goToEffective",
+          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
+          "group": "0-dependency@2"
         },
         {
           "command": "maven.project.goToDefinition",

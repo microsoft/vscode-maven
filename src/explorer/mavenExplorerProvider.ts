@@ -4,6 +4,7 @@
 import { TreeDataProvider } from "vscode";
 import * as vscode from "vscode";
 import { Utils } from "../utils/Utils";
+import { Dependency } from "./model/Dependency";
 import { ITreeItem } from "./model/ITreeItem";
 import { MavenProject } from "./model/MavenProject";
 import { WorkspaceFolder } from "./model/WorkspaceFolder";
@@ -78,6 +79,13 @@ class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
             return vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolder(workspaceFolder));
         } else {
             return element.getChildren ? element.getChildren() : undefined;
+        }
+    }
+    public async getParent(element: ITreeItem): Promise<ITreeItem | undefined> {
+        if (element instanceof Dependency) {
+            return element.parent;
+        } else {
+            return undefined;
         }
     }
 

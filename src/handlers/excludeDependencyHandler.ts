@@ -12,7 +12,7 @@ export async function excludeDependencyHandler(toExclude?: Dependency): Promise<
     if (toExclude === undefined) {
         throw new UserError("Only Dependency can be excluded.");
     }
-    const root: Dependency | undefined =  toExclude.root ? <Dependency> toExclude.root : undefined;
+    const root: Dependency = toExclude.root;
     if (root === undefined || toExclude.fullArtifactName === root.fullArtifactName) {
         vscode.window.showInformationMessage("The dependency written in pom can not be excluded.");
         return;

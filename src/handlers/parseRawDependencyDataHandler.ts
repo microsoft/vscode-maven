@@ -32,6 +32,7 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const prefix: string = "+- ";
     const [treeNodes, conflictNodes] = await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
     project.conflictNodes = conflictNodes;
+    project.dependencyNodes = treeNodes;
     return treeNodes;
 }
 
@@ -86,7 +87,7 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
                 } else {
                     const level: number = (preIndentCnt - curIndentCnt) / indent.length;
                     for (let i = level; i > 0; i -= 1) {
-                        parentNode = <Dependency> parentNode.parent;
+                        parentNode = parentNode.parent;
                     }
                     parentNode.addChild(curNode);
                 }
@@ -103,7 +104,7 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
                 // find all parent and set hasConflict upforward
                 let tmpNode = curNode;
                 while (tmpNode.parent !== undefined) {
-                    const parent = <Dependency> tmpNode.parent;
+                    const parent = tmpNode.parent;
                     if (parent.uri.query !== "hasConflict") {
                         parent.uri = uri.with({query: "hasConflict"});
                         tmpNode = parent;

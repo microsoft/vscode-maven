@@ -3,10 +3,10 @@
 
 import * as vscode from "vscode";
 import { ITreeItem } from "./ITreeItem";
+import { ITreeNode } from "./ITreeNode";
 import { IOmittedStatus } from "./OmittedStatus";
-import { TreeNode } from "./TreeNode";
 
-export class Dependency extends TreeNode implements ITreeItem {
+export class Dependency implements ITreeItem, ITreeNode {
     public fullArtifactName: string = ""; // groupId:artifactId:version:scope
     public projectPomPath: string;
     public groupId: string;
@@ -15,8 +15,10 @@ export class Dependency extends TreeNode implements ITreeItem {
     public scope: string;
     public omittedStatus?: IOmittedStatus;
     public uri: vscode.Uri;
+    public children: Dependency[] = [];
+    public root: Dependency;
+    public parent: Dependency;
     constructor(gid: string, aid: string, version: string, scope: string, projectPomPath: string, omittedStatus?: IOmittedStatus) {
-        super();
         this.groupId = gid;
         this.artifactId = aid;
         this.version = version;
@@ -26,8 +28,13 @@ export class Dependency extends TreeNode implements ITreeItem {
         this.omittedStatus = omittedStatus;
     }
 
+    public addChild(node: Dependency): void {
+        node.parent = this;
+        this.children.push(node);
+    }
+
     public getContextValue(): string {
-        const root = <Dependency> this.root;
+        const root = this.root;
         let contextValue: string = "maven:dependency";
         if (root.fullArtifactName === this.fullArtifactName) {
             contextValue = `${contextValue}+root`;

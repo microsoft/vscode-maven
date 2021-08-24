@@ -16,7 +16,7 @@ export async function jumpToDefinitionHandler(node?: Dependency): Promise<void> 
     if (node.parent === undefined) {
         selectedPath = node.projectPomPath;
     } else {
-        const parent: Dependency = <Dependency> node.parent;
+        const parent: Dependency = node.parent;
         selectedPath = localPomPath(parent.groupId, parent.artifactId, parent.version);
     }
     await goToDefinition(selectedPath, node.groupId, node.artifactId);
