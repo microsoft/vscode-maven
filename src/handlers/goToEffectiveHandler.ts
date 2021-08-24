@@ -19,8 +19,8 @@ export async function goToEffectiveHandler(view: vscode.TreeView<ITreeItem>, nod
         throw new Error("Failed to find maven projects.");
     }
 
-    const treeNodes = project.treeNodes;
-    const treeItem: Dependency | undefined = await searchFirstEffective(treeNodes, fullArtifactName);
+    const dependencyNodes = project.dependencyNodes;
+    const treeItem: Dependency | undefined = await searchFirstEffective(dependencyNodes, fullArtifactName);
     if (treeItem === undefined) {
         throw new Error("Failed to find dependency.");
     }
@@ -28,10 +28,10 @@ export async function goToEffectiveHandler(view: vscode.TreeView<ITreeItem>, nod
 
 }
 
-async function searchFirstEffective(treeNodes: Dependency[], fullArtifactName: string): Promise<Dependency | undefined> {
+async function searchFirstEffective(dependencyNodes: Dependency[], fullArtifactName: string): Promise<Dependency | undefined> {
     let targetItem: Dependency | undefined;
     const queue: Queue<Dependency> = new Queue();
-    for (const child of treeNodes) {
+    for (const child of dependencyNodes) {
         queue.push(child);
     }
     while (queue.empty() === false) {

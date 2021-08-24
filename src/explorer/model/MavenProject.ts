@@ -26,7 +26,7 @@ export class MavenProject implements ITreeItem {
     public pomPath: string;
     public _fullDependencyText: string;
     public conflictNodes: Dependency[];
-    public treeNodes: Dependency[];
+    public dependencyNodes: Dependency[];
     private ePomProvider: EffectivePomProvider;
     private _ePom: any;
     private _pom: any;

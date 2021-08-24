@@ -32,7 +32,7 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     const prefix: string = "+- ";
     const [treeNodes, conflictNodes] = await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
     project.conflictNodes = conflictNodes;
-    project.treeNodes = treeNodes;
+    project.dependencyNodes = treeNodes;
     return treeNodes;
 }
 
