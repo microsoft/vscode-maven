@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.33.0
+
+### Added
+- New entry to `Run` lifecycle phases from context menu. [#700](https://github.com/microsoft/vscode-maven/issues/700)
+- New setting `maven.projectOpenBehavior` specifying default way to open newly created project. [#662](https://github.com/microsoft/vscode-maven/issues/662)
+
+### Fixed
+- Bugs fixes and improvements related to dependency management.
+  - Unified icons. [#707](https://github.com/microsoft/vscode-maven/issues/707)
+  - New setting `maven.dependency.enableConflictDiagnostics` specifying whether to show diagnostics for dependency conflicts. [#677](https://github.com/microsoft/vscode-maven/issues/677)
+
 ## 0.32.2
 ### Fixed
 - Failed to create project when an empty workspace is opened. [#689](https://github.com/microsoft/vscode-maven/issues/689)
