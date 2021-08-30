@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { diagnosticProvider } from "../../DiagnosticProvider";
 import { parseRawDependencyDataHandler } from "../../handlers/parseRawDependencyDataHandler";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
+import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { Dependency } from "./Dependency";
 import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
@@ -44,5 +45,18 @@ export class DependenciesMenu extends Menu implements ITreeItem {
             dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
         };
         return treeItem;
+    }
+
+    public refresh(): void {
+        this._savePom();
+        mavenExplorerProvider.refresh(this);
+    }
+
+    private _savePom(): void {
+        const textEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors;
+        const textEditor: vscode.TextEditor | undefined = textEditors.find(editor => editor.document.fileName === this.project.pomPath);
+        if (textEditor !== undefined) {
+            textEditor.document.save();
+        }
     }
 }
