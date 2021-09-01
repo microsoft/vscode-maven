@@ -2,47 +2,45 @@ trigger:
 - main
 
 jobs:
-  - job: cred_scan
-    displayName: Cred Scan
+  - job: static_analysis
+    displayName: Static Code Analysis
     pool:
       vmImage: 'windows-latest'
     steps:
-    - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+    - task: CredScan@2
       displayName: 'Run CredScan'
       inputs:
         toolMajorVersion: V2
         verboseOutput: true
         debugMode: false
-    - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    - task: Semmle@1
+      displayName: Code QL for TS/JS
+      inputs:
+        sourceCodeDirectory: '$(Build.SourcesDirectory)'
+        language: 'tsandjs'
+        includeNodeModules: false
+        querySuite: 'Recommended'
+        timeout: '1800'
+        ram: '16384'
+        addProjectDirToScanningExclusionList: true
+    - task: Semmle@1
+      displayName: Code QL for Java
+      inputs:
+        sourceCodeDirectory: '$(Build.SourcesDirectory)/jdtls.ext'
+        language: 'java'
+        querySuite: 'Recommended'
+        timeout: '1800'
+        ram: '16384'
+        addProjectDirToScanningExclusionList: true
+    - task: PostAnalysis@1
       displayName: 'Post Analysis'
       inputs:
         CredScan: true
-  - job: CodeQL
-    displayName: Code QL
-    pool:
-      vmImage: 'windows-latest'
-    steps:
-      - task: Semmle@1
-        displayName: Code QL for TS/JS
-        inputs:
-          sourceCodeDirectory: '$(Build.SourcesDirectory)'
-          language: 'tsandjs'
-          includeNodeModules: false
-          querySuite: 'Recommended'
-          timeout: '1800'
-          ram: '16384'
-          addProjectDirToScanningExclusionList: true
-      - task: Semmle@1
-        displayName: Code QL for Java
-        inputs:
-          sourceCodeDirectory: '$(Build.SourcesDirectory)/jdtls.ext'
-          language: 'java'
-          querySuite: 'Recommended'
-          timeout: '1800'
-          ram: '16384'
-          addProjectDirToScanningExclusionList: true
+        Semmle: true
+        SemmleBreakOn: 'Error'
+        ToolLogsNotFoundAction: 'Standard'
+
   - job: ci
-    dependsOn: cred_scan
     displayName: VS Code Maven CI
     pool:
       vmImage: 'ubuntu-latest'
