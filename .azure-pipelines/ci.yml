@@ -20,7 +20,7 @@ jobs:
   - job: CodeQL
     displayName: Code QL
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'windows-latest'
     steps:
       - task: Semmle@1
         inputs:
