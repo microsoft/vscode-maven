@@ -17,7 +17,20 @@ jobs:
       displayName: 'Post Analysis'
       inputs:
         CredScan: true
-
+  - job: CodeQL
+    displayName: Code QL
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - task: Semmle@1
+        inputs:
+          sourceCodeDirectory: '$(Build.SourcesDirectory)'
+          language: 'tsandjs'
+          includeNodeModules: false
+          querySuite: 'Recommended'
+          timeout: '1800'
+          ram: '16384'
+          addProjectDirToScanningExclusionList: true
   - job: ci
     dependsOn: cred_scan
     displayName: VS Code Maven CI
