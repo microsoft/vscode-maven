@@ -66,7 +66,7 @@ class DiagnosticProvider {
     }
 
     public async createDiagnostics(node: Dependency): Promise<vscode.Diagnostic> {
-        const root: Dependency = <Dependency> node.root;
+        const root: Dependency = node.root;
         const range: vscode.Range = await this.findConflictRange(root.projectPomPath, root.groupId, root.artifactId);
         const message: string = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus?.effectiveVersion}`;
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
