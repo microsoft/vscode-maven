@@ -57,10 +57,10 @@ export async function addDependencyHandler(options?: any): Promise<void> {
     if (!selectedDoc) {
         return;
     }
-    await addDependency(pomPath, selectedDoc.g, selectedDoc.a, selectedDoc.latestVersion);
+    await addDependency(pomPath, selectedDoc.g, selectedDoc.a, selectedDoc.latestVersion, selectedDoc.p);
 }
 
-async function addDependency(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
+async function addDependency(pomPath: string, gid: string, aid: string, version: string, dependencyType: string): Promise<void> {
     // Find out <dependencies> node and insert content.
     const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
     const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
@@ -71,14 +71,14 @@ async function addDependency(pomPath: string, gid: string, aid: string, version:
     const projectNode: ElementNode = projectNodes[0];
     const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
     if (dependenciesNode !== undefined) {
-        await insertDependency(pomPath, dependenciesNode, gid, aid, version);
+        await insertDependency(pomPath, dependenciesNode, gid, aid, version, dependencyType);
     } else {
-        await insertDependency(pomPath, projectNode, gid, aid, version);
+        await insertDependency(pomPath, projectNode, gid, aid, version, dependencyType);
 
     }
 }
 
-async function insertDependency(pomPath: string, targetNode: ElementNode, gid: string, aid: string, version: string): Promise<void> {
+async function insertDependency(pomPath: string, targetNode: ElementNode, gid: string, aid: string, version: string, dependencyType: string): Promise<void> {
     if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined) {
         throw new UserError("Invalid target XML node to insert dependency.");
     }
@@ -92,10 +92,10 @@ async function insertDependency(pomPath: string, targetNode: ElementNode, gid: s
     let targetText: string;
     if (targetNode.tag === XmlTagName.Dependencies) {
         insertPosition = currentDocument.positionAt(targetNode.contentStart);
-        targetText = constructDependencyNode(gid, aid, version, baseIndent, indent, eol);
+        targetText = constructDependencyNode({gid: gid, aid: aid, version: version, dtype: dependencyType, baseIndent: baseIndent, indent: indent, eol: eol});
     } else if (targetNode.tag === XmlTagName.Project) {
         insertPosition = currentDocument.positionAt(targetNode.contentEnd);
-        targetText = constructDependenciesNode(gid, aid, version, baseIndent, indent, eol);
+        targetText = constructDependenciesNode({gid: gid, aid: aid, version: version, dtype: dependencyType, baseIndent: baseIndent, indent: indent, eol: eol});
     } else {
         return;
     }

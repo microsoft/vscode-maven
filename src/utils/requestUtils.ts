@@ -14,6 +14,7 @@ export interface IArtifactMetadata {
     a: string;
     latestVersion: string;
     versionCount: number;
+    p: string;
 }
 
 export interface IVersionMetadata {
