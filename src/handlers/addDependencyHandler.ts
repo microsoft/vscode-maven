@@ -92,10 +92,10 @@ async function insertDependency(pomPath: string, targetNode: ElementNode, gid: s
     let targetText: string;
     if (targetNode.tag === XmlTagName.Dependencies) {
         insertPosition = currentDocument.positionAt(targetNode.contentStart);
-        targetText = constructDependencyNode({gid: gid, aid: aid, version: version, dtype: dependencyType, baseIndent: baseIndent, indent: indent, eol: eol});
+        targetText = constructDependencyNode({gid, aid, version, dtype: dependencyType, baseIndent, indent, eol});
     } else if (targetNode.tag === XmlTagName.Project) {
         insertPosition = currentDocument.positionAt(targetNode.contentEnd);
-        targetText = constructDependenciesNode({gid: gid, aid: aid, version: version, dtype: dependencyType, baseIndent: baseIndent, indent: indent, eol: eol});
+        targetText = constructDependenciesNode({gid, aid, version, dtype: dependencyType, baseIndent, indent, eol});
     } else {
         return;
     }

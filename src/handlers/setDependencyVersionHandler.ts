@@ -109,10 +109,10 @@ async function insertDependencyManagement(pomPath: string, targetNode: ElementNo
             node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid)
         );
         const newIndent: string = `${baseIndent}${indent}`;
-        targetText = constructDependencyNode({gid: gid, aid: aid, version: version, baseIndent: newIndent, indent: indent, eol: eol});
+        targetText = constructDependencyNode({gid, aid, version, baseIndent: newIndent, indent, eol});
     } else if (targetNode.tag === XmlTagName.DependencyManagement && dependenciesNode === undefined) {
         insertPosition = currentDocument.positionAt(targetNode.contentStart);
-        targetText = constructDependenciesNode({gid: gid, aid: aid, version: version, baseIndent: baseIndent, indent: indent, eol: eol});
+        targetText = constructDependenciesNode({gid, aid, version, baseIndent, indent, eol});
     } else if (targetNode.tag === XmlTagName.Project) {
         insertPosition = currentDocument.positionAt(targetNode.contentEnd);
         targetText = constructDependencyManagementNode(gid, aid, version, baseIndent, indent, eol);
