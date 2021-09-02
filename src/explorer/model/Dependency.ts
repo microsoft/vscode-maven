@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { ITreeItem } from "./ITreeItem";
 import { ITreeNode } from "./ITreeNode";
 import { IOmittedStatus } from "./OmittedStatus";
@@ -61,7 +62,21 @@ export class Dependency implements ITreeItem, ITreeNode {
         }
 
         // icons
-        treeItem.iconPath = new vscode.ThemeIcon("library");
+        if (this.omittedStatus === undefined) {
+            treeItem.iconPath = new vscode.ThemeIcon("library");
+        } else if (this.omittedStatus.status === "duplicate") {
+            const iconFile: string = "LibraryDuplicate.svg";
+            treeItem.iconPath = {
+                light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
+                dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
+            };
+        } else if (this.omittedStatus.status === "conflict") {
+            const iconFile: string = "LibraryConflict.svg";
+            treeItem.iconPath = {
+                light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
+                dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
+            };
+        }
 
         // description
         const descriptions: string[] = [];
