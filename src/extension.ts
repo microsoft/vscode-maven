@@ -260,17 +260,18 @@ async function openPomHandler(node: MavenProject | { uri: string }): Promise<voi
 }
 
 function registerProjectCreationEndListener(context: vscode.ExtensionContext): void {
+    // corresponding to setting values
     const OPEN_IN_NEW_WORKSPACE = "Open";
     const OPEN_IN_CURRENT_WORKSPACE = "Add to Workspace";
+    const OPEN_INTERACTIVE = "Interactive";
 
     const specifyOpenMethod = async (hasOpenFolder: boolean, projectName: string, projectLocation: string) => {
         let openMethod = vscode.workspace.getConfiguration("maven").get<string>("projectOpenBehavior");
-        if (openMethod === OPEN_IN_CURRENT_WORKSPACE || openMethod === OPEN_IN_NEW_WORKSPACE) {
-            sendInfo("", {
-                name: "projectOpenBehavior(from setting)",
-                value: openMethod
-            }, {});
-        } else {
+        sendInfo("", {
+            name: "projectOpenBehavior(from setting)",
+            value: openMethod ?? "undefined"
+        }, {});
+        if (openMethod === OPEN_INTERACTIVE) {
             const candidates: string[] = <string[]>[
                 OPEN_IN_NEW_WORKSPACE,
                 hasOpenFolder ? OPEN_IN_CURRENT_WORKSPACE : undefined

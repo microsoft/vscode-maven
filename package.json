@@ -696,7 +696,8 @@
             "enum": [
               "Interactive",
               "Open",
-              "Add to Workspace"
+              "Add to Workspace",
+              "None"
             ]
           }
         }
