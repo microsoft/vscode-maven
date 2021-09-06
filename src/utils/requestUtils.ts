@@ -4,9 +4,12 @@
 import * as http from "http";
 import * as https from "https";
 import * as _ from "lodash";
+import * as path from "path";
 import * as url from "url";
 
-const URL_BASIC_SEARCH: string = "https://search.maven.org/solrsearch/select";
+const URL_MAVEN_SEARCH_API: string = "https://search.maven.org/solrsearch/select";
+const URL_MAVEN_CENTRAL_REPO: string = "https://repo1.maven.org/maven2/";
+const MAVEN_METADATA_FILENAME: string = "maven-metadata.xml";
 
 export interface IArtifactMetadata {
     id: string;
@@ -36,7 +39,7 @@ export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadat
         rows: 50,
         wt: "json"
     };
-    const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
+    const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`);
     try {
         return _.get(JSON.parse(raw), "response.docs", []);
     } catch (error) {
@@ -52,7 +55,7 @@ export async function getVersions(gid: string, aid: string): Promise<IVersionMet
         rows: 50,
         wt: "json"
     };
-    const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
+    const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`);
     try {
         return _.get(JSON.parse(raw), "response.docs", []);
     } catch (error) {
@@ -68,7 +71,7 @@ export async function getLatestVersion(gid: string, aid: string): Promise<string
             rows: 1,
             wt: "json"
         };
-        const raw: string = await httpsGet(`${URL_BASIC_SEARCH}?${toQueryString(params)}`);
+        const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`);
         return _.get(JSON.parse(raw), "response.docs[0].latestVersion");
     } catch (error) {
         console.error(error);
@@ -95,4 +98,9 @@ async function httpsGet(urlString: string): Promise<string> {
 
 function toQueryString(params: { [key: string]: any }): string {
     return Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k].toString())}`).join("&");
+}
+
+export async function fetchPluginMetadataXml(gid: string): Promise<string> {
+    const metadataUrl = URL_MAVEN_CENTRAL_REPO + path.posix.join(...gid.split("."), MAVEN_METADATA_FILENAME);
+    return await httpsGet(metadataUrl);
 }

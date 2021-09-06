@@ -34,7 +34,7 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
         return await readFileIfExists(epomPath);
     }
 
-    await executeInBackground(`help:effective-pom -Doutput="${epomPath}"`, pomPath);
+    await executeInBackground(`-B -Doutput="${epomPath}" help:effective-pom`, pomPath);
     await fse.writeFile(mtimePath, mtimeMs);
     return await readFileIfExists(epomPath);
 }
@@ -51,7 +51,7 @@ export async function rawDependencyTree(pomPath: string): Promise<any> {
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pluginId);
     // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock
-    await executeInBackground(`help:describe -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}"`, pomPath);
+    await executeInBackground(`-B -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}" help:describe`, pomPath);
     return await readFileIfExists(outputPath);
 }
 
