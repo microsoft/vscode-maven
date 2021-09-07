@@ -738,7 +738,6 @@
   },
   "dependencies": {
     "@types/lru-cache": "^5.1.0",
-    "axios": "^0.21.1",
     "expand-home-dir": "0.0.3",
     "fast-glob": "^3.2.7",
     "fs-extra": "^4.0.3",
