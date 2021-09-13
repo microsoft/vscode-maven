@@ -25,7 +25,7 @@ export class MavenPlugin implements ITreeItem {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
-        taskExecutor.execute(async () => await this.loadMetadata());
+        taskExecutor.execute(async () => await this.fetchPrefix());
     }
 
     private get pluginId(): string {
@@ -52,7 +52,7 @@ export class MavenPlugin implements ITreeItem {
 
     public async getChildren(): Promise<PluginGoal[]> {
         try {
-            await this.loadMetadata();
+            await this.fetchGoals();
         } catch (error) {
             return [];
         }
@@ -60,20 +60,24 @@ export class MavenPlugin implements ITreeItem {
     }
 
     public async refresh(): Promise<void> {
-        this.goals = undefined;
-        await pluginInfoProvider.clearPluginInfo(this.groupId, this.artifactId, this.version);
         mavenExplorerProvider.refresh(this);
     }
 
-    private async loadMetadata(): Promise<void> {
-        if (this.prefix !== undefined && this.goals !== undefined) {
+    private async fetchPrefix(): Promise<void> {
+        if (this.prefix !== undefined) {
             return;
         }
-
-        const { prefix, goals } = await pluginInfoProvider.getPluginInfo(this.project.pomPath, this.groupId, this.artifactId, this.version);
+        const prefix = await pluginInfoProvider.getPluginPrefix(this.groupId, this.artifactId);
         this.prefix = prefix;
+        mavenExplorerProvider.refresh(this); // update label/description of current tree item.
+    }
+
+    private async fetchGoals(): Promise<void> {
+        if (this.goals !== undefined) {
+            return;
+        }
+        const goals = await pluginInfoProvider.getPluginGoals(this.project.pomPath, this.groupId, this.artifactId, this.version);
         this.goals = goals;
-        mavenExplorerProvider.refresh(this);
     }
 
 }

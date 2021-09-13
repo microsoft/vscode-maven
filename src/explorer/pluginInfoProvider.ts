@@ -3,13 +3,22 @@
 
 import * as _ from "lodash";
 import * as vscode from "vscode";
+import { fetchPluginMetadataXml } from "../utils/requestUtils";
 import { Utils } from "../utils/Utils";
 
 const KEY_PLUGINS: string = "plugins";
 
+interface IPluginCache {
+    [groupId: string]: {
+        [artifactId: string]: IPluginInfo
+    };
+}
+
 interface IPluginInfo {
     prefix?: string;
-    goals?: string[];
+    versions?: {
+        [version: string]: string[] // goals
+    };
 }
 
 class PluginInfoProvider {
@@ -19,44 +28,63 @@ class PluginInfoProvider {
         this._context = context;
     }
 
-    public async getPluginInfo(projectBasePath: string, gid: string, aid: string, version: string): Promise<IPluginInfo> {
-        const cachedResult: IPluginInfo | undefined = await this.getFromLocalCache(gid, aid, version);
-        if (cachedResult) {
-            return cachedResult;
+    public async getPluginPrefix(gid: string, aid: string): Promise<string | undefined> {
+        const infos: {[aid: string]: IPluginInfo} = _.get(this.getPluginCache(), [gid]) ?? {};
+        const info: IPluginInfo = _.get(infos, [aid]) ?? {};
+        if (info.prefix !== undefined) {
+            return info.prefix;
         }
 
-        const latestResult: IPluginInfo = await this.fetchFromRepository(projectBasePath, gid, aid, version);
-        await this.saveToLocalCache(gid, aid, version, latestResult);
-        return latestResult;
+        const metadataXml = await fetchPluginMetadataXml(gid);
+        const xml: any = await Utils.parseXmlContent(metadataXml);
+        const plugins: any[] = _.get(xml, "metadata.plugins[0].plugin");
+        plugins.forEach(plugin => {
+            const a: string = _.get(plugin, "artifactId[0]");
+            const p: string = _.get(plugin, "prefix[0]");
+            infos[a] = infos[a] ?? {};
+            infos[a].prefix = p;
+        });
+        await this.cachePluginInfos(gid, infos);
+        return infos[aid]?.prefix;
     }
 
-    public async clearPluginInfo(gid: string, aid: string, version: string): Promise<void> {
-        await this.saveToLocalCache(gid, aid, version, undefined);
-    }
-
-    private async getFromLocalCache(gid: string, aid: string, version: string): Promise<IPluginInfo | undefined> {
-        const plugins: any = this._context.globalState.get(KEY_PLUGINS);
-        return _.get(plugins, [gid, aid, version]);
-    }
-
-    private async saveToLocalCache(gid: string, aid: string, version: string, pluginInfo: IPluginInfo | undefined): Promise<void> {
-        let plugins: any = this._context.globalState.get(KEY_PLUGINS);
-        if (!plugins) {
-            plugins = {};
+    public async getPluginGoals(pomPath: string, groupId: string, artifactId: string, version: string): Promise<string[] | undefined> {
+        const infos: {[aid: string]: IPluginInfo} = _.get(this.getPluginCache(), [groupId]) ?? {};
+        const info: IPluginInfo = _.get(infos, [artifactId]) ?? {};
+        info.versions = info.versions ?? {};
+        const goalsFromCache: string[] | undefined = _.get(info.versions, [version]);
+        if (goalsFromCache !== undefined) {
+            return goalsFromCache;
         }
-        _.set(plugins, [gid, aid, version], pluginInfo);
+
+        const {prefix, goals} = await this.fetchFromRepository(pomPath, groupId, artifactId, version);
+        info.prefix = info.prefix ?? prefix;
+        info.versions[version] = goals ?? [];
+
+        await this.cachePluginInfo(groupId, artifactId, info);
+        return goals;
+    }
+
+    private getPluginCache(): IPluginCache {
+        return this._context.globalState.get(KEY_PLUGINS) ?? {};
+    }
+
+    private async cachePluginInfos(gid: string, infos: {[aid: string]: IPluginInfo}): Promise<void> {
+        const plugins: any = this._context.globalState.get(KEY_PLUGINS) ?? {};
+        _.set(plugins, [gid], infos);
         await this._context.globalState.update(KEY_PLUGINS, plugins);
     }
 
-    private async fetchFromRepository(projectBasePath: string, gid: string, aid: string, version?: string): Promise<IPluginInfo> {
+    private async cachePluginInfo(gid: string, aid: string, info: IPluginInfo): Promise<void> {
+        const plugins: any = this._context.globalState.get(KEY_PLUGINS) ?? {};
+        _.set(plugins, [gid, aid], info);
+        await this._context.globalState.update(KEY_PLUGINS, plugins);
+    }
+
+    private async fetchFromRepository(projectBasePath: string, gid: string, aid: string, version?: string): Promise<{prefix?: string, goals?: string[]}> {
         let prefix: string | undefined;
         const goals: string[] = [];
-        const rawOutput: string = await Utils.getPluginDescription(this.getPluginId(gid, aid, version), projectBasePath);
-
-        // Remove ANSI escape code: ESC[m, ESC[1m
-        // To fix: https://github.com/microsoft/vscode-maven/issues/340#issuecomment-511125457
-        const escChar: string = Buffer.from([0x1b]).toString();
-        const textOutput: string = rawOutput.replace(new RegExp(`${escChar}\\[\\d*?m`, "g"), "");
+        const textOutput: string = await Utils.getPluginDescription(this.getPluginId(gid, aid, version), projectBasePath);
 
         const versionRegExp: RegExp = /^Version: (.*)/m;
         const versionMatch: string[] | null = textOutput.match(versionRegExp);
