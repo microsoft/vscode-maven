@@ -63,9 +63,14 @@ class MavenTerminal implements vscode.Disposable {
                 // On Windows, append .cmd for `path/to/mvn` to prevent popup window
                 // See: https://github.com/microsoft/vscode-maven/pull/494#issuecomment-633869294
                 if (path.extname(filepath) === "") {
-                    const amended: string = `${filepath}.cmd`;
-                    if (await fse.pathExists(amended)) {
-                        return amended;
+                    // try .cmd or .bat (up to maven version)
+                    // See: https://github.com/microsoft/vscode-maven/issues/489#issuecomment-917613597
+                    const possibleExts = ["cmd", "bat"];
+                    for (const ext of possibleExts) {
+                        const amended: string = `${filepath}.${ext}`;
+                        if (await fse.pathExists(amended)) {
+                            return amended;
+                        }
                     }
                 }
                 return filepath;
