@@ -8,6 +8,12 @@ import { MavenProject } from "./explorer/model/MavenProject";
 import { getDependencyTree } from "./handlers/showDependenciesHandler";
 import { Utils } from "./utils/Utils";
 
+/**
+ * URI patterns.
+ * vscode-maven://dependencies/<pom-path>/Dependencies?<pom-path>
+ * vscode-maven://effective-pom/<pom-path>/EffectivePOM.xml?<pom-path>
+ * vscode-maven:///<pom-path-in-local-maven-repository>
+ */
 class MavenContentProvider implements vscode.TextDocumentContentProvider {
 
     public readonly onDidChange: vscode.Event<vscode.Uri>;
@@ -39,10 +45,12 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
                 } else {
                     return Utils.getEffectivePom(pomPath);
                 }
+            case "local-repository":
+                const fsUri = uri.with({ scheme: "file", authority: "" });
+                return (await vscode.workspace.fs.readFile(fsUri)).toString();
             default:
         }
         return undefined;
-
     }
 }
 
