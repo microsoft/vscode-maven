@@ -45,10 +45,12 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
                 } else {
                     return Utils.getEffectivePom(pomPath);
                 }
-            default:
-                const fsUri = uri.with({scheme: "file"});
+            case "local-repository":
+                const fsUri = uri.with({ scheme: "file", authority: "" });
                 return (await vscode.workspace.fs.readFile(fsUri)).toString();
+            default:
         }
+        return undefined;
     }
 }
 

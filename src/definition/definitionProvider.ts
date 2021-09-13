@@ -35,7 +35,7 @@ class DefinitionProvider implements vscode.DefinitionProvider {
             const pomPath: string = localPomPath(groupIdHint, artifactIdHint, version);
             const definitionLink: vscode.LocationLink = {
               targetRange: new vscode.Range(0, 0, 0, 0),
-              targetUri: vscode.Uri.file(pomPath).with({ scheme: "vscode-maven" }),
+              targetUri: vscode.Uri.file(pomPath).with({ scheme: "vscode-maven", authority: "local-repository" }),
               originSelectionRange: selectionRange
             };
             return [definitionLink];
