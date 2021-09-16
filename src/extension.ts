@@ -145,11 +145,11 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         registerArtifactSearcher(context);
     }
 
-    //diagnostic
+    // diagnostic
     diagnosticProvider.initialize(context);
-    //fileDecoration
+    // fileDecoration
     context.subscriptions.push(decorationProvider);
-    //textDocument based output (e.g. effective-pom, dependencies)
+    // textDocument based output (e.g. effective-pom, dependencies)
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("vscode-maven", contentProvider));
 }
 
@@ -272,10 +272,10 @@ function registerProjectCreationEndListener(context: vscode.ExtensionContext): v
             value: openMethod ?? "undefined"
         }, {});
         if (openMethod === OPEN_INTERACTIVE) {
-            const candidates: string[] = <string[]>[
+            const candidates: string[] = [
                 OPEN_IN_NEW_WORKSPACE,
                 hasOpenFolder ? OPEN_IN_CURRENT_WORKSPACE : undefined
-            ].filter(Boolean);
+            ].filter(Boolean) as string[];
             openMethod = await vscode.window.showInformationMessage(`Maven project [${projectName}] is created under: ${projectLocation}`, ...candidates);
             sendInfo("", {
                 name: "projectOpenBehavior(from choice)",

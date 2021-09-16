@@ -36,7 +36,7 @@ class CentralProvider implements IMavenCompletionItemProvider {
             const item: vscode.CompletionItem = new vscode.CompletionItem(doc.a, vscode.CompletionItemKind.Field);
             item.insertText = doc.a;
             item.detail = `GroupId: ${doc.g}`;
-            (<any>item).data = { groupId: doc.g };
+            (item as any).data = { groupId: doc.g };
             item.command = commandOnSelection;
             return item;
         });

@@ -43,7 +43,7 @@ async function searchFirstEffective(dependencyNodes: Dependency[], fullArtifactN
             targetItem = node;
             break;
         }
-        const children = <Dependency[]> node.children;
+        const children = node.children;
         for (const child of children) {
             queue.push(child);
         }

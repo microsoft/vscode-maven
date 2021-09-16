@@ -61,7 +61,7 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
             if (supplement.indexOf(CONFLICT_INDICATOR) !== -1) {
                 const re = /\(omitted for conflict with ([\w.-]+)\)/gm;
                 effectiveVersion = supplement.replace(re, "$1");
-                omittedStatus = {status: "conflict", effectiveVersion: effectiveVersion, description: supplement};
+                omittedStatus = {status: "conflict", effectiveVersion, description: supplement};
             } else if (supplement.indexOf(DUPLICATE_INDICATOR) !== -1) {
                 omittedStatus = {status: "duplicate", effectiveVersion: version, description: supplement};
             }

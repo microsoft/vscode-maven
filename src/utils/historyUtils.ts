@@ -22,7 +22,7 @@ export async function updateLRUCommands(command: string, pomPath: string): Promi
     const content: string = (await fse.readFile(historyFilePath)).toString();
     let historyObject: ICommandHistory;
     try {
-        historyObject = <ICommandHistory>JSON.parse(content);
+        historyObject = JSON.parse(content) as ICommandHistory;
         historyObject.pomPath = pomPath;
         historyObject.timestamps[command] = Date.now();
     } catch (error) {
@@ -38,13 +38,13 @@ export async function getLRUCommands(pomPath: string): Promise<ICommandHistoryEn
         const content: string = (await fse.readFile(filepath)).toString();
         let historyObject: ICommandHistory;
         try {
-            historyObject = <ICommandHistory>JSON.parse(content);
+            historyObject = JSON.parse(content) as ICommandHistory;
         } catch (error) {
             historyObject = { pomPath, timestamps: {} };
         }
         const timestamps: { [command: string]: number } = historyObject.timestamps;
         const commandList: string[] = Object.keys(timestamps).sort((a, b) => timestamps[b] - timestamps[a]);
-        return commandList.map(command => <ICommandHistoryEntry>Object.assign({ command, pomPath, timestamp: timestamps[command] }));
+        return commandList.map(command => Object.assign({ command, pomPath, timestamp: timestamps[command] }) as ICommandHistoryEntry);
     }
     return [];
 }

@@ -16,7 +16,7 @@ export async function getDependencyTree(pomPathOrMavenProject: string | MavenPro
     let pomPath: string;
     let name: string;
     if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
-        const mavenProject: MavenProject = <MavenProject>pomPathOrMavenProject;
+        const mavenProject: MavenProject = pomPathOrMavenProject;
         pomPath = mavenProject.pomPath;
         name = mavenProject.name;
     } else if (typeof pomPathOrMavenProject === "string") {
@@ -36,7 +36,7 @@ export async function getDependencyTree(pomPathOrMavenProject: string | MavenPro
                 resolve(rawData);
                 return;
             } catch (error) {
-                setUserError(<Error>error);
+                setUserError(error);
                 reject(error);
                 return;
             }
