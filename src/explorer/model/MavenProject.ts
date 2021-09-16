@@ -89,7 +89,7 @@ export class MavenProject implements ITreeItem {
         let plugins: any[] | undefined;
         if (_.has(this._ePom, "projects.project")) {
             // multi-module project
-            const project: any = (<any[]>this._ePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
+            const project: any = this._ePom.projects.project.find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
             if (project) {
                 plugins = _.get(project, "build[0].plugins[0].plugin");
             }
@@ -104,7 +104,7 @@ export class MavenProject implements ITreeItem {
         let deps: any[] = [];
         if (_.has(this._ePom, "projects.project")) {
             // multi-module project
-            const project: any = (<any[]>this._ePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
+            const project: any = (this._ePom.projects.project).find((elem: any) => this.name === _.get(elem, "artifactId[0]"));
             if (project) {
                 deps = _.get(project, "build[0].plugins[0].plugin");
             }
@@ -161,7 +161,7 @@ export class MavenProject implements ITreeItem {
         ret.push(new PluginsMenu(this));
         ret.push(new DependenciesMenu(this));
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {
-            const projects: MavenProject[] = <MavenProject[]>this.modules.map(m => mavenExplorerProvider.getMavenProject(m)).filter(Boolean);
+            const projects: MavenProject[] = this.modules.map(m => mavenExplorerProvider.getMavenProject(m)).filter(Boolean) as MavenProject[];
             ret.push(...projects);
         }
         return ret;

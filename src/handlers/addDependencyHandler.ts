@@ -86,7 +86,7 @@ async function insertDependency(pomPath: string, targetNode: ElementNode, gid: s
     const textEditor: vscode.TextEditor = await vscode.window.showTextDocument(currentDocument);
     const baseIndent: string = getIndentation(currentDocument, targetNode.contentEnd);
     const options: vscode.TextEditorOptions = textEditor.options;
-    const indent: string = options.insertSpaces ? " ".repeat(<number>options.tabSize) : "\t";
+    const indent: string = options.insertSpaces && typeof options.tabSize === "number" ? " ".repeat(options.tabSize) : "\t";
     const eol: string = currentDocument.eol === vscode.EndOfLine.LF ? "\n" : "\r\n";
     let insertPosition: vscode.Position;
     let targetText: string;

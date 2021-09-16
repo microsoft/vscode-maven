@@ -32,7 +32,7 @@ export class ConflictResolver implements vscode.CodeActionProvider {
             title: "set version to",
             arguments: [{
                 pomPath: document.uri.fsPath,
-                effectiveVersion: effectiveVersion,
+                effectiveVersion,
                 groupId: gid,
                 artifactId: aid,
                 fullDependencyText: mavenExplorerProvider.getMavenProject(document.uri.fsPath)?.fullText

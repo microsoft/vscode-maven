@@ -25,7 +25,7 @@ export async function excludeDependencyHandler(toExclude?: Dependency): Promise<
 }
 
 async function excludeDependency(pomPath: string, gid: string, aid: string, rootGid: string, rootAid: string): Promise<void> {
-    //find out <dependencies> node with artifactId === rootAid and insert <exclusions> node
+    // find out <dependencies> node with artifactId === rootAid and insert <exclusions> node
     const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
     const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
@@ -53,7 +53,7 @@ async function insertExcludeDependency(pomPath: string, targetNode: ElementNode,
     const textEditor: vscode.TextEditor = await vscode.window.showTextDocument(currentDocument);
     const baseIndent: string = getIndentation(currentDocument, targetNode.contentEnd);
     const options: vscode.TextEditorOptions = textEditor.options;
-    const indent: string = options.insertSpaces ? " ".repeat(<number>options.tabSize) : "\t";
+    const indent: string = options.insertSpaces && typeof options.tabSize === "number" ? " ".repeat(options.tabSize) : "\t";
     const eol: string = currentDocument.eol === vscode.EndOfLine.LF ? "\n" : "\r\n";
     let insertPosition: vscode.Position;
     let targetText: string;

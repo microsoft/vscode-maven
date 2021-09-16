@@ -47,7 +47,7 @@ export class Dependency implements ITreeItem, ITreeNode {
     }
 
     public async getChildren(): Promise<Dependency[] | undefined> {
-        return Promise.resolve(<Dependency[]> this.children);
+        return Promise.resolve(this.children);
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {

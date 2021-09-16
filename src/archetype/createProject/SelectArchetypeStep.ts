@@ -126,7 +126,7 @@ export class SelectArchetypeStep implements IProjectCreationStep {
         if (!fixedList) {
             return [];
         } else {
-            return <Archetype[]>fixedList.map((fullname: string) => allItems.find((item: Archetype) => fullname === `${item.groupId}:${item.artifactId}`)).filter(Boolean);
+            return fixedList.map((fullname: string) => allItems.find((item: Archetype) => fullname === `${item.groupId}:${item.artifactId}`)).filter(Boolean) as Archetype[];
         }
     }
 

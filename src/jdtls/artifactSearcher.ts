@@ -125,7 +125,7 @@ class TypeResolver {
             };
             const codeAction: vscode.CodeAction = {
                 title: `${TITLE_RESOLVE_UNKNOWN_TYPE} '${className}'`,
-                command: command,
+                command,
                 kind: vscode.CodeActionKind.QuickFix
             };
             return [codeAction];
@@ -157,7 +157,7 @@ class TypeResolver {
 async function getArtifactsPickItems(className: string): Promise<vscode.QuickPickItem[]> {
     const searchParam: ISearchArtifactParam = {
         searchType: SearchType.className,
-        className: className
+        className
     };
     const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
     const picks: vscode.QuickPickItem[] = [];

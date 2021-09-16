@@ -61,7 +61,7 @@ export namespace Utils {
 
         return await new Promise((resolve: (res: string) => void, reject: (e: Error) => void): void => {
             const urlObj: url.Url = url.parse(targetUrl);
-            const options: Object = Object.assign({ headers: Object.assign({}, customHeaders, { "User-Agent": `vscode/${getExtensionVersion()}` }) }, urlObj);
+            const options: object = Object.assign({ headers: Object.assign({}, customHeaders, { "User-Agent": `vscode/${getExtensionVersion()}` }) }, urlObj);
             let client: any;
             if (urlObj.protocol === "https:") {
                 client = https;
@@ -143,7 +143,7 @@ export namespace Utils {
         let pomPath: string;
         let name: string;
         if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
-            const mavenProject: MavenProject = <MavenProject>pomPathOrMavenProject;
+            const mavenProject: MavenProject = pomPathOrMavenProject;
             pomPath = mavenProject.pomPath;
             name = mavenProject.name;
         } else if (typeof pomPathOrMavenProject === "string") {
@@ -159,7 +159,7 @@ export namespace Utils {
                     const ret: string | undefined = await rawEffectivePom(pomPath);
                     resolve(ret ? ret : "");
                 } catch (error) {
-                    setUserError(<Error>error);
+                    setUserError(error);
                     reject(error);
                 }
             }
@@ -174,7 +174,7 @@ export namespace Utils {
                     const ret: string | undefined = await pluginDescription(pluginId, pomPath);
                     resolve(ret ? ret : "");
                 } catch (error) {
-                    setUserError(<Error>error);
+                    setUserError(error);
                     reject(error);
                 }
             }
@@ -200,10 +200,10 @@ export namespace Utils {
     }
 
     export async function executeHistoricalGoals(projectPomPaths: string[]): Promise<void> {
-        const candidates: ICommandHistoryEntry[] = <ICommandHistoryEntry[]>Array.prototype.concat.apply(
+        const candidates: ICommandHistoryEntry[] = Array.prototype.concat.apply(
             [],
             await Promise.all(projectPomPaths.map(getLRUCommands))
-        );
+        ) as ICommandHistoryEntry[];
         candidates.sort((a, b) => b.timestamp - a.timestamp);
         const selected: { command: string; pomPath: string; timestamp: number } | undefined = await window.showQuickPick(
             candidates.map(item => ({

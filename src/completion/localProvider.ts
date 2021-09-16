@@ -43,7 +43,7 @@ class LocalProvider implements IMavenCompletionItemProvider {
             const item: vscode.CompletionItem = new vscode.CompletionItem(aid, vscode.CompletionItemKind.Field);
             item.insertText = aid;
             item.detail = `GroupId: ${groupId}`;
-            (<any>item).data = { groupId: groupId };
+            (item as any).data = { groupId };
             item.command = commandOnSelection;
             return item;
         });

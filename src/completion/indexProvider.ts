@@ -51,7 +51,7 @@ class IndexProvider implements IMavenCompletionItemProvider {
             const item: vscode.CompletionItem = new vscode.CompletionItem(doc.artifactId, vscode.CompletionItemKind.Field);
             item.insertText = doc.artifactId;
             item.detail = `GroupId: ${doc.groupId}`;
-            (<any>item).data = { groupId: doc.groupId };
+            (item as any).data = { groupId: doc.groupId };
             item.command = commandOnSelection;
             return item;
         });
@@ -66,8 +66,8 @@ class IndexProvider implements IMavenCompletionItemProvider {
         }
         const searchParam: ISearchArtifactParam = {
             searchType: SearchType.identifier,
-            groupId: groupId,
-            artifactId: artifactId
+            groupId,
+            artifactId
         };
         const docs: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
         const commandOnSelection: vscode.Command = {
