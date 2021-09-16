@@ -23,6 +23,7 @@ import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { addDependencyHandler } from "./handlers/addDependencyHandler";
+import { addWrapperHandler } from "./handlers/addWrapperHandler";
 import { debugHandler } from "./handlers/debugHandler";
 import { excludeDependencyHandler } from "./handlers/excludeDependencyHandler";
 import { goToEffectiveHandler } from "./handlers/goToEffectiveHandler";
@@ -151,6 +152,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     context.subscriptions.push(decorationProvider);
     // textDocument based output (e.g. effective-pom, dependencies)
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("vscode-maven", contentProvider));
+
+    // add maven wrapper
+    registerCommand(context, "maven.project.addWrapper", () => addWrapperHandler());
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {

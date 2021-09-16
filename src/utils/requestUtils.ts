@@ -97,6 +97,14 @@ async function httpsGet(urlString: string): Promise<string> {
     });
 }
 
+async function httpsGetStatusCode(uriString: string): Promise<number | undefined> {
+    return new Promise<number | undefined>((resolve, _reject) => {
+        https.get(url.parse(uriString), (res: http.IncomingMessage) => {
+            resolve(res.statusCode);
+        });
+    });
+}
+
 function toQueryString(params: { [key: string]: any }): string {
     return Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k].toString())}`).join("&");
 }
@@ -104,4 +112,13 @@ function toQueryString(params: { [key: string]: any }): string {
 export async function fetchPluginMetadataXml(gid: string): Promise<string> {
     const metadataUrl = URL_MAVEN_CENTRAL_REPO + path.posix.join(...gid.split("."), MAVEN_METADATA_FILENAME);
     return await httpsGet(metadataUrl);
+}
+
+function mavenDistributionUrl(mavenVersion: string): string {
+    return `https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${mavenVersion}`;
+}
+
+export async function mavenDitributionExisting(mavenVersion: string): Promise<boolean> {
+    const statusCode = await httpsGetStatusCode(mavenDistributionUrl(mavenVersion));
+    return statusCode !== 404;
 }
