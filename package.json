@@ -709,7 +709,7 @@
     "build-plugin": "node scripts/build-jdtls-ext.js",
     "compile": "tsc -p ./",
     "tslint": "tslint -t verbose --project tsconfig.json",
-    "watch": "webpack --mode development --watch --info-verbosity verbose",
+    "watch": "webpack --mode development --watch",
     "test": "npm run compile && node ./out/test/runTest.js",
     "webpack": "webpack --mode development"
   },
