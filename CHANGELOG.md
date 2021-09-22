@@ -1,8 +1,16 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
-## 0.33.0
+## 0.34.0
+### Added
+- Add command to navigate between conflict dependencies. [#672](https://github.com/microsoft/vscode-maven/issues/672)
+- New localization: Chinese (Traditional). [#727](https://github.com/microsoft/vscode-maven/pull/727)
 
+### Changed
+- Open POM file under local repository in readonly mode. [#718](https://github.com/microsoft/vscode-maven/issues/718)
+- Improve performance on fetching plugin information. [#714](https://github.com/microsoft/vscode-maven/issues/714)
+
+## 0.33.0
 ### Added
 - New entry to `Run` lifecycle phases from context menu. [#700](https://github.com/microsoft/vscode-maven/issues/700)
 - New setting `maven.projectOpenBehavior` specifying default way to open newly created project. [#662](https://github.com/microsoft/vscode-maven/issues/662)
