@@ -61,7 +61,7 @@ export function constructDependencyNode(options: { gid: string, aid: string, ver
     const { gid, aid, version, dtype, classifier, baseIndent, indent, eol } = options;
 
     // init the array with the required params
-    let builder: string[] = [
+    const builder: string[] = [
         eol,
         "<dependency>",
         `${indent}<groupId>${gid}</groupId>`,
