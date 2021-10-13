@@ -20,7 +20,7 @@
     "contributes.commands.maven.dependency.goToEffective": "Go to Effective Dependency",
     "contributes.commands.maven.project.goToDefinition": "Go to Definition",
     "contributes.views.explorer.mavenProjects": "Maven",
-    "contributes.viewsWelcome.mavenProjects.untrustedWorkspaces": "Advanced features (e.g. executing lifecycle phases and plugin goals) are disabled in Restricted Mode for security concern.\nPOM editing assistance (e.g. [add a dependency](command:maven.project.addDependency)) is still available.\nLearn more about [Workspace Trust](https://aka.ms/vscode-workspace-trust).\n[Manage Workspace Trust](command:workbench.action.manageTrust)",
+    "contributes.viewsWelcome.mavenProjects.untrustedWorkspaces": "Advanced features (e.g. executing lifecycle phases and plugin goals) are disabled in Restricted Mode for security concern.\nPOM editing assistance (e.g. [add a dependency](command:maven.project.addDependency)) is still available.\nLearn more about [Workspace Trust](https://aka.ms/vscode-workspace-trust).\n[Manage Workspace Trust](command:workbench.trust.manage)",
     "configuration.maven.excludedFolders": "Specifies file path pattern of folders to exclude while searching for Maven projects.",
     "configuration.maven.executable.preferMavenWrapper": "Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' by walking up the parent folders. If false, or 'mvnw' is not found, it tries 'mvn' in PATH instead.",
     "configuration.maven.executable.path": "Specifies absolute path of your 'mvn' executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to the value of 'maven.executable.preferMavenWrapper'.",
