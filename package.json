@@ -711,12 +711,14 @@
     "tslint": "tslint -t verbose --project tsconfig.json",
     "watch": "webpack --mode development --watch",
     "test": "npm run compile && node ./out/test/runTest.js",
-    "webpack": "webpack --mode development"
+    "webpack": "webpack --mode development",
+    "update-tpn": "node scripts/update-third-party-notice.js"
   },
   "devDependencies": {
     "@types/fs-extra": "^4.0.9",
     "@types/glob": "^7.1.1",
     "@types/lodash": "^4.14.168",
+    "@types/lru-cache": "^5.1.0",
     "@types/md5": "^2.3.0",
     "@types/minimatch": "^3.0.4",
     "@types/mocha": "^5.2.7",
@@ -736,7 +738,6 @@
     "webpack-cli": "^4.8.0"
   },
   "dependencies": {
-    "@types/lru-cache": "^5.1.0",
     "expand-home-dir": "0.0.3",
     "fast-glob": "^3.2.7",
     "fs-extra": "^4.0.3",
