@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.34.1
+### Fixed
+- Update command for workspace trust management. [#749](https://github.com/microsoft/vscode-maven/pull/749)
+- Update third party notices. [#751](https://github.com/microsoft/vscode-maven/pull/751)
+
 ## 0.34.0
 ### Added
 - Add command to navigate between conflict dependencies. [#672](https://github.com/microsoft/vscode-maven/issues/672)

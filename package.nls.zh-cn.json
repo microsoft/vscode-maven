@@ -20,7 +20,7 @@
     "contributes.commands.maven.project.setDependencyVersion": "指定依赖版本为...",
     "contributes.commands.maven.dependency.goToEffective": "转到有效的依赖项",
     "contributes.views.explorer.mavenProjects": "Maven",
-    "contributes.viewsWelcome.mavenProjects.untrustedWorkspaces": "高级功能（例如：执行生命周期阶段与插件的目标命令）将会因为安全考量在限制模式中被停用。\nPOM编辑辅助功能（例如：[添加依赖]（command:maven.project.addDependency））仍可以使用。\n学习更多关于[工作区信任]（https://aka.ms/vscode-workspace-trust）\n[管理工作区信任]（command:workbench.action.manageTrust）",
+    "contributes.viewsWelcome.mavenProjects.untrustedWorkspaces": "高级功能（例如：执行生命周期阶段与插件的目标命令）将会因为安全考量在限制模式中被停用。\nPOM编辑辅助功能（例如：[添加依赖](command:maven.project.addDependency)）仍可以使用。\n学习更多关于[工作区信任](https://aka.ms/vscode-workspace-trust)\n[管理工作区信任](command:workbench.trust.manage)",
     "configuration.maven.excludedFolders": "指定搜索 Maven 项目时要排除的文件夹。",
     "configuration.maven.executable.preferMavenWrapper": "指定是否优先使用 Maven Wrapper。如果为 true，则尝试向上遍历父文件夹寻找 mvnw 作为可执行文件；如果为 false，或者找不到 mvnw，则尝试使用系统 PATH 中的 mvn。",
     "configuration.maven.executable.path": "指定mvn可执行文件的绝对路径。当此值为空时，它会根据 maven.executable.preferMavenWrapper 的值尝试使用 mvn 或 mvnw 。",

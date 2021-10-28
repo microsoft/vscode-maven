@@ -20,7 +20,7 @@
     "contributes.commands.maven.dependency.goToEffective": "移至有效的相依套件項",
     "contributes.commands.maven.project.goToDefinition": "移至定義",
     "contributes.views.explorer.mavenProjects": "Maven",
-    "contributes.viewsWelcome.mavenProjects.untrustedWorkspaces": "進階功能 (例如: 執行生命週期階段與 Plugin 的目標命令) 將會因為安全考量在限制模式中被停用。\nPOM 編輯輔助功能 (例如: [新增相依套件](command:maven.project.addDependency)) 還是可以使用。\n學習更多關於 [工作區信任](https://aka.ms/vscode-workspace-trust)\n[管理工作區信任](command:workbench.action.manageTrust)",
+    "contributes.viewsWelcome.mavenProjects.untrustedWorkspaces": "進階功能 (例如: 執行生命週期階段與 Plugin 的目標命令) 將會因為安全考量在限制模式中被停用。\nPOM 編輯輔助功能 (例如: [新增相依套件](command:maven.project.addDependency)) 還是可以使用。\n學習更多關於 [工作區信任](https://aka.ms/vscode-workspace-trust)\n[管理工作區信任](command:workbench.trust.manage)",
     "configuration.maven.excludedFolders": "指定搜尋 Maven 專案時要排除的文件夾。",
     "configuration.maven.executable.preferMavenWrapper": "指定是否優先使用 Maven Wrapper。如果為 true，則嘗試向上遍歷父文件夾尋找 mvnw 作為可執行文件；如果為 false，或者找不到 mvnw，則嘗試使用系統 PATH 中的 mvn。",
     "configuration.maven.executable.path": "指定 mvn 可執行文件的絕對路徑。當此值為空時，它會根據 maven.executable.preferMavenWrapper 的值嘗試使用 mvn 或 mvnw 。",
