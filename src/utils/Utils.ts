@@ -6,7 +6,7 @@ import * as http from "http";
 import * as https from "https";
 import * as md5 from "md5";
 import * as path from "path";
-import * as url from "url";
+import { URL } from "url";
 import { commands, Progress, ProgressLocation, RelativePattern, Uri, window, workspace, WorkspaceFolder } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
@@ -60,20 +60,9 @@ export namespace Utils {
         await fse.ensureFile(tempFilePath);
 
         return await new Promise((resolve: (res: string) => void, reject: (e: Error) => void): void => {
-            const urlObj: url.Url = url.parse(targetUrl);
-            const options: object = Object.assign({ headers: Object.assign({}, customHeaders, { "User-Agent": `vscode/${getExtensionVersion()}` }) }, urlObj);
-            let client: any;
-            if (urlObj.protocol === "https:") {
-                client = https;
-                // tslint:disable-next-line:no-http-string
-            } else if (urlObj.protocol === "http:") {
-                client = http;
-            } else {
-                reject(new Error("Unsupported protocol."));
-                return;
-            }
-            // tslint:disable-next-line: no-unsafe-any
-            client.get(options, (res: http.IncomingMessage) => {
+            const url: URL = new URL(targetUrl);
+            const options: object = { headers: Object.assign({}, customHeaders, { "User-Agent": `vscode/${getExtensionVersion()}` }) };
+            const callback = (res: http.IncomingMessage) => {
                 let rawData: string;
                 let ws: fse.WriteStream;
                 if (readContent) {
@@ -96,9 +85,15 @@ export namespace Utils {
                         resolve(tempFilePath);
                     }
                 });
-            }).on("error", (err: Error) => {
-                reject(err);
-            });
+            };
+            if (url.protocol === "https:") {
+                https.get(url, options, callback).on("error", reject);
+            } else if (url.protocol === "http:") {
+                http.get(url, options, callback).on("error", reject);
+            } else {
+                reject(new Error("Unsupported protocol."));
+                return;
+            }
         });
     }
 

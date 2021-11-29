@@ -5,7 +5,7 @@ import * as http from "http";
 import * as https from "https";
 import * as _ from "lodash";
 import * as path from "path";
-import * as url from "url";
+import { URL } from "url";
 
 const URL_MAVEN_SEARCH_API: string = "https://search.maven.org/solrsearch/select";
 const URL_MAVEN_CENTRAL_REPO: string = "https://repo1.maven.org/maven2/";
@@ -83,7 +83,7 @@ export async function getLatestVersion(gid: string, aid: string): Promise<string
 async function httpsGet(urlString: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         let result: string = "";
-        https.get(url.parse(urlString), (res: http.IncomingMessage) => {
+        https.get(new URL(urlString), (res: http.IncomingMessage) => {
             res.on("data", chunk => {
                 result = result.concat(chunk.toString());
             });
