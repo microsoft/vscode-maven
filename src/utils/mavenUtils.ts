@@ -66,7 +66,9 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
     const userArgs: string | undefined = Settings.Executable.options(pomfile);
-    const matched: RegExpMatchArray | null = [mvnArgs, userArgs].filter(Boolean).join(" ").match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
+    const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
+    const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s ${mvnSettingsFile}` : undefined;
+    const matched: RegExpMatchArray | null = [mvnSettingsArg, mvnArgs, userArgs].filter(Boolean).join(" ").match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
     const args: string[] = matched !== null ? matched : [];
     if (pomfile) {
         args.push("-f", `"${pomfile}"`);
@@ -123,8 +125,10 @@ export async function executeInTerminal(options: {
     }
 
     const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvn));
+    const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
     const fullCommand: string = [
         mvnString,
+        mvnSettingsFile && `-s ${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}`,
         command.trim(),
         pomfile && `-f "${await mavenTerminal.formattedPathForTerminal(pomfile)}"`,
         Settings.Executable.options(pomfile)
