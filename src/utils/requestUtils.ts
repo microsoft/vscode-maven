@@ -83,7 +83,11 @@ export async function getLatestVersion(gid: string, aid: string): Promise<string
 async function httpsGet(urlString: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         let result: string = "";
-        https.get(url.parse(urlString), (res: http.IncomingMessage) => {
+        const options: any = url.parse(urlString);
+        options.headers = {
+            'User-Agent': 'vscode-maven/0.1'
+        }
+        https.get(options, (res: http.IncomingMessage) => {
             res.on("data", chunk => {
                 result = result.concat(chunk.toString());
             });
