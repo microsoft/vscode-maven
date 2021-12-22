@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.34.2
+### Fixed
+- `Maven: Add a dependency` not working. [#766](https://github.com/microsoft/vscode-maven/issues/766)
+
 ## 0.34.1
 ### Fixed
 - Update command for workspace trust management. [#749](https://github.com/microsoft/vscode-maven/pull/749)
