@@ -8,7 +8,7 @@
   "preview": true,
   "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
   "engines": {
-    "vscode": "^1.56.0"
+    "vscode": "^1.62.0"
   },
   "enabledApiProposals": [],
   "capabilities": {
@@ -709,7 +709,7 @@
     "build-plugin": "node scripts/build-jdtls-ext.js",
     "compile": "tsc -p ./",
     "tslint": "tslint -t verbose --project tsconfig.json",
-    "watch": "webpack --mode development --watch",
+    "watch": "webpack --mode development --watch --progress",
     "test": "npm run compile && node ./out/test/runTest.js",
     "webpack": "webpack --mode development",
     "update-tpn": "node scripts/update-third-party-notice.js"
@@ -724,7 +724,7 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^14.18.4",
     "@types/semver": "^7.3.9",
-    "@types/vscode": "1.56.0",
+    "@types/vscode": "1.62.0",
     "@types/which": "^1.3.2",
     "@types/xml-zero-lexer": "^2.1.0",
     "@types/xml2js": "^0.4.8",
