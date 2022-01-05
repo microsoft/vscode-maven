@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { Uri, workspace } from "vscode";
 import { sendInfo } from "vscode-extension-telemetry-wrapper";
 import { mavenTerminal } from "../mavenTerminal";
+import { Settings } from "../Settings";
 import { getPathToExtensionRoot } from "../utils/contextUtils";
 import { getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
 import { Utils } from "../utils/Utils";
@@ -74,7 +75,8 @@ export namespace ArchetypeModule {
         if (mvnPath === undefined) { return; }
         const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvnPath));
 
-        let commandLine: string = [mvnString, ...cmdArgs].filter(Boolean).join(" ");
+        const defaultArgs: string | undefined = Settings.Executable.options(metadata.targetFolder);
+        let commandLine: string = [mvnString, ...cmdArgs, defaultArgs].filter(Boolean).join(" ");
         const options: vscode.ShellExecutionOptions = { cwd };
         if (vscode.env.remoteName === undefined && process.platform === "win32") { // VS Code launched in Windows Desktop.
             options.shellQuoting = shellQuotes.cmd;

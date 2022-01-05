@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.34.1",
+  "version": "0.34.2",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -10,7 +10,7 @@
   "engines": {
     "vscode": "^1.56.0"
   },
-  "enableProposedApi": false,
+  "enabledApiProposals": [],
   "capabilities": {
     "virtualWorkspaces": false,
     "untrustedWorkspaces": {
@@ -716,26 +716,26 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^4.0.9",
-    "@types/glob": "^7.1.1",
-    "@types/lodash": "^4.14.168",
+    "@types/glob": "^7.2.0",
+    "@types/lodash": "^4.14.178",
     "@types/lru-cache": "^5.1.0",
     "@types/md5": "^2.3.0",
     "@types/minimatch": "^3.0.4",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^14.14.37",
-    "@types/semver": "^7.3.8",
+    "@types/node": "^14.18.4",
+    "@types/semver": "^7.3.9",
     "@types/vscode": "1.56.0",
     "@types/which": "^1.3.2",
     "@types/xml-zero-lexer": "^2.1.0",
     "@types/xml2js": "^0.4.8",
-    "glob": "^7.1.6",
-    "mocha": "^9.1.2",
-    "ts-loader": "^9.2.5",
+    "glob": "^7.2.0",
+    "mocha": "^9.1.3",
+    "ts-loader": "^9.2.6",
     "tslint": "^6.1.3",
-    "typescript": "^4.4.3",
+    "typescript": "^4.5.4",
     "vscode-test": "^1.5.2",
-    "webpack": "^5.44.0",
-    "webpack-cli": "^4.8.0"
+    "webpack": "^5.65.0",
+    "webpack-cli": "^4.9.1"
   },
   "dependencies": {
     "expand-home-dir": "0.0.3",
@@ -747,10 +747,10 @@
     "md5": "^2.2.1",
     "minimatch": "^3.0.4",
     "semver": "^5.6.0",
-    "vscode-extension-telemetry-wrapper": "^0.10.0",
+    "vscode-extension-telemetry-wrapper": "^0.11.0",
     "vscode-languageclient": "^7.0.0",
     "vscode-languageserver-protocol": "^3.16.0",
-    "vscode-tas-client": "^0.1.22",
+    "vscode-tas-client": "^0.1.27",
     "which": "^1.3.1",
     "xml-zero-lexer": "^2.1.0",
     "xml2js": "^0.4.23"
