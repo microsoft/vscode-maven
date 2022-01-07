@@ -20,6 +20,9 @@ export class SelectArchetypeStep implements IProjectCreationStep {
     public readonly previousStep: undefined;
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
+        if (metadata.archetypeGroupId && metadata.archetypeArtifactId && metadata.archetypeVersion) {
+            return StepResult.NEXT;
+        }
 
         const disposables: Disposable[] = [];
         const specifyAchetypePromise = new Promise<StepResult>(async (resolve, _reject) => {

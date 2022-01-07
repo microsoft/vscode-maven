@@ -8,13 +8,17 @@ export class SpecifyArtifactIdStep implements IProjectCreationStep {
     public previousStep?: IProjectCreationStep;
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
+        if (metadata.artifactId) {
+            return StepResult.NEXT;
+        }
+
         const disposables: Disposable[] = [];
         const quickInputPromise = new Promise<StepResult>((resolve, reject) => {
             const inputBox: InputBox = window.createInputBox();
             inputBox.title = "Create Maven Project";
             inputBox.placeholder = "e.g. demo";
             inputBox.prompt = "Input artifact Id of your project.";
-            inputBox.value = metadata.artifactId ?? "demo";
+            inputBox.value = metadata.defaultArtifactId ?? "demo";
             inputBox.ignoreFocusOut = true;
             if (this.previousStep) {
                 inputBox.buttons = [(QuickInputButtons.Back)];

@@ -8,6 +8,9 @@ export class SpecifyGroupIdStep implements IProjectCreationStep {
     public previousStep?: IProjectCreationStep;
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
+        if (metadata.groupId) {
+            return StepResult.NEXT;
+        }
 
         const disposables: Disposable[] = [];
         const specifyGroupIdPromise = new Promise<StepResult>((resolve, reject) => {
@@ -15,7 +18,7 @@ export class SpecifyGroupIdStep implements IProjectCreationStep {
             inputBox.title = "Create Maven Project";
             inputBox.placeholder = "e.g. com.example";
             inputBox.prompt = "Input group Id of your project.";
-            inputBox.value = metadata.groupId ?? "com.example";
+            inputBox.value = metadata.defaultGroupId ?? "com.example";
             inputBox.ignoreFocusOut = true;
             if (this.previousStep) {
                 inputBox.buttons = [(QuickInputButtons.Back)];

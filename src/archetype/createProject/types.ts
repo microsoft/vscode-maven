@@ -4,13 +4,17 @@
 import { Archetype } from "../Archetype";
 
 export interface IProjectCreationMetadata {
-    archetype?: Archetype; // temopary cached data between steps
+    archetype?: Archetype; // temporary cached data between steps, used to select versions
     archetypeArtifactId?: string;
     archetypeGroupId?: string;
     archetypeVersion?: string;
     groupId?: string;
     artifactId?: string;
     targetFolder?: string;
+    // fields for default values in quickbox
+    defaultGroupId?: string;
+    defaultArtifactId?: string;
+    defaultTargetFolder?: string;
 }
 
 export interface IProjectCreationStep {
