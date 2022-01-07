@@ -56,73 +56,62 @@ export function getIndentation(document: vscode.TextDocument, offset: number): s
     ));
 }
 
-export function constructDependencyNode(options: {gid: string, aid: string, version: string, dtype?: string, baseIndent: string, indent: string, eol: string}): string {
-    let dependencyNode: string;
-    const {gid, aid, version, dtype, baseIndent, indent, eol} = options;
-    if (dtype === undefined || dtype === "jar") {
-        dependencyNode = [
-            eol,
-            "<dependency>",
-            `${indent}<groupId>${gid}</groupId>`,
-            `${indent}<artifactId>${aid}</artifactId>`,
-            `${indent}<version>${version}</version>`,
-            `</dependency>${eol}`
-        ].join(`${eol}${baseIndent}${indent}`);
-    } else {
-        dependencyNode = [
-            eol,
-            "<dependency>",
-            `${indent}<groupId>${gid}</groupId>`,
-            `${indent}<artifactId>${aid}</artifactId>`,
-            `${indent}<version>${version}</version>`,
-            `${indent}<type>${dtype}</type>`,
-            `</dependency>${eol}`
-        ].join(`${eol}${baseIndent}${indent}`);
-    }
-    return dependencyNode;
+export function constructDependencyNode(options: { gid: string, aid: string, version: string, dtype?: string, classifier?: string, baseIndent: string, indent: string, eol: string }): string {
+
+    const { gid, aid, version, dtype, classifier, baseIndent, indent, eol } = options;
+
+    // init the array with the required params
+    const builder: string[] = [
+        eol,
+        "<dependency>",
+        `${indent}<groupId>${gid}</groupId>`,
+        `${indent}<artifactId>${aid}</artifactId>`,
+        `${indent}<version>${version}</version>`
+    ];
+
+    // add the packaging type if present and not the default
+    if (dtype !== undefined && dtype !== "jar")
+        builder.push(`${indent}<type>${dtype}</type>`);
+
+    // add the classifier if present
+    if (classifier !== undefined)
+        builder.push(`${indent}<type>${classifier}</type>`);
+
+    // cap the end of the array with the closing tag
+    builder.push(`</dependency>${eol}`);
+
+    // join the array together with the newlines and indents
+    return builder.join(`${eol}${baseIndent}${indent}`);
 }
 
-export function constructDependenciesNode(options: {gid: string, aid: string, version: string, dtype?: string, baseIndent: string, indent: string, eol: string}): string {
-    let dependenciesNode: string;
-    const {gid, aid, version, dtype, baseIndent, indent, eol} = options;
-    if (dtype === undefined || dtype === "jar") {
-        dependenciesNode = [
-            eol,
-            "<dependencies>",
-            `${indent}<dependency>`,
-            `${indent}${indent}<groupId>${gid}</groupId>`,
-            `${indent}${indent}<artifactId>${aid}</artifactId>`,
-            `${indent}${indent}<version>${version}</version>`,
-            `${indent}</dependency>`,
-            `</dependencies>${eol}`
-        ].join(`${eol}${baseIndent}${indent}`);
-    } else {
-        dependenciesNode = [
-            eol,
-            "<dependencies>",
-            `${indent}<dependency>`,
-            `${indent}${indent}<groupId>${gid}</groupId>`,
-            `${indent}${indent}<artifactId>${aid}</artifactId>`,
-            `${indent}${indent}<version>${version}</version>`,
-            `${indent}${indent}<type>${dtype}</type>`,
-            `${indent}</dependency>`,
-            `</dependencies>${eol}`
-        ].join(`${eol}${baseIndent}${indent}`);
-    }
-    return dependenciesNode;
+export function constructDependenciesNode(options: { gid: string, aid: string, version: string, dtype?: string, classifier?: string, baseIndent: string, indent: string, eol: string }): string {
+
+    const { gid, aid, version, dtype, classifier, baseIndent, indent, eol } = options;
+
+    // use the existing dependency method to build that section, just add an extra bump to the indent
+    const dependencyNode = constructDependencyNode({ gid, aid, version, dtype, baseIndent: (baseIndent + indent), classifier, indent, eol });
+
+    // wrap the dependency with the dependencies node
+    return [
+        eol,
+        "<dependencies>",
+        dependencyNode,
+        `</dependencies>${eol}`
+    ].join(`${eol}${baseIndent}${indent}`);
 }
 
-export function constructDependencyManagementNode(gid: string, aid: string, version: string, baseIndent: string, indent: string, eol: string): string {
+export function constructDependencyManagementNode(options: { gid: string, aid: string, version: string, dtype?: string, classifier?: string, baseIndent: string, indent: string, eol: string }): string {
+
+    const { gid, aid, version, dtype, classifier, baseIndent, indent, eol } = options;
+
+    // use the existing dependencies method to build that section, just add an extra bump to the indent
+    const dependenciesNode = constructDependenciesNode({ gid, aid, version, dtype, baseIndent: (baseIndent + indent), classifier, indent, eol });
+
+    // wrap the dependencies with the dependencyManagement node
     return [
         eol,
         "<dependencyManagement>",
-        `${indent}<dependencies>`,
-        `${indent}${indent}<dependency>`,
-        `${indent}${indent}${indent}<groupId>${gid}</groupId>`,
-        `${indent}${indent}${indent}<artifactId>${aid}</artifactId>`,
-        `${indent}${indent}${indent}<version>${version}</version>`,
-        `${indent}${indent}</dependency>`,
-        `${indent}</dependencies>`,
+        dependenciesNode,
         `</dependencyManagement>${eol}`
     ].join(`${eol}${baseIndent}${indent}`);
 }

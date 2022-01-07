@@ -36,18 +36,22 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
     versions.push(OPTION_SEARCH_MAVEN_CENTRAL);
 
     let selectedVersion: string | undefined = await vscode.window.showQuickPick(
-        versions.map(version => ({ value: version, label: version !== OPTION_SEARCH_MAVEN_CENTRAL ? `$(package) ${version}` : version, description: version === effectiveVersion ? "effective" : undefined})),
-        { placeHolder: `Select a version for ${gid}:${aid}...`,
-            ignoreFocusOut: true}
+        versions.map(version => ({ value: version, label: version !== OPTION_SEARCH_MAVEN_CENTRAL ? `$(package) ${version}` : version, description: version === effectiveVersion ? "effective" : undefined })),
+        {
+            placeHolder: `Select a version for ${gid}:${aid}...`,
+            ignoreFocusOut: true
+        }
     ).then(version => version ? version.value : undefined);
     if (selectedVersion === undefined) {
         return;
     }
     if (selectedVersion === OPTION_SEARCH_MAVEN_CENTRAL) {
         const selectedVersionFromMavenCentral: string | undefined = await vscode.window.showQuickPick<vscode.QuickPickItem & { value: string }>(
-            getVersions(gid, aid).then(artifacts => artifacts.map(artifact => ({value: artifact.v, label: `$(package) ${artifact.v}`, description: artifact.v === effectiveVersion ? "effective" : undefined }))),
-            { placeHolder: `Select a version for ${gid}:${aid}...`,
-                ignoreFocusOut: true }
+            getVersions(gid, aid).then(artifacts => artifacts.map(artifact => ({ value: artifact.v, label: `$(package) ${artifact.v}`, description: artifact.v === effectiveVersion ? "effective" : undefined }))),
+            {
+                placeHolder: `Select a version for ${gid}:${aid}...`,
+                ignoreFocusOut: true
+            }
         ).then(artifact => artifact ? artifact.value : undefined);
         if (selectedVersionFromMavenCentral === undefined) {
             return;
@@ -60,14 +64,14 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
 }
 
 async function setDependencyVersion(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
-    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
+    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), { preserveFocus: true });
     const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
 
     const projectNode: ElementNode = projectNodes[0];
-    const dependenciesNode:  ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
+    const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
     const dependencyManagementNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.DependencyManagement);
     // find ${gid:aid} dependency node in <dependencies> to delete
     const deleteNode: ElementNode | undefined = dependenciesNode?.children?.find(node =>
@@ -83,7 +87,7 @@ async function setDependencyVersion(pomPath: string, gid: string, aid: string, v
 }
 
 async function insertDependencyManagement(pomPath: string, targetNode: ElementNode, deleteNode: ElementNode | undefined, gid: string, aid: string, version: string): Promise<void> {
-    if ( targetNode.contentStart === undefined || targetNode.contentEnd === undefined) {
+    if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined) {
         throw new UserError("Invalid target XML node to insert dependency management.");
     }
     const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
@@ -109,13 +113,13 @@ async function insertDependencyManagement(pomPath: string, targetNode: ElementNo
             node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid)
         );
         const newIndent: string = `${baseIndent}${indent}`;
-        targetText = constructDependencyNode({gid, aid, version, baseIndent: newIndent, indent, eol});
+        targetText = constructDependencyNode({ gid, aid, version, baseIndent: newIndent, indent, eol });
     } else if (targetNode.tag === XmlTagName.DependencyManagement && dependenciesNode === undefined) {
         insertPosition = currentDocument.positionAt(targetNode.contentStart);
-        targetText = constructDependenciesNode({gid, aid, version, baseIndent, indent, eol});
+        targetText = constructDependenciesNode({ gid, aid, version, baseIndent, indent, eol });
     } else if (targetNode.tag === XmlTagName.Project) {
         insertPosition = currentDocument.positionAt(targetNode.contentEnd);
-        targetText = constructDependencyManagementNode(gid, aid, version, baseIndent, indent, eol);
+        targetText = constructDependencyManagementNode({ gid, aid, version, baseIndent, indent, eol });
     } else {
         return;
     }
