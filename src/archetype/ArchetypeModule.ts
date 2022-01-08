@@ -76,7 +76,9 @@ export namespace ArchetypeModule {
         const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvnPath));
 
         const defaultArgs: string | undefined = Settings.Executable.options(metadata.targetFolder);
-        let commandLine: string = [mvnString, ...cmdArgs, defaultArgs].filter(Boolean).join(" ");
+        const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
+        const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"` : undefined;
+        let commandLine: string = [mvnString, ...cmdArgs, defaultArgs, mvnSettingsArg].filter(Boolean).join(" ");
         const options: vscode.ShellExecutionOptions = { cwd };
         if (vscode.env.remoteName === undefined && process.platform === "win32") { // VS Code launched in Windows Desktop.
             options.shellQuoting = shellQuotes.cmd;
