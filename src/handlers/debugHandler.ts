@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import { default as getPort } from "get-port";
+import * as net from "net";
 import * as vscode from "vscode";
 import { createUuid } from "vscode-extension-telemetry-wrapper";
 import { PluginGoal } from "../explorer/model/PluginGoal";
@@ -36,7 +37,7 @@ async function debug({ command, pomfile, projectName }: IDebugOptions): Promise<
         Settings.getEnvironment(pomfile).MAVEN_OPTS, // user-setting MAVEN_OPTS
         `-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=${freePort}` // MAVEN_DEBUG_OPTS
     ].filter(Boolean).join(" ");
-    const sessionId: string = createUuid().substr(0, 6);
+    const sessionId: string = createUuid().substring(0, 6);
     const debugTerminal: vscode.Terminal | undefined = await executeInTerminal({
         command,
         pomfile,
@@ -56,10 +57,20 @@ async function debug({ command, pomfile, projectName }: IDebugOptions): Promise<
         projectName,
         terminalName: debugTerminal.name
     };
-    setTimeout(async () => {
-        await vscode.debug.startDebugging(undefined, debugConfig);
-        debugTerminal.show(true);
-    }, 1000 /* wait 1s for mvnDebug startup */);
+
+    let elapsed = 0;
+    const interval = 100; // polling port status per 100ms
+    const timeout = 10000; // 10s timeout
+    const id = setInterval(async () => {
+        const taken = await isPortTaken(freePort);
+        if (taken || elapsed > timeout) {
+            // mvnDebug process launched, listening to the port
+            clearInterval(id);
+            await vscode.debug.startDebugging(undefined, debugConfig);
+            debugTerminal.show(true);
+        }
+        elapsed += interval;
+    }, interval);
 }
 
 function isJavaDebuggerEnabled(): boolean {
@@ -73,4 +84,23 @@ async function guideToInstallJavaDebugger(): Promise<void> {
     if (choice === BUTTON_CONFIRM) {
         vscode.commands.executeCommand("vscode.open", vscode.Uri.parse("vscode:extension/vscjava.vscode-java-debug"));
     }
+}
+
+async function isPortTaken(port: number): Promise<boolean> {
+    return new Promise<boolean>((resolve, _reject) => {
+        const server = net.createServer((socket) => {
+            socket.write('Echo server\r\n');
+            socket.pipe(socket);
+        });
+
+        server.on('error', () => {
+            resolve(true);
+        });
+        server.on('listening', () => {
+            server.close();
+            resolve(false);
+        });
+        server.listen(port, "localhost");
+
+    });
 }
