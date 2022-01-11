@@ -18,14 +18,18 @@ const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/mave
 
 export namespace ArchetypeModule {
 
-    export async function createMavenProject(entry: Uri | undefined, _operationId: string): Promise<void> {
-        const targetFolder: string | undefined = entry?.fsPath ?? workspace.workspaceFolders?.[0]?.uri.fsPath;
-        // default metadata
+    export async function createMavenProject(entry: Uri | IProjectCreationMetadata | undefined, _operationId: string): Promise<void> {
         const metadata: IProjectCreationMetadata = {
-            targetFolder,
-            groupId: "com.example",
-            artifactId: "demo"
+            defaultGroupId: "com.example",
+            defaultArtifactId: "demo",
+            defaultTargetFolder: workspace.workspaceFolders?.[0]?.uri.fsPath
         };
+        if (entry instanceof Uri) {
+            metadata.defaultTargetFolder = entry.fsPath;
+        } else if (typeof entry === 'object') {
+            Object.assign(metadata, entry);
+        }
+
         const steps: IProjectCreationStep[] = [selectArchetypeStep, specifyArchetypeVersionStep, specifyGroupIdStep, specifyArtifactIdStep, specifyTargetFolderStep];
         const success: boolean = await runSteps(steps, metadata);
         if (success) {

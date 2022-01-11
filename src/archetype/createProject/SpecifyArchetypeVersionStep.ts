@@ -8,6 +8,10 @@ export class SpecifyArchetypeVersionStep implements IProjectCreationStep {
     public previousStep?: IProjectCreationStep;
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
+        if (metadata.archetypeGroupId && metadata.archetypeArtifactId && metadata.archetypeVersion) {
+            return StepResult.NEXT;
+        }
+
         const disposables: Disposable[] = [];
         const specifyAchetypeVersionPromise = new Promise<StepResult>((resolve, reject) => {
             if (metadata.archetype?.versions === undefined) {

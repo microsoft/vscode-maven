@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
+import { IProjectCreationMetadata } from "./archetype/createProject/types";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { completionProvider } from "./completion/completionProvider";
@@ -80,7 +81,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommandRequiringTrust(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
     registerCommand(context, "maven.project.openPom", openPomHandler);
     // create project from archetype
-    registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | undefined) => {
+    registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | IProjectCreationMetadata | undefined) => {
         await ArchetypeModule.createMavenProject(entry, operationId);
     }, true);
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
