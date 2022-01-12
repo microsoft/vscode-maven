@@ -20,17 +20,28 @@ export namespace ArchetypeModule {
 
     export async function createMavenProject(entry: Uri | IProjectCreationMetadata | undefined, _operationId: string): Promise<void> {
         const metadata: IProjectCreationMetadata = {
-            defaultGroupId: "com.example",
-            defaultArtifactId: "demo",
-            defaultTargetFolder: workspace.workspaceFolders?.[0]?.uri.fsPath
+            targetFolderHint: workspace.workspaceFolders?.[0]?.uri.fsPath
         };
         if (entry instanceof Uri) {
-            metadata.defaultTargetFolder = entry.fsPath;
+            metadata.targetFolderHint = entry.fsPath;
         } else if (typeof entry === 'object') {
             Object.assign(metadata, entry);
         }
 
-        const steps: IProjectCreationStep[] = [selectArchetypeStep, specifyArchetypeVersionStep, specifyGroupIdStep, specifyArtifactIdStep, specifyTargetFolderStep];
+        const steps: IProjectCreationStep[] = [];
+        if (!metadata.archetypeArtifactId || !metadata.archetypeGroupId || !metadata.archetypeVersion) {
+            steps.push(selectArchetypeStep, specifyArchetypeVersionStep);
+        }
+        if (!metadata.groupId) {
+            steps.push(specifyGroupIdStep);
+        }
+        if (!metadata.artifactId) {
+            steps.push(specifyArtifactIdStep);
+        }
+        if (!metadata.targetFolder) {
+            steps.push(specifyTargetFolderStep);
+        }
+
         const success: boolean = await runSteps(steps, metadata);
         if (success) {
             await executeInTerminalHandler(metadata);
