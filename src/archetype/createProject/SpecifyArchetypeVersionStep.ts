@@ -8,10 +8,6 @@ export class SpecifyArchetypeVersionStep implements IProjectCreationStep {
     public previousStep?: IProjectCreationStep;
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
-        if (metadata.archetypeGroupId && metadata.archetypeArtifactId && metadata.archetypeVersion) {
-            return StepResult.NEXT;
-        }
-
         const disposables: Disposable[] = [];
         const specifyAchetypeVersionPromise = new Promise<StepResult>((resolve, reject) => {
             if (metadata.archetype?.versions === undefined) {
@@ -21,7 +17,7 @@ export class SpecifyArchetypeVersionStep implements IProjectCreationStep {
 
             const pickBox: QuickPick<QuickPickItem> = window.createQuickPick<QuickPickItem>();
             pickBox.title = "Create Maven Project";
-            pickBox.placeholder = "Select a version ...";
+            pickBox.placeholder = `Select version of ${metadata.archetypeArtifactId}`;
             pickBox.items = metadata.archetype.versions.map(version => ({
                 label: version
             }));

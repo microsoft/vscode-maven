@@ -21,10 +21,6 @@ export const specifyTargetFolderStep = new SpecifyTargetFolderStep();
  * @returns whether all steps are successfully passed
  */
 export const runSteps = async (steps: IProjectCreationStep[], metadata: IProjectCreationMetadata): Promise<boolean> => {
-  if (!(steps[0] instanceof SelectArchetypeStep)) {
-    throw new Error("First step must be SelectArchetypeStep.");
-  }
-
   for (let i = 0; i < steps.length; i += 1) {
     steps[i].nextStep = steps[i + 1];
     steps[i].previousStep = steps[i - 1];

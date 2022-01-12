@@ -11,10 +11,7 @@ export interface IProjectCreationMetadata {
     groupId?: string;
     artifactId?: string;
     targetFolder?: string;
-    // fields for default values in quickbox
-    defaultGroupId?: string;
-    defaultArtifactId?: string;
-    defaultTargetFolder?: string;
+    targetFolderHint?: string; // default value for folder picker dialog
 }
 
 export interface IProjectCreationStep {
