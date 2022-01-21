@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.35.0
+
+### Added
+- Enable external call from other extensions to add dependencies. [#743](https://github.com/microsoft/vscode-maven/pull/743)
+- Enable external call from other extensions to create Maven projects. [#775](https://github.com/microsoft/vscode-maven/pull/775)
+
+### Fixed
+- Custom options were not passed to the command line when creating new projects. [#771](https://github.com/microsoft/vscode-maven/issues/771)
+- Failed to attach to remote debuggee VM when debugging a Maven goal. [#757](https://github.com/microsoft/vscode-maven/issues/757)
+- Setting `maven.settingsFile` was not honored when executing Maven commands. [#776](https://github.com/microsoft/vscode-maven/pull/776)
+- StackOverflowException when there exists circular dependencies in projects. [#763](https://github.com/microsoft/vscode-maven/issues/763)
+
 ## 0.34.2
 ### Fixed
 - `Maven: Add a dependency` not working. [#766](https://github.com/microsoft/vscode-maven/issues/766)
