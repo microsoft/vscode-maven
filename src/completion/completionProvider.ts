@@ -38,7 +38,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             return undefined;
         }
 
-        const targetRange: vscode.Range = new vscode.Range(document.positionAt(currentNode.contentStart), position);
+        const targetRange: vscode.Range = new vscode.Range(document.positionAt(currentNode.contentStart), currentNode.contentEnd ? document.positionAt(currentNode.contentEnd) : position);
         switch (currentNode.tag) {
             case XmlTagName.GroupId: {
                 const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
