@@ -14,7 +14,7 @@ export class LifecycleMenu extends Menu implements ITreeItem {
     }
 
     public async getChildren() : Promise<LifecyclePhase[]> {
-        return ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].map(goal => new LifecyclePhase(this.project, goal));
+        return ["clean", "validate", "compile", "test", "test-compile", "package", "verify", "install", "site", "deploy"].map(goal => new LifecyclePhase(this.project, goal));
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
