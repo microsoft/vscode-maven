@@ -148,6 +148,7 @@ export class MavenProject implements ITreeItem {
         };
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         treeItem.description = this.id;
+        treeItem.tooltip = this.pomPath;
         return treeItem;
     }
 
