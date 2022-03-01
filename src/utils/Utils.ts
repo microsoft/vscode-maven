@@ -10,6 +10,7 @@ import * as url from "url";
 import { commands, Progress, ProgressLocation, RelativePattern, Uri, window, workspace, WorkspaceFolder } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
+import { DEFAULT_MAVEN_LIFECYCLES } from "../completion/constants";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { LifecyclePhase } from "../explorer/model/LifecyclePhase";
 import { MavenProject } from "../explorer/model/MavenProject";
@@ -245,7 +246,7 @@ export namespace Utils {
             const LABEL_CUSTOM: string = "Custom ...";
             const LABEL_FAVORITES: string = "Favorites ...";
             selectedCommand = await window.showQuickPick(
-                [LABEL_FAVORITES, LABEL_CUSTOM, "clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"],
+                [LABEL_FAVORITES, LABEL_CUSTOM, ...DEFAULT_MAVEN_LIFECYCLES],
                 { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }
             );
             if (!selectedCommand) {

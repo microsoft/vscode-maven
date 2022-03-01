@@ -42,6 +42,7 @@
     "onCommand:maven.goal.validate",
     "onCommand:maven.goal.compile",
     "onCommand:maven.goal.test",
+    "onCommand:maven.goal.test-compile",
     "onCommand:maven.goal.package",
     "onCommand:maven.goal.verify",
     "onCommand:maven.goal.install",
@@ -90,6 +91,11 @@
       {
         "command": "maven.goal.test",
         "title": "test",
+        "category": "Maven"
+      },
+      {
+        "command": "maven.goal.test-compile",
+        "title": "test-compile",
         "category": "Maven"
       },
       {
@@ -260,6 +266,10 @@
         },
         {
           "command": "maven.goal.test",
+          "when": "never"
+        },
+        {
+          "command": "maven.goal.test-compile",
           "when": "never"
         },
         {
@@ -435,6 +445,11 @@
           "command": "maven.goal.test",
           "when": "view == mavenProjects && viewItem == maven:project",
           "group": "1-lifecycle@70"
+        },
+        {
+          "command": "maven.goal.test-compile",
+          "when": "view == mavenProjects && viewItem == maven:project",
+          "group": "1-lifecycle@75"
         },
         {
           "command": "maven.goal.site",
