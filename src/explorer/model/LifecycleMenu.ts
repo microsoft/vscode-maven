@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
+import { DEFAULT_MAVEN_LIFECYCLES } from "../../completion/constants";
 import { ITreeItem } from "./ITreeItem";
 import { LifecyclePhase } from "./LifecyclePhase";
 import { MavenProject } from "./MavenProject";
@@ -14,7 +15,7 @@ export class LifecycleMenu extends Menu implements ITreeItem {
     }
 
     public async getChildren() : Promise<LifecyclePhase[]> {
-        return ["clean", "validate", "compile", "test", "test-compile", "package", "verify", "install", "site", "deploy"].map(goal => new LifecyclePhase(this.project, goal));
+        return DEFAULT_MAVEN_LIFECYCLES.map(goal => new LifecyclePhase(this.project, goal));
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {

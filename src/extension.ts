@@ -12,6 +12,7 @@ import { IProjectCreationMetadata } from "./archetype/createProject/types";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { completionProvider } from "./completion/completionProvider";
+import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
 import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { diagnosticProvider } from "./DiagnosticProvider";
@@ -73,7 +74,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // register output, terminal, taskExecutor
     context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
     // register common goals
-    ["clean", "validate", "compile", "test", "package", "verify", "install", "site", "deploy"].forEach((goal: string) => {
+    DEFAULT_MAVEN_LIFECYCLES.forEach((goal: string) => {
         registerCommandRequiringTrust(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
     });
     registerCommand(context, "maven.explorer.refresh", refreshExplorerHandler);
