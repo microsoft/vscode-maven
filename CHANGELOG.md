@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.35.1
+
+### Added
+- Add shortcut for `test-compile` lifecycle. [#798](https://github.com/microsoft/vscode-maven/pull/798)
+- Add tooltip showing path of POM file. [#799](https://github.com/microsoft/vscode-maven/pull/799)
+
+### Fixed
+- Fix completion of version. [#796](https://github.com/microsoft/vscode-maven/pull/796)
+
 ## 0.35.0
 
 ### Added
