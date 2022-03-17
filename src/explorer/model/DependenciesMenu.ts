@@ -54,8 +54,7 @@ export class DependenciesMenu extends Menu implements ITreeItem {
 
     private _savePom(): void {
         const pomUri: vscode.Uri = vscode.Uri.file(this.project.pomPath);
-        const textEditors: vscode.TextEditor[] = vscode.window.visibleTextEditors;
-        const textEditor: vscode.TextEditor | undefined = textEditors.find(editor =>
+        const textEditor: vscode.TextEditor | undefined = vscode.window.visibleTextEditors.find(editor =>
             editor.document.uri.toString() === pomUri.toString());
         if (textEditor !== undefined) {
             textEditor.document.save();
