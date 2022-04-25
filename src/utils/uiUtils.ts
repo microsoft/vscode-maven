@@ -103,7 +103,7 @@ export function registerCommandRequiringTrust(context: vscode.ExtensionContext, 
 }
 
 async function promptToManageWorkspaceTrust(): Promise<void> {
-    const COMMAND_MANAGE_TRUST = "workbench.action.manageTrust";
+    const COMMAND_MANAGE_TRUST = "workbench.trust.manage";
     const OPTION_MANAGE_TRUST = "Manage Workspace Trust";
     const information = "For security concern, this command requires your trust on current workspace before it can be executed.";
     const choiceForDetails: string | undefined = await window.showInformationMessage(information, OPTION_MANAGE_TRUST);
