@@ -186,13 +186,13 @@
         "command": "maven.view.flat",
         "title": "%contributes.commands.maven.view.flat%",
         "category": "Maven",
-        "icon": "$(list-tree)"
+        "icon": "$(list-flat)"
       },
       {
         "command": "maven.view.hierarchical",
         "title": "%contributes.commands.maven.view.hierarchical%",
         "category": "Maven",
-        "icon": "$(list-flat)"
+        "icon": "$(list-tree)"
       },
       {
         "command": "maven.project.addDependency",
