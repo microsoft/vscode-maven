@@ -75,7 +75,12 @@ class DiagnosticProvider {
     }
 
     public async findConflictRange(filePath: string, gid: string, aid: string): Promise<vscode.Range> {
-        const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(filePath), {preserveFocus: true});
+        const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(filePath);
+        if (project === undefined) {
+            throw new Error("Failed to get maven project.");
+        }
+
+        const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(filePath), { preserveFocus: true });
         const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
         if (projectNodes === undefined || projectNodes.length !== 1) {
             throw new UserError("Only support POM file with single <project> node.");
@@ -83,9 +88,9 @@ class DiagnosticProvider {
 
         const projectNode: ElementNode = projectNodes[0];
         const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
-        const dependencyNode =  dependenciesNode?.children?.find(node =>
-            node.children?.find(id => id.tag === XmlTagName.GroupId && id.text === gid) !== undefined &&
-            node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid) !== undefined
+        const dependencyNode = dependenciesNode?.children?.find(node =>
+            node.children?.find(id => id.tag === XmlTagName.GroupId && project.fillProperties(id.text) === gid) !== undefined &&
+            node.children?.find(id => id.tag === XmlTagName.ArtifactId && project.fillProperties(id.text) === aid) !== undefined
         );
         if (dependencyNode === undefined) {
             throw new UserError("Failed to find dependency.");
