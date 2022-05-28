@@ -89,8 +89,8 @@ class DiagnosticProvider {
         const projectNode: ElementNode = projectNodes[0];
         const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
         const dependencyNode = dependenciesNode?.children?.find(node =>
-            node.children?.find(id => id.tag === XmlTagName.GroupId && project.fillProperties(id.text) === gid) !== undefined &&
-            node.children?.find(id => id.tag === XmlTagName.ArtifactId && project.fillProperties(id.text) === aid) !== undefined
+            node.children?.find(id => id.tag === XmlTagName.GroupId && id.text && project.fillProperties(id.text) === gid) !== undefined &&
+            node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text && project.fillProperties(id.text) === aid) !== undefined
         );
         if (dependencyNode === undefined) {
             throw new UserError("Failed to find dependency.");
