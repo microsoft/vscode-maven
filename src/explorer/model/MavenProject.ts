@@ -228,7 +228,7 @@ export class MavenProject implements ITreeItem {
         }
     }
 
-    private fillProperties(rawName: string): string {
+    public fillProperties(rawName: string): string {
         const stringTemplatePattern: RegExp = /\$\{.*?\}/g;
         const matches: RegExpMatchArray | null = rawName.match(stringTemplatePattern);
         if (matches === null) {
