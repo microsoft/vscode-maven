@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.35.2
+### Fixed
+- Error "Failed to find dependency" when dependency conflict exists. [#815](https://github.com/microsoft/vscode-maven/issues/815)
+- Wrong icon of view-switching buttons. [#814](https://github.com/microsoft/vscode-maven/pull/814)
+
 ## 0.35.1
 
 ### Added
