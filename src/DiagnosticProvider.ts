@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+import { Element, isTag, isText, Node } from "domhandler";
 import * as _ from "lodash";
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
@@ -9,7 +10,7 @@ import { Dependency } from "./explorer/model/Dependency";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { Settings } from "./Settings";
 import { UserError } from "./utils/errorUtils";
-import { ElementNode, getNodesByTag, XmlTagName } from "./utils/lexerUtils";
+import { getNodesByTag, XmlTagName } from "./utils/lexerUtils";
 
 export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
 
@@ -81,27 +82,34 @@ class DiagnosticProvider {
         }
 
         const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(filePath), { preserveFocus: true });
-        const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
+        const projectNodes: Element[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
         if (projectNodes === undefined || projectNodes.length !== 1) {
             throw new UserError("Only support POM file with single <project> node.");
         }
 
-        const projectNode: ElementNode = projectNodes[0];
-        const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
+        const projectNode: Element = projectNodes[0];
+        const dependenciesNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.Dependencies) as Element | undefined;
         const dependencyNode = dependenciesNode?.children?.find(node =>
-            node.children?.find(id => id.tag === XmlTagName.GroupId && id.text && project.fillProperties(id.text) === gid) !== undefined &&
-            node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text && project.fillProperties(id.text) === aid) !== undefined
-        );
+            isTag(node) &&
+            node.tagName === XmlTagName.Dependency &&
+            node.children?.find(id =>
+                isTag(id) && id.tagName === XmlTagName.GroupId &&
+                id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === gid
+            ) &&
+            node.children?.find(id =>
+                isTag(id) && id.tagName === XmlTagName.ArtifactId &&
+                id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === aid
+            )
+        ) as Element | undefined;
         if (dependencyNode === undefined) {
             throw new UserError("Failed to find dependency.");
         }
 
-        const aidItem: ElementNode | undefined = dependencyNode.children?.find(node => node.tag === XmlTagName.ArtifactId);
-        if (aidItem === undefined || aidItem.contentStart === undefined || aidItem.contentEnd === undefined) {
-            throw new UserError("Failed to find dependency.");
-        }
         const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(filePath);
-        return new vscode.Range(currentDocument.positionAt(aidItem.contentStart), currentDocument.positionAt(aidItem.contentEnd));
+        return new vscode.Range(
+            currentDocument.positionAt(dependencyNode.startIndex!),
+            currentDocument.positionAt(dependencyNode.endIndex!)
+        );
     }
 }
 
