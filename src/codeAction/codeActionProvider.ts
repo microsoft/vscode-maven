@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { isTag } from "domhandler";
+import { Node, isTag } from "domhandler";
 import * as vscode from "vscode";
-import { ElementNode, getCurrentNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, XmlTagName } from "../utils/lexerUtils";
 
 class CodeActionProvider implements vscode.CodeActionProvider {
   public provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, _context: vscode.CodeActionContext, _token: vscode.CancellationToken): vscode.Command[] | undefined {
     const documentText: string = document.getText();
     const cursorOffset: number = document.offsetAt(range.start);
-    const currentNode: ElementNode | undefined = getCurrentNode(documentText, cursorOffset);
+    const currentNode: Node | undefined = getCurrentNode(documentText, cursorOffset);
     if (currentNode === undefined || currentNode.startIndex === null || currentNode.endIndex === null) {
       return undefined;
     }

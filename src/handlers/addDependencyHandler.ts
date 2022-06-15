@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import { Element, isTag, Node } from "domhandler";
 import * as fse from "fs-extra";
 import * as path from "path";
 import * as vscode from "vscode";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { constructDependenciesNode, constructDependencyNode, getIndentation } from "../utils/editUtils";
 import { UserError } from "../utils/errorUtils";
-import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
+import { getInnerEndIndex, getInnerStartIndex, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../utils/requestUtils";
 import { selectProjectIfNecessary } from "../utils/uiUtils";
 
@@ -70,13 +71,13 @@ export async function addDependencyHandler(options?: any): Promise<void> {
 async function addDependency(pomPath: string, gid: string, aid: string, version: string, dependencyType: string, classifier?: string): Promise<void> {
     // Find out <dependencies> node and insert content.
     const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), { preserveFocus: true });
-    const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
+    const projectNodes: Element[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
 
-    const projectNode: ElementNode = projectNodes[0];
-    const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
+    const projectNode: Element = projectNodes[0];
+    const dependenciesNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.Dependencies) as Element | undefined;
     if (dependenciesNode !== undefined) {
         await insertDependency(pomPath, dependenciesNode, gid, aid, version, dependencyType, classifier);
     } else {
@@ -85,23 +86,20 @@ async function addDependency(pomPath: string, gid: string, aid: string, version:
     }
 }
 
-async function insertDependency(pomPath: string, targetNode: ElementNode, gid: string, aid: string, version: string, dependencyType: string, classifier?: string): Promise<void> {
-    if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined) {
-        throw new UserError("Invalid target XML node to insert dependency.");
-    }
+async function insertDependency(pomPath: string, targetNode: Element, gid: string, aid: string, version: string, dependencyType: string, classifier?: string): Promise<void> {
     const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
     const textEditor: vscode.TextEditor = await vscode.window.showTextDocument(currentDocument);
-    const baseIndent: string = getIndentation(currentDocument, targetNode.contentEnd);
+    const baseIndent: string = getIndentation(currentDocument, getInnerEndIndex(targetNode));
     const options: vscode.TextEditorOptions = textEditor.options;
     const indent: string = options.insertSpaces && typeof options.tabSize === "number" ? " ".repeat(options.tabSize) : "\t";
     const eol: string = currentDocument.eol === vscode.EndOfLine.LF ? "\n" : "\r\n";
     let insertPosition: vscode.Position;
     let targetText: string;
-    if (targetNode.tag === XmlTagName.Dependencies) {
-        insertPosition = currentDocument.positionAt(targetNode.contentStart);
+    if (targetNode.tagName === XmlTagName.Dependencies) {
+        insertPosition = currentDocument.positionAt(getInnerStartIndex(targetNode));
         targetText = constructDependencyNode({ gid, aid, version, dtype: dependencyType, classifier, baseIndent, indent, eol });
-    } else if (targetNode.tag === XmlTagName.Project) {
-        insertPosition = currentDocument.positionAt(targetNode.contentEnd);
+    } else if (targetNode.tagName === XmlTagName.Project) {
+        insertPosition = currentDocument.positionAt(getInnerEndIndex(targetNode));
         targetText = constructDependenciesNode({ gid, aid, version, dtype: dependencyType, classifier, baseIndent, indent, eol });
     } else {
         return;

@@ -7,11 +7,11 @@ import * as vscode from "vscode";
 
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
-import { ElementNode, getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 
 class HoverProvider implements vscode.HoverProvider {
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
-        const currentNode: ElementNode | undefined = getCurrentNode(document.getText(), document.offsetAt(position));
+        const currentNode: Node | undefined = getCurrentNode(document.getText(), document.offsetAt(position));
         if (currentNode === undefined || currentNode.startIndex === null || currentNode.endIndex === null) {
             return undefined;
         }

@@ -43,6 +43,13 @@ export function getTextFromNode(node: Node | undefined | null, fallbackValue: st
     return node && isText(node) ? node.data : fallbackValue;
 }
 
+export function getInnerStartIndex(node: Element) {
+    return node.startIndex! + node.tagName.length + "<>".length;
+}
+
+export function getInnerEndIndex(node: Element) {
+    return node.endIndex! - node.tagName.length - "</>".length + 1;
+}
 function dfs(node: Node, pred: (arg: Node) => boolean, result: Node[], includeAll?: boolean) {
     if (pred(node)) {
         result.push(node);
