@@ -41,7 +41,7 @@ async function excludeDependency(pomPath: string, gid: string, aid: string, root
     }
 
     const projectNode: Element = projectNodes[0];
-        const dependenciesNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.Dependencies) as Element | undefined;
+    const dependenciesNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.Dependencies) as Element | undefined;
     const dependencyNode = dependenciesNode?.children?.find(node =>
         isTag(node) &&
         node.tagName === XmlTagName.Dependency &&
