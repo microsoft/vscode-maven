@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { Element, isTag, isText, Node } from "domhandler";
+import { Element, isTag, isText } from "domhandler";
 import * as fse from "fs-extra";
 import * as vscode from "vscode";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";

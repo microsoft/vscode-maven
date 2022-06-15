@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import { Element, isTag, isText, Node } from "domhandler";
-import * as _ from "lodash";
+import { Element, isTag, isText } from "domhandler";
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { getRequestDelay, lruCache, MovingAverage } from "./debouncing";

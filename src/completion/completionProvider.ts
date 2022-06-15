@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { Element, isTag, isText, Node } from "domhandler";
+import { Element, isTag, Node } from "domhandler";
 import * as _ from "lodash";
 import * as vscode from "vscode";
 import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";

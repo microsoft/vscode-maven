@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import { Element, isTag, isText } from "domhandler";
 import * as fse from "fs-extra";
 import * as semver from "semver";
 import * as vscode from "vscode";
@@ -9,7 +10,7 @@ import { Dependency } from "../explorer/model/Dependency";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { constructDependenciesNode, constructDependencyManagementNode, constructDependencyNode, getIndentation } from "../utils/editUtils";
 import { UserError } from "../utils/errorUtils";
-import { ElementNode, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
+import { getInnerEndIndex, getInnerStartIndex, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
 import { getVersions } from "../utils/requestUtils";
 
 export async function setDependencyVersionHandler(selectedItem?: any): Promise<void> {
@@ -64,20 +65,33 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
 }
 
 async function setDependencyVersion(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
+    const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
+    if (project === undefined) {
+        throw new Error("Failed to get maven project.");
+    }
+
     const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), { preserveFocus: true });
-    const projectNodes: ElementNode[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
+    const projectNodes: Element[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
     if (projectNodes === undefined || projectNodes.length !== 1) {
         throw new UserError("Only support POM file with single <project> node.");
     }
 
-    const projectNode: ElementNode = projectNodes[0];
-    const dependenciesNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.Dependencies);
-    const dependencyManagementNode: ElementNode | undefined = projectNode.children?.find(node => node.tag === XmlTagName.DependencyManagement);
+    const projectNode: Element = projectNodes[0];
+    const dependenciesNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.Dependencies) as Element | undefined;
+    const dependencyManagementNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.DependencyManagement) as Element | undefined;
     // find ${gid:aid} dependency node in <dependencies> to delete
-    const deleteNode: ElementNode | undefined = dependenciesNode?.children?.find(node =>
-        node.children?.find(id => id.tag === XmlTagName.GroupId && id.text === gid) !== undefined &&
-        node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid) !== undefined
-    );
+    const deleteNode = dependenciesNode?.children?.find(node =>
+        isTag(node) &&
+        node.tagName === XmlTagName.Dependency &&
+        node.children?.find(id =>
+            isTag(id) && id.tagName === XmlTagName.GroupId &&
+            id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === gid
+        ) &&
+        node.children?.find(id =>
+            isTag(id) && id.tagName === XmlTagName.ArtifactId &&
+            id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === aid
+        )
+    ) as Element | undefined;
 
     if (dependencyManagementNode !== undefined) {
         await insertDependencyManagement(pomPath, dependencyManagementNode, deleteNode, gid, aid, version);
@@ -86,39 +100,46 @@ async function setDependencyVersion(pomPath: string, gid: string, aid: string, v
     }
 }
 
-async function insertDependencyManagement(pomPath: string, targetNode: ElementNode, deleteNode: ElementNode | undefined, gid: string, aid: string, version: string): Promise<void> {
-    if (targetNode.contentStart === undefined || targetNode.contentEnd === undefined) {
+async function insertDependencyManagement(pomPath: string, targetNode: Element, deleteNode: Element | undefined, gid: string, aid: string, version: string): Promise<void> {
+    if (targetNode === undefined) {
         throw new UserError("Invalid target XML node to insert dependency management.");
     }
     const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
     const textEditor: vscode.TextEditor = await vscode.window.showTextDocument(currentDocument);
-    const baseIndent: string = getIndentation(currentDocument, targetNode.contentEnd);
+    const baseIndent: string = getIndentation(currentDocument, getInnerEndIndex(targetNode));
     const options: vscode.TextEditorOptions = textEditor.options;
     const indent: string = options.insertSpaces && typeof options.tabSize === "number" ? " ".repeat(options.tabSize) : "\t";
     const eol: string = currentDocument.eol === vscode.EndOfLine.LF ? "\n" : "\r\n";
 
     let insertPosition: vscode.Position | undefined;
     let targetText: string;
-    let dependencyNodeInManagement: ElementNode | undefined;
-    const dependenciesNode: ElementNode | undefined = targetNode?.children?.find(node => node.tag === XmlTagName.Dependencies);
+    let dependencyNodeInManagement: Element | undefined;
 
-    if (targetNode.tag === XmlTagName.DependencyManagement && dependenciesNode !== undefined) {
-        if (dependenciesNode.contentStart === undefined || dependenciesNode.contentEnd === undefined) {
-            throw new UserError("Invalid target XML node to insert dependency management.");
+    if (targetNode.tagName === XmlTagName.DependencyManagement) {
+        const dependenciesNode: Element | undefined = targetNode?.children?.find(node => isTag(node) && node.tagName === XmlTagName.Dependencies) as Element | undefined;
+        if (dependenciesNode) {
+            insertPosition = currentDocument.positionAt(getInnerStartIndex(dependenciesNode));
+            // find ${gid:aid} dependency node that already in dependency management to delete
+            dependencyNodeInManagement = dependenciesNode?.children?.find(node =>
+                isTag(node) &&
+                node.tagName === XmlTagName.Dependency &&
+                node.children?.find(id =>
+                    isTag(id) && id.tagName === XmlTagName.GroupId &&
+                    id.firstChild && isText(id.firstChild) && id.firstChild.data === gid
+                ) &&
+                node.children?.find(id =>
+                    isTag(id) && id.tagName === XmlTagName.ArtifactId &&
+                    id.firstChild && isText(id.firstChild) && id.firstChild.data === aid
+                )
+            ) as Element | undefined;
+            const newIndent: string = `${baseIndent}${indent}`;
+            targetText = constructDependencyNode({ gid, aid, version, baseIndent: newIndent, indent, eol });
+        } else {
+            insertPosition = currentDocument.positionAt(getInnerStartIndex(targetNode));
+            targetText = constructDependenciesNode({ gid, aid, version, baseIndent, indent, eol });
         }
-        insertPosition = currentDocument.positionAt(dependenciesNode.contentStart);
-        // find ${gid:aid} dependency node that already in dependency management to delete
-        dependencyNodeInManagement = dependenciesNode.children?.find(node =>
-            node.children?.find(id => id.tag === XmlTagName.GroupId && id.text === gid) &&
-            node.children?.find(id => id.tag === XmlTagName.ArtifactId && id.text === aid)
-        );
-        const newIndent: string = `${baseIndent}${indent}`;
-        targetText = constructDependencyNode({ gid, aid, version, baseIndent: newIndent, indent, eol });
-    } else if (targetNode.tag === XmlTagName.DependencyManagement && dependenciesNode === undefined) {
-        insertPosition = currentDocument.positionAt(targetNode.contentStart);
-        targetText = constructDependenciesNode({ gid, aid, version, baseIndent, indent, eol });
-    } else if (targetNode.tag === XmlTagName.Project) {
-        insertPosition = currentDocument.positionAt(targetNode.contentEnd);
+    } else if (targetNode.tagName === XmlTagName.Project) {
+        insertPosition = currentDocument.positionAt(getInnerEndIndex(targetNode));
         targetText = constructDependencyManagementNode({ gid, aid, version, baseIndent, indent, eol });
     } else {
         return;
@@ -126,25 +147,17 @@ async function insertDependencyManagement(pomPath: string, targetNode: ElementNo
 
     const edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
     if (deleteNode) { // the version of ${gid:aid} dependency node already imported should be deleted
-        const versionItem: ElementNode | undefined = deleteNode.children?.find(node => node.tag === XmlTagName.Version);
-        if (versionItem) {
-            if (versionItem.contentStart === undefined || versionItem.contentEnd === undefined) {
-                throw new UserError("Invalid target XML node to delete.");
-            }
-            const versionString: string = "<version>";
-            const start: number = versionItem.contentStart - versionString.length;
-            const end: number = versionItem.contentEnd + versionString.length + 1;
+        const versionNode: Element | undefined = deleteNode.children?.find(node => isTag(node) && node.tagName === XmlTagName.Version) as Element | undefined;
+        if (versionNode) {
+            const start: number = versionNode.startIndex!;
+            const end: number = versionNode.endIndex! + 1;
             const range = new vscode.Range(currentDocument.positionAt(start), currentDocument.positionAt(end));
             edit.delete(currentDocument.uri, range);
         }
     }
     if (dependencyNodeInManagement) { // ${gid:aid} dependency node that already exists in <dependencyManagement> shoule be deleted
-        if (dependencyNodeInManagement.contentStart === undefined || dependencyNodeInManagement.contentEnd === undefined) {
-            throw new UserError("Invalid target XML node to delete.");
-        }
-        const dependencyString: string = "<dependency>";
-        const start = dependencyNodeInManagement.contentStart - dependencyString.length;
-        const end = dependencyNodeInManagement.contentEnd + dependencyString.length + 1;
+        const start: number = dependencyNodeInManagement.startIndex!;
+        const end: number = dependencyNodeInManagement.endIndex! + 1;
         const range = new vscode.Range(currentDocument.positionAt(start), currentDocument.positionAt(end));
         edit.delete(currentDocument.uri, range);
     }
