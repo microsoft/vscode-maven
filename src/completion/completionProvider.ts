@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import { Element, isTag, isText, Node } from "domhandler";
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { ElementNode, getCurrentNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, XmlTagName } from "../utils/lexerUtils";
 import { centralProvider } from "./centralProvider";
 import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
 import { indexProvider } from "./indexProvider";
@@ -33,45 +34,66 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
         const documentText: string = document.getText();
         const cursorOffset: number = document.offsetAt(position);
-        const currentNode: ElementNode | undefined = getCurrentNode(documentText, cursorOffset);
-        if (currentNode === undefined || currentNode.contentStart === undefined) {
+        const currentNode: Node | undefined = getCurrentNode(documentText, cursorOffset);
+        if (currentNode === undefined || currentNode.startIndex === null || !isTag(currentNode)) {
             return undefined;
         }
 
-        const targetRange: vscode.Range = new vscode.Range(document.positionAt(currentNode.contentStart), currentNode.contentEnd ? document.positionAt(currentNode.contentEnd) : position);
-        switch (currentNode.tag) {
+        switch (currentNode.tagName) {
             case XmlTagName.GroupId: {
-                const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
-                const artifactIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
-                const groupIdHint: string = currentNode.text ? currentNode.text : "";
-                const artifactIdHint: string = artifactIdNode && artifactIdNode.text ? artifactIdNode.text : "";
+                const groupIdTextNode = currentNode.firstChild;
+                const targetRange: vscode.Range = new vscode.Range(
+                    groupIdTextNode?.startIndex ? document.positionAt(groupIdTextNode.startIndex) : position,
+                    groupIdTextNode?.endIndex ? document.positionAt(groupIdTextNode.endIndex) : position
+                );
+
+                const siblingNodes: Node[] = currentNode.parent?.children ?? [];
+                const artifactIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.ArtifactId) as Element | undefined;
+                const artifactIdTextNode = artifactIdNode?.firstChild;
+
+                const groupIdHint: string = getTextFromNode(groupIdTextNode);
+                const artifactIdHint: string = getTextFromNode(artifactIdTextNode);
+
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
                 const indexItems: vscode.CompletionItem[] = await indexProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
-                const mergedItems: vscode.CompletionItem[] = this.deDuplicate(centralItems, indexItems, localItems, (item) => item.insertText);
+                const mergedItems: vscode.CompletionItem[] = _.unionBy(centralItems, indexItems, localItems, (item) => item.insertText);
                 mergedItems.forEach(item => item.range = targetRange);
 
                 return new vscode.CompletionList(mergedItems, _.isEmpty(centralItems));
             }
             case XmlTagName.ArtifactId: {
-                const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
-                const groupIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
-                const groupIdHint: string = groupIdNode && groupIdNode.text ? groupIdNode.text : "";
-                const artifactIdHint: string = currentNode.text ? currentNode.text : "";
+                const artifactIdTextNode = currentNode.firstChild;
+                const targetRange: vscode.Range = new vscode.Range(
+                    artifactIdTextNode?.startIndex ? document.positionAt(artifactIdTextNode.startIndex) : position,
+                    artifactIdTextNode?.endIndex ? document.positionAt(artifactIdTextNode.endIndex) : position
+                );
+
+                const siblingNodes: Node[] = currentNode.parent?.children ?? [];
+                const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;
+                const groupIdTextNode = groupIdNode?.firstChild;
+
+                const groupIdHint: string = getTextFromNode(groupIdTextNode);
+                const artifactIdHint: string = getTextFromNode(artifactIdTextNode);
 
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 const indexItems: vscode.CompletionItem[] = await indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
                 let mergedItems: vscode.CompletionItem[] = [];
+
                 const ID_SEPARATOR: string = ":";
-                // tslint:disable-next-line: restrict-plus-operands
-                mergedItems = this.deDuplicate(centralItems, indexItems, localItems, (item) => _.get(item, "data.groupId") + ID_SEPARATOR + item.insertText);
-                mergedItems = this.reserveGidMatch(mergedItems, groupIdHint);
-                if (groupIdNode && groupIdNode.contentStart !== undefined && groupIdNode.contentEnd !== undefined) {
+                mergedItems = _.unionBy(centralItems, indexItems, localItems, (item) => _.get(item, "data.groupId") + ID_SEPARATOR + item.insertText);
+                mergedItems = dedupItemsWithGroupId(mergedItems, groupIdHint);
+
+                // also update corresponding groupId node
+                if (groupIdTextNode && groupIdTextNode.startIndex !== null && groupIdTextNode.endIndex !== null) {
                     for (const item of mergedItems) {
                         const matchedGroupId: string = _.get(item, "data.groupId");
                         if (matchedGroupId) {
-                            const groupIdRange: vscode.Range = new vscode.Range(document.positionAt(groupIdNode.contentStart), document.positionAt(groupIdNode.contentEnd));
+                            const groupIdRange: vscode.Range = new vscode.Range(
+                                document.positionAt(groupIdTextNode.startIndex),
+                                document.positionAt(groupIdTextNode.endIndex)
+                            );
                             item.additionalTextEdits = [new vscode.TextEdit(groupIdRange, matchedGroupId)];
                         }
                     }
@@ -80,11 +102,18 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 return new vscode.CompletionList(mergedItems, _.isEmpty(centralItems));
             }
             case XmlTagName.Version: {
-                const siblingNodes: ElementNode[] = _.get(currentNode, "parent.children", []);
-                const groupIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.GroupId);
-                const artifactIdNode: ElementNode | undefined = siblingNodes.find(elem => elem.tag === XmlTagName.ArtifactId);
-                const groupIdHint: string | undefined = groupIdNode?.text || DEFAULT_GROUP_ID;
-                const artifactIdHint: string | undefined = artifactIdNode?.text;
+                const versionTextNode = currentNode.firstChild;
+                const targetRange: vscode.Range = new vscode.Range(
+                    versionTextNode?.startIndex ? document.positionAt(versionTextNode.startIndex) : position,
+                    versionTextNode?.endIndex ? document.positionAt(versionTextNode.endIndex) : position
+                );
+
+                const siblingNodes: Node[] = currentNode.parent?.children ?? [];
+                const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;
+                const artifactIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.ArtifactId) as Element | undefined;
+
+                const groupIdHint: string = getTextFromNode(groupIdNode?.firstChild, DEFAULT_GROUP_ID);
+                const artifactIdHint: string = getTextFromNode(artifactIdNode?.firstChild);
                 if (!groupIdHint || !artifactIdHint) {
                     return [];
                 }
@@ -92,7 +121,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 const centralItems: vscode.CompletionItem[] = await centralProvider.getVersionCandidates(groupIdHint, artifactIdHint);
                 const indexItems: vscode.CompletionItem[] = await indexProvider.getVersionCandidates(groupIdHint, artifactIdHint);
                 const localItems: vscode.CompletionItem[] = await localProvider.getVersionCandidates(groupIdHint, artifactIdHint);
-                const mergedItems: vscode.CompletionItem[] = this.deDuplicate(centralItems, indexItems, localItems, (item) => item.insertText);
+                const mergedItems: vscode.CompletionItem[] = _.unionBy(centralItems, indexItems, localItems, (item) => item.insertText);
                 mergedItems.forEach(item => item.range = targetRange);
                 return new vscode.CompletionList(mergedItems, false);
             }
@@ -124,25 +153,13 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 return undefined;
         }
     }
+}
 
-    private deDuplicate(first: vscode.CompletionItem[], second: vscode.CompletionItem[], third: vscode.CompletionItem[],
-                        valueIteratee: (value: vscode.CompletionItem) => string|vscode.SnippetString|undefined): vscode.CompletionItem[] {
-        return _.unionBy(first, second, third, valueIteratee);
-    }
-
-    private reserveGidMatch(items: vscode.CompletionItem[], groupIdHint: string): vscode.CompletionItem[] {
-        const reservedItems: vscode.CompletionItem[] = items.filter(item => {
-            return _.get(item, "data.groupId") === groupIdHint;
-        });
-        const reservedArtifactId: (string|vscode.SnippetString|undefined)[] = reservedItems.map((item) => {
-            return item.insertText;
-        });
-        items = items.filter((item) => {
-            return reservedArtifactId.indexOf(item.insertText) === -1;
-        });
-        items = items.concat(reservedItems);
-        return items;
-    }
+function dedupItemsWithGroupId(items: vscode.CompletionItem[], groupId: string): vscode.CompletionItem[] {
+    const itemsWithGivenGroupId: vscode.CompletionItem[] = items.filter(item => _.get(item, "data.groupId") === groupId);
+    const reservedArtifactIds: (string|vscode.SnippetString|undefined)[] = itemsWithGivenGroupId.map(item => item.insertText);
+    const dedupedItems = items.filter((item) => !reservedArtifactIds.includes(item.insertText));
+    return itemsWithGivenGroupId.concat(dedupedItems);
 }
 
 function trimBrackets(snippetContent: string, fileContent: string, offset: number): string {
@@ -159,6 +176,10 @@ function trimBrackets(snippetContent: string, fileContent: string, offset: numbe
         ret = ret.slice(0, ret.length - 1);
     }
     return ret;
+}
+
+function getTextFromNode(node: Node | undefined | null, fallbackValue: string = "") {
+    return node && isText(node) ? node.data : fallbackValue;
 }
 
 export const completionProvider: CompletionProvider = new CompletionProvider();
