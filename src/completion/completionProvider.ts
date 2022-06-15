@@ -4,7 +4,7 @@
 import { Element, isTag, isText, Node } from "domhandler";
 import * as _ from "lodash";
 import * as vscode from "vscode";
-import { getCurrentNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 import { centralProvider } from "./centralProvider";
 import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
 import { indexProvider } from "./indexProvider";
@@ -176,10 +176,6 @@ function trimBrackets(snippetContent: string, fileContent: string, offset: numbe
         ret = ret.slice(0, ret.length - 1);
     }
     return ret;
-}
-
-function getTextFromNode(node: Node | undefined | null, fallbackValue: string = "") {
-    return node && isText(node) ? node.data : fallbackValue;
 }
 
 export const completionProvider: CompletionProvider = new CompletionProvider();

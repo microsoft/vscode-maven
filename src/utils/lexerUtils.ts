@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import { Document, isTag, Node, NodeWithChildren, Element } from "domhandler";
+import { Document, isTag, Node, NodeWithChildren, Element, isText } from "domhandler";
 import * as hp from "htmlparser2";
 
 export type ElementNode = Node;
@@ -37,6 +37,10 @@ export function getCurrentNode(text: string, offset: number): Node | undefined {
     const ret: Node[] = [];
     dfs(document, (node) => node.startIndex !== null && node.startIndex <= offset && node.endIndex !== null && offset < node.endIndex, ret, true);
     return ret?.[ret.length - 1];
+}
+
+export function getTextFromNode(node: Node | undefined | null, fallbackValue: string = "") {
+    return node && isText(node) ? node.data : fallbackValue;
 }
 
 function dfs(node: Node, pred: (arg: Node) => boolean, result: Node[], includeAll?: boolean) {
