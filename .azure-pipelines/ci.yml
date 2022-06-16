@@ -7,6 +7,12 @@ jobs:
     pool:
       vmImage: 'windows-latest'
     steps:
+    - task: JavaToolInstaller@0
+      displayName: 'Use Java 17'
+      inputs:
+        versionSpec: 17
+        jdkArchitectureOption: x64
+        jdkSourceOption: PreInstalled
     - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
       displayName: 'Run CredScan'
       inputs:
