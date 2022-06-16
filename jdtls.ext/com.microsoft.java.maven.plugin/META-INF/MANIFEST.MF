@@ -4,7 +4,7 @@ Bundle-Name: com.microsoft.java.maven
 Bundle-SymbolicName: com.microsoft.java.maven.plugin;singleton:=true
 Bundle-Version: 0.27.1
 Bundle-Activator: com.microsoft.java.maven.PluginActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: org.eclipse.jdt.core,
  org.eclipse.jdt.launching,
  org.osgi.framework;version="1.3.0"
