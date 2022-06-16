@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 import { Dependency } from "../explorer/model/Dependency";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { IOmittedStatus } from "../explorer/model/OmittedStatus";
-import { getDependencyTree } from "../handlers/showDependenciesHandler";
+import { getDependencyTree } from "./dependency/showDependenciesHandler";
 
 const DUPLICATE_INDICATOR: string = "omitted for duplicate";
 const CONFLICT_INDICATOR: string = "omitted for conflict";

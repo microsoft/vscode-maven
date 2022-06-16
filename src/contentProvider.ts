@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { IEffectivePom } from "./explorer/model/IEffectivePom";
 import { MavenProject } from "./explorer/model/MavenProject";
-import { getDependencyTree } from "./handlers/showDependenciesHandler";
+import { getDependencyTree } from "./handlers/dependency/showDependenciesHandler";
 import { Utils } from "./utils/Utils";
 
 /**
