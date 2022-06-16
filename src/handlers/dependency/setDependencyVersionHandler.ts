@@ -5,13 +5,14 @@ import { Element, isTag, isText } from "domhandler";
 import * as fse from "fs-extra";
 import * as semver from "semver";
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
-import { Dependency } from "../explorer/model/Dependency";
-import { MavenProject } from "../explorer/model/MavenProject";
-import { constructDependenciesNode, constructDependencyManagementNode, constructDependencyNode, getIndentation } from "../utils/editUtils";
-import { UserError } from "../utils/errorUtils";
-import { getInnerEndIndex, getInnerStartIndex, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
-import { getVersions } from "../utils/requestUtils";
+import { mavenExplorerProvider } from "../../explorer/mavenExplorerProvider";
+import { Dependency } from "../../explorer/model/Dependency";
+import { MavenProject } from "../../explorer/model/MavenProject";
+import { constructDependenciesNode, constructDependencyManagementNode, constructDependencyNode, getIndentation } from "../../utils/editUtils";
+import { UserError } from "../../utils/errorUtils";
+import { getInnerEndIndex, getInnerStartIndex, getNodesByTag, XmlTagName } from "../../utils/lexerUtils";
+import { getVersions } from "../../utils/requestUtils";
+import { getDependencyNodeFromDependenciesNode } from "./utils";
 
 export async function setDependencyVersionHandler(selectedItem?: any): Promise<void> {
     let pomPath: string;
@@ -80,19 +81,7 @@ async function setDependencyVersion(pomPath: string, gid: string, aid: string, v
     const dependenciesNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.Dependencies) as Element | undefined;
     const dependencyManagementNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.DependencyManagement) as Element | undefined;
     // find ${gid:aid} dependency node in <dependencies> to delete
-    const deleteNode = dependenciesNode?.children?.find(node =>
-        isTag(node) &&
-        node.tagName === XmlTagName.Dependency &&
-        node.children?.find(id =>
-            isTag(id) && id.tagName === XmlTagName.GroupId &&
-            id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === gid
-        ) &&
-        node.children?.find(id =>
-            isTag(id) && id.tagName === XmlTagName.ArtifactId &&
-            id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === aid
-        )
-    ) as Element | undefined;
-
+    const deleteNode = getDependencyNodeFromDependenciesNode(dependenciesNode, gid, aid, project);
     if (dependencyManagementNode !== undefined) {
         await insertDependencyManagement(pomPath, dependencyManagementNode, deleteNode, gid, aid, version);
     } else {

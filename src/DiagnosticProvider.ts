@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-import { Element, isTag, isText } from "domhandler";
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { getRequestDelay, lruCache, MovingAverage } from "./debouncing";
 import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { Dependency } from "./explorer/model/Dependency";
 import { MavenProject } from "./explorer/model/MavenProject";
+import { getDependencyNode } from "./handlers/dependency/utils";
 import { Settings } from "./Settings";
 import { UserError } from "./utils/errorUtils";
-import { getNodesByTag, XmlTagName } from "./utils/lexerUtils";
 
 export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
 
@@ -74,37 +73,13 @@ class DiagnosticProvider {
         return diagnostic;
     }
 
-    public async findConflictRange(filePath: string, gid: string, aid: string): Promise<vscode.Range> {
-        const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(filePath);
-        if (project === undefined) {
-            throw new Error("Failed to get maven project.");
-        }
-
-        const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(filePath), { preserveFocus: true });
-        const projectNodes: Element[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
-        if (projectNodes === undefined || projectNodes.length !== 1) {
-            throw new UserError("Only support POM file with single <project> node.");
-        }
-
-        const projectNode: Element = projectNodes[0];
-        const dependenciesNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.Dependencies) as Element | undefined;
-        const dependencyNode = dependenciesNode?.children?.find(node =>
-            isTag(node) &&
-            node.tagName === XmlTagName.Dependency &&
-            node.children?.find(id =>
-                isTag(id) && id.tagName === XmlTagName.GroupId &&
-                id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === gid
-            ) &&
-            node.children?.find(id =>
-                isTag(id) && id.tagName === XmlTagName.ArtifactId &&
-                id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === aid
-            )
-        ) as Element | undefined;
+    public async findConflictRange(pomPath: string, gid: string, aid: string): Promise<vscode.Range> {
+        const dependencyNode = await getDependencyNode(pomPath, gid, aid);
         if (dependencyNode === undefined) {
             throw new UserError("Failed to find dependency.");
         }
 
-        const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(filePath);
+        const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
         return new vscode.Range(
             currentDocument.positionAt(dependencyNode.startIndex!),
             currentDocument.positionAt(dependencyNode.endIndex!)

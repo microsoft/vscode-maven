@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { Element, isTag, isText } from "domhandler";
+import { Element, isTag } from "domhandler";
 import * as fse from "fs-extra";
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
-import { Dependency } from "../explorer/model/Dependency";
-import { MavenProject } from "../explorer/model/MavenProject";
-import { getIndentation } from "../utils/editUtils";
-import { UserError } from "../utils/errorUtils";
-import { getInnerEndIndex, getInnerStartIndex, getNodesByTag, XmlTagName } from "../utils/lexerUtils";
+import { Dependency } from "../../explorer/model/Dependency";
+import { getIndentation } from "../../utils/editUtils";
+import { UserError } from "../../utils/errorUtils";
+import { getInnerEndIndex, getInnerStartIndex, XmlTagName } from "../../utils/lexerUtils";
+import { getDependencyNode } from "./utils";
 
 export async function excludeDependencyHandler(toExclude?: Dependency): Promise<void> {
     if (toExclude === undefined) {
@@ -29,31 +28,7 @@ export async function excludeDependencyHandler(toExclude?: Dependency): Promise<
 
 async function excludeDependency(pomPath: string, gid: string, aid: string, rootGid: string, rootAid: string): Promise<void> {
     // find out <dependencies> node with artifactId === rootAid and insert <exclusions> node
-    const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
-    if (project === undefined) {
-        throw new Error("Failed to get maven project.");
-    }
-
-    const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), {preserveFocus: true});
-    const projectNodes: Element[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
-    if (projectNodes === undefined || projectNodes.length !== 1) {
-        throw new UserError("Only support POM file with single <project> node.");
-    }
-
-    const projectNode: Element = projectNodes[0];
-    const dependenciesNode: Element | undefined = projectNode.children.find(elem => isTag(elem) && elem.tagName === XmlTagName.Dependencies) as Element | undefined;
-    const dependencyNode = dependenciesNode?.children?.find(node =>
-        isTag(node) &&
-        node.tagName === XmlTagName.Dependency &&
-        node.children?.find(id =>
-            isTag(id) && id.tagName === XmlTagName.GroupId &&
-            id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === rootGid
-        ) &&
-        node.children?.find(id =>
-            isTag(id) && id.tagName === XmlTagName.ArtifactId &&
-            id.firstChild && isText(id.firstChild) && project.fillProperties(id.firstChild.data) === rootAid
-        )
-    ) as Element | undefined;
+    const dependencyNode = await getDependencyNode(pomPath, rootGid, rootAid);
     if (dependencyNode === undefined) {
         throw new Error(`Failed to find the dependency where ${gid}:${aid} is introduced.`);
     } else {

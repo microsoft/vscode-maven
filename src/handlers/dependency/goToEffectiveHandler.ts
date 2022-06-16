@@ -2,11 +2,11 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
-import { Dependency } from "../explorer/model/Dependency";
-import { ITreeItem } from "../explorer/model/ITreeItem";
-import { MavenProject } from "../explorer/model/MavenProject";
-import { Queue } from "../taskExecutor";
+import { mavenExplorerProvider } from "../../explorer/mavenExplorerProvider";
+import { Dependency } from "../../explorer/model/Dependency";
+import { ITreeItem } from "../../explorer/model/ITreeItem";
+import { MavenProject } from "../../explorer/model/MavenProject";
+import { Queue } from "../../taskExecutor";
 
 export async function goToEffectiveHandler(view: vscode.TreeView<ITreeItem>, node?: Dependency): Promise<void> {
     if (node === undefined || node.omittedStatus === undefined) {
