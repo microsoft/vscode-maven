@@ -11,6 +11,8 @@ TestPlan.md
 webpack.*.js
 node_modules
 out/**
+test/**
+extension.bundle.ts
 javaConfig.json
 gulpfile.js
 jdtls.ext/**
