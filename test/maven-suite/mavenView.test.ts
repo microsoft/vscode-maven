@@ -2,7 +2,8 @@
 // Licensed under the MIT license.
 
 import * as assert from "assert";
-import { mavenExplorerProvider, MavenProject } from "../../extension.bundle";
+import { mavenExplorerProvider } from "../../src/explorer/mavenExplorerProvider";
+import { MavenProject } from "../../src/explorer/model/MavenProject";
 import { ensureExtensionActivated } from "../shared";
 
 // tslint:disable: only-arrow-functions
