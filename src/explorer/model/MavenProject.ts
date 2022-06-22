@@ -6,7 +6,6 @@ import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Settings } from "../../Settings";
-import { taskExecutor } from "../../taskExecutor";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Utils } from "../../utils/Utils";
 import { EffectivePomProvider } from "../EffectivePomProvider";
@@ -35,14 +34,6 @@ export class MavenProject implements ITreeItem {
     constructor(pomPath: string) {
         this.pomPath = pomPath;
         this.ePomProvider = new EffectivePomProvider(pomPath);
-        const options: any = Settings.Pomfile.prefetchEffectivePom() ? undefined : { cacheOnly: true };
-        taskExecutor.execute(async () => {
-            try {
-                await this.getEffectivePom(options);
-            } catch (error) {
-                // ignore
-            }
-        });
     }
 
     public get name(): string {

@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "..\\simple"
+		},
+		{
+			"path": "..\\maven"
+		},
+		{
+			"path": "..\\gradle"
+		}
+	],
+	"settings": {}
+}
