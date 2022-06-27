@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.36.0
+### Changed
+- Replace `xml-zero-lexer` with `htmlparser2` as the parser of pom.xml files. [#822](https://github.com/microsoft/vscode-maven/pull/822)
+- Follow upstream change to build JDTLS plugin with JDK 17. [#824](https://github.com/microsoft/vscode-maven/pull/824)
+
 ## 0.35.2
 ### Fixed
 - Error "Failed to find dependency" when dependency conflict exists. [#815](https://github.com/microsoft/vscode-maven/issues/815)
