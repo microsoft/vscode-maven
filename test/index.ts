@@ -4,27 +4,29 @@
 import * as cp from "child_process";
 import * as os from "os";
 import * as path from "path";
-import { downloadAndUnzipVSCode, resolveCliPathFromVSCodeExecutablePath, runTests } from "@vscode/test-electron";
+import { downloadAndUnzipVSCode, resolveCliPathFromVSCodeExecutablePath, runTests } from "vscode-test";
 
 async function main(): Promise<void> {
     try {
         const vscodeExecutablePath = await downloadAndUnzipVSCode();
-        let platform;
-        switch (os.platform()) {
-            case "linux":
-                platform = "linux-x64";
-                break;
-            case "win32":
-                platform = "win32-x64-archive";
-                break;
-            case "darwin":
-                platform = os.arch() === "arm64" ? "darwin-arm64" : "darwin"
-                break;
-            default:
-                console.error(`unsupported platform: ${os.platform()}`);
-                return;
-        }
-        const cliPath = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath, platform);
+        // Platform-specific when using @vscode/test-electron
+        // let platform;
+        // switch (os.platform()) {
+        //     case "linux":
+        //         platform = "linux-x64";
+        //         break;
+        //     case "win32":
+        //         platform = "win32-x64-archive";
+        //         break;
+        //     case "darwin":
+        //         platform = os.arch() === "arm64" ? "darwin-arm64" : "darwin"
+        //         break;
+        //     default:
+        //         console.error(`unsupported platform: ${os.platform()}`);
+        //         return;
+        // }
+        // const cliPath = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath, platform);
+        const cliPath = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
 
         // Resolve extension dependencies
         cp.spawnSync(cliPath, ["--install-extension", "redhat.java"], {
