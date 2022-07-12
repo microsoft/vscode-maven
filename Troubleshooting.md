@@ -5,7 +5,7 @@
 ### Where to find Error logs
 
 There are 2 types of command execution methods.
-* **Background command**. It spawns a child process in background for your command, and the process is showing in status bar. E.g. generating effective pom. You can find error logs in an `Output` panel named `Maven for Java`.
+* **Background command**. It spawns a child process in background for your command, and the process is showing in status bar. E.g. generating effective pom. When a background command fails, you will see an error toast along the lines of `Background process terminated with code 1` or `Error occured in background process`. You can find error logs in an `Output` panel named `Maven for Java`.
 * **Terminal command**. It sends plain text of your command to a terminal to execute. E.g. almost all the other Maven commands. Error logs are directly printed in the corresponding terminals.
   
 ### Requirements
