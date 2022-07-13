@@ -497,11 +497,6 @@
           "group": "inline"
         },
         {
-          "command": "maven.project.openPom",
-          "when": "view == javaProjectExplorer && viewItem =~ /java:project(?=.*?\\b\\+maven\\b)(?=.*?\\b\\+uri\\b)/",
-          "group": "maven"
-        },
-        {
           "command": "maven.plugin.execute",
           "when": "view == mavenProjects && viewItem == maven:pluginGoal",
           "group": "inline"
@@ -542,11 +537,6 @@
           "group": "inline@1"
         },
         {
-          "command": "maven.goal.execute.fromProjectManager",
-          "when": "view == javaProjectExplorer && viewItem =~ /java:project(?=.*?\\b\\+maven\\b)(?=.*?\\b\\+uri\\b)/",
-          "group": "maven"
-        },
-        {
           "command": "maven.goal.execute.fromLifecycleMenu",
           "when": "view == mavenProjects && viewItem == maven:lifecycle",
           "group": "inline"
@@ -555,6 +545,16 @@
           "command": "maven.goal.execute.fromLifecycleMenu",
           "when": "view == mavenProjects && viewItem == maven:lifecycle",
           "group": "1@1"
+        }
+      ],
+      "javaProject.maven": [
+        {
+          "command": "maven.project.openPom",
+          "group": "maven@20"
+        },
+        {
+          "command": "maven.goal.execute.fromProjectManager",
+          "group": "maven@30"
         }
       ]
     },
