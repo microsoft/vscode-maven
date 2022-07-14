@@ -126,4 +126,26 @@ export namespace Settings {
             return {};
         }
     }
+
+    /**
+     * Get effective label of project node according to settings,
+     * filling ${project.groupId}, ${project.artifactId}, ${project.version}, ${project.name}
+     */
+    export function getExploreProjectName(project: {
+        pomPath?: string;
+        artifactId: string;
+        groupId: string;
+        version: string;
+        name: string;
+    }) {
+        const template = _getMavenSection<string>("explorer.projectName", project.pomPath);
+        if (!template) {
+            return undefined;
+        }
+
+        return template.replace("${project.name}", project.name)
+            .replace("${project.groupId}", project.groupId)
+            .replace("${project.artifactId}", project.artifactId)
+            .replace("${project.version}", project.version);
+    }
 }

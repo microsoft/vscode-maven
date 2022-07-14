@@ -188,7 +188,9 @@ function registerConfigChangeListener(context: vscode.ExtensionContext): void {
             mavenTerminal.dispose();
         }
         if (e.affectsConfiguration("maven.view")
-            || e.affectsConfiguration("maven.pomfile.globPattern")) {
+            || e.affectsConfiguration("maven.pomfile.globPattern")
+            || e.affectsConfiguration("maven.explorer.projectName")
+        ) {
             mavenExplorerProvider.refresh();
         }
         if (e.affectsConfiguration("maven.executable.preferMavenWrapper")) {

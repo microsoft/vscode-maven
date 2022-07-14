@@ -714,6 +714,19 @@
               "Add to Workspace",
               "None"
             ]
+          },
+          "maven.explorer.projectName": {
+            "default": "${project.name}",
+            "type": "string",
+            "scope": "window",
+            "description": "%configuration.maven.explorer.projectName%",
+            "enum": [
+              "${project.name}",
+              "${project.artifactId}",
+              "${project.artifactId}-${project.version}",
+              "${project.groupId}.${project.artifactId}",
+              "${project.groupId}.${project.artifactId}-${project.version}"
+            ]
           }
         }
       }
