@@ -36,7 +36,7 @@ export function getCurrentNode(text: string, offset: number): Node | undefined {
         xmlMode: true,
     });
     const ret: Node[] = [];
-    dfs(document, (node) => node.startIndex !== null && node.startIndex <= offset && node.endIndex !== null && offset < node.endIndex, ret, true);
+    dfs(document, (node) => node.startIndex !== null && node.startIndex <= offset && node.endIndex !== null && offset <= node.endIndex, ret, true);
     return ret?.[ret.length - 1];
 }
 
