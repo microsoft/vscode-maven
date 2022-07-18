@@ -24,7 +24,7 @@ export class MavenProject implements ITreeItem {
     public parent?: MavenProject; // assigned if it's specified as one of parent project's modules
     public pomPath: string;
     public _fullDependencyText: string;
-    public conflictNodes: Dependency[];
+    public _conflictNodes: Dependency[];
     public dependencyNodes: Dependency[];
     private ePomProvider: EffectivePomProvider;
     private _ePom: any;
@@ -130,6 +130,14 @@ export class MavenProject implements ITreeItem {
     public get parentPomPath(): string {
         const relativePath: string = this._pom?.project?.parent?.[0]?.relativePath?.[0] ?? "../pom.xml";
         return path.join(path.dirname(this.pomPath), relativePath);
+    }
+
+    public get conflictNodes(): Dependency[] {
+        return this._conflictNodes ?? [];
+    }
+
+    public set conflictNodes(nodes: Dependency[]) {
+        this._conflictNodes = nodes;
     }
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
