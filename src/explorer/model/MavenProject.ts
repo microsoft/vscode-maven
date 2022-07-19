@@ -10,7 +10,7 @@ import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Utils } from "../../utils/Utils";
 import { EffectivePomProvider } from "../EffectivePomProvider";
 import { mavenExplorerProvider } from "../mavenExplorerProvider";
-import { DependenciesMenu} from "./DependenciesMenu";
+import { DependenciesMenu } from "./DependenciesMenu";
 import { Dependency } from "./Dependency";
 import { IEffectivePom } from "./IEffectivePom";
 import { ITreeItem } from "./ITreeItem";
@@ -268,5 +268,20 @@ export class MavenProject implements ITreeItem {
         }
 
         return undefined;
+    }
+
+    /**
+     * get properties from effective pom
+     */
+    public getProperties() {
+        const propertiesNode = _.get(this._ePom, "project.properties[0]");
+        if (typeof propertiesNode === "object") {
+            return Object.keys(propertiesNode);
+
+        } else {
+            return undefined;
+
+        }
+
     }
 }

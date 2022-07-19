@@ -4,6 +4,7 @@
 import { Element, isTag, Node } from "domhandler";
 import * as _ from "lodash";
 import * as vscode from "vscode";
+import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 import { centralProvider } from "./centralProvider";
 import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
@@ -148,6 +149,23 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                     arguments: [{ completeFor: "plugin", source: "snippet" }]
                 };
                 return new vscode.CompletionList([snippetItem], false);
+            }
+            case XmlTagName.Properties: {
+                const project = mavenExplorerProvider.getMavenProject(document.uri.fsPath);
+                const props = await project?.getProperties();
+
+                if (props) {
+                    const propertyToCompletionItem = (prop: string) => {
+                        const item = new vscode.CompletionItem(prop, vscode.CompletionItemKind.Property);
+                        const insertText = `<${prop}>$1</${prop}>\n$0`;
+                        const snippetContent: string = trimBrackets(insertText, documentText, cursorOffset);
+                        item.insertText = new vscode.SnippetString(snippetContent);
+                        return item;
+                    }
+
+                    const items = props.map(propertyToCompletionItem);
+                    return new vscode.CompletionList(items, false);
+                }
             }
             default:
                 return undefined;
