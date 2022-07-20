@@ -35,19 +35,26 @@ class CompletionProvider implements vscode.CompletionItemProvider {
         const documentText: string = document.getText();
         const cursorOffset: number = document.offsetAt(position);
         const currentNode: Node | undefined = getCurrentNode(documentText, cursorOffset);
-        if (currentNode === undefined || currentNode.startIndex === null || !isTag(currentNode)) {
+        if (currentNode === undefined || currentNode.startIndex === null || currentNode.endIndex === null) {
             return undefined;
         }
 
-        switch (currentNode.tagName) {
-            case XmlTagName.GroupId: {
-                const groupIdTextNode = currentNode.firstChild;
-                const targetRange: vscode.Range = new vscode.Range(
-                    groupIdTextNode?.startIndex ? document.positionAt(groupIdTextNode.startIndex) : position,
-                    groupIdTextNode?.endIndex ? document.positionAt(groupIdTextNode.endIndex) : position
-                );
+        let tagNode: Element | undefined;
+        if (isTag(currentNode)) {
+            tagNode = currentNode;
+        } else if (currentNode.parent && isTag(currentNode.parent)) {
+            tagNode = currentNode.parent;
+        } else {
+            // TODO: should we recursively traverse up to find nearest tag node?
+            return undefined;
+        }
 
-                const siblingNodes: Node[] = currentNode.parent?.children ?? [];
+        switch (tagNode.tagName) {
+            case XmlTagName.GroupId: {
+                const groupIdTextNode = tagNode.firstChild;
+                const targetRange: vscode.Range = getRange(groupIdTextNode, document, position)!;
+
+                const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const artifactIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.ArtifactId) as Element | undefined;
                 const artifactIdTextNode = artifactIdNode?.firstChild;
 
@@ -63,13 +70,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 return new vscode.CompletionList(mergedItems, _.isEmpty(centralItems));
             }
             case XmlTagName.ArtifactId: {
-                const artifactIdTextNode = currentNode.firstChild;
-                const targetRange: vscode.Range = new vscode.Range(
-                    artifactIdTextNode?.startIndex ? document.positionAt(artifactIdTextNode.startIndex) : position,
-                    artifactIdTextNode?.endIndex ? document.positionAt(artifactIdTextNode.endIndex) : position
-                );
+                const artifactIdTextNode = tagNode.firstChild;
+                const targetRange: vscode.Range = getRange(artifactIdTextNode, document, position)!;
 
-                const siblingNodes: Node[] = currentNode.parent?.children ?? [];
+                const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;
                 const groupIdTextNode = groupIdNode?.firstChild;
 
@@ -90,11 +94,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                     for (const item of mergedItems) {
                         const matchedGroupId: string = _.get(item, "data.groupId");
                         if (matchedGroupId) {
-                            const groupIdRange: vscode.Range = new vscode.Range(
-                                document.positionAt(groupIdTextNode.startIndex),
-                                document.positionAt(groupIdTextNode.endIndex)
-                            );
-                            item.additionalTextEdits = [new vscode.TextEdit(groupIdRange, matchedGroupId)];
+                            const groupIdRange: vscode.Range | undefined = getRange(groupIdTextNode, document);
+                            if (groupIdRange){
+                                item.additionalTextEdits = [new vscode.TextEdit(groupIdRange, matchedGroupId)];
+                            }
                         }
                     }
                 }
@@ -102,13 +105,10 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 return new vscode.CompletionList(mergedItems, _.isEmpty(centralItems));
             }
             case XmlTagName.Version: {
-                const versionTextNode = currentNode.firstChild;
-                const targetRange: vscode.Range = new vscode.Range(
-                    versionTextNode?.startIndex ? document.positionAt(versionTextNode.startIndex) : position,
-                    versionTextNode?.endIndex ? document.positionAt(versionTextNode.endIndex) : position
-                );
+                const versionTextNode = tagNode.firstChild;
+                const targetRange: vscode.Range = getRange(versionTextNode, document, position)!;
 
-                const siblingNodes: Node[] = currentNode.parent?.children ?? [];
+                const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;
                 const artifactIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.ArtifactId) as Element | undefined;
 
@@ -176,6 +176,22 @@ function trimBrackets(snippetContent: string, fileContent: string, offset: numbe
         ret = ret.slice(0, ret.length - 1);
     }
     return ret;
+}
+
+function getRange(node: Node | null, document: vscode.TextDocument, fallbackPosition?: vscode.Position) {
+    if (fallbackPosition) {
+        return new vscode.Range(
+            node?.startIndex ? document.positionAt(node.startIndex) : fallbackPosition,
+            node?.endIndex ? document.positionAt(node.endIndex + 1) : fallbackPosition
+        );
+    } else if (node !== null && node.startIndex !== null && node.endIndex !== null) {
+        return new vscode.Range(
+            document.positionAt(node.startIndex),
+            document.positionAt(node.endIndex + 1)
+        );
+    } else {
+        return undefined;
+    }
 }
 
 export const completionProvider: CompletionProvider = new CompletionProvider();
