@@ -145,6 +145,11 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     // register artifact searcher if Java language server is activated
     if (isJavaExtEnabled()) {
         registerArtifactSearcher(context);
+
+        // Reload All Maven Projects in JDTLS, impl in upstream
+        registerCommand(context, "maven.java.projectConfiguration.update", () => {
+            vscode.commands.executeCommand("java.projectConfiguration.update", mavenExplorerProvider.mavenProjectNodes.map(n => Uri.file(n.pomPath)));
+        })
     }
 
     // diagnostic

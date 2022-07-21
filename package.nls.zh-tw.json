@@ -41,5 +41,6 @@
     "configuration.maven.settingsFile": "指定 maven 設定文件的絕對路徑，預設是 ~/.m2/settings.xml",
     "configuration.maven.dependency.enableConflictDiagnostics": "指定是否在 POM 文件中顯示相依套件衝突。",
     "configuration.maven.projectOpenBehavior": "新建專案的預設打開方式。",
-    "configuration.maven.explorer.projectName": "Maven 專案名稱節點的格式。"
+    "configuration.maven.explorer.projectName": "Maven 專案名稱節點的格式。",
+    "contributes.commands.maven.java.projectConfiguration.update": "重新載入所有 Maven 專案"
 }
