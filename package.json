@@ -230,6 +230,12 @@
         "command": "maven.favorites",
         "title": "%contributes.commands.maven.favorites%",
         "category": "Maven"
+      },
+      {
+        "command": "maven.java.projectConfiguration.update",
+        "title": "%contributes.commands.maven.java.projectConfiguration.update%",
+        "icon": "$(sync)",
+        "category": "Maven"
       }
     ],
     "views": {
@@ -359,6 +365,10 @@
         {
           "command": "maven.goal.execute",
           "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "maven.java.projectConfiguration.update",
+          "when": "false"
         }
       ],
       "explorer/context": [
@@ -374,6 +384,11 @@
         }
       ],
       "view/title": [
+        {
+          "command": "maven.java.projectConfiguration.update",
+          "when": "view == mavenProjects && javaLSReady",
+          "group": "navigation@05"
+        },
         {
           "command": "maven.view.flat",
           "when": "view == mavenProjects && config.maven.view != flat",
@@ -392,7 +407,7 @@
         {
           "command": "maven.explorer.refresh",
           "when": "view == mavenProjects",
-          "group": "navigation@2"
+          "group": "overflow@2"
         }
       ],
       "view/item/context": [
