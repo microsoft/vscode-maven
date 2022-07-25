@@ -8,7 +8,8 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
+                "${workspaceFolder}/test/projects/maven",
+                "--extensionDevelopmentPath=${workspaceFolder}",
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"

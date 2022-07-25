@@ -41,6 +41,18 @@ export function getCurrentNode(text: string, offset: number): Node | undefined {
     return ret?.[ret.length - 1];
 }
 
+export function getNodePath(node: Node) {
+    const parents = [];
+    let cur: Node | null = node;
+    while (cur) {
+        if (isTag(cur)) {
+            parents.unshift(cur.tagName);
+        }
+        cur = cur.parent;
+    }
+    return parents.join(".");
+}
+
 export function getTextFromNode(node: Node | undefined | null, fallbackValue: string = "") {
     return node && isText(node) ? node.data : fallbackValue;
 }
