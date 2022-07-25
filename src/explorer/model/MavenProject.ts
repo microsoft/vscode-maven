@@ -64,7 +64,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public get version(): string {
-        return this._pom?.project?.version?.[0];
+        return this._pom?.project?.version?.[0] ?? this._pom?.project?.parent?.[0]?.version?.[0] ?? this.parent?.version;
     }
 
     public get id(): string {
