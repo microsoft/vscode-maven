@@ -140,7 +140,7 @@ export namespace Settings {
     }) {
         const template = _getMavenSection<string>("explorer.projectName", project.pomPath);
         if (!template) {
-            return undefined;
+            return "Unknown";
         }
 
         return template.replace("${project.name}", project.name)

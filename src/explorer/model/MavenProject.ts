@@ -142,7 +142,7 @@ export class MavenProject implements ITreeItem {
 
     public async getTreeItem(): Promise<vscode.TreeItem> {
         await this.parsePom();
-        const label = Settings.getExploreProjectName(this) ?? "[Corrupted]";
+        const label = this.artifactId ? Settings.getExploreProjectName(this) : "Unknown";
         const iconFile: string = this.packaging === "pom" ? "root.svg" : "project.svg";
         const treeItem: vscode.TreeItem = new vscode.TreeItem(label);
         treeItem.iconPath = {
