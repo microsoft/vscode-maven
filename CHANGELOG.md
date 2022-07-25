@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.37.0
+### Added
+- Better completion for properties. [#843](https://github.com/microsoft/vscode-maven/issues/843)
+- Shortcut to reload all Maven projects. [#847](https://github.com/microsoft/vscode-maven/pull/847)
+- New setting `maven.explorer.projectName` to customize format of project node name. [#834](https://github.com/microsoft/vscode-maven/pull/834)
+
+### Fixed
+- Wrong completion range in pom.xml. [#842](https://github.com/microsoft/vscode-maven/pull/842)
+- Error: `mainThreadExtensionService.ts:80 TypeError: r is not iterable` when opening multi-module projects. [#839](https://github.com/microsoft/vscode-maven/pull/839)
+
 ## 0.36.0
 ### Changed
 - Replace `xml-zero-lexer` with `htmlparser2` as the parser of pom.xml files. [#822](https://github.com/microsoft/vscode-maven/pull/822)
