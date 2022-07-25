@@ -16,16 +16,17 @@ const artifactSegments: string[] = [
     "\t<artifactId>$2</artifactId>",
     "\t<version>$3</version>"
 ];
-const dependencySnippetString: string = [
+const dependencySnippetString = (eol: string) => [
     "<dependency>",
     ...artifactSegments,
     "</dependency>"
-].join("\n");
-const pluginSnippetString: string = [
+].join(eol);
+
+const pluginSnippetString = (eol: string) => [
     "<plugin>",
     ...artifactSegments,
     "</plugin>"
-].join("\n");
+].join(eol);
 
 const DEFAULT_GROUP_ID: string = "org.apache.maven.plugins";
 
@@ -34,6 +35,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
     // tslint:disable-next-line:cyclomatic-complexity
     public async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList | undefined> {
         const documentText: string = document.getText();
+        const eol = toEolString(document.eol);
         const cursorOffset: number = document.offsetAt(position);
         const currentNode: Node | undefined = getCurrentNode(documentText, cursorOffset);
         if (currentNode === undefined || currentNode.startIndex === null || currentNode.endIndex === null) {
@@ -128,7 +130,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             }
             case XmlTagName.Dependencies: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("dependency", vscode.CompletionItemKind.Snippet);
-                const snippetContent: string = trimBrackets(dependencySnippetString, documentText, cursorOffset);
+                const snippetContent: string = trimBrackets(dependencySnippetString(eol), documentText, cursorOffset);
                 const dependencySnippet: vscode.SnippetString = new vscode.SnippetString(snippetContent);
                 snippetItem.insertText = dependencySnippet;
                 snippetItem.detail = "Maven Snippet";
@@ -140,7 +142,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
             }
             case XmlTagName.Plugins: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
-                const snippetContent: string = trimBrackets(pluginSnippetString, documentText, cursorOffset);
+                const snippetContent: string = trimBrackets(pluginSnippetString(eol), documentText, cursorOffset);
                 const pluginSnippet: vscode.SnippetString = new vscode.SnippetString(snippetContent);
                 snippetItem.insertText = pluginSnippet;
                 snippetItem.detail = "Maven Snippet";
@@ -157,7 +159,7 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                 if (props) {
                     const propertyToCompletionItem = (prop: string) => {
                         const item = new vscode.CompletionItem(prop, vscode.CompletionItemKind.Property);
-                        const insertText = `<${prop}>$1</${prop}>\n$0`;
+                        const insertText = `<${prop}>$1</${prop}>${eol}$0`;
                         const snippetContent: string = trimBrackets(insertText, documentText, cursorOffset);
                         item.insertText = new vscode.SnippetString(snippetContent);
                         return item;
@@ -210,6 +212,10 @@ function getRange(node: Node | null, document: vscode.TextDocument, fallbackPosi
     } else {
         return undefined;
     }
+}
+
+function toEolString(eol: vscode.EndOfLine) {
+    return eol === vscode.EndOfLine.LF ? "\n" : "\r\n";
 }
 
 export const completionProvider: CompletionProvider = new CompletionProvider();

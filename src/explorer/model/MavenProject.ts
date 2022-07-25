@@ -277,11 +277,8 @@ export class MavenProject implements ITreeItem {
         const propertiesNode = _.get(this._ePom, "project.properties[0]");
         if (typeof propertiesNode === "object") {
             return Object.keys(propertiesNode);
-
         } else {
             return undefined;
-
         }
-
     }
 }
