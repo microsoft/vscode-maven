@@ -14,16 +14,12 @@
             <repository location="https://download.eclipse.org/jdtls/snapshots/repository/latest/"/>
         </location>
         <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-            <unit id="org.jboss.tools.maven.apt.feature.feature.group" version="1.5.0.201805160042"/>
-            <repository location="https://download.jboss.org/jbosstools/updates/m2e-extensions/m2e-apt/1.5.0-2018-05-16_00-46-30-H11"/>
-        </location>
-        <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
             <unit id="com.ibm.icu.base" version="58.2.0.v20170418-1837"/>
             <unit id="com.google.guava" version="21.0.0.v20170206-1425"/>
             <unit id="org.apache.commons.lang3" version="3.1.0.v201403281430"/>
             <unit id="com.google.gson" version="2.7.0.v20170129-0911"/>
             <unit id="org.slf4j.api" version="1.7.10.v20170428-1633"/>
-            <repository location="https://download.eclipse.org/tools/orbit/R-builds/R20170516192513/repository"/>
+            <repository location="https://download.eclipse.org/tools/orbit/R-builds/R20200529191137/repository"/>
         </location>
     </locations>
 </target>
