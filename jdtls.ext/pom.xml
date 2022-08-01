@@ -4,7 +4,7 @@
     <groupId>com.microsoft.java.maven</groupId>
     <artifactId>parent</artifactId>
     <name>${base.name} :: Parent</name>
-    <version>0.27.1</version>
+    <version>0.37.0</version>
     <packaging>pom</packaging>
     <properties>
         <base.name>JDTLS Maven Extension</base.name>
@@ -72,9 +72,9 @@
     </build>
     <repositories>
         <repository>
-            <id>photon</id>
+            <id>202112</id>
             <layout>p2</layout>
-            <url>https://download.eclipse.org/releases/photon</url>
+            <url>https://download.eclipse.org/releases/2021-12/202112081000/</url>
         </repository>
         <repository>
             <id>oss.sonatype.org</id>
@@ -86,17 +86,12 @@
         <repository>
             <id>LSP4J</id>
             <layout>p2</layout>
-            <url>https://download.eclipse.org/lsp4j/updates/releases/0.5.0/</url>
+            <url>https://download.eclipse.org/lsp4j/updates/releases/0.11.0/</url>
         </repository>
         <repository>
             <id>JDT.LS</id>
             <layout>p2</layout>
             <url>https://download.eclipse.org/jdtls/snapshots/repository/latest/</url>
-        </repository>
-        <repository>
-            <id>JBOLL.TOOLS</id>
-            <layout>p2</layout>
-            <url>https://download.jboss.org/jbosstools/updates/m2e-extensions/m2e-apt/1.5.0-2018-05-16_00-46-30-H11</url>
         </repository>
     </repositories>
 </project>
