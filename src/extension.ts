@@ -13,6 +13,7 @@ import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { completionProvider } from "./completion/completionProvider";
 import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
+import { init as initMavenXsd } from "./completion/mavenXsd";
 import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { diagnosticProvider } from "./DiagnosticProvider";
@@ -158,6 +159,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     context.subscriptions.push(decorationProvider);
     // textDocument based output (e.g. effective-pom, dependencies)
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("vscode-maven", contentProvider));
+
+    await initMavenXsd();
 }
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {

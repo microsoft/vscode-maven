@@ -5,16 +5,16 @@ import { Element, isTag, Node } from "domhandler";
 import * as _ from "lodash";
 import * as vscode from "vscode";
 import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
-import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, getNodePath, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 import { centralProvider } from "./centralProvider";
 import { COMMAND_COMPLETION_ITEM_SELECTED } from "./constants";
 import { indexProvider } from "./indexProvider";
 import { localProvider } from "./localProvider";
+import { getXsdElement, XSDElement } from "./mavenXsd";
 
 const artifactSegments: string[] = [
     "\t<groupId>$1</groupId>",
     "\t<artifactId>$2</artifactId>",
-    "\t<version>$3</version>"
 ];
 const dependencySnippetString = (eol: string) => [
     "<dependency>",
@@ -169,8 +169,43 @@ class CompletionProvider implements vscode.CompletionItemProvider {
                     return new vscode.CompletionList(items, false);
                 }
             }
-            default:
-                return undefined;
+            default: {
+                const nodePath = getNodePath(currentNode);
+                const elem = getXsdElement(nodePath);
+                const defToCompletionItem = (e: XSDElement) => {
+                    const name = e.name;
+                    const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Property);
+                    let insertText;
+                    if (e.isLeaf) {
+                        // <textNode>|</textNode>
+                        insertText = `<${name}>$1</${name}>${eol}$0`;
+                    } else {
+                        // <complexNode>
+                        //   |
+                        // </complexNode>
+                        insertText = [`<${name}>`, "\t$0", `</${name}>`].join(eol);
+                    }
+                    const snippetContent: string = trimBrackets(insertText, documentText, cursorOffset);
+                    item.insertText = new vscode.SnippetString(snippetContent);
+
+                    if (e.isDeprecated) {
+                        item.tags = [vscode.CompletionItemTag.Deprecated]
+                    }
+                    item.documentation = e.markdownString;
+
+                    // trigger completion again immediately for non-leaf node
+                    if (!e.isLeaf) {
+                        item.command = {
+                            command: "editor.action.triggerSuggest",
+                            title: "Trigger Suggest"
+                        };
+                    }
+                    return item;
+                }
+
+                const items = elem?.candidates.map(defToCompletionItem) ?? [];
+                return new vscode.CompletionList(items, false);
+            }
         }
     }
 }

@@ -755,7 +755,8 @@
     "watch": "webpack --mode development --watch --progress",
     "test": "tsc -p ./ && node ./out/test/index.js",
     "webpack": "webpack --mode development",
-    "update-tpn": "node scripts/update-third-party-notice.js"
+    "update-tpn": "node scripts/update-third-party-notice.js",
+    "update-xsd": "tsc scripts/generate-maven-xsd.ts && node scripts/generate-maven-xsd.js"
   },
   "devDependencies": {
     "@types/fs-extra": "^4.0.9",
