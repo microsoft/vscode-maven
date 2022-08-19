@@ -2,13 +2,13 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { IArtifactSearchResult, ISearchArtifactParam, SearchType } from "../jdtls/artifactSearcher";
-import { executeJavaLanguageServerCommand, isJavaLangugageServerStarndard } from "../jdtls/commands";
-import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "./constants";
-import { IMavenCompletionItemProvider } from "./IArtifactProvider";
-import { getSortText } from "./versionUtils";
+import { IArtifactSearchResult, ISearchArtifactParam, SearchType } from "../../../jdtls/artifactSearcher";
+import { executeJavaLanguageServerCommand, isJavaLangugageServerStarndard } from "../../../jdtls/commands";
+import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "../../constants";
+import { IArtifactCompletionProvider } from "./IArtifactProvider";
+import { getSortText } from "../../utils";
 
-class IndexProvider implements IMavenCompletionItemProvider {
+export class FromIndex implements IArtifactCompletionProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
         if (!isJavaLangugageServerStarndard()) {
             return [];
@@ -48,7 +48,12 @@ class IndexProvider implements IMavenCompletionItemProvider {
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "artifactId", source: "maven-index" }]
         };
         return docs.map(doc => {
-            const item: vscode.CompletionItem = new vscode.CompletionItem(doc.artifactId, vscode.CompletionItemKind.Field);
+            const item: vscode.CompletionItem = new vscode.CompletionItem({
+                label: doc.artifactId,
+                detail: "detail",
+                description: doc.groupId
+
+            }, vscode.CompletionItemKind.Field);
             item.insertText = doc.artifactId;
             item.detail = `GroupId: ${doc.groupId}`;
             (item as any).data = { groupId: doc.groupId };
@@ -83,5 +88,3 @@ class IndexProvider implements IMavenCompletionItemProvider {
         });
     }
 }
-
-export const indexProvider: IMavenCompletionItemProvider = new IndexProvider();

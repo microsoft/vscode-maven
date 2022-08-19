@@ -5,6 +5,7 @@ import { getPathToExtensionRoot } from "../utils/contextUtils";
 import * as fse from "fs-extra";
 import * as _ from "lodash";
 import { MarkdownString } from "vscode";
+import { EOL } from "os";
 
 let schema: any;
 
@@ -58,7 +59,7 @@ export class XSDElement {
             content += description;
         }
         if (version) {
-            content += "\n";
+            content += EOL + EOL;
             content += `Version: ${version}`
         }
 

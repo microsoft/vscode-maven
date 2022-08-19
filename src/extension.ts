@@ -11,9 +11,9 @@ import { ArchetypeModule } from "./archetype/ArchetypeModule";
 import { IProjectCreationMetadata } from "./archetype/createProject/types";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
-import { completionProvider } from "./completion/completionProvider";
 import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
 import { init as initMavenXsd } from "./completion/mavenXsd";
+import { PomCompletionProvider } from "./completion/PomCompletionProvider";
 import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
 import { diagnosticProvider } from "./DiagnosticProvider";
@@ -219,7 +219,7 @@ function registerPomFileAuthoringHelpers(context: vscode.ExtensionContext): void
         pattern: Settings.Pomfile.globPattern()
     }];
     // completion item provider
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, completionProvider, ".", "-", "<"));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, new PomCompletionProvider(), ".", "-", "<"));
     registerCommand(context, "maven.completion.selected", sendInfo, true);
     // hover
     context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
