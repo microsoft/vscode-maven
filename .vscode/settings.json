@@ -9,5 +9,11 @@
         "out": true // set this to false to include "out" folder in search results
     },
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.checkstyle.configuration": "${workspaceFolder}/jdtls.ext/checkstyle.xml"
+    "java.import.exclusions": [
+        "**/node_modules/**",
+        "**/.metadata/**",
+        "**/archetype-resources/**",
+        "**/test/**",
+        "**/META-INF/maven/**"
+    ]
 }
