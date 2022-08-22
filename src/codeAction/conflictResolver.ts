@@ -3,8 +3,8 @@
 
 import * as vscode from "vscode";
 import { diagnosticProvider, MAVEN_DEPENDENCY_CONFLICT } from "../DiagnosticProvider";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { Dependency } from "../explorer/model/Dependency";
+import { MavenProjectManager } from "../project/MavenProjectManager";
 
 export class ConflictResolver implements vscode.CodeActionProvider {
     public static readonly providedCodeActionKinds: vscode.CodeActionKind[] = [
@@ -35,7 +35,7 @@ export class ConflictResolver implements vscode.CodeActionProvider {
                 effectiveVersion,
                 groupId: gid,
                 artifactId: aid,
-                fullDependencyText: mavenExplorerProvider.getMavenProject(document.uri.fsPath)?.fullText
+                fullDependencyText: MavenProjectManager.get(document.uri.fsPath)?.fullText
             }]
         };
         actionSetVersion.diagnostics = [diagnostic];

@@ -8,12 +8,11 @@ import { MavenProject } from "./MavenProject";
 const CONTEXT_VALUE: string = "maven:menu";
 
 export abstract class Menu implements ITreeItem {
-    protected project: MavenProject;
     protected name: string;
 
-    constructor(project: MavenProject) {
-        this.project = project;
-    }
+    constructor(
+        public project: MavenProject,
+    ) { }
 
     public abstract getChildren(): ITreeItem[] | undefined | Promise<ITreeItem[] | undefined>;
 

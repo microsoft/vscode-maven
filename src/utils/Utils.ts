@@ -7,13 +7,13 @@ import * as https from "https";
 import * as md5 from "md5";
 import * as path from "path";
 import * as url from "url";
-import { commands, Progress, ProgressLocation, RelativePattern, Uri, window, workspace, WorkspaceFolder } from "vscode";
+import { commands, Progress, ProgressLocation, Uri, window } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { DEFAULT_MAVEN_LIFECYCLES } from "../completion/constants";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { LifecyclePhase } from "../explorer/model/LifecyclePhase";
 import { MavenProject } from "../explorer/model/MavenProject";
+import { MavenProjectManager } from "../project/MavenProjectManager";
 import { Settings } from "../Settings";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { MavenNotFoundError } from "./errorUtils";
@@ -101,21 +101,6 @@ export namespace Utils {
                 reject(err);
             });
         });
-    }
-
-    export async function getAllPomPaths(workspaceFolder?: WorkspaceFolder): Promise<string[]> {
-        if (!workspaceFolder) {
-            if (workspace.workspaceFolders) {
-                const arrayOfPoms: string[][] = await Promise.all(workspace.workspaceFolders.map(getAllPomPaths));
-                return [].concat.apply([], arrayOfPoms);
-            } else {
-                return [];
-            }
-        }
-        const exclusions: string[] = Settings.excludedFolders(workspaceFolder.uri);
-        const pattern: string = Settings.Pomfile.globPattern();
-        const pomFileUris: Uri[] = await workspace.findFiles(new RelativePattern(workspaceFolder, pattern), `{${exclusions.join(",")}}`);
-        return pomFileUris.map(_uri => _uri.fsPath);
     }
 
     export async function showEffectivePom(param: Uri | MavenProject | string): Promise<void> {
@@ -229,7 +214,7 @@ export namespace Utils {
         } else if (node && node.uri) {
             // for nodes from Project Manager
             const pomPath: string = path.join(Uri.parse(node.uri).fsPath, "pom.xml");
-            selectedProject = mavenExplorerProvider.mavenProjectNodes.find(project => project.pomPath.toLowerCase() === pomPath.toLowerCase());
+            selectedProject = MavenProjectManager.projects.find(project => project.pomPath.toLowerCase() === pomPath.toLowerCase());
         }
 
         // select a project(pomfile)

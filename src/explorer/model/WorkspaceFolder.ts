@@ -3,8 +3,8 @@
 
 import * as vscode from "vscode";
 import { TreeItemCollapsibleState } from "vscode";
+import { MavenProjectManager } from "../../project/MavenProjectManager";
 import { Settings } from "../../Settings";
-import { mavenExplorerProvider } from "../mavenExplorerProvider";
 import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
@@ -12,18 +12,16 @@ import { MavenProject } from "./MavenProject";
 const CONTEXT_VALUE: string = "maven:workspaceFolder";
 
 export class WorkspaceFolder implements ITreeItem {
-    private _workspaceFolder: vscode.WorkspaceFolder;
-
-    constructor(workspaceFolder: vscode.WorkspaceFolder) {
-        this._workspaceFolder = workspaceFolder;
-    }
+    constructor(
+        public workspaceFolder: vscode.WorkspaceFolder,
+    ) { }
 
     public getContextValue(): string {
         return CONTEXT_VALUE;
     }
 
     public async getChildren(): Promise<ITreeItem[]> {
-        const allProjects: MavenProject[] = await mavenExplorerProvider.loadProjects(this._workspaceFolder);
+        const allProjects: MavenProject[] = await MavenProjectManager.loadProjects(this.workspaceFolder);
         if (allProjects.length === 0) {
             return [new HintNode("No Maven project found.")];
         }
@@ -39,7 +37,7 @@ export class WorkspaceFolder implements ITreeItem {
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        return new vscode.TreeItem(this._workspaceFolder.name, TreeItemCollapsibleState.Expanded);
+        return new vscode.TreeItem(this.workspaceFolder.name, TreeItemCollapsibleState.Expanded);
     }
 
     private sortByName(arr: MavenProject[]): MavenProject[] {

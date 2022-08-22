@@ -19,9 +19,8 @@ import { definitionProvider } from "./definition/definitionProvider";
 import { diagnosticProvider } from "./DiagnosticProvider";
 import { initExpService } from "./experimentationService";
 import { decorationProvider } from "./explorer/decorationProvider";
-import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
+import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { Dependency } from "./explorer/model/Dependency";
-import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
@@ -38,6 +37,7 @@ import { registerArtifactSearcher } from "./jdtls/artifactSearcher";
 import { isJavaExtEnabled } from "./jdtls/commands";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
+import { MavenProjectManager } from "./project/MavenProjectManager";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
 import { getAiKey, getExtensionId, getExtensionVersion, loadMavenSettingsFilePath, loadPackageInfo } from "./utils/contextUtils";
@@ -63,12 +63,13 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     pluginInfoProvider.initialize(context);
     await vscode.commands.executeCommand("setContext", "vscode-maven:activated", true);
     // register tree view
-    await mavenExplorerProvider.loadProjects();
+    await MavenProjectManager.loadProjects();
+    const mavenExplorerProvider: MavenExplorerProvider = MavenExplorerProvider.getInstance();
     const view = vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true });
     context.subscriptions.push(view);
     registerCommand(context, "maven.dependency.goToEffective", (node?: Dependency) => goToEffectiveHandler(view, node));
     context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(_e => {
-        mavenExplorerProvider.refresh();
+        MavenExplorerProvider.getInstance().refresh();
     }));
     // pom.xml listener to refresh tree view
     registerPomFileWatcher(context);
@@ -78,7 +79,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     DEFAULT_MAVEN_LIFECYCLES.forEach((goal: string) => {
         registerCommandRequiringTrust(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
     });
-    registerCommand(context, "maven.explorer.refresh", refreshExplorerHandler);
+    registerCommand(context, "maven.explorer.refresh", async (item) => {
+        item?.refresh?.() ?? MavenExplorerProvider.getInstance().refresh(item);
+    });
     registerCommandRequiringTrust(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
     registerCommandRequiringTrust(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
     registerCommand(context, "maven.project.openPom", openPomHandler);
@@ -149,7 +152,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
         // Reload All Maven Projects in JDTLS, impl in upstream
         registerCommand(context, "maven.java.projectConfiguration.update", () => {
-            vscode.commands.executeCommand("java.projectConfiguration.update", mavenExplorerProvider.mavenProjectNodes.map(n => Uri.file(n.pomPath)));
+            vscode.commands.executeCommand("java.projectConfiguration.update", MavenProjectManager.projects.map(n => Uri.file(n.pomPath)));
         })
     }
 
@@ -165,9 +168,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
 
 function registerPomFileWatcher(context: vscode.ExtensionContext): void {
     const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(Settings.Pomfile.globPattern());
-    watcher.onDidCreate((e: Uri) => mavenExplorerProvider.addProject(e.fsPath), null, context.subscriptions);
+    watcher.onDidCreate((e: Uri) => MavenExplorerProvider.getInstance().addProject(e.fsPath), null, context.subscriptions);
     watcher.onDidChange(async (e: Uri) => {
-        const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(e.fsPath);
+        const project: MavenProject | undefined = MavenProjectManager.get(e.fsPath);
         if (project) {
             // notify dependencies/effectivePOM to update
             contentProvider.invalidate(effectivePomContentUri(project.pomPath));
@@ -177,12 +180,12 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
             if (Settings.Pomfile.autoUpdateEffectivePOM()) {
                 taskExecutor.execute(async () => {
                     await project.refreshEffectivePom();
-                    mavenExplorerProvider.refresh(project);
+                    MavenExplorerProvider.getInstance().refresh(project);
                 });
             }
         }
     }, null, context.subscriptions);
-    watcher.onDidDelete((e: Uri) => mavenExplorerProvider.removeProject(e.fsPath), null, context.subscriptions);
+    watcher.onDidDelete((e: Uri) => MavenExplorerProvider.getInstance().removeProject(e.fsPath), null, context.subscriptions);
     context.subscriptions.push(watcher);
 }
 
@@ -199,7 +202,7 @@ function registerConfigChangeListener(context: vscode.ExtensionContext): void {
             || e.affectsConfiguration("maven.pomfile.globPattern")
             || e.affectsConfiguration("maven.explorer.projectName")
         ) {
-            mavenExplorerProvider.refresh();
+            MavenExplorerProvider.getInstance().refresh();
         }
         if (e.affectsConfiguration("maven.executable.preferMavenWrapper")) {
             context.workspaceState.update("trustMavenWrapper", undefined);
@@ -237,7 +240,7 @@ async function mavenHistoryHandler(item: MavenProject | undefined): Promise<void
     if (item) {
         await Utils.executeHistoricalGoals([item.pomPath]);
     } else {
-        await Utils.executeHistoricalGoals(mavenExplorerProvider.mavenProjectNodes.map(node => node.pomPath));
+        await Utils.executeHistoricalGoals(MavenProjectManager.projects.map(node => node.pomPath));
     }
 }
 
@@ -247,14 +250,6 @@ async function updateArchetypeCatalogHandler(): Promise<void> {
         await ArchetypeModule.updateArchetypeCatalog();
         p.report({ message: "finished." });
     });
-}
-
-async function refreshExplorerHandler(item?: ITreeItem): Promise<void> {
-    if (item && item.refresh) {
-        await item.refresh();
-    } else {
-        mavenExplorerProvider.refresh(item);
-    }
 }
 
 async function openPomHandler(node: MavenProject | { uri: string }): Promise<void> {

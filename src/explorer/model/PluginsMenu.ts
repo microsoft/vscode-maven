@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../mavenExplorerProvider";
+import { MavenExplorerProvider } from "../MavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 import { MavenProject } from "./MavenProject";
@@ -27,6 +27,6 @@ export class PluginsMenu extends Menu implements ITreeItem {
 
     public async refresh(): Promise<void> {
         this.project.refreshEffectivePom().catch(console.error);
-        mavenExplorerProvider.refresh(this);
+        MavenExplorerProvider.getInstance().refresh(this);
     }
 }

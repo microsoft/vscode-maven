@@ -2,11 +2,10 @@
 // Licensed under the MIT license.
 
 import { Element, isTag, Node } from "domhandler";
-import * as _ from "lodash";
 import * as vscode from "vscode";
 
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
+import { MavenProjectManager } from "../project/MavenProjectManager";
 import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 
 class HoverProvider implements vscode.HoverProvider {
@@ -41,7 +40,7 @@ class HoverProvider implements vscode.HoverProvider {
                 const groupIdHint = getTextFromNode(groupIdNode?.firstChild);
                 const artifactIdHint = getTextFromNode(artifactIdNode?.firstChild);
                 if (groupIdHint && artifactIdHint) {
-                    const mavenProject: MavenProject | undefined = mavenExplorerProvider.getMavenProject(document.uri.fsPath);
+                    const mavenProject: MavenProject | undefined = MavenProjectManager.get(document.uri.fsPath);
                     if (!mavenProject) {
                         return undefined;
                     }
