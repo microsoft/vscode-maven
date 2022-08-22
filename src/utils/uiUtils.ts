@@ -6,9 +6,9 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { OpenDialogOptions, Uri, window } from "vscode";
 import { instrumentOperation } from "vscode-extension-telemetry-wrapper";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { mavenOutputChannel } from "../mavenOutputChannel";
+import { MavenProjectManager } from "../project/MavenProjectManager";
 import { generalErrorHandler } from "./errorUtils";
 
 const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
@@ -63,14 +63,14 @@ export async function showTroubleshootingDialog(errorMessage: string): Promise<v
 }
 
 export async function selectProjectIfNecessary(): Promise< MavenProject | undefined> {
-    if (mavenExplorerProvider.mavenProjectNodes === undefined || mavenExplorerProvider.mavenProjectNodes.length === 0) {
+    if (MavenProjectManager.projects === undefined || MavenProjectManager.projects.length === 0) {
         return undefined;
     }
-    if (mavenExplorerProvider.mavenProjectNodes.length === 1) {
-        return mavenExplorerProvider.mavenProjectNodes[0];
+    if (MavenProjectManager.projects.length === 1) {
+        return MavenProjectManager.projects[0];
     }
     return await window.showQuickPick(
-        mavenExplorerProvider.mavenProjectNodes.map(item => ({
+        MavenProjectManager.projects.map(item => ({
             value: item,
             label: `$(primitive-dot) ${item.name}`,
             description: undefined,

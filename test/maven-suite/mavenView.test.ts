@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import * as assert from "assert";
-import { mavenExplorerProvider } from "../../src/explorer/mavenExplorerProvider";
+import { MavenExplorerProvider } from "../../src/explorer/MavenExplorerProvider";
 import { MavenProject } from "../../src/explorer/model/MavenProject";
 import { ensureExtensionActivated } from "../shared";
 
@@ -12,7 +12,7 @@ suite("Maven Project View Tests", () => {
     suiteSetup(ensureExtensionActivated);
 
     test("Can list maven projects", async () => {
-        const roots = await mavenExplorerProvider.getChildren();
+        const roots = await MavenExplorerProvider.getInstance().getChildren();
         assert.equal(roots?.length, 1, "Number of root node should be 1");
 
         const projectNode = roots![0] as MavenProject;

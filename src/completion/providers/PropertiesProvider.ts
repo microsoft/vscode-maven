@@ -3,7 +3,7 @@
 
 import { Element, isTag, Node } from "domhandler";
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../../explorer/mavenExplorerProvider";
+import { MavenProjectManager } from "../../project/MavenProjectManager";
 import { XmlTagName } from "../../utils/lexerUtils";
 import { trimBrackets } from "../utils";
 import { IXmlCompletionProvider } from "./IXmlCompletionProvider";
@@ -27,8 +27,7 @@ export class PropertiesProvider implements IXmlCompletionProvider {
         const ret: vscode.CompletionItem[] = [];
         switch (tagNode.tagName) {
             case XmlTagName.Properties: {
-                // TODO: should refactor mavenExplorerProvider to singleton
-                const project = mavenExplorerProvider.getMavenProject(document.uri.fsPath);
+                const project = MavenProjectManager.get(document.uri.fsPath);
                 const props = await project?.getProperties();
 
                 if (props) {

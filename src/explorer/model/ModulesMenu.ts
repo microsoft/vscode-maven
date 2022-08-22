@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { mavenExplorerProvider } from "../mavenExplorerProvider";
+import { MavenProjectManager } from "../../project/MavenProjectManager";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
@@ -17,8 +17,8 @@ export class ModulesMenu extends Menu implements ITreeItem {
 
     public getChildren() : MavenProject[] {
         return this.project.modules.map(modulePomPath => {
-            const found: MavenProject | undefined = mavenExplorerProvider.getMavenProject(modulePomPath);
-            return  found ? found : new MavenProject(modulePomPath);
+            const found: MavenProject | undefined = MavenProjectManager.get(modulePomPath);
+            return found ? found : new MavenProject(modulePomPath);
         });
     }
 }

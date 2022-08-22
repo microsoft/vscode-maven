@@ -3,8 +3,8 @@
 
 import { Element, isTag, Node } from "domhandler";
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../explorer/mavenExplorerProvider";
 import { MavenProject } from "../explorer/model/MavenProject";
+import { MavenProjectManager } from "../project/MavenProjectManager";
 import { localPomPath } from "../utils/contextUtils";
 import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 
@@ -45,7 +45,7 @@ class DefinitionProvider implements vscode.DefinitionProvider {
         const artifactIdHint = getTextFromNode(artifactIdNode?.firstChild);
         const versionHint = getTextFromNode(versionNode?.firstChild);
         if (groupIdHint && artifactIdHint) {
-          const mavenProject: MavenProject | undefined = mavenExplorerProvider.getMavenProject(document.uri.fsPath);
+          const mavenProject: MavenProject | undefined = MavenProjectManager.get(document.uri.fsPath);
           const version: string | undefined = mavenProject?.getDependencyVersion(groupIdHint, artifactIdHint) || versionHint;
           if (version !== undefined && version.match(/^\$\{.*\}$/) === null) { // skip for unresolved properties, e.g. ${azure.version}
             const pomPath: string = localPomPath(groupIdHint, artifactIdHint, version);

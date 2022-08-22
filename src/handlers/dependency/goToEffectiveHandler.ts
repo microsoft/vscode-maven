@@ -2,10 +2,10 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../../explorer/mavenExplorerProvider";
 import { Dependency } from "../../explorer/model/Dependency";
 import { ITreeItem } from "../../explorer/model/ITreeItem";
 import { MavenProject } from "../../explorer/model/MavenProject";
+import { MavenProjectManager } from "../../project/MavenProjectManager";
 import { Queue } from "../../taskExecutor";
 
 export async function goToEffectiveHandler(view: vscode.TreeView<ITreeItem>, node?: Dependency): Promise<void> {
@@ -14,7 +14,7 @@ export async function goToEffectiveHandler(view: vscode.TreeView<ITreeItem>, nod
     }
     const fullArtifactName: string = [node.groupId, node.artifactId, node.omittedStatus.effectiveVersion, node.scope].join(":");
     const pomPath: string = node.projectPomPath;
-    const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
+    const project: MavenProject | undefined = MavenProjectManager.get(pomPath);
     if (project === undefined) {
         throw new Error("Failed to find maven projects.");
     }

@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
 import { Element, isTag, isText } from "domhandler";
-import { mavenExplorerProvider } from "../../explorer/mavenExplorerProvider";
 import { MavenProject } from "../../explorer/model/MavenProject";
 import { UserError } from "../../utils/errorUtils";
 import { getNodesByTag, XmlTagName } from "../../utils/lexerUtils";
+import { MavenProjectManager } from "../../project/MavenProjectManager";
 
 export async function getDependencyNode(pomPath:string, gid: string, aid: string) {
-    const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
+    const project: MavenProject | undefined = MavenProjectManager.get(pomPath);
 
     const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), { preserveFocus: true });
     const projectNodes: Element[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);

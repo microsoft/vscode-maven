@@ -3,7 +3,7 @@
 
 import * as vscode from "vscode";
 import { taskExecutor } from "../../taskExecutor";
-import { mavenExplorerProvider } from "../mavenExplorerProvider";
+import { MavenExplorerProvider } from "../MavenExplorerProvider";
 import { pluginInfoProvider } from "../pluginInfoProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
@@ -60,7 +60,7 @@ export class MavenPlugin implements ITreeItem {
     }
 
     public async refresh(): Promise<void> {
-        mavenExplorerProvider.refresh(this);
+        MavenExplorerProvider.getInstance().refresh(this);
     }
 
     private async fetchPrefix(): Promise<void> {
@@ -69,7 +69,7 @@ export class MavenPlugin implements ITreeItem {
         }
         const prefix = await pluginInfoProvider.getPluginPrefix(this.groupId, this.artifactId);
         this.prefix = prefix;
-        mavenExplorerProvider.refresh(this); // update label/description of current tree item.
+        MavenExplorerProvider.getInstance().refresh(this); // update label/description of current tree item.
     }
 
     private async fetchGoals(): Promise<void> {

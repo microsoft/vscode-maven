@@ -2,10 +2,10 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { IEffectivePom } from "./explorer/model/IEffectivePom";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { getDependencyTree } from "./handlers/dependency/showDependenciesHandler";
+import { MavenProjectManager } from "./project/MavenProjectManager";
 import { Utils } from "./utils/Utils";
 
 /**
@@ -38,7 +38,7 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
             case "dependencies":
                 return getDependencyTree(pomPath);
             case "effective-pom":
-                const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
+                const project: MavenProject | undefined = MavenProjectManager.get(pomPath);
                 if (project) {
                     const effectivePom: IEffectivePom = await project.getEffectivePom();
                     return effectivePom.ePomString;

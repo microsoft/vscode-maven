@@ -5,9 +5,9 @@ import { Element, isTag, isText } from "domhandler";
 import * as fse from "fs-extra";
 import * as semver from "semver";
 import * as vscode from "vscode";
-import { mavenExplorerProvider } from "../../explorer/mavenExplorerProvider";
 import { Dependency } from "../../explorer/model/Dependency";
 import { MavenProject } from "../../explorer/model/MavenProject";
+import { MavenProjectManager } from "../../project/MavenProjectManager";
 import { constructDependenciesNode, constructDependencyManagementNode, constructDependencyNode, getIndentation } from "../../utils/editUtils";
 import { UserError } from "../../utils/errorUtils";
 import { getInnerEndIndex, getInnerStartIndex, getNodesByTag, XmlTagName } from "../../utils/lexerUtils";
@@ -66,7 +66,7 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
 }
 
 async function setDependencyVersion(pomPath: string, gid: string, aid: string, version: string): Promise<void> {
-    const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
+    const project: MavenProject | undefined = MavenProjectManager.get(pomPath);
     if (project === undefined) {
         throw new Error("Failed to get maven project.");
     }
@@ -158,7 +158,7 @@ async function insertDependencyManagement(pomPath: string, targetNode: Element, 
 }
 
 function getAllVersionsInTree(pomPath: string, gid: string, aid: string): string[] {
-    const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(pomPath);
+    const project: MavenProject | undefined = MavenProjectManager.get(pomPath);
     if (project === undefined) {
         throw new Error("Failed to get maven projects.");
     }

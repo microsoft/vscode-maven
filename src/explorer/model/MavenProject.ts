@@ -5,11 +5,12 @@ import * as fs from "fs";
 import * as _ from "lodash";
 import * as path from "path";
 import * as vscode from "vscode";
+import { MavenProjectManager } from "../../project/MavenProjectManager";
 import { Settings } from "../../Settings";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Utils } from "../../utils/Utils";
 import { EffectivePomProvider } from "../EffectivePomProvider";
-import { mavenExplorerProvider } from "../mavenExplorerProvider";
+import { MavenExplorerProvider } from "../MavenExplorerProvider";
 import { DependenciesMenu } from "./DependenciesMenu";
 import { Dependency } from "./Dependency";
 import { IEffectivePom } from "./IEffectivePom";
@@ -165,7 +166,7 @@ export class MavenProject implements ITreeItem {
         ret.push(new PluginsMenu(this));
         ret.push(new DependenciesMenu(this));
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {
-            const projects: MavenProject[] = this.modules.map(m => mavenExplorerProvider.getMavenProject(m)).filter(Boolean) as MavenProject[];
+            const projects: MavenProject[] = this.modules.map(m => MavenProjectManager.get(m)).filter(Boolean) as MavenProject[];
             ret.push(...projects);
         }
         return ret;
@@ -208,7 +209,7 @@ export class MavenProject implements ITreeItem {
 
     private async _refreshPom(): Promise<void> {
         await this.parsePom();
-        mavenExplorerProvider.refresh(this);
+        MavenExplorerProvider.getInstance().refresh(this);
     }
 
     private _convertXmlPlugin(plugins: any[] | undefined): MavenPlugin[] {
@@ -259,12 +260,12 @@ export class MavenProject implements ITreeItem {
             return this.properties.get(key);
         }
 
-        let cur: MavenProject | undefined = mavenExplorerProvider.getMavenProject(this.parentPomPath) ?? this.parent;
+        let cur: MavenProject | undefined = MavenProjectManager.get(this.parentPomPath) ?? this.parent;
         while (cur !== undefined) {
             if (cur.properties.has(key)) {
                 return cur.properties.get(key);
             }
-            cur = mavenExplorerProvider.getMavenProject(cur.parentPomPath) ?? cur.parent;
+            cur = MavenProjectManager.get(cur.parentPomPath) ?? cur.parent;
         }
 
         return undefined;

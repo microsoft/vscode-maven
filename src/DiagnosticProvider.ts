@@ -3,10 +3,10 @@
 import { performance } from "perf_hooks";
 import * as vscode from "vscode";
 import { getRequestDelay, lruCache, MovingAverage } from "./debouncing";
-import { mavenExplorerProvider } from "./explorer/mavenExplorerProvider";
 import { Dependency } from "./explorer/model/Dependency";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { getDependencyNode } from "./handlers/dependency/utils";
+import { MavenProjectManager } from "./project/MavenProjectManager";
 import { Settings } from "./Settings";
 import { UserError } from "./utils/errorUtils";
 
@@ -50,7 +50,7 @@ class DiagnosticProvider {
             this._collection.set(uri, diagnostics);
             return;
         }
-        const project: MavenProject | undefined = mavenExplorerProvider.getMavenProject(uri.fsPath);
+        const project: MavenProject | undefined = MavenProjectManager.get(uri.fsPath);
         if (project === undefined) {
             throw new Error("Failed to get maven project.");
         }

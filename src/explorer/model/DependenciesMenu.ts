@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { diagnosticProvider } from "../../DiagnosticProvider";
 import { parseRawDependencyDataHandler } from "../../handlers/parseRawDependencyDataHandler";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
-import { mavenExplorerProvider } from "../mavenExplorerProvider";
+import { MavenExplorerProvider } from "../MavenExplorerProvider";
 import { Dependency } from "./Dependency";
 import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
@@ -49,7 +49,7 @@ export class DependenciesMenu extends Menu implements ITreeItem {
 
     public refresh(): void {
         this._savePom();
-        mavenExplorerProvider.refresh(this);
+        MavenExplorerProvider.getInstance().refresh(this);
     }
 
     private _savePom(): void {
