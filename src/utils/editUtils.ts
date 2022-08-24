@@ -56,7 +56,7 @@ export function getIndentation(document: vscode.TextDocument, offset: number): s
     ));
 }
 
-export function constructDependencyNode(options: { gid: string, aid: string, version: string, dtype?: string, classifier?: string, baseIndent: string, indent: string, eol: string }): string {
+export function constructDependencyNode(options: { gid: string, aid: string, version?: string, dtype?: string, classifier?: string, baseIndent: string, indent: string, eol: string }): string {
 
     const { gid, aid, version, dtype, classifier, baseIndent, indent, eol } = options;
 
@@ -66,8 +66,10 @@ export function constructDependencyNode(options: { gid: string, aid: string, ver
         "<dependency>",
         `${indent}<groupId>${gid}</groupId>`,
         `${indent}<artifactId>${aid}</artifactId>`,
-        `${indent}<version>${version}</version>`
     ];
+    if (version) {
+        builder.push(`${indent}<version>${version}</version>`);
+    }
 
     // add the packaging type if present and not the default
     if (dtype !== undefined && dtype !== "jar")
@@ -84,7 +86,7 @@ export function constructDependencyNode(options: { gid: string, aid: string, ver
     return builder.join(`${eol}${baseIndent}${indent}`);
 }
 
-export function constructDependenciesNode(options: { gid: string, aid: string, version: string, dtype?: string, classifier?: string, baseIndent: string, indent: string, eol: string }): string {
+export function constructDependenciesNode(options: { gid: string, aid: string, version?: string, dtype?: string, classifier?: string, baseIndent: string, indent: string, eol: string }): string {
 
     const { gid, aid, version, dtype, classifier, baseIndent, indent, eol } = options;
 

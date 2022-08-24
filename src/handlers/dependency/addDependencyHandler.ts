@@ -37,7 +37,7 @@ export async function addDependencyHandler(options?: any): Promise<void> {
     }
 
     // check if another extension has passed a dependency to add on its own
-    if (options && options.groupId && options.artifactId && options.version) {
+    if (options && options.groupId && options.artifactId) {
         await addDependency(pomPath, options.groupId, options.artifactId, options.version, options.packaging, options.classifier);
     }
     else {
@@ -68,7 +68,7 @@ export async function addDependencyHandler(options?: any): Promise<void> {
     }
 }
 
-async function addDependency(pomPath: string, gid: string, aid: string, version: string, dependencyType: string, classifier?: string): Promise<void> {
+async function addDependency(pomPath: string, gid: string, aid: string, version?: string, dependencyType?: string, classifier?: string): Promise<void> {
     // Find out <dependencies> node and insert content.
     const pomDocument = await vscode.window.showTextDocument(vscode.Uri.file(pomPath), { preserveFocus: true });
     const projectNodes: Element[] = getNodesByTag(pomDocument.document.getText(), XmlTagName.Project);
@@ -86,7 +86,7 @@ async function addDependency(pomPath: string, gid: string, aid: string, version:
     }
 }
 
-async function insertDependency(pomPath: string, targetNode: Element, gid: string, aid: string, version: string, dependencyType: string, classifier?: string): Promise<void> {
+async function insertDependency(pomPath: string, targetNode: Element, gid: string, aid: string, version?: string, dependencyType?: string, classifier?: string): Promise<void> {
     const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
     const textEditor: vscode.TextEditor = await vscode.window.showTextDocument(currentDocument);
     const baseIndent: string = getIndentation(currentDocument, getInnerEndIndex(targetNode));
