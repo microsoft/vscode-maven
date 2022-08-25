@@ -12,7 +12,7 @@ import { IProjectCreationMetadata } from "./archetype/createProject/types";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
-import { init as initMavenXsd } from "./completion/mavenXsd";
+import { init as initMavenXsd } from "./mavenXsd";
 import { PomCompletionProvider } from "./completion/PomCompletionProvider";
 import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";

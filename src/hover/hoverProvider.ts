@@ -3,17 +3,23 @@
 
 import { Element, isTag, Node } from "domhandler";
 import * as vscode from "vscode";
+import { getXsdElement } from "../mavenXsd";
 
 import { MavenProject } from "../explorer/model/MavenProject";
 import { MavenProjectManager } from "../project/MavenProjectManager";
-import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, getNodePath, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 
 class HoverProvider implements vscode.HoverProvider {
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
-        const currentNode: Node | undefined = getCurrentNode(document.getText(), document.offsetAt(position));
+        const documentText: string = document.getText();
+        const cursorOffset: number = document.offsetAt(position);
+        const currentNode: Node | undefined = getCurrentNode(documentText, cursorOffset);
         if (currentNode === undefined || currentNode.startIndex === null || currentNode.endIndex === null) {
             return undefined;
         }
+
+        const nodePath = getNodePath(currentNode);
+        const elem = getXsdElement(nodePath);
 
         let tagNode;
         if (isTag(currentNode)) {
@@ -55,7 +61,7 @@ class HoverProvider implements vscode.HoverProvider {
                 }
             }
             default:
-                return undefined;
+                return elem ? new vscode.Hover([elem.nodePath.replace(/\./g, ">"), elem.markdownString], new vscode.Range(position, position)) : undefined;
         }
     }
 }
