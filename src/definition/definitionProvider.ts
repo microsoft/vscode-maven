@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { MavenProjectManager } from "../project/MavenProjectManager";
 import { localPomPath } from "../utils/contextUtils";
-import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, getEnclosingTag, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 
 class DefinitionProvider implements vscode.DefinitionProvider {
   public provideDefinition(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken): vscode.ProviderResult<vscode.Location | vscode.Location[] | vscode.LocationLink[]> {
@@ -17,14 +17,7 @@ class DefinitionProvider implements vscode.DefinitionProvider {
       return undefined;
     }
 
-    let tagNode;
-    if (isTag(currentNode)) {
-      tagNode = currentNode;
-    } else if (currentNode.parent && isTag(currentNode.parent)) {
-      tagNode = currentNode.parent;
-    } else {
-      // TODO: should we recursively traverse up to find nearest tag node?
-    }
+    const tagNode = getEnclosingTag(currentNode);
 
     switch (tagNode?.tagName) {
       case XmlTagName.GroupId:

@@ -7,7 +7,7 @@ import { getXsdElement } from "../mavenXsd";
 
 import { MavenProject } from "../explorer/model/MavenProject";
 import { MavenProjectManager } from "../project/MavenProjectManager";
-import { getCurrentNode, getNodePath, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, getEnclosingTag, getNodePath, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 
 class HoverProvider implements vscode.HoverProvider {
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
@@ -19,16 +19,9 @@ class HoverProvider implements vscode.HoverProvider {
         }
 
         const nodePath = getNodePath(currentNode);
-        const elem = getXsdElement(nodePath);
+        const xsdElement = getXsdElement(nodePath);
 
-        let tagNode;
-        if (isTag(currentNode)) {
-            tagNode = currentNode;
-        } else if (currentNode.parent && isTag(currentNode.parent)) {
-            tagNode = currentNode.parent;
-        } else {
-            // TODO: should we recursively traverse up to find nearest tag node?
-        }
+        const tagNode = getEnclosingTag(currentNode);
 
         switch (tagNode?.tagName) {
             case XmlTagName.GroupId:
@@ -61,7 +54,7 @@ class HoverProvider implements vscode.HoverProvider {
                 }
             }
             default:
-                return elem ? new vscode.Hover([elem.nodePath.replace(/\./g, ">"), elem.markdownString], new vscode.Range(position, position)) : undefined;
+                return xsdElement ? new vscode.Hover([xsdElement.nodePath.replace(/\./g, ">"), xsdElement.markdownString], new vscode.Range(position, position)) : undefined;
         }
     }
 }
