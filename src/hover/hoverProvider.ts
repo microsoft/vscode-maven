@@ -3,26 +3,25 @@
 
 import { Element, isTag, Node } from "domhandler";
 import * as vscode from "vscode";
+import { getXsdElement } from "../mavenXsd";
 
 import { MavenProject } from "../explorer/model/MavenProject";
 import { MavenProjectManager } from "../project/MavenProjectManager";
-import { getCurrentNode, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
+import { getCurrentNode, getEnclosingTag, getNodePath, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 
 class HoverProvider implements vscode.HoverProvider {
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
-        const currentNode: Node | undefined = getCurrentNode(document.getText(), document.offsetAt(position));
+        const documentText: string = document.getText();
+        const cursorOffset: number = document.offsetAt(position);
+        const currentNode: Node | undefined = getCurrentNode(documentText, cursorOffset);
         if (currentNode === undefined || currentNode.startIndex === null || currentNode.endIndex === null) {
             return undefined;
         }
 
-        let tagNode;
-        if (isTag(currentNode)) {
-            tagNode = currentNode;
-        } else if (currentNode.parent && isTag(currentNode.parent)) {
-            tagNode = currentNode.parent;
-        } else {
-            // TODO: should we recursively traverse up to find nearest tag node?
-        }
+        const nodePath = getNodePath(currentNode);
+        const xsdElement = getXsdElement(nodePath);
+
+        const tagNode = getEnclosingTag(currentNode);
 
         switch (tagNode?.tagName) {
             case XmlTagName.GroupId:
@@ -55,7 +54,7 @@ class HoverProvider implements vscode.HoverProvider {
                 }
             }
             default:
-                return undefined;
+                return xsdElement ? new vscode.Hover([xsdElement.nodePath.replace(/\./g, ">"), xsdElement.markdownString], new vscode.Range(position, position)) : undefined;
         }
     }
 }

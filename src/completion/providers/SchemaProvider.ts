@@ -4,7 +4,7 @@
 import { Node } from "domhandler";
 import * as vscode from "vscode";
 import { getNodePath } from "../../utils/lexerUtils";
-import { getXsdElement, XSDElement } from "../mavenXsd";
+import { getXsdElement, XSDElement } from "../../mavenXsd";
 import { trimBrackets } from "../utils";
 import { IXmlCompletionProvider } from "./IXmlCompletionProvider";
 
