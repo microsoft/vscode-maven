@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.38.0
+### Added
+- Support Maven schema-based completion for pom.xml files. [#857](https://github.com/microsoft/vscode-maven/pull/857)
+
+### Fixed
+- Show correct version when inherited from parent projects. [#851](https://github.com/microsoft/vscode-maven/pull/851)
+
 ## 0.37.0
 ### Added
 - Better completion for properties. [#843](https://github.com/microsoft/vscode-maven/issues/843)
