@@ -64,6 +64,18 @@ export function getInnerStartIndex(node: Element) {
 export function getInnerEndIndex(node: Element) {
     return node.endIndex! - node.tagName.length - "</>".length + 1;
 }
+
+export function getEnclosingTag(node: Node): Element | null {
+    let currentNode: Node | null = node;
+    while (currentNode) {
+        if (isTag(currentNode)) {
+            return currentNode;
+        }
+        currentNode = currentNode.parent;
+    }
+    return null;
+}
+
 function dfs(node: Node, pred: (arg: Node) => boolean, result: Node[], includeAll?: boolean) {
     if (pred(node)) {
         result.push(node);

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { getPathToExtensionRoot } from "../utils/contextUtils";
+import { getPathToExtensionRoot } from "./utils/contextUtils";
 import * as fse from "fs-extra";
 import * as _ from "lodash";
 import { MarkdownString } from "vscode";
