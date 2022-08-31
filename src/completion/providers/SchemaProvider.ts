@@ -22,7 +22,7 @@ export class SchemaProvider implements IXmlCompletionProvider {
             let insertText;
             if (e.isLeaf) {
                 // <textNode>|</textNode>
-                insertText = `<${name}>$1</${name}>${eol}$0`;
+                insertText = `<${name}>$1</${name}>$0`;
             } else {
                 // <complexNode>
                 //   |
