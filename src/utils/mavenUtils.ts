@@ -15,6 +15,10 @@ import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage 
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
 
+// calculate dependency graph
+const GOAL_DEPENDENCY_GRAPH = "com.github.ferstl:depgraph-maven-plugin:4.0.2:graph";
+const OPTIONS_DEPENDENCY_GRAPH = "-DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds";
+
 /**
  * Get effective pom of a Maven project.
  *
@@ -44,7 +48,7 @@ export async function rawDependencyTree(pomPath: string): Promise<any> {
     const dependencyGraphPath: string = `${outputPath}.deps.txt`;
     const outputDirectory: string = path.dirname(dependencyGraphPath);
     const outputFileName: string = path.basename(dependencyGraphPath);
-    await executeInBackground(`-N com.github.ferstl:depgraph-maven-plugin:3.3.2:graph -DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}"`, pomPath);
+    await executeInBackground(`-B -N ${OPTIONS_DEPENDENCY_GRAPH} -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}" ${GOAL_DEPENDENCY_GRAPH}`, pomPath);
     return await readFileIfExists(path.join(outputDirectory, outputFileName));
 }
 
