@@ -3,7 +3,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ## 0.39.0
 ### Added
-- Created a new maven goal to execute 'clean install' in just one command.
+- Created a new maven goal to execute 'clean install' in just one command. [#870] (https://github.com/microsoft/vscode-maven/pull/870)
 
 ## 0.38.0
 ### Added
