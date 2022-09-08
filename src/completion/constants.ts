@@ -5,4 +5,4 @@ export const COMMAND_COMPLETION_ITEM_SELECTED: string = "maven.completion.select
 export const INFO_COMPLETION_ITEM_SELECTED: string = "completion-item-selected";
 
 // each should have a corresponding command maven.goal.xxx
-export const DEFAULT_MAVEN_LIFECYCLES: string[] = ["clean", "validate", "compile", "test", "test-compile", "package", "verify", "install", "site", "deploy"];
+export const DEFAULT_MAVEN_LIFECYCLES: string[] = ["clean", "validate", "compile", "test", "test-compile", "package", "verify", "install", "site", "deploy", "clean install"];

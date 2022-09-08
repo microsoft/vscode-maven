@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.39.0
+### Added
+- Created a new maven goal to execute 'clean install' in just one command.
+
 ## 0.38.0
 ### Added
 - Support Maven schema-based completion for pom.xml files. [#857](https://github.com/microsoft/vscode-maven/pull/857)
