@@ -813,11 +813,5 @@
 		"vscode-tas-client": "^0.1.63",
 		"which": "^1.3.1",
 		"xml2js": "^0.4.23"
-	},
-	"__metadata": {
-		"id": "b0f06c6b-24fb-4d7b-bd79-bc5e2fa17312",
-		"publisherDisplayName": "Microsoft",
-		"publisherId": "bae08b87-578e-41ec-ab1c-0b036e7add88",
-		"isPreReleaseVersion": false
 	}
 }
