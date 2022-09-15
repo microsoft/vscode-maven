@@ -132,10 +132,12 @@ async function getCDCommand(cwd: string): Promise<string> {
     }
 }
 
+// Ref:
+// https://github.com/microsoft/vscode/blob/1755a21efc89bcb5ccef3fd908372bf7c8944d3c/src/vs/platform/terminal/node/windowsShellHelper.ts#L144-L164
 function currentWindowsShell(): ShellType {
     const currentWindowsShellPath: string = vscode.env.shell;
-    const binaryName: string = path.basename(currentWindowsShellPath);
-    switch (binaryName) {
+    const executable: string = path.basename(currentWindowsShellPath);
+    switch (executable.toLowerCase()) {
         case "cmd.exe":
             return ShellType.CMD;
         case "pwsh.exe":
@@ -143,10 +145,15 @@ function currentWindowsShell(): ShellType {
         case "pwsh": // pwsh on mac/linux
             return ShellType.POWERSHELL;
         case "bash.exe":
-        case "wsl.exe":
-            if (currentWindowsShellPath.indexOf("Git") > 0) {
-                return ShellType.GIT_BASH;
-            }
+        case 'git-cmd.exe':
+            return ShellType.GIT_BASH;
+        case 'wsl.exe':
+        case 'ubuntu.exe':
+        case 'ubuntu1804.exe':
+        case 'kali.exe':
+        case 'debian.exe':
+        case 'opensuse-42.exe':
+        case 'sles-12.exe':
             return ShellType.WSL;
         default:
             return ShellType.OTHERS;
