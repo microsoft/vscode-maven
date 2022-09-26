@@ -59,8 +59,11 @@ export async function addDependencyHandler(options?: any): Promise<void> {
 
         const selectedDoc: IArtifactMetadata | undefined = await vscode.window.showQuickPick<vscode.QuickPickItem & { value: IArtifactMetadata }>(
             getArtifacts(keywordString.trim().split(/[-,. :]/)).then(artifacts => artifacts.map(artifact => ({ value: artifact, label: `$(package) ${artifact.a}`, description: artifact.g }))),
-            { placeHolder: "Select a dependency ..." }
-        ).then(selected => selected ? selected.value : undefined);
+            {
+                placeHolder: "Select a dependency ...",
+                matchOnDescription: true
+            }
+        ).then(selected => selected?.value);
         if (!selectedDoc) {
             return;
         }
