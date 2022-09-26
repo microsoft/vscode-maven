@@ -22,9 +22,9 @@ function initialize() {
     const usageFilePath = getPathToExtensionRoot("resources", "IndexData", "ArtifactUsage.json");
     let raw;
     try {
-        raw = JSON.parse(readFileSync(usageFilePath).toString())    
+        raw = JSON.parse(readFileSync(usageFilePath).toString())
     } catch (error) {
-        console.log("Failed to load data from ArtifactUsage.json");
+        console.warn("Failed to load data from ArtifactUsage.json");
     }
 
     if (raw) {
