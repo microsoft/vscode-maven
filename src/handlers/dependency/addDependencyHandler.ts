@@ -11,6 +11,7 @@ import { UserError } from "../../utils/errorUtils";
 import { getInnerEndIndex, getInnerStartIndex, getNodesByTag, XmlTagName } from "../../utils/lexerUtils";
 import { getArtifacts, IArtifactMetadata } from "../../utils/requestUtils";
 import { selectProjectIfNecessary } from "../../utils/uiUtils";
+import { getUsage } from "./artifactUsage";
 
 export async function addDependencyHandler(options?: any): Promise<void> {
     let pomPath: string;
@@ -58,7 +59,15 @@ export async function addDependencyHandler(options?: any): Promise<void> {
         }
 
         const selectedDoc: IArtifactMetadata | undefined = await vscode.window.showQuickPick<vscode.QuickPickItem & { value: IArtifactMetadata }>(
-            getArtifacts(keywordString.trim().split(/[-,. :]/)).then(artifacts => artifacts.map(artifact => ({ value: artifact, label: `$(package) ${artifact.a}`, description: artifact.g }))),
+            getArtifacts(keywordString.trim().split(/[-,. :]/))
+                .then(
+                    artifacts => artifacts.map(artifact => ({
+                        value: artifact,
+                        label: `$(package) ${artifact.a}`,
+                        description: artifact.g,
+                        usage: getUsage(`${artifact.g}:${artifact.a}`) // load usage data
+                    })).sort((a, b) => b.usage - a.usage) // from largest to smallest
+                ),
             {
                 placeHolder: "Select a dependency ...",
                 matchOnDescription: true
