@@ -114,10 +114,12 @@ async function promptToManageWorkspaceTrust(): Promise<void> {
 
 export function effectivePomContentUri(pomPath: string): vscode.Uri {
     const displayName = "EffectivePOM.xml";
-    return Uri.parse("vscode-maven://effective-pom").with({ path: `/${path.join(pomPath, displayName)}`, query: pomPath });
+    const contentType = "effective-pom";
+    return vscode.Uri.file(path.join(pomPath, displayName)).with({ scheme: "vscode-maven", authority: contentType, query: pomPath });
 }
 
 export function dependenciesContentUri(pomPath: string): vscode.Uri {
     const displayName = "Dependencies";
-    return vscode.Uri.parse("vscode-maven://dependencies").with({ path: `/${path.join(pomPath, displayName)}`, query: pomPath });
+    const contentType = "dependencies";
+    return vscode.Uri.file(path.join(pomPath, displayName)).with({ scheme: "vscode-maven", authority: contentType, query: pomPath });
 }
