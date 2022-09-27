@@ -52,14 +52,14 @@ The extension provides Maven specific completion suggestions when editing POM fi
 <details>
 <summary>Re-Run Historical Commands</summary>
 
-It preserves history of goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...` 
+It preserves history of goals for each project, so you can fast re-run previous long commands, e.g. `mvn <goals> -Dparam1=value1 -Dparam2=value2 -Dparam3=value3 ...`
 There are 2 entries for it:
 * Command Palette -> select `Maven: History ...` -> Select a project -> Select command from the history
 * Right-click on a project -> Click `History ...` -> Select command from the history
 
 ![Screenshot](images/history.gif)
 </details>
- 
+
 <details>
 <summary>Archetype Related</summary>
 
@@ -67,7 +67,7 @@ There are 2 entries for it:
 The extension loads archetypes listed in local/remote catalog. After selection, the extension sends `mvn archetype:generate -D...` to terminal.
 There are 2 entries for it:
 * Command Palette -> select `Maven: Generate from Maven Archetype`
-* Right-click on a folder -> Click `Generate from Maven Archetype` 
+* Right-click on a folder -> Click `Generate from Maven Archetype`
 
 ![Screenshot](images/archetype.gif)
 
@@ -137,7 +137,7 @@ The usage of Maven executable is:
 You can use `maven.executable.options` to specify default **options** for all your Maven commands executed in current project.
 ```json
 {
-    "maven.executable.options": "-o -s ./settings.xml"      // work offline, and use an alternative settings file 
+    "maven.executable.options": "-o -s ./settings.xml"      // work offline, and use an alternative settings file
 }
 ```
 </details>
@@ -182,18 +182,22 @@ Now right-click on an project item, and then click `Favorite ...`. The option `f
 
 | Name | Description | Default Value |
 |---|---|---|
+| `maven.dependency.enableConflictDiagnostics` | Specify whether to show diagnostics for conflict dependencies. | `true` |
 | `maven.excludedFolders` | Specifies file path pattern of folders to exclude while searching for Maven projects. | `[ "**/.*", "**/node_modules", "**/target", "**/bin", "**/archetype-resources" ]` |
 | `maven.executable.preferMavenWrapper` | Specifies whether you prefer to use Maven wrapper. If true, it tries using 'mvnw' by walking up the parent folders. If false, or 'mvnw' is not found, it tries 'mvn' in PATH instead. | `true` |
 | `maven.executable.path` | Specifies absolute path of your 'mvn' executable. When this value is empty, it tries using 'mvn' or 'mvnw' according to the value of 'maven.executable.preferMavenWrapper'. E.g. `/usr/local/apache-maven-3.6.0/bin/mvn` | ` ` |
 | `maven.executable.options` | Specifies default options for all mvn commands. E.g. `-o -DskipTests` | ` ` |
+| `maven.explorer.projectName` | Format of project node name shown in Maven explorer. | `${project.name}` |
 | `maven.projectOpenBehavior` | "Default method of opening newly created project. | `"Interactive"` |
 | `maven.pomfile.autoUpdateEffectivePOM` | Specifies whether to update effective-pom automatically whenever changes detected. | `false` |
 | `maven.pomfile.globPattern` | Specifies the glob pattern used to look for pom.xml files. | `**/pom.xml` |
+| `maven.pomfile.prefetchEffectivePom` | Specifies whether to prefetch effective pom on startup. | `false` |
 | `maven.terminal.useJavaHome` | If this value is true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created. | `false` |
 | `maven.terminal.customEnv` | Specifies an array of environment variable names and values. These environment variable values will be added before Maven is executed. <br /> `environmentVariable`: Name of the environment variable to set. <br /> `value`: Value of the environment variable to set. | `[]` |
 | `maven.terminal.favorites` | Specify pre-defined favorite commands to execute. <br /> `alias`: A short name for the command. <br /> `command`: Content of the favorite command. | `[]` |
 | `maven.view` | Specifies the way of viewing Maven projects. Possible values: `flat`, `hierarchical`. | `flat` |
 | `maven.settingsFile` | Specifies the absolute path of Maven `settings.xml` file. If not specified, `~/.m2/settings.xml` is used. | `null` |
+| `maven.showInExplorerContextMenu` | If this value is true, add a command to create Maven Projects in the Explorer context menu for folders. | `true` |
 
 ## Data/Telemetry
 

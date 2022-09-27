@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.39.0
+### Added
+- Can filter artifacts with group Id when adding a dependency. [#877](https://github.com/microsoft/vscode-maven/pull/877)
+
+### Changed
+- Update depgraph-maven-plugin to 4.0.2, which is used to calculate dependencies. [#867](https://github.com/microsoft/vscode-maven/pull/867)
+
+### Fixed
+- Error: UriError path cannot begin with two slash characters. [#817](https://github.com/microsoft/vscode-maven/issues/817)
+- Wrongly recongnize Git Bash as WSL when it's not installed on default location. [#874](https://github.com/microsoft/vscode-maven/issues/874)
+
 ## 0.38.0
 ### Added
 - Support Maven schema-based completion for pom.xml files. [#857](https://github.com/microsoft/vscode-maven/pull/857)
