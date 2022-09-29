@@ -8,7 +8,6 @@ import { MavenProject } from "./explorer/model/MavenProject";
 import { getDependencyNode } from "./handlers/dependency/utils";
 import { MavenProjectManager } from "./project/MavenProjectManager";
 import { Settings } from "./Settings";
-import { UserError } from "./utils/errorUtils";
 
 export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
 
@@ -58,25 +57,32 @@ class DiagnosticProvider {
         const conflictNodes: Dependency[] = project.conflictNodes;
         for (const node of conflictNodes) {
             const diagnostic = await this.createDiagnostics(node);
-            diagnostics.push(diagnostic);
-            this.map.set(diagnostic, node);
+            if (diagnostic) {
+                diagnostics.push(diagnostic);
+                this.map.set(diagnostic, node);
+            }
         }
         this._collection.set(uri, diagnostics);
     }
 
-    public async createDiagnostics(node: Dependency): Promise<vscode.Diagnostic> {
+    public async createDiagnostics(node: Dependency): Promise<vscode.Diagnostic | undefined> {
         const root: Dependency = node.root;
-        const range: vscode.Range = await this.findConflictRange(root.projectPomPath, root.groupId, root.artifactId);
+        const range: vscode.Range | undefined = await this.findConflictRange(root.projectPomPath, root.groupId, root.artifactId);
+        if (!range) {
+            return undefined;
+        }
+
         const message: string = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus?.effectiveVersion}`;
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
         diagnostic.code = MAVEN_DEPENDENCY_CONFLICT;
         return diagnostic;
     }
 
-    public async findConflictRange(pomPath: string, gid: string, aid: string): Promise<vscode.Range> {
+    public async findConflictRange(pomPath: string, gid: string, aid: string): Promise<vscode.Range | undefined> {
         const dependencyNode = await getDependencyNode(pomPath, gid, aid);
         if (dependencyNode === undefined) {
-            throw new UserError("Failed to find dependency.");
+            console.warn(`Failed to find dependency node ${gid}:${aid} in ${pomPath}.`);
+            return undefined;
         }
 
         const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
