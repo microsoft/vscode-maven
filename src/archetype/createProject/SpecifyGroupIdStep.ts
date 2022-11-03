@@ -9,7 +9,7 @@ export class SpecifyGroupIdStep implements IProjectCreationStep {
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
         const disposables: Disposable[] = [];
-        const specifyGroupIdPromise = new Promise<StepResult>((resolve, reject) => {
+        const specifyGroupIdPromise = new Promise<StepResult>((resolve) => {
             const inputBox: InputBox = window.createInputBox();
             inputBox.title = "Create Maven Project";
             inputBox.placeholder = "e.g. com.example";
@@ -29,15 +29,14 @@ export class SpecifyGroupIdStep implements IProjectCreationStep {
             disposables.push(
                 inputBox.onDidChangeValue(() => {
                     const validationMessage: string | undefined = this.groupIdValidation(inputBox.value);
-                    inputBox.enabled = validationMessage === undefined;
+                    // inputBox.enabled = validationMessage === undefined;
                     inputBox.validationMessage = validationMessage;
                 }),
                 inputBox.onDidAccept(() => {
-                    if (!inputBox.enabled) {
-                        reject("Invalid groupId submitted.");
+                    if (!inputBox.validationMessage) {
+                        metadata.groupId = inputBox.value;
+                        resolve(StepResult.NEXT);
                     }
-                    metadata.groupId = inputBox.value;
-                    resolve(StepResult.NEXT);
                 }),
                 inputBox.onDidHide(() => {
                     resolve(StepResult.STOP);
