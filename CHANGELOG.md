@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.39.2
+### Fixed
+- Input boxes freeze when value is invalid, since VS Code v1.73.0. [#896](https://github.com/microsoft/vscode-maven/issues/896)
+
 ## 0.39.1
 ### Fixed
 - Error "Failed to find dependency" when dependency conflict exists. [#815](https://github.com/microsoft/vscode-maven/issues/815)[#883](https://github.com/microsoft/vscode-maven/pull/883)
