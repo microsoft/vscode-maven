@@ -18,6 +18,7 @@ import { ITreeItem } from "./ITreeItem";
 import { LifecycleMenu } from "./LifecycleMenu";
 import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
+import { FavoritesMenu } from "./FavoritesMenu";
 
 const CONTEXT_VALUE: string = "maven:project";
 
@@ -165,6 +166,7 @@ export class MavenProject implements ITreeItem {
         ret.push(new LifecycleMenu(this));
         ret.push(new PluginsMenu(this));
         ret.push(new DependenciesMenu(this));
+        ret.push(new FavoritesMenu(this));
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {
             const projects: MavenProject[] = this.modules.map(m => MavenProjectManager.get(m)).filter(Boolean) as MavenProject[];
             ret.push(...projects);

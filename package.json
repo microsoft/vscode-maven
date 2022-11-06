@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.39.0",
+  "version": "0.40.0",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -172,6 +172,12 @@
         "icon": "$(play)"
       },
       {
+        "command": "maven.goal.execute.fromFavoritesMenu",
+        "title": "%contributes.commands.maven.plugin.execute%",
+        "category": "Maven",
+        "icon": "$(play)"
+      },
+      {
         "command": "maven.plugin.execute",
         "title": "%contributes.commands.maven.plugin.execute%",
         "category": "Maven",
@@ -320,6 +326,10 @@
         },
         {
           "command": "maven.goal.execute.fromLifecycleMenu",
+          "when": "never"
+        },
+        {
+          "command": "maven.goal.execute.fromFavoritesMenu",
           "when": "never"
         },
         {
@@ -559,6 +569,16 @@
         {
           "command": "maven.goal.execute.fromLifecycleMenu",
           "when": "view == mavenProjects && viewItem == maven:lifecycle",
+          "group": "1@1"
+        },
+        {
+          "command": "maven.goal.execute.fromFavoritesMenu",
+          "when": "view == mavenProjects && viewItem == maven:favorites",
+          "group": "inline"
+        },
+        {
+          "command": "maven.goal.execute.fromFavoritesMenu",
+          "when": "view == mavenProjects && viewItem == maven:favorites",
           "group": "1@1"
         }
       ],

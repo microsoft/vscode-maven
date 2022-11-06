@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as vscode from "vscode";
 import { Uri, workspace } from "vscode";
+import { FavoriteCommand } from "./explorer/model/FavoriteCommand";
+import { MavenProject } from "./explorer/model/MavenProject";
 
 export namespace Settings {
     export function excludedFolders(resource: Uri): string[] {
@@ -59,8 +62,9 @@ export namespace Settings {
             return _getMavenSection("terminal.customEnv", resourceOrFilepath);
         }
 
-        export function favorites(resource: Uri): { alias: string; command: string }[] | undefined {
-            return _getMavenSection("terminal.favorites", resource);
+        export function favorites(project: MavenProject): FavoriteCommand[] | undefined {
+            const favorites: {alias: string, command: string, debug?: boolean}[] | undefined = _getMavenSection("terminal.favorites", vscode.Uri.file(project.pomPath));
+            return favorites?.map(favorite => new FavoriteCommand(project, favorite.command, favorite.alias, favorite.debug));
         }
     }
     export namespace Executable {
