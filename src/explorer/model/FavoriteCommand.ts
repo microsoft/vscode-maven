@@ -16,6 +16,7 @@ export class FavoriteCommand implements ITreeItem {
 
     getTreeItem(): TreeItem | Thenable<TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.alias, vscode.TreeItemCollapsibleState.None);
+        treeItem.description = this.command;
         treeItem.iconPath = new vscode.ThemeIcon("gear");
         return treeItem;
     }
