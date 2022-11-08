@@ -63,8 +63,8 @@ export namespace Settings {
         }
 
         export function favorites(project: MavenProject): FavoriteCommand[] | undefined {
-            const favorites: {alias: string, command: string, debug?: boolean}[] | undefined = _getMavenSection("terminal.favorites", vscode.Uri.file(project.pomPath));
-            return favorites?.map(favorite => new FavoriteCommand(project, favorite.command, favorite.alias, favorite.debug));
+            type Favorite = {alias: string, command: string, debug?: boolean};
+            return _getMavenSection<Favorite[]>("terminal.favorites", vscode.Uri.file(project.pomPath))?.map(favorite => new FavoriteCommand(project, favorite.command, favorite.alias, favorite.debug));
         }
     }
     export namespace Executable {

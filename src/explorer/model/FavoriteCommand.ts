@@ -7,7 +7,7 @@ import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 
 export class FavoriteCommand implements ITreeItem {
-    
+
     constructor(public project: MavenProject, public command: string, public alias: string, public debug?: boolean) {}
 
     getContextValue(): string {
@@ -20,5 +20,5 @@ export class FavoriteCommand implements ITreeItem {
         treeItem.iconPath = new vscode.ThemeIcon("gear");
         return treeItem;
     }
-    
+
 }

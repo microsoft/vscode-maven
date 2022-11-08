@@ -259,7 +259,7 @@ export namespace Utils {
             await runFavoriteCommandsHandler(selectedProject, node);
             return;
         }
-        
+
         await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
     }
 
