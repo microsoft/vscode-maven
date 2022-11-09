@@ -75,7 +75,7 @@ export class ArtifactProvider implements IXmlCompletionProvider {
                 // also update corresponding groupId node
                 if (groupIdTextNode && groupIdTextNode.startIndex !== null && groupIdTextNode.endIndex !== null) {
                     for (const item of mergedItems) {
-                        const matchedGroupId: string = _.get(item, "data.groupId");
+                        const matchedGroupId: string | undefined = _.get(item, "data.groupId");
                         if (matchedGroupId) {
                             const groupIdRange: vscode.Range | undefined = getRange(groupIdTextNode, document);
                             if (groupIdRange){

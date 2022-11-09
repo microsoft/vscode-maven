@@ -2,26 +2,26 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { DEFAULT_MAVEN_LIFECYCLES } from "../../completion/constants";
-import { ITreeItem } from "./ITreeItem";
-import { LifecyclePhase } from "./LifecyclePhase";
-import { MavenProject } from "./MavenProject";
 import { Menu } from "./Menu";
+import { ITreeItem } from "./ITreeItem";
+import { MavenProject } from "./MavenProject";
+import { FavoriteCommand } from "./FavoriteCommand";
+import { Settings } from "../../Settings";
 
-export class LifecycleMenu extends Menu implements ITreeItem {
+export class FavoritesMenu extends Menu implements ITreeItem {
 
     constructor(project: MavenProject) {
         super(project);
-        this.name = "Lifecycle";
+        this.name = "Favorites";
     }
 
-    public async getChildren() : Promise<LifecyclePhase[]> {
-        return DEFAULT_MAVEN_LIFECYCLES.map(goal => new LifecyclePhase(this.project, goal));
+    public async getChildren(): Promise<FavoriteCommand[] | undefined> {
+        return Settings.Terminal.favorites(this.project);
     }
 
     public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
-        treeItem.iconPath = new vscode.ThemeIcon("sync");
+        treeItem.iconPath = new vscode.ThemeIcon("star-empty");
         return treeItem;
     }
 }

@@ -11,8 +11,10 @@ import { commands, Progress, ProgressLocation, Uri, window } from "vscode";
 import { createUuid, setUserError } from "vscode-extension-telemetry-wrapper";
 import * as xml2js from "xml2js";
 import { DEFAULT_MAVEN_LIFECYCLES } from "../completion/constants";
+import { FavoriteCommand } from "../explorer/model/FavoriteCommand";
 import { LifecyclePhase } from "../explorer/model/LifecyclePhase";
 import { MavenProject } from "../explorer/model/MavenProject";
+import { runFavoriteCommandsHandler } from "../handlers/runFavoriteCommandsHandler";
 import { MavenProjectManager } from "../project/MavenProjectManager";
 import { Settings } from "../Settings";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
@@ -211,6 +213,9 @@ export namespace Utils {
         if (node instanceof LifecyclePhase) {
             selectedProject = node.project;
             selectedCommand = node.phase;
+        } else if (node instanceof FavoriteCommand) {
+            selectedProject = node.project;
+            selectedCommand = node.command;
         } else if (node && node.uri) {
             // for nodes from Project Manager
             const pomPath: string = path.join(Uri.parse(node.uri).fsPath, "pom.xml");
@@ -248,6 +253,11 @@ export namespace Utils {
                 default:
                     break;
             }
+        }
+
+        if (node instanceof FavoriteCommand){
+            await runFavoriteCommandsHandler(selectedProject, node);
+            return;
         }
 
         await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
