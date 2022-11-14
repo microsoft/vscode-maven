@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as fs from "fs";
 import * as _ from "lodash";
+import * as path from "path";
 import * as vscode from "vscode";
+import { getMavenLocalRepository } from "../utils/contextUtils";
+import { readContentFromJar } from "../utils/jarUtils";
 import { fetchPluginMetadataXml } from "../utils/requestUtils";
 import { Utils } from "../utils/Utils";
 
@@ -23,6 +27,11 @@ interface IPluginInfo {
 
 interface PluginInfoDict {
     [artifactId: string]: IPluginInfo;
+}
+
+interface PluginDescription {
+    goalPrefix: string;
+    goals: string[];
 }
 
 class PluginInfoProvider {
@@ -66,17 +75,22 @@ class PluginInfoProvider {
             return goalsFromCache;
         }
 
-        // TODO: read from `jar!META-INF/maven/plugin.xml` if plugin.jar is available in local repository.
+        // Read from `jar!META-INF/maven/plugin.xml` if plugin.jar is available in local repository.
         // See https://github.com/microsoft/vscode-maven/issues/895
-
-        // get plugin goals using maven-help-plugin, i.e. mvn help:describe
-        const { prefix, goals } = await this.parseFromPluginDescription(pomPath, groupId, artifactId, version);
-        info.prefix = info.prefix ?? prefix;
-        info.versions[version] = goals ?? [];
+        const desc: PluginDescription | undefined = await parseMetadataFromJar(groupId, artifactId, version);
+        if (desc) {
+            info.prefix = desc.goalPrefix;
+            info.versions[version] = desc.goals;
+        } else {
+            // get plugin goals using maven-help-plugin, i.e. mvn help:describe
+            const { prefix, goals } = await this.parseFromPluginDescription(pomPath, groupId, artifactId, version);
+            info.prefix = info.prefix ?? prefix;
+            info.versions[version] = goals ?? [];
+        }
 
         // update cache
         await this.cachePluginInfo(groupId, artifactId, info);
-        return goals;
+        return info.versions[version];
     }
 
     private getPluginCache(): IPluginCache {
@@ -131,3 +145,25 @@ class PluginInfoProvider {
 }
 
 export const pluginInfoProvider: PluginInfoProvider = new PluginInfoProvider();
+
+async function parseMetadataFromJar(groupId: string, artifactId: string, version: string): Promise<PluginDescription | undefined> {
+    const jarFilePath = path.join(getMavenLocalRepository(), ...groupId.split("."), artifactId, version, `${artifactId}-${version}.jar`);
+    try {
+        await fs.promises.access(jarFilePath);
+        const jarUri = vscode.Uri.file(jarFilePath);
+        const segs = "META-INF/maven/plugin.xml".split("/");
+
+        const xml = await readContentFromJar(jarUri, ...segs);
+        const xmlObj = xml && await Utils.parseXmlContent(xml);
+        const goalPrefix: any = _.get(xmlObj, "plugin.goalPrefix[0]");
+        const mojos = _.get(xmlObj, "plugin.mojos[0].mojo");
+        const goals = mojos ? (mojos as any[]).map(m => m.goal[0]) : [];
+        return {
+            goalPrefix,
+            goals
+        }
+    } catch (error) {
+        return undefined;
+    }
+
+}
