@@ -21,6 +21,10 @@ interface IPluginInfo {
     };
 }
 
+interface PluginInfoDict {
+    [artifactId: string]: IPluginInfo;
+}
+
 class PluginInfoProvider {
     private _context: vscode.ExtensionContext;
 
@@ -29,12 +33,14 @@ class PluginInfoProvider {
     }
 
     public async getPluginPrefix(gid: string, aid: string): Promise<string | undefined> {
-        const infos: {[aid: string]: IPluginInfo} = _.get(this.getPluginCache(), [gid]) ?? {};
+        // read from cache if exists
+        const infos: PluginInfoDict = _.get(this.getPluginCache(), [gid]) ?? {};
         const info: IPluginInfo = _.get(infos, [aid]) ?? {};
         if (info.prefix !== undefined) {
             return info.prefix;
         }
 
+        // get prefix from central/groupId/maven-metadata.xml
         const metadataXml = await fetchPluginMetadataXml(gid);
         const xml: any = await Utils.parseXmlContent(metadataXml);
         const plugins: any[] = _.get(xml, "metadata.plugins[0].plugin");
@@ -44,12 +50,15 @@ class PluginInfoProvider {
             infos[a] = infos[a] ?? {};
             infos[a].prefix = p;
         });
-        await this.cachePluginInfos(gid, infos);
+
+        // update cache
+        await this.udpatePluginInfoCache(gid, infos);
         return infos[aid]?.prefix;
     }
 
     public async getPluginGoals(pomPath: string, groupId: string, artifactId: string, version: string): Promise<string[] | undefined> {
-        const infos: {[aid: string]: IPluginInfo} = _.get(this.getPluginCache(), [groupId]) ?? {};
+        // read from cache if exists
+        const infos: PluginInfoDict = _.get(this.getPluginCache(), [groupId]) ?? {};
         const info: IPluginInfo = _.get(infos, [artifactId]) ?? {};
         info.versions = info.versions ?? {};
         const goalsFromCache: string[] | undefined = _.get(info.versions, [version]);
@@ -57,10 +66,15 @@ class PluginInfoProvider {
             return goalsFromCache;
         }
 
-        const {prefix, goals} = await this.fetchFromRepository(pomPath, groupId, artifactId, version);
+        // TODO: read from `jar!META-INF/maven/plugin.xml` if plugin.jar is available in local repository.
+        // See https://github.com/microsoft/vscode-maven/issues/895
+
+        // get plugin goals using maven-help-plugin, i.e. mvn help:describe
+        const { prefix, goals } = await this.parseFromPluginDescription(pomPath, groupId, artifactId, version);
         info.prefix = info.prefix ?? prefix;
         info.versions[version] = goals ?? [];
 
+        // update cache
         await this.cachePluginInfo(groupId, artifactId, info);
         return goals;
     }
@@ -69,7 +83,7 @@ class PluginInfoProvider {
         return this._context.globalState.get(KEY_PLUGINS) ?? {};
     }
 
-    private async cachePluginInfos(gid: string, infos: {[aid: string]: IPluginInfo}): Promise<void> {
+    private async udpatePluginInfoCache(gid: string, infos: PluginInfoDict): Promise<void> {
         const plugins: any = this._context.globalState.get(KEY_PLUGINS) ?? {};
         _.set(plugins, [gid], infos);
         await this._context.globalState.update(KEY_PLUGINS, plugins);
@@ -81,7 +95,7 @@ class PluginInfoProvider {
         await this._context.globalState.update(KEY_PLUGINS, plugins);
     }
 
-    private async fetchFromRepository(projectBasePath: string, gid: string, aid: string, version?: string): Promise<{prefix?: string, goals?: string[]}> {
+    private async parseFromPluginDescription(projectBasePath: string, gid: string, aid: string, version?: string): Promise<{ prefix?: string, goals?: string[] }> {
         let prefix: string | undefined;
         const goals: string[] = [];
         const textOutput: string = await Utils.getPluginDescription(this.getPluginId(gid, aid, version), projectBasePath);
