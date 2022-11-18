@@ -19,31 +19,31 @@ jobs:
         toolMajorVersion: V2
         verboseOutput: true
         debugMode: false
-    - task: Semmle@1
-      displayName: Code QL for TS/JS
-      inputs:
-        sourceCodeDirectory: '$(Build.SourcesDirectory)'
-        language: 'tsandjs'
-        includeNodeModules: false
-        querySuite: 'Recommended'
-        timeout: '1800'
-        ram: '16384'
-        addProjectDirToScanningExclusionList: true
-    - task: Semmle@1
-      displayName: Code QL for Java
-      inputs:
-        sourceCodeDirectory: '$(Build.SourcesDirectory)/jdtls.ext'
-        language: 'java'
-        querySuite: 'Recommended'
-        timeout: '1800'
-        ram: '16384'
-        addProjectDirToScanningExclusionList: true
+    # - task: Semmle@1
+    #   displayName: Code QL for TS/JS
+    #   inputs:
+    #     sourceCodeDirectory: '$(Build.SourcesDirectory)'
+    #     language: 'tsandjs'
+    #     includeNodeModules: false
+    #     querySuite: 'Recommended'
+    #     timeout: '1800'
+    #     ram: '16384'
+    #     addProjectDirToScanningExclusionList: true
+    # - task: Semmle@1
+    #   displayName: Code QL for Java
+    #   inputs:
+    #     sourceCodeDirectory: '$(Build.SourcesDirectory)/jdtls.ext'
+    #     language: 'java'
+    #     querySuite: 'Recommended'
+    #     timeout: '1800'
+    #     ram: '16384'
+    #     addProjectDirToScanningExclusionList: true
     - task: PostAnalysis@1
       displayName: 'Post Analysis'
       inputs:
         CredScan: true
-        Semmle: true
-        SemmleBreakOn: 'Error'
+        # Semmle: true
+        # SemmleBreakOn: 'Error'
         ToolLogsNotFoundAction: 'Standard'
 
   - job: ci
