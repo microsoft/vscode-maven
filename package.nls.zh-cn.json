@@ -18,6 +18,7 @@
     "contributes.commands.maven.project.goToDefinition": "转到定义",
     "contributes.commands.maven.project.excludeDependency": "删除依赖",
     "contributes.commands.maven.project.setDependencyVersion": "指定依赖版本为...",
+    "contributes.commands.maven.project.addFavorite": "添加常用命令...",
     "contributes.commands.maven.dependency.goToEffective": "转到有效的依赖项",
     "contributes.views.explorer.mavenProjects": "Maven",
     "contributes.viewsWelcome.mavenProjects.untrustedWorkspaces": "高级功能（例如：执行生命周期阶段与插件的目标命令）将会因为安全考量在限制模式中被停用。\nPOM编辑辅助功能（例如：[添加依赖](command:maven.project.addDependency)）仍可以使用。\n学习更多关于[工作区信任](https://aka.ms/vscode-workspace-trust)\n[管理工作区信任](command:workbench.trust.manage)",
