@@ -27,11 +27,12 @@ import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { debugHandler } from "./handlers/debugHandler";
 import { addDependencyHandler } from "./handlers/dependency/addDependencyHandler";
 import { excludeDependencyHandler } from "./handlers/dependency/excludeDependencyHandler";
+import { addFavoriteHandler } from "./handlers/favorites/addFavoriteHandler";
 import { goToEffectiveHandler } from "./handlers/dependency/goToEffectiveHandler";
 import { jumpToDefinitionHandler } from "./handlers/dependency/jumpToDefinitionHandler";
 import { setDependencyVersionHandler } from "./handlers/dependency/setDependencyVersionHandler";
 import { showDependenciesHandler } from "./handlers/dependency/showDependenciesHandler";
-import { runFavoriteCommandsHandler } from "./handlers/runFavoriteCommandsHandler";
+import { runFavoriteCommandsHandler } from "./handlers/favorites/runFavoriteCommandsHandler";
 import { hoverProvider } from "./hover/hoverProvider";
 import { registerArtifactSearcher } from "./jdtls/artifactSearcher";
 import { isJavaExtEnabled } from "./jdtls/commands";
@@ -134,6 +135,9 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.project.setDependencyVersion", setDependencyVersionHandler);
     registerCommand(context, "maven.project.goToDefinition", jumpToDefinitionHandler);
 
+    // favorites
+    registerCommand(context, "maven.project.addFavorite", addFavoriteHandler);
+
     // debug
     registerCommand(context, "maven.plugin.debug", debugHandler);
     vscode.debug.onDidTerminateDebugSession((session) => {
@@ -202,6 +206,7 @@ function registerConfigChangeListener(context: vscode.ExtensionContext): void {
         if (e.affectsConfiguration("maven.view")
             || e.affectsConfiguration("maven.pomfile.globPattern")
             || e.affectsConfiguration("maven.explorer.projectName")
+            || e.affectsConfiguration("maven.terminal.favorites")
         ) {
             MavenExplorerProvider.getInstance().refresh();
         }

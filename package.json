@@ -2,7 +2,7 @@
   "name": "vscode-maven",
   "displayName": "Maven for Java",
   "description": "%description%",
-  "version": "0.40.0",
+  "version": "0.41.0",
   "icon": "resources/logo.png",
   "publisher": "vscjava",
   "preview": true,
@@ -59,6 +59,7 @@
     "onCommand:maven.plugin.execute",
     "onCommand:maven.project.addDependency",
     "onCommand:maven.project.excludeDependency",
+    "onCommand:maven.project.addFavorite",
     "onView:mavenProjects"
   ],
   "main": "./dist/extension",
@@ -221,6 +222,12 @@
         "title": "%contributes.commands.maven.project.setDependencyVersion%",
         "category": "Maven",
         "icon": "$(wrench)"
+      },
+      {
+        "command": "maven.project.addFavorite",
+        "title": "%contributes.commands.maven.project.addFavorite%",
+        "category": "Maven",
+        "icon": "$(add)"
       },
       {
         "command": "maven.dependency.goToEffective",
@@ -554,6 +561,16 @@
         {
           "command": "maven.project.addDependency",
           "when": "view == mavenProjects && viewItem == maven:dependenciesMenu",
+          "group": "inline@0"
+        },
+        {
+          "command": "maven.project.addFavorite",
+          "when": "view == javaProjectExplorer && viewItem == maven:favoritesMenu",
+          "group": "inline"
+        },
+        {
+          "command": "maven.project.addFavorite",
+          "when": "view == mavenProjects && viewItem == maven:favoritesMenu",
           "group": "inline@0"
         },
         {

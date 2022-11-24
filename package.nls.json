@@ -17,6 +17,7 @@
     "contributes.commands.maven.project.showDependencies": "Show Dependencies",
     "contributes.commands.maven.project.excludeDependency": "Exclude Dependency",
     "contributes.commands.maven.project.setDependencyVersion": "Resolve Conflict...",
+    "contributes.commands.maven.project.addFavorite": "Add a favorite...",
     "contributes.commands.maven.dependency.goToEffective": "Go to Effective Dependency",
     "contributes.commands.maven.project.goToDefinition": "Go to Definition",
     "contributes.views.explorer.mavenProjects": "Maven",
