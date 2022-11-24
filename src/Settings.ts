@@ -6,6 +6,7 @@ import { Uri, workspace } from "vscode";
 import { FavoriteCommand } from "./explorer/model/FavoriteCommand";
 import { MavenProject } from "./explorer/model/MavenProject";
 
+type FavoriteFormat = {alias: string; command: string; debug?: boolean}
 export namespace Settings {
     export function excludedFolders(resource: Uri): string[] {
         const ret: string[] | undefined = _getMavenSection<string[]>("excludedFolders", resource);
@@ -30,6 +31,12 @@ export namespace Settings {
 
     export function changeToHierarchicalView(): void {
         workspace.getConfiguration().update("maven.view", "hierarchical", false);
+    }
+
+    export function storeFavorite(favorite: FavoriteFormat): void {
+        const favorites: FavoriteFormat[] = workspace.getConfiguration().get("maven.terminal.favorites") ?? [];
+        favorites.push(favorite);
+        workspace.getConfiguration().update("maven.terminal.favorites", favorites);
     }
 
     export function setMavenExecutablePath(mvnPath: string): void {

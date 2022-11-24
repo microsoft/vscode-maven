@@ -4,6 +4,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 ## 0.40.0
 ### Added
 - Created a new FavoritesMenu. This menu allows shortcuts to execute the favorite commands. [#884](https://github.com/microsoft/vscode-maven/issues/884)
+- Created a UI to add favorites into the user workspace scope. [#901](https://github.com/microsoft/vscode-maven/issues/901)
 
 ## 0.39.2
 ### Fixed

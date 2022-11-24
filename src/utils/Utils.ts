@@ -14,7 +14,7 @@ import { DEFAULT_MAVEN_LIFECYCLES } from "../completion/constants";
 import { FavoriteCommand } from "../explorer/model/FavoriteCommand";
 import { LifecyclePhase } from "../explorer/model/LifecyclePhase";
 import { MavenProject } from "../explorer/model/MavenProject";
-import { runFavoriteCommandsHandler } from "../handlers/runFavoriteCommandsHandler";
+import { runFavoriteCommandsHandler } from "../handlers/favorites/runFavoriteCommandsHandler";
 import { MavenProjectManager } from "../project/MavenProjectManager";
 import { Settings } from "../Settings";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";

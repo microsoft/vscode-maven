@@ -15,6 +15,10 @@ export class FavoritesMenu extends Menu implements ITreeItem {
         this.name = "Favorites";
     }
 
+    public getContextValue(): string {
+        return "maven:favoritesMenu";
+    }
+
     public async getChildren(): Promise<FavoriteCommand[] | undefined> {
         return Settings.Terminal.favorites(this.project);
     }
