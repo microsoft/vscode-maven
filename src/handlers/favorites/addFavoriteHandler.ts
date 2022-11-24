@@ -50,7 +50,7 @@ export async function addFavoriteHandler() {
     if (!debugMode) {
         return;
     }
- 
+
     // store favorite into workspace settings
     const debug: boolean = debugMode === 'true';
     Settings.storeFavorite({alias, command, debug});
