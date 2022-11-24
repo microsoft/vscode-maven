@@ -34,8 +34,8 @@ export namespace Settings {
     }
 
     export function storeFavorite(favorite: FavoriteFormat): void {
-        const favorites: FavoriteFormat[] | undefined = workspace.getConfiguration().get("maven.terminal.favorites");
-        favorites?.push(favorite);
+        const favorites: FavoriteFormat[] = workspace.getConfiguration().get("maven.terminal.favorites") ?? [];
+        favorites.push(favorite);
         workspace.getConfiguration().update("maven.terminal.favorites", favorites);
     }
 

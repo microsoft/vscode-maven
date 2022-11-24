@@ -5,23 +5,6 @@ import * as vscode from "vscode";
 
 export async function addFavoriteHandler() {
 
-    const alias = await vscode.window.showInputBox({
-        title: "Add favorite",
-        ignoreFocusOut: true,
-        prompt: "Input an alias for your favorite.",
-        placeHolder: "e.g. Clean and Build Project",
-        validateInput: (text: string) => {
-            if (text.trim().length < 3) {
-                return "Favorite is too short.";
-            }
-            return undefined;
-        }
-    });
-
-    if (!alias) {
-        return;
-    }
-
     const command = await vscode.window.showInputBox({
         title: "Add favorite",
         ignoreFocusOut: true,
@@ -39,19 +22,37 @@ export async function addFavoriteHandler() {
         return;
     }
 
-    const debugMode = await vscode.window.showQuickPick(
-        ["true", "false"],
+    const alias = await vscode.window.showInputBox({
+        title: "Add favorite",
+        ignoreFocusOut: true,
+        prompt: "Input an alias for your favorite.",
+        placeHolder: "e.g. Clean and Build Project",
+        value: command,
+        validateInput: (text: string) => {
+            if (text.trim().length < 3) {
+                return "Favorite is too short.";
+            }
+            return undefined;
+        }
+    });
+
+    if (!alias) {
+        return;
+    }
+
+    const executionMode = await vscode.window.showQuickPick(
+        ["Run", "Debug"],
         {
             title: "Add favorite",
-            placeHolder: "Is it to execute in debug mode?",
+            placeHolder: "Select the command execution mode...",
         }
     );
 
-    if (!debugMode) {
+    if (!executionMode) {
         return;
     }
 
     // store favorite into workspace settings
-    const debug: boolean = debugMode === 'true';
+    const debug: boolean = executionMode === 'Debug';
     Settings.storeFavorite({alias, command, debug});
 }

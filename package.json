@@ -1,840 +1,841 @@
 {
-  "name": "vscode-maven",
-  "displayName": "Maven for Java",
-  "description": "%description%",
-  "version": "0.41.0",
-  "icon": "resources/logo.png",
-  "publisher": "vscjava",
-  "preview": true,
-  "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
-  "engines": {
-    "vscode": "^1.65.0"
-  },
-  "enabledApiProposals": [],
-  "capabilities": {
-    "virtualWorkspaces": false,
-    "untrustedWorkspaces": {
-      "supported": "limited",
-      "restrictedConfigurations": [
-        "maven.executable.options",
-        "maven.terminal.customEnv"
-      ]
-    }
-  },
-  "categories": [
-    "Programming Languages",
-    "Other"
-  ],
-  "keywords": [
-    "Maven",
-    "Java"
-  ],
-  "license": "MIT",
-  "homepage": "https://github.com/Microsoft/vscode-maven/",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Microsoft/vscode-maven.git"
-  },
-  "activationEvents": [
-    "workspaceContains:**/pom.xml",
-    "onCommand:maven.explorer.refresh",
-    "onCommand:maven.goal.clean",
-    "onCommand:maven.goal.validate",
-    "onCommand:maven.goal.compile",
-    "onCommand:maven.goal.test",
-    "onCommand:maven.goal.test-compile",
-    "onCommand:maven.goal.package",
-    "onCommand:maven.goal.verify",
-    "onCommand:maven.goal.install",
-    "onCommand:maven.goal.site",
-    "onCommand:maven.goal.deploy",
-    "onCommand:maven.goal.custom",
-    "onCommand:maven.goal.execute",
-    "onCommand:maven.goal.execute.fromProjectManager",
-    "onCommand:maven.project.effectivePom",
-    "onCommand:maven.project.openPom",
-    "onCommand:maven.archetype.generate",
-    "onCommand:maven.archetype.update",
-    "onCommand:maven.history",
-    "onCommand:maven.plugin.execute",
-    "onCommand:maven.project.addDependency",
-    "onCommand:maven.project.excludeDependency",
-    "onCommand:maven.project.addFavorite",
-    "onView:mavenProjects"
-  ],
-  "main": "./dist/extension",
-  "contributes": {
-    "javaExtensions": [
-      "./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.37.0.jar"
-    ],
-    "commands": [
-      {
-        "command": "maven.explorer.refresh",
-        "title": "%contributes.commands.maven.explorer.refresh%",
-        "category": "Maven",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "maven.goal.clean",
-        "title": "clean",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.validate",
-        "title": "validate",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.compile",
-        "title": "compile",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.test",
-        "title": "test",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.test-compile",
-        "title": "test-compile",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.package",
-        "title": "package",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.verify",
-        "title": "verify",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.install",
-        "title": "install",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.site",
-        "title": "site",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.deploy",
-        "title": "deploy",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.custom",
-        "title": "%contributes.commands.maven.goal.custom%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.project.effectivePom",
-        "title": "%contributes.commands.maven.project.effectivePom%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.project.openPom",
-        "title": "%contributes.commands.maven.project.openPom%",
-        "category": "Maven",
-        "icon": "$(go-to-file)"
-      },
-      {
-        "command": "maven.archetype.generate",
-        "title": "%contributes.commands.maven.archetype.generate%",
-        "category": "Maven",
-        "icon": "$(add)"
-      },
-      {
-        "command": "maven.archetype.update",
-        "title": "%contributes.commands.maven.archetype.update%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.history",
-        "title": "%contributes.commands.maven.history%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.execute",
-        "title": "%contributes.commands.maven.goal.execute%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.execute.fromProjectManager",
-        "title": "Run Maven Commands...",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.goal.execute.fromLifecycleMenu",
-        "title": "%contributes.commands.maven.plugin.execute%",
-        "category": "Maven",
-        "icon": "$(play)"
-      },
-      {
-        "command": "maven.goal.execute.fromFavoritesMenu",
-        "title": "%contributes.commands.maven.plugin.execute%",
-        "category": "Maven",
-        "icon": "$(play)"
-      },
-      {
-        "command": "maven.plugin.execute",
-        "title": "%contributes.commands.maven.plugin.execute%",
-        "category": "Maven",
-        "icon": "$(play)"
-      },
-      {
-        "command": "maven.plugin.debug",
-        "title": "%contributes.commands.maven.plugin.debug%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.view.flat",
-        "title": "%contributes.commands.maven.view.flat%",
-        "category": "Maven",
-        "icon": "$(list-flat)"
-      },
-      {
-        "command": "maven.view.hierarchical",
-        "title": "%contributes.commands.maven.view.hierarchical%",
-        "category": "Maven",
-        "icon": "$(list-tree)"
-      },
-      {
-        "command": "maven.project.addDependency",
-        "title": "%contributes.commands.maven.project.addDependency%",
-        "category": "Maven",
-        "icon": "$(add)"
-      },
-      {
-        "command": "maven.project.showDependencies",
-        "title": "%contributes.commands.maven.project.showDependencies%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.project.excludeDependency",
-        "title": "%contributes.commands.maven.project.excludeDependency%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.project.setDependencyVersion",
-        "title": "%contributes.commands.maven.project.setDependencyVersion%",
-        "category": "Maven",
-        "icon": "$(wrench)"
-      },
-      {
-        "command": "maven.project.addFavorite",
-        "title": "%contributes.commands.maven.project.addFavorite%",
-        "category": "Maven",
-        "icon": "$(add)"
-      },
-      {
-        "command": "maven.dependency.goToEffective",
-        "title": "%contributes.commands.maven.dependency.goToEffective%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.project.goToDefinition",
-        "title": "%contributes.commands.maven.project.goToDefinition%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.favorites",
-        "title": "%contributes.commands.maven.favorites%",
-        "category": "Maven"
-      },
-      {
-        "command": "maven.java.projectConfiguration.update",
-        "title": "%contributes.commands.maven.java.projectConfiguration.update%",
-        "icon": "$(sync)",
-        "category": "Maven"
-      }
-    ],
-    "views": {
-      "explorer": [
-        {
-          "id": "mavenProjects",
-          "name": "%contributes.views.explorer.mavenProjects%",
-          "when": "workbenchState == empty || vscode-maven:activated",
-          "contextualTitle": "%contributes.views.explorer.mavenProjects%",
-          "icon": "resources/icons/dark/project.svg"
-        }
-      ]
-    },
-    "viewsWelcome": [
-      {
-        "view": "mavenProjects",
-        "contents": "%contributes.viewsWelcome.mavenProjects.untrustedWorkspaces%",
-        "when": "!isWorkspaceTrusted"
-      }
-    ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "maven.goal.clean",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.validate",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.compile",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.test",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.test-compile",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.package",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.verify",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.install",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.site",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.deploy",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.custom",
-          "when": "never"
-        },
-        {
-          "command": "maven.project.effectivePom",
-          "when": "never"
-        },
-        {
-          "command": "maven.explorer.refresh",
-          "when": "never"
-        },
-        {
-          "command": "maven.project.openPom",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.execute.fromProjectManager",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.execute.fromLifecycleMenu",
-          "when": "never"
-        },
-        {
-          "command": "maven.goal.execute.fromFavoritesMenu",
-          "when": "never"
-        },
-        {
-          "command": "maven.plugin.execute",
-          "when": "never"
-        },
-        {
-          "command": "maven.plugin.debug",
-          "when": "never"
-        },
-        {
-          "command": "maven.project.showDependencies",
-          "when": "never"
-        },
-        {
-          "command": "maven.project.excludeDependency",
-          "when": "never"
-        },
-        {
-          "command": "maven.project.setDependencyVersion",
-          "when": "never"
-        },
-        {
-          "command": "maven.dependency.goToEffective",
-          "when": "never"
-        },
-        {
-          "command": "maven.project.goToDefinition",
-          "when": "never"
-        },
-        {
-          "command": "maven.archetype.generate",
-          "when": "!java:projectManagerActivated"
-        },
-        {
-          "command": "maven.favorites",
-          "when": "isWorkspaceTrusted"
-        },
-        {
-          "command": "maven.history",
-          "when": "isWorkspaceTrusted"
-        },
-        {
-          "command": "maven.goal.execute",
-          "when": "isWorkspaceTrusted"
-        },
-        {
-          "command": "maven.java.projectConfiguration.update",
-          "when": "false"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "maven.archetype.generate",
-          "when": "config.maven.showInExplorerContextMenu && explorerResourceIsFolder",
-          "group": "maven@3"
-        },
-        {
-          "command": "maven.project.effectivePom",
-          "when": "resourceFilename == pom.xml",
-          "group": "maven@1"
-        }
-      ],
-      "view/title": [
-        {
-          "command": "maven.java.projectConfiguration.update",
-          "when": "view == mavenProjects && javaLSReady",
-          "group": "navigation@05"
-        },
-        {
-          "command": "maven.view.flat",
-          "when": "view == mavenProjects && config.maven.view != flat",
-          "group": "navigation@0a"
-        },
-        {
-          "command": "maven.view.hierarchical",
-          "when": "view == mavenProjects && config.maven.view != hierarchical",
-          "group": "navigation@0b"
-        },
-        {
-          "command": "maven.archetype.generate",
-          "when": "view == mavenProjects",
-          "group": "navigation@1"
-        },
-        {
-          "command": "maven.explorer.refresh",
-          "when": "view == mavenProjects",
-          "group": "overflow@2"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "maven.goal.custom",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@5"
-        },
-        {
-          "command": "maven.favorites",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@3"
-        },
-        {
-          "command": "maven.history",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@0"
-        },
-        {
-          "command": "maven.goal.clean",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@10"
-        },
-        {
-          "command": "maven.goal.package",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@20"
-        },
-        {
-          "command": "maven.goal.install",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@30"
-        },
-        {
-          "command": "maven.goal.compile",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@40"
-        },
-        {
-          "command": "maven.goal.validate",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@50"
-        },
-        {
-          "command": "maven.goal.verify",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@60"
-        },
-        {
-          "command": "maven.goal.test",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@70"
-        },
-        {
-          "command": "maven.goal.test-compile",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@75"
-        },
-        {
-          "command": "maven.goal.site",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@80"
-        },
-        {
-          "command": "maven.goal.deploy",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@90"
-        },
-        {
-          "command": "maven.project.effectivePom",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "0-pom@1"
-        },
-        {
-          "command": "maven.project.showDependencies",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "0-pom@0"
-        },
-        {
-          "command": "maven.project.excludeDependency",
-          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?!.*?\\b\\+root\\b)/",
-          "group": "0-dependency@0"
-        },
-        {
-          "command": "maven.project.setDependencyVersion",
-          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
-          "group": "inline"
-        },
-        {
-          "command": "maven.dependency.goToEffective",
-          "when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
-          "group": "0-dependency@2"
-        },
-        {
-          "command": "maven.project.goToDefinition",
-          "when": "view == mavenProjects && viewItem =~ /maven:dependency/",
-          "group": "0-dependency@1"
-        },
-        {
-          "command": "maven.project.openPom",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "inline"
-        },
-        {
-          "command": "maven.plugin.execute",
-          "when": "view == mavenProjects && viewItem == maven:pluginGoal",
-          "group": "inline"
-        },
-        {
-          "command": "maven.plugin.execute",
-          "when": "view == mavenProjects && viewItem == maven:pluginGoal",
-          "group": "1@1"
-        },
-        {
-          "command": "maven.plugin.debug",
-          "when": "view == mavenProjects && viewItem == maven:pluginGoal",
-          "group": "1@2"
-        },
-        {
-          "command": "maven.explorer.refresh",
-          "when": "view == mavenProjects && viewItem == maven:plugin",
-          "group": "1@1"
-        },
-        {
-          "command": "maven.explorer.refresh",
-          "when": "view == mavenProjects && viewItem == maven:menu",
-          "group": "inline"
-        },
-        {
-          "command": "maven.project.addDependency",
-          "when": "view == javaProjectExplorer && viewItem =~ /java:container(?=.*?\\b\\+maven\\b)/",
-          "group": "inline"
-        },
-        {
-          "command": "maven.project.addDependency",
-          "when": "view == mavenProjects && viewItem == maven:dependenciesMenu",
-          "group": "inline@0"
-        },
-        {
-          "command": "maven.project.addFavorite",
-          "when": "view == javaProjectExplorer && viewItem == maven:favoritesMenu",
-          "group": "inline"
-        },
-        {
-          "command": "maven.project.addFavorite",
-          "when": "view == mavenProjects && viewItem == maven:favoritesMenu",
-          "group": "inline@0"
-        },
-        {
-          "command": "maven.explorer.refresh",
-          "when": "view == mavenProjects && viewItem == maven:dependenciesMenu",
-          "group": "inline@1"
-        },
-        {
-          "command": "maven.goal.execute.fromLifecycleMenu",
-          "when": "view == mavenProjects && viewItem == maven:lifecycle",
-          "group": "inline"
-        },
-        {
-          "command": "maven.goal.execute.fromLifecycleMenu",
-          "when": "view == mavenProjects && viewItem == maven:lifecycle",
-          "group": "1@1"
-        },
-        {
-          "command": "maven.goal.execute.fromFavoritesMenu",
-          "when": "view == mavenProjects && viewItem == maven:favorites",
-          "group": "inline"
-        },
-        {
-          "command": "maven.goal.execute.fromFavoritesMenu",
-          "when": "view == mavenProjects && viewItem == maven:favorites",
-          "group": "1@1"
-        }
-      ],
-      "javaProject.maven": [
-        {
-          "command": "maven.project.openPom",
-          "group": "maven@20"
-        },
-        {
-          "command": "maven.goal.execute.fromProjectManager",
-          "group": "maven@30"
-        }
-      ]
-    },
-    "configuration": [
-      {
-        "title": "Maven for Java",
-        "properties": {
-          "maven.settingsFile": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "default": null,
-            "description": "%configuration.maven.settingsFile%",
-            "scope": "machine"
-          },
-          "maven.excludedFolders": {
-            "type": "array",
-            "default": [
-              "**/.*",
-              "**/node_modules",
-              "**/target",
-              "**/bin",
-              "**/archetype-resources"
-            ],
-            "description": "%configuration.maven.excludedFolders%",
-            "scope": "resource"
-          },
-          "maven.executable.preferMavenWrapper": {
-            "type": "boolean",
-            "default": "true",
-            "description": "%configuration.maven.executable.preferMavenWrapper%",
-            "scope": "resource"
-          },
-          "maven.executable.path": {
-            "type": "string",
-            "default": "",
-            "description": "%configuration.maven.executable.path%",
-            "scope": "machine"
-          },
-          "maven.executable.options": {
-            "type": "string",
-            "default": "",
-            "description": "%configuration.maven.executable.options%",
-            "scope": "machine-overridable"
-          },
-          "maven.terminal.useJavaHome": {
-            "type": "boolean",
-            "default": false,
-            "description": "%configuration.maven.terminal.useJavaHome%",
-            "scope": "window"
-          },
-          "maven.terminal.customEnv": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "title": "environment setting",
-              "required": [
-                "environmentVariable",
-                "value"
-              ],
-              "properties": {
-                "environmentVariable": {
-                  "type": "string",
-                  "minLength": 1,
-                  "description": "%configuration.maven.terminal.customEnv.environmentVariable%"
-                },
-                "value": {
-                  "type": "string",
-                  "description": "%configuration.maven.terminal.customEnv.value%"
-                }
-              }
-            },
-            "default": [],
-            "description": "%configuration.maven.terminal.customEnv%",
-            "scope": "resource"
-          },
-          "maven.terminal.favorites": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "title": "Favorite commands",
-              "required": [
-                "alias",
-                "command"
-              ],
-              "properties": {
-                "alias": {
-                  "type": "string",
-                  "minLength": 1,
-                  "description": "%configuration.maven.terminal.favorites.alias%"
-                },
-                "command": {
-                  "type": "string",
-                  "minLength": 1,
-                  "description": "%configuration.maven.terminal.favorites.command%"
-                },
-                "debug": {
-                  "type": "boolean",
-                  "default": false,
-                  "description": "%configuration.maven.terminal.favorites.debug%"
-                }
-              }
-            },
-            "default": [],
-            "description": "%configuration.maven.terminal.favorites%",
-            "scope": "resource"
-          },
-          "maven.view": {
-            "type": "string",
-            "enum": [
-              "flat",
-              "hierarchical"
-            ],
-            "default": "flat",
-            "scope": "window",
-            "description": "%configuration.maven.view%"
-          },
-          "maven.showInExplorerContextMenu": {
-            "type": "boolean",
-            "default": "true",
-            "description": "%configuration.maven.showInExplorerContextMenu%",
-            "scope": "resource"
-          },
-          "maven.pomfile.globPattern": {
-            "type": "string",
-            "default": "**/pom.xml",
-            "description": "%configuration.maven.pomfile.globPattern%",
-            "scope": "window"
-          },
-          "maven.pomfile.autoUpdateEffectivePOM": {
-            "type": "boolean",
-            "default": false,
-            "description": "%configuration.maven.pomfile.autoUpdateEffectivePOM%",
-            "scope": "window"
-          },
-          "maven.pomfile.prefetchEffectivePom": {
-            "type": "boolean",
-            "default": false,
-            "description": "%configuration.maven.pomfile.prefetchEffectivePom%",
-            "scope": "application"
-          },
-          "maven.dependency.enableConflictDiagnostics": {
-            "type": "boolean",
-            "default": "true",
-            "description": "%configuration.maven.dependency.enableConflictDiagnostics%",
-            "scope": "window"
-          },
-          "maven.projectOpenBehavior": {
-            "default": "Interactive",
-            "type": "string",
-            "scope": "window",
-            "description": "%configuration.maven.projectOpenBehavior%",
-            "enum": [
-              "Interactive",
-              "Open",
-              "Add to Workspace",
-              "None"
-            ]
-          },
-          "maven.explorer.projectName": {
-            "default": "${project.name}",
-            "type": "string",
-            "scope": "window",
-            "description": "%configuration.maven.explorer.projectName%",
-            "enum": [
-              "${project.name}",
-              "${project.artifactId}",
-              "${project.artifactId}-${project.version}",
-              "${project.groupId}.${project.artifactId}",
-              "${project.groupId}.${project.artifactId}-${project.version}"
-            ]
-          }
-        }
-      }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "webpack --mode production",
-    "build-plugin": "node scripts/build-jdtls-ext.js",
-    "compile": "tsc -p ./",
-    "tslint": "tslint -t verbose --project tsconfig.json",
-    "watch": "webpack --mode development --watch --progress",
-    "test": "tsc -p ./ && node ./out/test/index.js",
-    "webpack": "webpack --mode development",
-    "update-tpn": "node scripts/update-third-party-notice.js",
-    "update-xsd": "tsc scripts/generate-maven-xsd.ts && node scripts/generate-maven-xsd.js"
-  },
-  "devDependencies": {
-    "@types/fs-extra": "^4.0.9",
-    "@types/glob": "^7.2.0",
-    "@types/lodash": "^4.14.186",
-    "@types/lru-cache": "^5.1.0",
-    "@types/md5": "^2.3.2",
-    "@types/minimatch": "^3.0.4",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^16.18.3",
-    "@types/semver": "^7.3.12",
-    "@types/vscode": "1.65.0",
-    "@types/which": "^1.3.2",
-    "@types/xml2js": "^0.4.11",
-    "@vscode/test-electron": "^2.1.5",
-    "glob": "^7.2.3",
-    "mocha": "^9.2.2",
-    "ts-loader": "^9.4.1",
-    "tslint": "^6.1.3",
-    "typescript": "^4.8.4",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
-  },
-  "dependencies": {
-    "domhandler": "^5.0.3",
-    "expand-home-dir": "0.0.3",
-    "fast-glob": "^3.2.12",
-    "fs-extra": "^4.0.3",
-    "get-port": "^4.2.0",
-    "htmlparser2": "^8.0.1",
-    "jszip": "^3.10.1",
-    "lodash": "^4.17.21",
-    "lru-cache": "^6.0.0",
-    "md5": "^2.2.1",
-    "minimatch": "^3.1.2",
-    "semver": "^7.3.8",
-    "vscode-extension-telemetry-wrapper": "^0.13.2",
-    "vscode-languageclient": "^7.0.0",
-    "vscode-languageserver-protocol": "^3.17.2",
-    "vscode-tas-client": "^0.1.63",
-    "which": "^1.3.1",
-    "xml2js": "^0.4.23"
-  }
+	"name": "vscode-maven",
+	"displayName": "Maven for Java",
+	"description": "%description%",
+	"version": "0.40.0",
+	"icon": "resources/logo.png",
+	"publisher": "vscjava",
+	"preview": true,
+	"aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
+	"engines": {
+		"vscode": "^1.65.0"
+	},
+	"enabledApiProposals": [],
+	"capabilities": {
+		"virtualWorkspaces": false,
+		"untrustedWorkspaces": {
+			"supported": "limited",
+			"restrictedConfigurations": [
+				"maven.executable.options",
+				"maven.terminal.customEnv"
+			]
+		}
+	},
+	"categories": [
+		"Programming Languages",
+		"Other"
+	],
+	"keywords": [
+		"Maven",
+		"Java"
+	],
+	"license": "MIT",
+	"homepage": "https://github.com/Microsoft/vscode-maven/",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Microsoft/vscode-maven.git"
+	},
+	"activationEvents": [
+		"workspaceContains:**/pom.xml",
+		"onCommand:maven.explorer.refresh",
+		"onCommand:maven.goal.clean",
+		"onCommand:maven.goal.validate",
+		"onCommand:maven.goal.compile",
+		"onCommand:maven.goal.test",
+		"onCommand:maven.goal.test-compile",
+		"onCommand:maven.goal.package",
+		"onCommand:maven.goal.verify",
+		"onCommand:maven.goal.install",
+		"onCommand:maven.goal.site",
+		"onCommand:maven.goal.deploy",
+		"onCommand:maven.goal.custom",
+		"onCommand:maven.goal.execute",
+		"onCommand:maven.goal.execute.fromProjectManager",
+		"onCommand:maven.project.effectivePom",
+		"onCommand:maven.project.openPom",
+		"onCommand:maven.archetype.generate",
+		"onCommand:maven.archetype.update",
+		"onCommand:maven.history",
+		"onCommand:maven.plugin.execute",
+		"onCommand:maven.project.addDependency",
+		"onCommand:maven.project.excludeDependency",
+		"onCommand:maven.project.addFavorite",
+		"onView:mavenProjects"
+	],
+	"main": "./dist/extension",
+	"contributes": {
+		"javaExtensions": [
+			"./jdtls.ext/com.microsoft.java.maven.plugin/target/com.microsoft.java.maven.plugin-0.37.0.jar"
+		],
+		"commands": [
+			{
+				"command": "maven.explorer.refresh",
+				"title": "%contributes.commands.maven.explorer.refresh%",
+				"category": "Maven",
+				"icon": "$(refresh)"
+			},
+			{
+				"command": "maven.goal.clean",
+				"title": "clean",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.validate",
+				"title": "validate",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.compile",
+				"title": "compile",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.test",
+				"title": "test",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.test-compile",
+				"title": "test-compile",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.package",
+				"title": "package",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.verify",
+				"title": "verify",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.install",
+				"title": "install",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.site",
+				"title": "site",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.deploy",
+				"title": "deploy",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.custom",
+				"title": "%contributes.commands.maven.goal.custom%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.project.effectivePom",
+				"title": "%contributes.commands.maven.project.effectivePom%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.project.openPom",
+				"title": "%contributes.commands.maven.project.openPom%",
+				"category": "Maven",
+				"icon": "$(go-to-file)"
+			},
+			{
+				"command": "maven.archetype.generate",
+				"title": "%contributes.commands.maven.archetype.generate%",
+				"category": "Maven",
+				"icon": "$(add)"
+			},
+			{
+				"command": "maven.archetype.update",
+				"title": "%contributes.commands.maven.archetype.update%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.history",
+				"title": "%contributes.commands.maven.history%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.execute",
+				"title": "%contributes.commands.maven.goal.execute%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.execute.fromProjectManager",
+				"title": "Run Maven Commands...",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.goal.execute.fromLifecycleMenu",
+				"title": "%contributes.commands.maven.plugin.execute%",
+				"category": "Maven",
+				"icon": "$(play)"
+			},
+			{
+				"command": "maven.goal.execute.fromFavoritesMenu",
+				"title": "%contributes.commands.maven.plugin.execute%",
+				"category": "Maven",
+				"icon": "$(play)"
+			},
+			{
+				"command": "maven.plugin.execute",
+				"title": "%contributes.commands.maven.plugin.execute%",
+				"category": "Maven",
+				"icon": "$(play)"
+			},
+			{
+				"command": "maven.plugin.debug",
+				"title": "%contributes.commands.maven.plugin.debug%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.view.flat",
+				"title": "%contributes.commands.maven.view.flat%",
+				"category": "Maven",
+				"icon": "$(list-flat)"
+			},
+			{
+				"command": "maven.view.hierarchical",
+				"title": "%contributes.commands.maven.view.hierarchical%",
+				"category": "Maven",
+				"icon": "$(list-tree)"
+			},
+			{
+				"command": "maven.project.addDependency",
+				"title": "%contributes.commands.maven.project.addDependency%",
+				"category": "Maven",
+				"icon": "$(add)"
+			},
+			{
+				"command": "maven.project.showDependencies",
+				"title": "%contributes.commands.maven.project.showDependencies%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.project.excludeDependency",
+				"title": "%contributes.commands.maven.project.excludeDependency%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.project.setDependencyVersion",
+				"title": "%contributes.commands.maven.project.setDependencyVersion%",
+				"category": "Maven",
+				"icon": "$(wrench)"
+			},
+			{
+				"command": "maven.project.addFavorite",
+				"title": "%contributes.commands.maven.project.addFavorite%",
+				"category": "Maven",
+				"icon": "$(add)"
+			},
+			{
+				"command": "maven.dependency.goToEffective",
+				"title": "%contributes.commands.maven.dependency.goToEffective%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.project.goToDefinition",
+				"title": "%contributes.commands.maven.project.goToDefinition%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.favorites",
+				"title": "%contributes.commands.maven.favorites%",
+				"category": "Maven"
+			},
+			{
+				"command": "maven.java.projectConfiguration.update",
+				"title": "%contributes.commands.maven.java.projectConfiguration.update%",
+				"icon": "$(sync)",
+				"category": "Maven"
+			}
+		],
+		"views": {
+			"explorer": [
+				{
+					"id": "mavenProjects",
+					"name": "%contributes.views.explorer.mavenProjects%",
+					"when": "workbenchState == empty || vscode-maven:activated",
+					"contextualTitle": "%contributes.views.explorer.mavenProjects%",
+					"icon": "resources/icons/dark/project.svg"
+				}
+			]
+		},
+		"viewsWelcome": [
+			{
+				"view": "mavenProjects",
+				"contents": "%contributes.viewsWelcome.mavenProjects.untrustedWorkspaces%",
+				"when": "!isWorkspaceTrusted"
+			}
+		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "maven.goal.clean",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.validate",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.compile",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.test",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.test-compile",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.package",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.verify",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.install",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.site",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.deploy",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.custom",
+					"when": "never"
+				},
+				{
+					"command": "maven.project.effectivePom",
+					"when": "never"
+				},
+				{
+					"command": "maven.explorer.refresh",
+					"when": "never"
+				},
+				{
+					"command": "maven.project.openPom",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.execute.fromProjectManager",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.execute.fromLifecycleMenu",
+					"when": "never"
+				},
+				{
+					"command": "maven.goal.execute.fromFavoritesMenu",
+					"when": "never"
+				},
+				{
+					"command": "maven.plugin.execute",
+					"when": "never"
+				},
+				{
+					"command": "maven.plugin.debug",
+					"when": "never"
+				},
+				{
+					"command": "maven.project.showDependencies",
+					"when": "never"
+				},
+				{
+					"command": "maven.project.excludeDependency",
+					"when": "never"
+				},
+				{
+					"command": "maven.project.setDependencyVersion",
+					"when": "never"
+				},
+				{
+					"command": "maven.dependency.goToEffective",
+					"when": "never"
+				},
+				{
+					"command": "maven.project.goToDefinition",
+					"when": "never"
+				},
+				{
+					"command": "maven.archetype.generate",
+					"when": "!java:projectManagerActivated"
+				},
+				{
+					"command": "maven.favorites",
+					"when": "isWorkspaceTrusted"
+				},
+				{
+					"command": "maven.history",
+					"when": "isWorkspaceTrusted"
+				},
+				{
+					"command": "maven.goal.execute",
+					"when": "isWorkspaceTrusted"
+				},
+				{
+					"command": "maven.java.projectConfiguration.update",
+					"when": "false"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "maven.archetype.generate",
+					"when": "config.maven.showInExplorerContextMenu && explorerResourceIsFolder",
+					"group": "maven@3"
+				},
+				{
+					"command": "maven.project.effectivePom",
+					"when": "resourceFilename == pom.xml",
+					"group": "maven@1"
+				}
+			],
+			"view/title": [
+				{
+					"command": "maven.java.projectConfiguration.update",
+					"when": "view == mavenProjects && javaLSReady",
+					"group": "navigation@05"
+				},
+				{
+					"command": "maven.view.flat",
+					"when": "view == mavenProjects && config.maven.view != flat",
+					"group": "navigation@0a"
+				},
+				{
+					"command": "maven.view.hierarchical",
+					"when": "view == mavenProjects && config.maven.view != hierarchical",
+					"group": "navigation@0b"
+				},
+				{
+					"command": "maven.archetype.generate",
+					"when": "view == mavenProjects",
+					"group": "navigation@1"
+				},
+				{
+					"command": "maven.explorer.refresh",
+					"when": "view == mavenProjects",
+					"group": "overflow@2"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "maven.goal.custom",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@5"
+				},
+				{
+					"command": "maven.favorites",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@3"
+				},
+				{
+					"command": "maven.history",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@0"
+				},
+				{
+					"command": "maven.goal.clean",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@10"
+				},
+				{
+					"command": "maven.goal.package",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@20"
+				},
+				{
+					"command": "maven.goal.install",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@30"
+				},
+				{
+					"command": "maven.goal.compile",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@40"
+				},
+				{
+					"command": "maven.goal.validate",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@50"
+				},
+				{
+					"command": "maven.goal.verify",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@60"
+				},
+				{
+					"command": "maven.goal.test",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@70"
+				},
+				{
+					"command": "maven.goal.test-compile",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@75"
+				},
+				{
+					"command": "maven.goal.site",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@80"
+				},
+				{
+					"command": "maven.goal.deploy",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "1-lifecycle@90"
+				},
+				{
+					"command": "maven.project.effectivePom",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "0-pom@1"
+				},
+				{
+					"command": "maven.project.showDependencies",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "0-pom@0"
+				},
+				{
+					"command": "maven.project.excludeDependency",
+					"when": "view == mavenProjects && viewItem =~ /maven:dependency(?!.*?\\b\\+root\\b)/",
+					"group": "0-dependency@0"
+				},
+				{
+					"command": "maven.project.setDependencyVersion",
+					"when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
+					"group": "inline"
+				},
+				{
+					"command": "maven.dependency.goToEffective",
+					"when": "view == mavenProjects && viewItem =~ /maven:dependency(?=.*?\\b\\+conflict\\b)/",
+					"group": "0-dependency@2"
+				},
+				{
+					"command": "maven.project.goToDefinition",
+					"when": "view == mavenProjects && viewItem =~ /maven:dependency/",
+					"group": "0-dependency@1"
+				},
+				{
+					"command": "maven.project.openPom",
+					"when": "view == mavenProjects && viewItem == maven:project",
+					"group": "inline"
+				},
+				{
+					"command": "maven.plugin.execute",
+					"when": "view == mavenProjects && viewItem == maven:pluginGoal",
+					"group": "inline"
+				},
+				{
+					"command": "maven.plugin.execute",
+					"when": "view == mavenProjects && viewItem == maven:pluginGoal",
+					"group": "1@1"
+				},
+				{
+					"command": "maven.plugin.debug",
+					"when": "view == mavenProjects && viewItem == maven:pluginGoal",
+					"group": "1@2"
+				},
+				{
+					"command": "maven.explorer.refresh",
+					"when": "view == mavenProjects && viewItem == maven:plugin",
+					"group": "1@1"
+				},
+				{
+					"command": "maven.explorer.refresh",
+					"when": "view == mavenProjects && viewItem == maven:menu",
+					"group": "inline"
+				},
+				{
+					"command": "maven.project.addDependency",
+					"when": "view == javaProjectExplorer && viewItem =~ /java:container(?=.*?\\b\\+maven\\b)/",
+					"group": "inline"
+				},
+				{
+					"command": "maven.project.addDependency",
+					"when": "view == mavenProjects && viewItem == maven:dependenciesMenu",
+					"group": "inline@0"
+				},
+				{
+					"command": "maven.project.addFavorite",
+					"when": "view == mavenProjects && viewItem == maven:favoritesMenu",
+					"group": "inline@0"
+				},
+				{
+					"command": "maven.explorer.refresh",
+					"when": "view == mavenProjects && viewItem == maven:dependenciesMenu",
+					"group": "inline@1"
+				},
+				{
+					"command": "maven.goal.execute.fromLifecycleMenu",
+					"when": "view == mavenProjects && viewItem == maven:lifecycle",
+					"group": "inline"
+				},
+				{
+					"command": "maven.goal.execute.fromLifecycleMenu",
+					"when": "view == mavenProjects && viewItem == maven:lifecycle",
+					"group": "1@1"
+				},
+				{
+					"command": "maven.goal.execute.fromFavoritesMenu",
+					"when": "view == mavenProjects && viewItem == maven:favorites",
+					"group": "inline"
+				},
+				{
+					"command": "maven.goal.execute.fromFavoritesMenu",
+					"when": "view == mavenProjects && viewItem == maven:favorites",
+					"group": "1@1"
+				}
+			],
+			"javaProject.maven": [
+				{
+					"command": "maven.project.openPom",
+					"group": "maven@20"
+				},
+				{
+					"command": "maven.goal.execute.fromProjectManager",
+					"group": "maven@30"
+				}
+			]
+		},
+		"configuration": [
+			{
+				"title": "Maven for Java",
+				"properties": {
+					"maven.settingsFile": {
+						"type": [
+							"string",
+							"null"
+						],
+						"default": null,
+						"description": "%configuration.maven.settingsFile%",
+						"scope": "machine"
+					},
+					"maven.excludedFolders": {
+						"type": "array",
+						"default": [
+							"**/.*",
+							"**/node_modules",
+							"**/target",
+							"**/bin",
+							"**/archetype-resources"
+						],
+						"description": "%configuration.maven.excludedFolders%",
+						"scope": "resource"
+					},
+					"maven.executable.preferMavenWrapper": {
+						"type": "boolean",
+						"default": "true",
+						"description": "%configuration.maven.executable.preferMavenWrapper%",
+						"scope": "resource"
+					},
+					"maven.executable.path": {
+						"type": "string",
+						"default": "",
+						"description": "%configuration.maven.executable.path%",
+						"scope": "machine"
+					},
+					"maven.executable.options": {
+						"type": "string",
+						"default": "",
+						"description": "%configuration.maven.executable.options%",
+						"scope": "machine-overridable"
+					},
+					"maven.terminal.useJavaHome": {
+						"type": "boolean",
+						"default": false,
+						"description": "%configuration.maven.terminal.useJavaHome%",
+						"scope": "window"
+					},
+					"maven.terminal.customEnv": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"title": "environment setting",
+							"required": [
+								"environmentVariable",
+								"value"
+							],
+							"properties": {
+								"environmentVariable": {
+									"type": "string",
+									"minLength": 1,
+									"description": "%configuration.maven.terminal.customEnv.environmentVariable%"
+								},
+								"value": {
+									"type": "string",
+									"description": "%configuration.maven.terminal.customEnv.value%"
+								}
+							}
+						},
+						"default": [],
+						"description": "%configuration.maven.terminal.customEnv%",
+						"scope": "resource"
+					},
+					"maven.terminal.favorites": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"title": "Favorite commands",
+							"required": [
+								"alias",
+								"command"
+							],
+							"properties": {
+								"alias": {
+									"type": "string",
+									"minLength": 1,
+									"description": "%configuration.maven.terminal.favorites.alias%"
+								},
+								"command": {
+									"type": "string",
+									"minLength": 1,
+									"description": "%configuration.maven.terminal.favorites.command%"
+								},
+								"debug": {
+									"type": "boolean",
+									"default": false,
+									"description": "%configuration.maven.terminal.favorites.debug%"
+								}
+							}
+						},
+						"default": [],
+						"description": "%configuration.maven.terminal.favorites%",
+						"scope": "resource"
+					},
+					"maven.view": {
+						"type": "string",
+						"enum": [
+							"flat",
+							"hierarchical"
+						],
+						"default": "flat",
+						"scope": "window",
+						"description": "%configuration.maven.view%"
+					},
+					"maven.showInExplorerContextMenu": {
+						"type": "boolean",
+						"default": "true",
+						"description": "%configuration.maven.showInExplorerContextMenu%",
+						"scope": "resource"
+					},
+					"maven.pomfile.globPattern": {
+						"type": "string",
+						"default": "**/pom.xml",
+						"description": "%configuration.maven.pomfile.globPattern%",
+						"scope": "window"
+					},
+					"maven.pomfile.autoUpdateEffectivePOM": {
+						"type": "boolean",
+						"default": false,
+						"description": "%configuration.maven.pomfile.autoUpdateEffectivePOM%",
+						"scope": "window"
+					},
+					"maven.pomfile.prefetchEffectivePom": {
+						"type": "boolean",
+						"default": false,
+						"description": "%configuration.maven.pomfile.prefetchEffectivePom%",
+						"scope": "application"
+					},
+					"maven.dependency.enableConflictDiagnostics": {
+						"type": "boolean",
+						"default": "true",
+						"description": "%configuration.maven.dependency.enableConflictDiagnostics%",
+						"scope": "window"
+					},
+					"maven.projectOpenBehavior": {
+						"default": "Interactive",
+						"type": "string",
+						"scope": "window",
+						"description": "%configuration.maven.projectOpenBehavior%",
+						"enum": [
+							"Interactive",
+							"Open",
+							"Add to Workspace",
+							"None"
+						]
+					},
+					"maven.explorer.projectName": {
+						"default": "${project.name}",
+						"type": "string",
+						"scope": "window",
+						"description": "%configuration.maven.explorer.projectName%",
+						"enum": [
+							"${project.name}",
+							"${project.artifactId}",
+							"${project.artifactId}-${project.version}",
+							"${project.groupId}.${project.artifactId}",
+							"${project.groupId}.${project.artifactId}-${project.version}"
+						]
+					}
+				}
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "webpack --mode production",
+		"build-plugin": "node scripts/build-jdtls-ext.js",
+		"compile": "tsc -p ./",
+		"tslint": "tslint -t verbose --project tsconfig.json",
+		"watch": "webpack --mode development --watch --progress",
+		"test": "tsc -p ./ && node ./out/test/index.js",
+		"webpack": "webpack --mode development",
+		"update-tpn": "node scripts/update-third-party-notice.js",
+		"update-xsd": "tsc scripts/generate-maven-xsd.ts && node scripts/generate-maven-xsd.js"
+	},
+	"devDependencies": {
+		"@types/fs-extra": "^4.0.9",
+		"@types/glob": "^7.2.0",
+		"@types/lodash": "^4.14.186",
+		"@types/lru-cache": "^5.1.0",
+		"@types/md5": "^2.3.2",
+		"@types/minimatch": "^3.0.4",
+		"@types/mocha": "^9.1.1",
+		"@types/node": "^16.18.3",
+		"@types/semver": "^7.3.12",
+		"@types/vscode": "1.65.0",
+		"@types/which": "^1.3.2",
+		"@types/xml2js": "^0.4.11",
+		"@vscode/test-electron": "^2.1.5",
+		"glob": "^7.2.3",
+		"mocha": "^9.2.2",
+		"ts-loader": "^9.4.1",
+		"tslint": "^6.1.3",
+		"typescript": "^4.8.4",
+		"webpack": "^5.74.0",
+		"webpack-cli": "^4.10.0"
+	},
+	"dependencies": {
+		"domhandler": "^5.0.3",
+		"expand-home-dir": "0.0.3",
+		"fast-glob": "^3.2.12",
+		"fs-extra": "^4.0.3",
+		"get-port": "^4.2.0",
+		"htmlparser2": "^8.0.1",
+		"jszip": "^3.10.1",
+		"lodash": "^4.17.21",
+		"lru-cache": "^6.0.0",
+		"md5": "^2.2.1",
+		"minimatch": "^3.1.2",
+		"semver": "^7.3.8",
+		"vscode-extension-telemetry-wrapper": "^0.13.2",
+		"vscode-languageclient": "^7.0.0",
+		"vscode-languageserver-protocol": "^3.17.2",
+		"vscode-tas-client": "^0.1.63",
+		"which": "^1.3.1",
+		"xml2js": "^0.4.23"
+	},
+	"__metadata": {
+		"id": "b0f06c6b-24fb-4d7b-bd79-bc5e2fa17312",
+		"publisherDisplayName": "Microsoft",
+		"publisherId": "bae08b87-578e-41ec-ab1c-0b036e7add88",
+		"isPreReleaseVersion": false
+	}
 }
