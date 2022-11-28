@@ -6,7 +6,7 @@ import { Uri, workspace } from "vscode";
 import { FavoriteCommand } from "./explorer/model/FavoriteCommand";
 import { MavenProject } from "./explorer/model/MavenProject";
 
-type FavoriteFormat = {alias: string; command: string; debug?: boolean}
+type FavoriteFormat = { alias?: string; command: string; debug?: boolean }
 export namespace Settings {
     export function excludedFolders(resource: Uri): string[] {
         const ret: string[] | undefined = _getMavenSection<string[]>("excludedFolders", resource);
@@ -70,7 +70,7 @@ export namespace Settings {
         }
 
         export function favorites(project: MavenProject): FavoriteCommand[] | undefined {
-            type Favorite = {alias: string, command: string, debug?: boolean};
+            type Favorite = { alias: string, command: string, debug?: boolean };
             return _getMavenSection<Favorite[]>("terminal.favorites", vscode.Uri.file(project.pomPath))?.map(favorite => new FavoriteCommand(project, favorite.command, favorite.alias, favorite.debug));
         }
     }

@@ -685,7 +685,6 @@
               "type": "object",
               "title": "Favorite commands",
               "required": [
-                "alias",
                 "command"
               ],
               "properties": {
