@@ -6,6 +6,9 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - Created a new FavoritesMenu. This menu allows shortcuts to execute the favorite commands. [#884](https://github.com/microsoft/vscode-maven/issues/884)
 - Created a UI to add favorites into the user workspace scope. [#901](https://github.com/microsoft/vscode-maven/issues/901)
 
+### Changed
+- Improve performance of fetching plugin goals when expanding plugin node in Maven explorer. [#903](https://github.com/microsoft/vscode-maven/pull/903)
+
 ## 0.39.2
 ### Fixed
 - Input boxes freeze when value is invalid, since VS Code v1.73.0. [#896](https://github.com/microsoft/vscode-maven/issues/896)
