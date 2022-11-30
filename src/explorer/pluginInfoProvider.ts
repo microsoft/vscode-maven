@@ -132,7 +132,8 @@ class PluginInfoProvider {
             const goalRegExp: RegExp = new RegExp(`^${prefix}:(.*)`, "gm");
             const goalsMatch: string[] | null = textOutput.match(goalRegExp);
             if (goalsMatch !== null) {
-                goals.push(...goalsMatch);
+                // prefix:goal matched, remove "prefix:" part
+                goals.push(...goalsMatch.map(fullGoal => fullGoal.slice(prefix!.length + 1)));
             }
         }
 

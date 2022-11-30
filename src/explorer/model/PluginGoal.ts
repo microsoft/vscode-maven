@@ -20,4 +20,13 @@ export class PluginGoal implements ITreeItem {
     public getTreeItem(): vscode.TreeItem {
         return new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.None);
     }
+
+    public get command() : string {
+        if (this.name.includes(":")) {
+            // workaround for compatibility in case the name already contains prefix
+            return this.name;
+        }
+        return `${this.plugin.prefix}:${this.name}`;
+    }
+
 }
