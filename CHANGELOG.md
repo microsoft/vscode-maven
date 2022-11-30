@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.40.1
+### Fixed
+- Regression on running plugin goals, where prefix is missing. [#910](https://github.com/microsoft/vscode-maven/issues/910)
+
 ## 0.40.0
 ### Added
 - Created a new FavoritesMenu. This menu allows shortcuts to execute the favorite commands. [#884](https://github.com/microsoft/vscode-maven/issues/884)
