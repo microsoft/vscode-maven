@@ -99,7 +99,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommandRequiringTrust(context, "maven.goal.execute.fromProjectManager", Utils.executeMavenCommand);
     registerCommandRequiringTrust(context, "maven.goal.execute.fromLifecycleMenu", Utils.executeMavenCommand);
     registerCommandRequiringTrust(context, "maven.goal.execute.fromFavoritesMenu", Utils.executeMavenCommand);
-    registerCommandRequiringTrust(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.name, pomfile: pluginGoal.plugin.project.pomPath }));
+    registerCommandRequiringTrust(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.command, pomfile: pluginGoal.plugin.project.pomPath }));
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());
     registerCommand(context, "maven.view.hierarchical", () => Settings.changeToHierarchicalView());
 
