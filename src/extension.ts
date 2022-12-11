@@ -12,7 +12,6 @@ import { IProjectCreationMetadata } from "./archetype/createProject/types";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
-import { init as initMavenXsd } from "./mavenXsd";
 import { PomCompletionProvider } from "./completion/PomCompletionProvider";
 import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
@@ -27,17 +26,18 @@ import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
 import { debugHandler } from "./handlers/debugHandler";
 import { addDependencyHandler } from "./handlers/dependency/addDependencyHandler";
 import { excludeDependencyHandler } from "./handlers/dependency/excludeDependencyHandler";
-import { addFavoriteHandler } from "./handlers/favorites/addFavoriteHandler";
 import { goToEffectiveHandler } from "./handlers/dependency/goToEffectiveHandler";
 import { jumpToDefinitionHandler } from "./handlers/dependency/jumpToDefinitionHandler";
 import { setDependencyVersionHandler } from "./handlers/dependency/setDependencyVersionHandler";
 import { showDependenciesHandler } from "./handlers/dependency/showDependenciesHandler";
+import { addFavoriteHandler } from "./handlers/favorites/addFavoriteHandler";
 import { runFavoriteCommandsHandler } from "./handlers/favorites/runFavoriteCommandsHandler";
-import { hoverProvider } from "./hover/hoverProvider";
+import { HoverProvider } from "./hover/hoverProvider";
 import { registerArtifactSearcher } from "./jdtls/artifactSearcher";
 import { isJavaExtEnabled } from "./jdtls/commands";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
+import { init as initMavenXsd } from "./mavenXsd";
 import { MavenProjectManager } from "./project/MavenProjectManager";
 import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
@@ -231,7 +231,7 @@ function registerPomFileAuthoringHelpers(context: vscode.ExtensionContext): void
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(pomSelector, new PomCompletionProvider(), ".", "-", "<"));
     registerCommand(context, "maven.completion.selected", sendInfo, true);
     // hover
-    context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, hoverProvider));
+    context.subscriptions.push(vscode.languages.registerHoverProvider(pomSelector, new HoverProvider()));
     // navigate to dependency pom
     context.subscriptions.push(vscode.languages.registerDefinitionProvider([...pomSelector, {
         pattern: "**/*.pom"

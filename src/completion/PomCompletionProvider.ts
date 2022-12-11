@@ -3,6 +3,7 @@
 
 import { Node } from "domhandler";
 import * as vscode from "vscode";
+import { isXmlExtensionEnabled } from "../utils/extensionUtils";
 import { getCurrentNode } from "../utils/lexerUtils";
 import { ArtifactProvider } from "./providers/ArtifactProvider";
 import { IXmlCompletionProvider } from "./providers/IXmlCompletionProvider";
@@ -10,7 +11,6 @@ import { PropertiesProvider } from "./providers/PropertiesProvider";
 import { SchemaProvider } from "./providers/SchemaProvider";
 import { SnippetProvider } from "./providers/SnippetProvider";
 
-const XML_EXTENSION_ID = "redhat.vscode-xml";
 export class PomCompletionProvider implements vscode.CompletionItemProvider {
 
     private providers: IXmlCompletionProvider[];
@@ -22,8 +22,7 @@ export class PomCompletionProvider implements vscode.CompletionItemProvider {
             new PropertiesProvider(),
         ];
 
-        const xmlExtension = vscode.extensions.getExtension(XML_EXTENSION_ID);
-        if (!xmlExtension) {
+        if (!isXmlExtensionEnabled()) {
             providers.push(new SchemaProvider());
         }
 
