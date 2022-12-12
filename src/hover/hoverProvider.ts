@@ -8,8 +8,15 @@ import { getXsdElement } from "../mavenXsd";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { MavenProjectManager } from "../project/MavenProjectManager";
 import { getCurrentNode, getEnclosingTag, getNodePath, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
+import { isXmlExtensionEnabled } from "../utils/extensionUtils";
 
-class HoverProvider implements vscode.HoverProvider {
+export class HoverProvider implements vscode.HoverProvider {
+    private isXmlExtensionEnabled: boolean;
+
+    constructor() {
+        this.isXmlExtensionEnabled = isXmlExtensionEnabled();
+    }
+
     public async provideHover(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken): Promise<vscode.Hover | undefined> {
         const documentText: string = document.getText();
         const cursorOffset: number = document.offsetAt(position);
@@ -54,9 +61,11 @@ class HoverProvider implements vscode.HoverProvider {
                 }
             }
             default:
+                // schema-based
+                if (this.isXmlExtensionEnabled) { // See: https://github.com/microsoft/vscode-maven/issues/918
+                    return undefined;
+                }
                 return xsdElement ? new vscode.Hover([xsdElement.nodePath.replace(/\./g, ">"), xsdElement.markdownString], new vscode.Range(position, position)) : undefined;
         }
     }
 }
-
-export const hoverProvider: HoverProvider = new HoverProvider();
