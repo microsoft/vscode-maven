@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+# 0.40.2
+### Fixed
+- [CVE-2022-42889](https://github.com/advisories/GHSA-599f-7c49-w659)
+- Documentation on tag hover duplicates with the XML extension's implementation. [#918](https://github.com/microsoft/vscode-maven/issues/918)
+- Incorrect invocation of the command when debugging plugin goal. [#913](https://github.com/microsoft/vscode-maven/issues/913)
+
 ## 0.40.1
 ### Fixed
 - Regression on running plugin goals, where prefix is missing. [#910](https://github.com/microsoft/vscode-maven/issues/910)
