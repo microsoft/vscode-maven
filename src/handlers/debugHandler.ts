@@ -11,7 +11,7 @@ import { executeInTerminal } from "../utils/mavenUtils";
 
 export async function debugHandler(goal: PluginGoal): Promise<void> {
     await debugCommand({
-        command: goal.name,
+        command: goal.command,
         pomfile: goal.plugin.project.pomPath,
         projectName: goal.plugin.project.artifactId
     });
