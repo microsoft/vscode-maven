@@ -9,7 +9,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/lucene-analyzers-common-5.5.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/okhttp-3.12.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/okio-1.15.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-text-1.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-text-1.10.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/plexus-utils-3.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/maven-resolver-api-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/maven-resolver-util-1.1.0.jar"/>

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.microsoft.java.maven</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.37.0</version>
+		<version>0.38.0</version>
 	</parent>
 	<artifactId>com.microsoft.java.maven.plugin</artifactId>
 	<packaging>eclipse-plugin</packaging>
@@ -81,7 +81,7 @@
 						<artifactItem>
 							<groupId>org.apache.commons</groupId>
 							<artifactId>commons-text</artifactId>
-							<version>1.7</version>
+							<version>1.10.0</version>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.codehaus.plexus</groupId>

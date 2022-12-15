@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.microsoft.java.maven
 Bundle-SymbolicName: com.microsoft.java.maven.plugin;singleton:=true
-Bundle-Version: 0.37.0
+Bundle-Version: 0.38.0
 Bundle-Activator: com.microsoft.java.maven.PluginActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: org.eclipse.jdt.core,
@@ -30,7 +30,7 @@ Bundle-ClassPath: .,
  lib/lucene-analyzers-common-5.5.5.jar,
  lib/okhttp-3.12.3.jar,
  lib/okio-1.15.0.jar,
- lib/commons-text-1.7.jar,
+ lib/commons-text-1.10.0.jar,
  lib/plexus-utils-3.2.1.jar,
  lib/maven-resolver-api-1.1.0.jar,
  lib/maven-resolver-util-1.1.0.jar,
