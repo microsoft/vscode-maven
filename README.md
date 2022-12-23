@@ -1,8 +1,8 @@
 # Maven for Java
 
-[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs-short/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
-[![Rating](https://vsmarketplacebadge.apphb.com/rating-short/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
+[![Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
+[![Rating](https://img.shields.io/visual-studio-marketplace/r/vscjava.vscode-maven.svg)](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-maven)
 [![Build status](https://dev.azure.com/mseng/VSJava/_apis/build/status/microsoft.vscode-maven-CI)](https://dev.azure.com/mseng/VSJava/_build/latest?definitionId=11975)
 
 ## Features
