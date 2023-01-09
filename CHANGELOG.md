@@ -1,7 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
-# 0.40.2
+## 0.40.3
+### Fixed
+- Cannot navigate to POM of dependencies when `localRepository` is specified in settings.xml. [#924](https://github.com/microsoft/vscode-maven/issues/924)
+
+## 0.40.2
 ### Fixed
 - [CVE-2022-42889](https://github.com/advisories/GHSA-599f-7c49-w659)
 - Documentation on tag hover duplicates with the XML extension's implementation. [#918](https://github.com/microsoft/vscode-maven/issues/918)
