@@ -45,7 +45,7 @@ export async function loadMavenSettingsFilePath(): Promise<void> {
         const userSettings: {} | undefined = await Utils.parseXmlFile(userSettingsPath);
         const localRepository = _.get(userSettings, "settings.localRepository[0]");
         if (localRepository) {
-            MAVEN_LOCAL_REPOSITORY = path.resolve();
+            MAVEN_LOCAL_REPOSITORY = path.resolve(localRepository);
             mavenOutputChannel.appendLine(`local repository: ${MAVEN_LOCAL_REPOSITORY}`);
         }
     } catch (error) {
