@@ -103,6 +103,11 @@
 							<artifactId>aopalliance</artifactId>
 							<version>1.0</version>
 						</artifactItem>
+						<artifactItem>
+							<groupId>org.slf4j</groupId>
+							<artifactId>slf4j-api</artifactId>
+							<version>1.7.10</version>
+						</artifactItem>
 					</artifactItems>
 				</configuration>
 			</plugin>
