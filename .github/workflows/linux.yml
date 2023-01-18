@@ -34,7 +34,7 @@ jobs:
       run: npm install
 
     - name: Install VSCE
-      run: npm install -g vsce
+      run: npm install -g @vscode/vsce
 
     - name: Linting
       run: npm run tslint
