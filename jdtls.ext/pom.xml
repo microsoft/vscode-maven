@@ -93,5 +93,10 @@
             <layout>p2</layout>
             <url>https://download.eclipse.org/jdtls/snapshots/repository/latest/</url>
         </repository>
+        <repository>
+            <id>M2E</id>
+            <layout>p2</layout>
+            <url>https://download.eclipse.org/technology/m2e/snapshots/latest/</url>
+        </repository>
     </repositories>
 </project>
