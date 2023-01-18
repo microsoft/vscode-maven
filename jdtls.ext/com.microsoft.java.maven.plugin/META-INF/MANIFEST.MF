@@ -21,6 +21,7 @@ Require-Bundle: com.google.guava,
  org.eclipse.text,
  org.eclipse.ltk.core.refactoring,
  com.google.gson,
+ org.slf4j.api,
  org.eclipse.m2e.maven.runtime
 Bundle-ClassPath: .,
  lib/indexer-core-6.0.0.jar,
@@ -33,6 +34,5 @@ Bundle-ClassPath: .,
  lib/plexus-utils-3.2.1.jar,
  lib/maven-resolver-api-1.1.0.jar,
  lib/maven-resolver-util-1.1.0.jar,
- lib/aopalliance-1.0.jar,
- lib/slf4j-api-1.7.10.jar
+ lib/aopalliance-1.0.jar
 Automatic-Module-Name: com.microsoft.java.maven
