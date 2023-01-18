@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.40.4
+### Fixed
+- Missing "Resolve Unknow Type" feature when Language Support for Java was upgraded to v1.14.0. [#932](https://github.com/microsoft/vscode-maven/issues/932)
+
 ## 0.40.3
 ### Fixed
 - Cannot navigate to POM of dependencies when `localRepository` is specified in settings.xml. [#924](https://github.com/microsoft/vscode-maven/issues/924)
