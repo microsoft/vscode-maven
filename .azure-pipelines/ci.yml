@@ -73,7 +73,7 @@ jobs:
         command: custom
         verbose: false
         customCommand: 'run build-plugin'
-    - script: 'npx vsce@latest package'
+    - script: 'npx @vscode/vsce@latest package'
       displayName: 'package vsix'
     - task: CopyFiles@2
       displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'

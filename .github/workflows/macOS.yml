@@ -22,13 +22,13 @@ jobs:
     - name: Setup Node.js environment
       uses: actions/setup-node@v2
       with:
-        node-version: 14
+        node-version: 16
 
     - name: Install Node.js modules
       run: npm install
 
     - name: Install VSCE
-      run: npm install -g vsce
+      run: npm install -g @vscode/vsce
 
     - name: Linting
       run: npm run tslint
