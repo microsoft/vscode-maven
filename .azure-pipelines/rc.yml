@@ -1,0 +1,40 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+steps:
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    verbose: false
+- task: Npm@1
+  displayName: 'npm run tslint'
+  inputs:
+    command: custom
+    verbose: false
+    customCommand: 'run tslint'
+- task: Npm@1
+  displayName: 'npm run compile'
+  inputs:
+    command: custom
+    verbose: false
+    customCommand: 'run compile'
+- task: Npm@1
+  displayName: 'npm run build-plugin'
+  inputs:
+    command: custom
+    verbose: false
+    customCommand: 'run build-plugin'
+- bash: |
+    npx json@latest -I -f package.json -e "this.aiKey=\"$(AI_KEY)\""
+  displayName: Replace AI Key
+- script: 'npx @vscode/vsce@latest package'
+  displayName: 'package vsix'
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+  inputs:
+    Contents: '*.vsix'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
