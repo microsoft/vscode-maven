@@ -86,7 +86,7 @@
         <repository>
             <id>LSP4J</id>
             <layout>p2</layout>
-            <url>https://download.eclipse.org/lsp4j/updates/releases/0.11.0/</url>
+            <url>https://download.eclipse.org/lsp4j/updates/releases/0.20.0/</url>
         </repository>
         <repository>
             <id>JDT.LS</id>
