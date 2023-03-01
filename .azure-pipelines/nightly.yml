@@ -37,9 +37,8 @@ steps:
     npx json@latest -I -f package.json -e "this.aiKey=\"$(AI_KEY)\""
   displayName: Replace AI Key
 - bash: |
-    node ./scripts/create-package-insiders-json.js
-    mv ./package.insiders.json ./package.json
-  displayName: Generate new package.json
+    npx json@latest -I -f package.json -e "this.version=this.version.substring(0, this.version.lastIndexOf('.'))+\".$(date -u +'%Y%m%d%H')\""
+  displayName: Update patch version in package.json
 - script: 'npx @vscode/vsce@latest package --pre-release'
   displayName: 'package vsix'
 - task: CopyFiles@2
