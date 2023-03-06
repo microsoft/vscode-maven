@@ -8,7 +8,7 @@
   "preview": true,
   "aiKey": "7c4292ac-8ca8-4e02-9f1c-0b73e1eeeca4",
   "engines": {
-    "vscode": "^1.65.0"
+    "vscode": "^1.75.0"
   },
   "enabledApiProposals": [],
   "capabilities": {
@@ -36,31 +36,7 @@
     "url": "https://github.com/Microsoft/vscode-maven.git"
   },
   "activationEvents": [
-    "workspaceContains:**/pom.xml",
-    "onCommand:maven.explorer.refresh",
-    "onCommand:maven.goal.clean",
-    "onCommand:maven.goal.validate",
-    "onCommand:maven.goal.compile",
-    "onCommand:maven.goal.test",
-    "onCommand:maven.goal.test-compile",
-    "onCommand:maven.goal.package",
-    "onCommand:maven.goal.verify",
-    "onCommand:maven.goal.install",
-    "onCommand:maven.goal.site",
-    "onCommand:maven.goal.deploy",
-    "onCommand:maven.goal.custom",
-    "onCommand:maven.goal.execute",
-    "onCommand:maven.goal.execute.fromProjectManager",
-    "onCommand:maven.project.effectivePom",
-    "onCommand:maven.project.openPom",
-    "onCommand:maven.archetype.generate",
-    "onCommand:maven.archetype.update",
-    "onCommand:maven.history",
-    "onCommand:maven.plugin.execute",
-    "onCommand:maven.project.addDependency",
-    "onCommand:maven.project.excludeDependency",
-    "onCommand:maven.project.addFavorite",
-    "onView:mavenProjects"
+    "workspaceContains:**/pom.xml"
   ],
   "main": "./dist/extension",
   "contributes": {
@@ -799,7 +775,7 @@
     "@types/mocha": "^9.1.1",
     "@types/node": "^16.18.3",
     "@types/semver": "^7.3.12",
-    "@types/vscode": "1.65.0",
+    "@types/vscode": "1.75.0",
     "@types/which": "^1.3.2",
     "@types/xml2js": "^0.4.11",
     "@vscode/test-electron": "^2.1.5",
