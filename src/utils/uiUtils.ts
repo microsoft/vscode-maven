@@ -11,7 +11,7 @@ import { mavenOutputChannel } from "../mavenOutputChannel";
 import { MavenProjectManager } from "../project/MavenProjectManager";
 import { generalErrorHandler } from "./errorUtils";
 
-const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
+const TROUBLESHOOTING_LINK = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
 
 // file chooser dialog
 export async function openDialogForFolder(customOptions: OpenDialogOptions): Promise<Uri | undefined> {
@@ -51,8 +51,8 @@ export async function openFileIfExists(filepath: string): Promise<void> {
 
 // Troubleshooting
 export async function showTroubleshootingDialog(errorMessage: string): Promise<void> {
-    const OPTION_SHOW_OUTPUT: string = "Show Output";
-    const OPTION_LEARN_MORE: string = "Learn More";
+    const OPTION_SHOW_OUTPUT = "Show Output";
+    const OPTION_LEARN_MORE = "Learn More";
     const choiceForDetails: string | undefined = await window.showErrorMessage(errorMessage, OPTION_SHOW_OUTPUT, OPTION_LEARN_MORE);
     if (choiceForDetails === OPTION_LEARN_MORE) {
         // open FAQs
@@ -80,8 +80,8 @@ export async function selectProjectIfNecessary(): Promise< MavenProject | undefi
     ).then(item => item ? item.value : undefined);
 }
 
-export function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
-    const callbackWithTroubleshooting: (...args: any[]) => any = instrumentOperation(commandName, async (_operationId: string, ...args: any[]) => {
+export function registerCommand(context: vscode.ExtensionContext, commandName: string, func: (...args: unknown[]) => unknown, withOperationIdAhead?: boolean): void {
+    const callbackWithTroubleshooting: (...args: unknown[]) => unknown = instrumentOperation(commandName, async (_operationId: string, ...args: unknown[]) => {
         try {
             return withOperationIdAhead ? await func(_operationId, ...args) : await func(...args);
         } catch (error) {
@@ -91,8 +91,8 @@ export function registerCommand(context: vscode.ExtensionContext, commandName: s
     context.subscriptions.push(vscode.commands.registerCommand(commandName, callbackWithTroubleshooting));
 }
 
-export function registerCommandRequiringTrust(context: vscode.ExtensionContext, commandName: string, func: (...args: any[]) => any, withOperationIdAhead?: boolean): void {
-    const instrumentedFunc = async (...args: any[]) => {
+export function registerCommandRequiringTrust(context: vscode.ExtensionContext, commandName: string, func: (...args: unknown[]) => unknown, withOperationIdAhead?: boolean): void {
+    const instrumentedFunc = async (...args: unknown[]) => {
         if (vscode.workspace.isTrusted) {
             await func(...args);
         } else {

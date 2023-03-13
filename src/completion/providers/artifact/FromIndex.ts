@@ -18,7 +18,7 @@ export class FromIndex implements IArtifactCompletionProvider {
             groupId: groupIdHint,
             artifactId: artifactIdHint
         };
-        const docs: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
+        const docs = await executeJavaLanguageServerCommand<IArtifactSearchResult[]>("java.maven.searchArtifact", searchParam);
         const groupIds: string[] = Array.from(new Set(docs.map(doc => doc.groupId)).values());
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,

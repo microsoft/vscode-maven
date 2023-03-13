@@ -10,7 +10,7 @@ import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 // import { ProfilesMenu } from "./ProfilesMenu";
 
-const CONTEXT_VALUE: string = "maven:workspaceFolder";
+const CONTEXT_VALUE = "maven:workspaceFolder";
 
 export class WorkspaceFolder implements ITreeItem {
     constructor(
@@ -30,10 +30,14 @@ export class WorkspaceFolder implements ITreeItem {
         }
 
         switch (Settings.viewType()) {
-            case "hierarchical":
+            case "hierarchical":{
                 ret.push(...this.sortByName(allProjects.filter(m => !m.parent)));
-            case "flat":
+                break;
+            }
+            case "flat": {
                 ret.push(...this.sortByName(allProjects));
+                break;
+            }
             default:
         }
         return ret;

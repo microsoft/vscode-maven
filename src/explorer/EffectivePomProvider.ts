@@ -9,7 +9,7 @@ import { IEffectivePom } from "./model/IEffectivePom";
 export class EffectivePomProvider {
   private pomPath: string;
   private emitter: EventEmitter = new EventEmitter();
-  private isCalculating: boolean = false;
+  private isCalculating = false;
 
   constructor(pomPath: string) {
     this.pomPath = pomPath;

@@ -7,7 +7,7 @@ import * as _ from "lodash";
 import { MarkdownString } from "vscode";
 import { EOL } from "os";
 
-let schema: any;
+let schema: unknown;
 
 export async function init() {
     const XSD_FILE_PATH = getPathToExtensionRoot("resources", "maven-4.0.0.xsd.json");
@@ -27,6 +27,7 @@ export function getXsdElement(nodePath: string) {
 }
 
 export class XSDElement {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(private definitionObject: { [key: string]: any }, public nodePath: string) { }
 
     public get name() : string {

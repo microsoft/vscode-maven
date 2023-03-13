@@ -24,7 +24,7 @@ export async function applyWorkspaceEdit(edit: ls.WorkspaceEdit): Promise<void> 
             // Get the position information of the first change
             let startPosition: Position = new Position(changes[0].range.start.line, changes[0].range.start.character);
             let lineOffsets: number = changes[0].newText.split(/\r?\n/).length - 1;
-            for (let i: number = 1; i < changes.length; i += 1) {
+            for (let i = 1; i < changes.length; i += 1) {
                 // When it comes to a discontinuous range, execute the range formatting and record the new start position
                 if (changes[i].range.start.line !== startPosition.line) {
                     await executeRangeFormat(currentEditor, startPosition, lineOffsets);

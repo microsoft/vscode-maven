@@ -54,16 +54,24 @@ export function getNodePath(node: Node) {
     return parents.join(".");
 }
 
-export function getTextFromNode(node: Node | undefined | null, fallbackValue: string = "") {
+export function getTextFromNode(node: Node | undefined | null, fallbackValue = "") {
     return node && isText(node) ? node.data : fallbackValue;
 }
 
 export function getInnerStartIndex(node: Element) {
-    return node.startIndex! + node.tagName.length + "<>".length;
+    if (node.startIndex !== null) {
+        return node.startIndex + node.tagName.length + "<>".length;
+    } else {
+        return -1;
+    }
 }
 
 export function getInnerEndIndex(node: Element) {
-    return node.endIndex! - node.tagName.length - "</>".length + 1;
+    if (node.endIndex !== null) {
+        return node.endIndex - node.tagName.length - "</>".length + 1;
+    } else {
+        return -1;
+    }
 }
 
 export function getEnclosingTag(node: Node): Element | null {

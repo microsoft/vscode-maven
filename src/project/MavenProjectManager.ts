@@ -10,9 +10,6 @@ export class MavenProjectManager {
     private static INSTANCE: MavenProjectManager;
     private _projectMap: Map<string, MavenProject> = new Map();
 
-    private constructor() {
-    }
-
     public static getInstance() {
         if (!this.INSTANCE) {
             this.INSTANCE = new MavenProjectManager();
@@ -85,7 +82,11 @@ async function getAllPomPaths(workspaceFolder?: vscode.WorkspaceFolder): Promise
     if (!workspaceFolder) {
         if (vscode.workspace.workspaceFolders) {
             const arrayOfPoms: string[][] = await Promise.all(vscode.workspace.workspaceFolders.map(getAllPomPaths));
-            return [].concat.apply([], arrayOfPoms);
+            const ret = [];
+            for (const poms of arrayOfPoms) {
+                ret.push(...poms);
+            }
+            return ret;
         } else {
             return [];
         }

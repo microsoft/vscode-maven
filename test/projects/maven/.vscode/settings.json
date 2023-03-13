@@ -1,3 +1,9 @@
 {
-    "java.server.launchMode": "Standard"
+    "java.server.launchMode": "Standard",
+    "maven.terminal.favorites": [
+        {
+            "command": "help:all-profiles",
+            "debug": false
+        }
+    ]
 }
