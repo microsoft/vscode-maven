@@ -59,6 +59,7 @@ export class HoverProvider implements vscode.HoverProvider {
                         ].join("\n\n"), targetRange);
                     }
                 }
+                return undefined;
             }
             default:
                 // schema-based

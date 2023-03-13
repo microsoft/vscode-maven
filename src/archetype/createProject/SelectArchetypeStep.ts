@@ -21,13 +21,13 @@ export class SelectArchetypeStep implements IProjectCreationStep {
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
         const disposables: Disposable[] = [];
-        const specifyAchetypePromise = new Promise<StepResult>(async (resolve, _reject) => {
+        const specifyAchetypePromise = (items: IArchetypePickItem[]) => new Promise<StepResult>((resolve) => {
             const pickBox: QuickPick<IArchetypePickItem> = window.createQuickPick<IArchetypePickItem>();
             pickBox.title = "Create Maven Project";
             pickBox.placeholder = "Select an archetype ...";
             pickBox.matchOnDescription = true;
             pickBox.ignoreFocusOut = true;
-            pickBox.items = await this.getArchetypePickItems(false);
+            pickBox.items = items;
             disposables.push(
                 pickBox.onDidTriggerButton(async (item) => {
                     if (item === QuickInputButtons.Back) {
@@ -55,7 +55,8 @@ export class SelectArchetypeStep implements IProjectCreationStep {
         });
 
         try {
-            return await specifyAchetypePromise;
+            const items = await this.getArchetypePickItems(false);
+            return await specifyAchetypePromise(items);
         } finally {
             disposables.forEach(d => d.dispose());
         }

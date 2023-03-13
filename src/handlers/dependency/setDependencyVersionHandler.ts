@@ -34,7 +34,7 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
     const gid: string = selectedItem.groupId;
     const aid: string = selectedItem.artifactId;
     const versions: string[] = getAllVersionsInTree(pomPath, gid, aid);
-    const OPTION_SEARCH_MAVEN_CENTRAL: string = "Search Maven Central Repository...";
+    const OPTION_SEARCH_MAVEN_CENTRAL = "Search Maven Central Repository...";
     versions.push(OPTION_SEARCH_MAVEN_CENTRAL);
 
     let selectedVersion: string | undefined = await vscode.window.showQuickPick(
@@ -121,7 +121,7 @@ async function insertDependencyManagement(pomPath: string, targetNode: Element, 
                     id.firstChild && isText(id.firstChild) && id.firstChild.data === aid
                 )
             ) as Element | undefined;
-            const newIndent: string = `${baseIndent}${indent}`;
+            const newIndent = `${baseIndent}${indent}`;
             targetText = constructDependencyNode({ gid, aid, version, baseIndent: newIndent, indent, eol });
         } else {
             insertPosition = currentDocument.positionAt(getInnerStartIndex(targetNode));
@@ -137,16 +137,16 @@ async function insertDependencyManagement(pomPath: string, targetNode: Element, 
     const edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
     if (deleteNode) { // the version of ${gid:aid} dependency node already imported should be deleted
         const versionNode: Element | undefined = deleteNode.children?.find(node => isTag(node) && node.tagName === XmlTagName.Version) as Element | undefined;
-        if (versionNode) {
-            const start: number = versionNode.startIndex!;
-            const end: number = versionNode.endIndex! + 1;
+        if (versionNode && versionNode.startIndex !== null && versionNode.endIndex !== null) {
+            const start: number = versionNode.startIndex;
+            const end: number = versionNode.endIndex + 1;
             const range = new vscode.Range(currentDocument.positionAt(start), currentDocument.positionAt(end));
             edit.delete(currentDocument.uri, range);
         }
     }
-    if (dependencyNodeInManagement) { // ${gid:aid} dependency node that already exists in <dependencyManagement> shoule be deleted
-        const start: number = dependencyNodeInManagement.startIndex!;
-        const end: number = dependencyNodeInManagement.endIndex! + 1;
+    if (dependencyNodeInManagement && dependencyNodeInManagement.startIndex !== null && dependencyNodeInManagement.endIndex !== null) { // ${gid:aid} dependency node that already exists in <dependencyManagement> shoule be deleted
+        const start: number = dependencyNodeInManagement.startIndex;
+        const end: number = dependencyNodeInManagement.endIndex + 1;
         const range = new vscode.Range(currentDocument.positionAt(start), currentDocument.positionAt(end));
         edit.delete(currentDocument.uri, range);
     }

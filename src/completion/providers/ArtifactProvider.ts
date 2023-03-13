@@ -10,7 +10,7 @@ import { FromIndex } from "./artifact/FromIndex";
 import { FromLocal } from "./artifact/FromLocal";
 import { IXmlCompletionProvider } from "./IXmlCompletionProvider";
 
-const DEFAULT_GROUP_ID: string = "org.apache.maven.plugins";
+const DEFAULT_GROUP_ID = "org.apache.maven.plugins";
 
 export class ArtifactProvider implements IXmlCompletionProvider {
     private centralProvider;
@@ -36,7 +36,10 @@ export class ArtifactProvider implements IXmlCompletionProvider {
         switch (tagNode.tagName) {
             case XmlTagName.GroupId: {
                 const groupIdTextNode = tagNode.firstChild;
-                const targetRange: vscode.Range = getRange(groupIdTextNode, document, position)!;
+                const targetRange: vscode.Range | undefined = getRange(groupIdTextNode, document, position);
+                if (!targetRange) {
+                    return []
+                }
 
                 const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const artifactIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.ArtifactId) as Element | undefined;
@@ -54,7 +57,10 @@ export class ArtifactProvider implements IXmlCompletionProvider {
             }
             case XmlTagName.ArtifactId: {
                 const artifactIdTextNode = tagNode.firstChild;
-                const targetRange: vscode.Range = getRange(artifactIdTextNode, document, position)!;
+                const targetRange: vscode.Range | undefined = getRange(artifactIdTextNode, document, position);
+                if (!targetRange) {
+                    return []
+                }
 
                 const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;
@@ -68,7 +74,7 @@ export class ArtifactProvider implements IXmlCompletionProvider {
                 const localItems: vscode.CompletionItem[] = await this.localProvider.getArtifactIdCandidates(groupIdHint);
                 let mergedItems: vscode.CompletionItem[] = [];
 
-                const ID_SEPARATOR: string = ":";
+                const ID_SEPARATOR = ":";
                 mergedItems = _.unionBy(centralItems, indexItems, localItems, (item) => _.get(item, "data.groupId") + ID_SEPARATOR + item.insertText);
                 mergedItems = dedupItemsWithGroupId(mergedItems, groupIdHint);
 
@@ -89,7 +95,10 @@ export class ArtifactProvider implements IXmlCompletionProvider {
             }
             case XmlTagName.Version: {
                 const versionTextNode = tagNode.firstChild;
-                const targetRange: vscode.Range = getRange(versionTextNode, document, position)!;
+                const targetRange: vscode.Range | undefined = getRange(versionTextNode, document, position);
+                if (!targetRange) {
+                    return []
+                }
 
                 const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;

@@ -16,29 +16,28 @@ import { LifecyclePhase } from "../explorer/model/LifecyclePhase";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { runFavoriteCommandsHandler } from "../handlers/favorites/runFavoriteCommandsHandler";
 import { MavenProjectManager } from "../project/MavenProjectManager";
-import { Settings } from "../Settings";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { MavenNotFoundError } from "./errorUtils";
 import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
 import { executeInTerminal, getMaven, pluginDescription, rawEffectivePom } from "./mavenUtils";
 import { effectivePomContentUri, selectProjectIfNecessary } from "./uiUtils";
 
-export namespace Utils {
+export class Utils {
 
-    export async function parseXmlFile(xmlFilePath: string, options?: xml2js.OptionsV2): Promise<{} | undefined> {
+    public static async parseXmlFile(xmlFilePath: string, options?: xml2js.OptionsV2): Promise<unknown> {
         if (await fse.pathExists(xmlFilePath)) {
             const xmlString: string = await fse.readFile(xmlFilePath, "utf8");
-            return parseXmlContent(xmlString, options);
+            return Utils.parseXmlContent(xmlString, options);
         } else {
             return undefined;
         }
     }
 
-    export async function parseXmlContent(xmlString: string, options?: xml2js.OptionsV2): Promise<{}> {
-        const opts: {} = Object.assign({ explicitArray: true }, options);
-        return new Promise<{}>(
-            (resolve: (value: {}) => void, reject: (e: Error) => void): void => {
-                xml2js.parseString(xmlString, opts, (err: Error, res: {}) => {
+    public static async parseXmlContent(xmlString: string, options?: xml2js.OptionsV2): Promise<unknown> {
+        const opts: object = Object.assign({ explicitArray: true }, options);
+        return new Promise<unknown>(
+            (resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
+                xml2js.parseString(xmlString, opts, (err: Error, res: unknown) => {
                     if (err !== null) {
                         reject(err);
                     } else {
@@ -49,7 +48,7 @@ export namespace Utils {
         );
     }
 
-    function getTempOutputPath(key: string): string {
+    static getTempOutputPath(key: string): string {
         const pathInWorkspaceFolder: string | undefined = getPathToWorkspaceStorage(md5(key), createUuid());
         if (pathInWorkspaceFolder !== undefined) {
             return pathInWorkspaceFolder;
@@ -58,13 +57,15 @@ export namespace Utils {
         }
     }
 
-    export async function downloadFile(targetUrl: string, readContent?: boolean, customHeaders?: {}): Promise<string> {
-        const tempFilePath: string = getTempOutputPath(targetUrl);
+    public static async downloadFile(targetUrl: string, readContent?: boolean, customHeaders?: object): Promise<string> {
+        const tempFilePath: string = Utils.getTempOutputPath(targetUrl);
         await fse.ensureFile(tempFilePath);
 
         return await new Promise((resolve: (res: string) => void, reject: (e: Error) => void): void => {
             const urlObj: url.Url = url.parse(targetUrl);
             const options: object = Object.assign({ headers: Object.assign({}, customHeaders, { "User-Agent": `vscode/${getExtensionVersion()}` }) }, urlObj);
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let client: any;
             if (urlObj.protocol === "https:") {
                 client = https;
@@ -105,7 +106,7 @@ export namespace Utils {
         });
     }
 
-    export async function showEffectivePom(param: Uri | MavenProject | string): Promise<void> {
+    public static async showEffectivePom(param: Uri | MavenProject | string): Promise<void> {
         let pomPath: string | undefined;
         if (typeof param === "string") {
             pomPath = param;
@@ -127,7 +128,7 @@ export namespace Utils {
         await window.showTextDocument(uri);
     }
 
-    export async function getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
+    public static async getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
         let pomPath: string;
         let name: string;
         if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
@@ -140,36 +141,34 @@ export namespace Utils {
         } else {
             return undefined;
         }
-        return await window.withProgress({ location: ProgressLocation.Notification }, async (p: Progress<{ message?: string }>) => new Promise<string>(
-            async (resolve, reject): Promise<void> => {
-                p.report({ message: `Generating Effective POM: ${name}` });
-                try {
-                    const ret: string | undefined = await rawEffectivePom(pomPath);
-                    resolve(ret ? ret : "");
-                } catch (error) {
-                    setUserError(error);
-                    reject(error);
-                }
+        const task = async (p: Progress<{ message?: string }>) => {
+            p.report({ message: `Generating Effective POM: ${name}` });
+            try {
+                const ret: string | undefined = await rawEffectivePom(pomPath);
+                return (ret ? ret : "");
+            } catch (error) {
+                setUserError(error);
+                throw (error);
             }
-        ));
+        };
+        return await window.withProgress({ location: ProgressLocation.Notification }, task);
     }
 
-    export async function getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
-        return await window.withProgress({ location: ProgressLocation.Window }, async (p: Progress<{ message?: string }>) => new Promise<string>(
-            async (resolve, reject): Promise<void> => {
-                p.report({ message: `Retrieving Plugin Info: ${pluginId}` });
-                try {
-                    const ret: string | undefined = await pluginDescription(pluginId, pomPath);
-                    resolve(ret ? ret : "");
-                } catch (error) {
-                    setUserError(error);
-                    reject(error);
-                }
+    public static async getPluginDescription(pluginId: string, pomPath: string): Promise<string> {
+        const task = async (p: Progress<{ message?: string }>) => {
+            p.report({ message: `Retrieving Plugin Info: ${pluginId}` });
+            try {
+                const ret: string | undefined = await pluginDescription(pluginId, pomPath);
+                return (ret ? ret : "");
+            } catch (error) {
+                setUserError(error);
+                throw (error);
             }
-        ));
+        };
+        return await window.withProgress({ location: ProgressLocation.Window }, task);
     }
 
-    export async function executeCustomGoal(pomOrProject: string | MavenProject): Promise<void> {
+    public static async executeCustomGoal(pomOrProject: string | MavenProject): Promise<void> {
         let pomPath: string | undefined;
         if (typeof pomOrProject === "string") {
             pomPath = pomOrProject;
@@ -187,7 +186,7 @@ export namespace Utils {
         }
     }
 
-    export async function executeHistoricalGoals(projectPomPaths: string[]): Promise<void> {
+    public static async executeHistoricalGoals(projectPomPaths: string[]): Promise<void> {
         const candidates: ICommandHistoryEntry[] = Array.prototype.concat.apply(
             [],
             await Promise.all(projectPomPaths.map(getLRUCommands))
@@ -207,7 +206,7 @@ export namespace Utils {
         }
     }
 
-    export async function executeMavenCommand(node?: any): Promise<void> {
+    public static async executeMavenCommand(node?: LifecyclePhase | FavoriteCommand | { uri: string }): Promise<void> {
         let selectedProject: MavenProject | undefined;
         let selectedCommand: string | undefined;
         if (node instanceof LifecyclePhase) {
@@ -233,8 +232,8 @@ export namespace Utils {
 
         // select a command if not provided
         if (!selectedCommand) {
-            const LABEL_CUSTOM: string = "Custom ...";
-            const LABEL_FAVORITES: string = "Favorites ...";
+            const LABEL_CUSTOM = "Custom ...";
+            const LABEL_FAVORITES = "Favorites ...";
             selectedCommand = await window.showQuickPick(
                 [LABEL_FAVORITES, LABEL_CUSTOM, ...DEFAULT_MAVEN_LIFECYCLES],
                 { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }
@@ -255,7 +254,7 @@ export namespace Utils {
             }
         }
 
-        if (node instanceof FavoriteCommand){
+        if (node instanceof FavoriteCommand) {
             await runFavoriteCommandsHandler(selectedProject, node);
             return;
         }
@@ -263,7 +262,4 @@ export namespace Utils {
         await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
     }
 
-    export function settingsFilePath(): string | undefined {
-        return Settings.getSettingsFilePath();
-    }
 }

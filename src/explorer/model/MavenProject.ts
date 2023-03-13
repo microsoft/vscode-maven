@@ -20,7 +20,7 @@ import { MavenPlugin } from "./MavenPlugin";
 import { PluginsMenu } from "./PluginsMenu";
 import { FavoritesMenu } from "./FavoritesMenu";
 
-const CONTEXT_VALUE: string = "maven:project";
+const CONTEXT_VALUE = "maven:project";
 
 export class MavenProject implements ITreeItem {
     public parent?: MavenProject; // assigned if it's specified as one of parent project's modules
@@ -244,7 +244,7 @@ export class MavenProject implements ITreeItem {
     }
 
     public fillProperties(rawName: string): string {
-        const stringTemplatePattern: RegExp = /\$\{.*?\}/g;
+        const stringTemplatePattern = /\$\{.*?\}/g;
         const matches: RegExpMatchArray | null = rawName.match(stringTemplatePattern);
         if (matches === null) {
             return rawName;
