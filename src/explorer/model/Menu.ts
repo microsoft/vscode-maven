@@ -11,7 +11,6 @@ export abstract class Menu implements ITreeItem {
     protected name: string;
 
     constructor(
-        public project: MavenProject,
     ) { }
 
     public abstract getChildren(): ITreeItem[] | undefined | Promise<ITreeItem[] | undefined>;
@@ -24,5 +23,15 @@ export abstract class Menu implements ITreeItem {
         const treeItem: vscode.TreeItem = new vscode.TreeItem(this.name, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.iconPath = new vscode.ThemeIcon("folder");
         return treeItem;
+    }
+}
+
+export abstract class ProjectMenu extends Menu {
+    protected name: string;
+
+    constructor(
+        public project: MavenProject,
+    ) {
+        super();
     }
 }

@@ -63,14 +63,17 @@ export class MavenExplorerProvider implements TreeDataProvider<ITreeItem> {
         if (!vscode.workspace.isTrusted) {
             return undefined;
         }
-        if (element === undefined) {
+        if (element === undefined) { // Top level elements
             if (!vscode.workspace.workspaceFolders) {
                 return undefined;
             }
             if (vscode.workspace.workspaceFolders.length === 1) {
+                // single root workspace
                 return await new WorkspaceFolder(vscode.workspace.workspaceFolders[0]).getChildren();
+            } else {
+                // multi-root workspace
+                return vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolder(workspaceFolder));
             }
-            return vscode.workspace.workspaceFolders.map(workspaceFolder => new WorkspaceFolder(workspaceFolder));
         } else {
             return element.getChildren ? element.getChildren() : undefined;
         }

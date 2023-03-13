@@ -6,9 +6,9 @@ import { DEFAULT_MAVEN_LIFECYCLES } from "../../completion/constants";
 import { ITreeItem } from "./ITreeItem";
 import { LifecyclePhase } from "./LifecyclePhase";
 import { MavenProject } from "./MavenProject";
-import { Menu } from "./Menu";
+import { ProjectMenu } from "./Menu";
 
-export class LifecycleMenu extends Menu implements ITreeItem {
+export class LifecycleMenu extends ProjectMenu implements ITreeItem {
 
     constructor(project: MavenProject) {
         super(project);
