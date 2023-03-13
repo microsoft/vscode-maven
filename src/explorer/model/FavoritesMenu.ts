@@ -2,13 +2,13 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import { Menu } from "./Menu";
+import { ProjectMenu } from "./Menu";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { FavoriteCommand } from "./FavoriteCommand";
 import { Settings } from "../../Settings";
 
-export class FavoritesMenu extends Menu implements ITreeItem {
+export class FavoritesMenu extends ProjectMenu implements ITreeItem {
 
     constructor(project: MavenProject) {
         super(project);

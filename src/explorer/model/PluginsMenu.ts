@@ -6,9 +6,9 @@ import { MavenExplorerProvider } from "../MavenExplorerProvider";
 import { ITreeItem } from "./ITreeItem";
 import { MavenPlugin } from "./MavenPlugin";
 import { MavenProject } from "./MavenProject";
-import { Menu } from "./Menu";
+import { ProjectMenu } from "./Menu";
 
-export class PluginsMenu extends Menu implements ITreeItem {
+export class PluginsMenu extends ProjectMenu implements ITreeItem {
     constructor(project: MavenProject) {
         super(project);
         this.name = "Plugins";

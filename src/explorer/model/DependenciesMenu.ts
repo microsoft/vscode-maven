@@ -10,9 +10,9 @@ import { Dependency } from "./Dependency";
 import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
-import { Menu } from "./Menu";
+import { ProjectMenu } from "./Menu";
 
-export class DependenciesMenu extends Menu implements ITreeItem {
+export class DependenciesMenu extends ProjectMenu implements ITreeItem {
     constructor(project: MavenProject) {
         super(project);
         this.name = "Dependencies";
