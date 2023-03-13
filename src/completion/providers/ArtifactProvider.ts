@@ -36,7 +36,10 @@ export class ArtifactProvider implements IXmlCompletionProvider {
         switch (tagNode.tagName) {
             case XmlTagName.GroupId: {
                 const groupIdTextNode = tagNode.firstChild;
-                const targetRange: vscode.Range = getRange(groupIdTextNode, document, position)!;
+                const targetRange: vscode.Range | undefined = getRange(groupIdTextNode, document, position);
+                if (!targetRange) {
+                    return []
+                }
 
                 const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const artifactIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.ArtifactId) as Element | undefined;
@@ -54,7 +57,10 @@ export class ArtifactProvider implements IXmlCompletionProvider {
             }
             case XmlTagName.ArtifactId: {
                 const artifactIdTextNode = tagNode.firstChild;
-                const targetRange: vscode.Range = getRange(artifactIdTextNode, document, position)!;
+                const targetRange: vscode.Range | undefined = getRange(artifactIdTextNode, document, position);
+                if (!targetRange) {
+                    return []
+                }
 
                 const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;
@@ -89,7 +95,10 @@ export class ArtifactProvider implements IXmlCompletionProvider {
             }
             case XmlTagName.Version: {
                 const versionTextNode = tagNode.firstChild;
-                const targetRange: vscode.Range = getRange(versionTextNode, document, position)!;
+                const targetRange: vscode.Range | undefined = getRange(versionTextNode, document, position);
+                if (!targetRange) {
+                    return []
+                }
 
                 const siblingNodes: Node[] = tagNode.parent?.children ?? [];
                 const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;

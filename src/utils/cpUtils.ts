@@ -29,16 +29,14 @@ export async function executeCommand(command: string, args: string[], options: c
 
 export async function executeCommandWithProgress(message: string, command: string, args: string[], options: cp.SpawnOptions = { shell: true }): Promise<string> {
     let result = "";
-    await vscode.window.withProgress({ location: vscode.ProgressLocation.Window }, async (p: vscode.Progress<{}>) => {
+    await vscode.window.withProgress<void>({ location: vscode.ProgressLocation.Window }, async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
         mavenOutputChannel.appendLine(`${command}, [${args.join(",")}]`);
-        return new Promise<void>(async (resolve, reject): Promise<void> => {
+        return new Promise<void>((resolve, reject) => {
             p.report({ message });
-            try {
-                result = await executeCommand(command, args, options);
+            executeCommand(command, args, options).then((value) => {
+                result = value;
                 resolve();
-            } catch (e) {
-                reject(e);
-            }
+            }).catch(reject);
         });
     });
     return result;

@@ -50,6 +50,7 @@ class DefinitionProvider implements vscode.DefinitionProvider {
             return [definitionLink];
           }
         }
+        return undefined;
       }
       case XmlTagName.Module: {
         const moduleName = getTextFromNode(tagNode.firstChild);

@@ -35,7 +35,7 @@ export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadat
         return [];
     }
 
-    const params: any = {
+    const params = {
         q: validKeywords.join(" ").trim(),
         rows: 50,
         wt: "json"
@@ -50,7 +50,7 @@ export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadat
 }
 
 export async function getVersions(gid: string, aid: string): Promise<IVersionMetadata[]> {
-    const params: any = {
+    const params = {
         q: `g:"${gid}" AND a:"${aid}"`,
         core: "gav",
         rows: 50,
@@ -67,7 +67,7 @@ export async function getVersions(gid: string, aid: string): Promise<IVersionMet
 
 export async function getLatestVersion(gid: string, aid: string): Promise<string | undefined> {
     try {
-        const params: any = {
+        const params = {
             q: `g:"${gid}" AND a:"${aid}"`,
             rows: 1,
             wt: "json"
@@ -83,6 +83,7 @@ export async function getLatestVersion(gid: string, aid: string): Promise<string
 async function httpsGet(urlString: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         let result = "";
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const options: any = url.parse(urlString);
         options.headers = {
             'User-Agent': 'vscode-maven/0.1'
@@ -101,7 +102,7 @@ async function httpsGet(urlString: string): Promise<string> {
     });
 }
 
-function toQueryString(params: { [key: string]: any }): string {
+function toQueryString(params: { [key: string]: number | string }): string {
     return Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k].toString())}`).join("&");
 }
 

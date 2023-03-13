@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 class MavenOutputChannel implements vscode.Disposable {
     private readonly channel: vscode.OutputChannel = vscode.window.createOutputChannel("Maven for Java");
 
-    public appendLine(message: any, title?: string): void {
+    public appendLine(message: string, title?: string): void {
         if (title) {
             const simplifiedTime: string = (new Date()).toISOString().replace(/z|t/gi, " ").trim(); // YYYY-MM-DD HH:mm:ss.sss
             const highlightingTitle = `[${title} ${simplifiedTime}]`;
@@ -15,7 +15,7 @@ class MavenOutputChannel implements vscode.Disposable {
         this.channel.appendLine(message);
     }
 
-    public append(message: any): void {
+    public append(message: string): void {
         this.channel.append(message);
     }
 

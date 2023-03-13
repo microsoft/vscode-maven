@@ -137,16 +137,16 @@ async function insertDependencyManagement(pomPath: string, targetNode: Element, 
     const edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
     if (deleteNode) { // the version of ${gid:aid} dependency node already imported should be deleted
         const versionNode: Element | undefined = deleteNode.children?.find(node => isTag(node) && node.tagName === XmlTagName.Version) as Element | undefined;
-        if (versionNode) {
-            const start: number = versionNode.startIndex!;
-            const end: number = versionNode.endIndex! + 1;
+        if (versionNode && versionNode.startIndex !== null && versionNode.endIndex !== null) {
+            const start: number = versionNode.startIndex;
+            const end: number = versionNode.endIndex + 1;
             const range = new vscode.Range(currentDocument.positionAt(start), currentDocument.positionAt(end));
             edit.delete(currentDocument.uri, range);
         }
     }
-    if (dependencyNodeInManagement) { // ${gid:aid} dependency node that already exists in <dependencyManagement> shoule be deleted
-        const start: number = dependencyNodeInManagement.startIndex!;
-        const end: number = dependencyNodeInManagement.endIndex! + 1;
+    if (dependencyNodeInManagement && dependencyNodeInManagement.startIndex !== null && dependencyNodeInManagement.endIndex !== null) { // ${gid:aid} dependency node that already exists in <dependencyManagement> shoule be deleted
+        const start: number = dependencyNodeInManagement.startIndex;
+        const end: number = dependencyNodeInManagement.endIndex + 1;
         const range = new vscode.Range(currentDocument.positionAt(start), currentDocument.positionAt(end));
         edit.delete(currentDocument.uri, range);
     }

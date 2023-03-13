@@ -43,7 +43,7 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
     return await readFileIfExists(epomPath);
 }
 
-export async function rawDependencyTree(pomPath: string): Promise<any> {
+export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
     const dependencyGraphPath = `${outputPath}.deps.txt`;
     const outputDirectory: string = path.dirname(dependencyGraphPath);
@@ -59,7 +59,7 @@ export async function pluginDescription(pluginId: string, pomPath: string): Prom
     return await readFileIfExists(outputPath);
 }
 
-async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<any> {
+async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<unknown> {
     const mvn: string | undefined = await getMaven(pomfile);
     if (mvn === undefined) {
         throw new MavenNotFoundError();
@@ -82,7 +82,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<a
         env: Object.assign({}, process.env, Settings.getEnvironment(pomfile)),
         shell: true
     };
-    return new Promise<{}>((resolve: (value: any) => void, reject: (e: Error) => void): void => {
+    return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
         mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command, args })}`);
         const proc: child_process.ChildProcess = child_process.spawn(command, args, spawnOptions);
         proc.on("error", (err: Error) => {
@@ -230,16 +230,18 @@ export async function promptToSettingMavenExecutable(): Promise<void> {
 
     const choice: string | undefined = await vscode.window.showInformationMessage(MESSAGE, BUTTON_GOTO_SETTINGS, BUTTON_BROWSE_FOR_MAVEN);
     switch (choice) {
-        case BUTTON_GOTO_SETTINGS:
+        case BUTTON_GOTO_SETTINGS:{
             await vscode.commands.executeCommand("workbench.action.openSettings", SETTING_MAVEN_EXECUTABLE_PATH);
             break;
-        case BUTTON_BROWSE_FOR_MAVEN:
-            const mvnPath: string | undefined = await browseForMavenBinary();
+        }
+        case BUTTON_BROWSE_FOR_MAVEN: {
+            const mvnPath = await browseForMavenBinary();
             if (mvnPath) {
                 Settings.setMavenExecutablePath(mvnPath);
                 await vscode.window.showInformationMessage(`Successfully set "${SETTING_MAVEN_EXECUTABLE_PATH}" to: ${mvnPath}`);
             }
             break;
+        }
         default:
             break;
     }
@@ -247,7 +249,7 @@ export async function promptToSettingMavenExecutable(): Promise<void> {
 
 async function browseForMavenBinary(): Promise<string | undefined> {
     const mvnFilename: string = isWin() ? "mvn.cmd" : "mvn";
-    const filters: any = isWin() ? { Executable: ["cmd"] } : undefined;
+    const filters = isWin() ? { Executable: ["cmd"] } : undefined;
 
     const selectedUris: vscode.Uri[] | undefined = await vscode.window.showOpenDialog({
         openLabel: `Select ${mvnFilename}`,

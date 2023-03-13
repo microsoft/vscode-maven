@@ -53,6 +53,7 @@ export class SnippetProvider implements IXmlCompletionProvider {
                     arguments: [{ completeFor: "dependency", source: "snippet" }]
                 };
                 ret.push(snippetItem);
+                break;
             }
             case XmlTagName.Plugins: {
                 const snippetItem: vscode.CompletionItem = new vscode.CompletionItem("plugin", vscode.CompletionItemKind.Snippet);
@@ -65,7 +66,9 @@ export class SnippetProvider implements IXmlCompletionProvider {
                     arguments: [{ completeFor: "plugin", source: "snippet" }]
                 };
                 ret.push(snippetItem);
+                break;
             }
+            default:
         }
         return ret;
     }

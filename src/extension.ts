@@ -8,7 +8,6 @@ import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
-import { IProjectCreationMetadata } from "./archetype/createProject/types";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
 import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
@@ -20,6 +19,7 @@ import { initExpService } from "./experimentationService";
 import { decorationProvider } from "./explorer/decorationProvider";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { Dependency } from "./explorer/model/Dependency";
+import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
@@ -69,7 +69,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     const view = vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true });
     context.subscriptions.push(view);
     registerCommand(context, "maven.dependency.goToEffective", (node?: Dependency) => goToEffectiveHandler(view, node));
-    context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(_e => {
+    context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(() => {
         MavenExplorerProvider.getInstance().refresh();
     }));
     // pom.xml listener to refresh tree view
@@ -80,16 +80,14 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     DEFAULT_MAVEN_LIFECYCLES.forEach((goal: string) => {
         registerCommandRequiringTrust(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
     });
-    registerCommand(context, "maven.explorer.refresh", async (item) => {
+    registerCommand(context, "maven.explorer.refresh", async (item: ITreeItem) => {
         item?.refresh ? item.refresh() : MavenExplorerProvider.getInstance().refresh(item);
     });
     registerCommandRequiringTrust(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
     registerCommandRequiringTrust(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
     registerCommand(context, "maven.project.openPom", openPomHandler);
     // create project from archetype
-    registerCommand(context, "maven.archetype.generate", async (operationId: string, entry: Uri | IProjectCreationMetadata | undefined) => {
-        await ArchetypeModule.createMavenProject(entry, operationId);
-    }, true);
+    registerCommand(context, "maven.archetype.generate", ArchetypeModule.createMavenProject);
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
     registerProjectCreationEndListener(context);
 
@@ -251,7 +249,7 @@ async function mavenHistoryHandler(item: MavenProject | undefined): Promise<void
 }
 
 async function updateArchetypeCatalogHandler(): Promise<void> {
-    await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: Progress<{}>) => {
+    await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (p: Progress<{message: string}>) => {
         p.report({ message: "updating archetype catalog ..." });
         await ArchetypeModule.updateArchetypeCatalog();
         p.report({ message: "finished." });

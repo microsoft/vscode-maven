@@ -133,7 +133,9 @@ class PluginInfoProvider {
             const goalsMatch: string[] | null = textOutput.match(goalRegExp);
             if (goalsMatch !== null) {
                 // prefix:goal matched, remove "prefix:" part
-                goals.push(...goalsMatch.map(fullGoal => fullGoal.slice(prefix!.length + 1)));
+                for (const fullGoal of goalsMatch) {
+                   goals.push(fullGoal.slice(prefix.length + 1));
+                }
             }
         }
 

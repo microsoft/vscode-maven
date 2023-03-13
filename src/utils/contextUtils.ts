@@ -7,6 +7,7 @@ import * as os from "os";
 import * as path from "path";
 import { ExtensionContext } from "vscode";
 import { mavenOutputChannel } from "../mavenOutputChannel";
+import { Settings } from "../Settings";
 import { Utils } from "./Utils";
 
 let EXTENSION_CONTEXT: ExtensionContext;
@@ -38,11 +39,11 @@ export async function loadPackageInfo(context: ExtensionContext): Promise<void> 
 export async function loadMavenSettingsFilePath(): Promise<void> {
     // find Maven Local Repository
     try {
-        let userSettingsPath: string | undefined = Utils.settingsFilePath();
+        let userSettingsPath: string | undefined = Settings.getSettingsFilePath();
         if (!userSettingsPath) {
             userSettingsPath = path.join(os.homedir(), ".m2", "settings.xml");
         }
-        const userSettings: {} | undefined = await Utils.parseXmlFile(userSettingsPath);
+        const userSettings: unknown = await Utils.parseXmlFile(userSettingsPath);
         const localRepository = _.get(userSettings, "settings.localRepository[0]");
         if (localRepository) {
             MAVEN_LOCAL_REPOSITORY = path.resolve(localRepository);

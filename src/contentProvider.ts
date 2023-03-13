@@ -37,7 +37,7 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
         switch (uri.authority) {
             case "dependencies":
                 return getDependencyTree(pomPath);
-            case "effective-pom":
+            case "effective-pom": {
                 const project: MavenProject | undefined = MavenProjectManager.get(pomPath);
                 if (project) {
                     const effectivePom: IEffectivePom = await project.getEffectivePom();
@@ -45,9 +45,11 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
                 } else {
                     return Utils.getEffectivePom(pomPath);
                 }
-            case "local-repository":
+            }
+            case "local-repository":{
                 const fsUri = uri.with({ scheme: "file", authority: "" });
                 return (await vscode.workspace.fs.readFile(fsUri)).toString();
+            }
             default:
         }
         return undefined;
