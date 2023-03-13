@@ -30,10 +30,14 @@ export class WorkspaceFolder implements ITreeItem {
         }
 
         switch (Settings.viewType()) {
-            case "hierarchical":
+            case "hierarchical":{
                 ret.push(...this.sortByName(allProjects.filter(m => !m.parent)));
-            case "flat":
+                break;
+            }
+            case "flat": {
                 ret.push(...this.sortByName(allProjects));
+                break;
+            }
             default:
         }
         return ret;
