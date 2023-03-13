@@ -17,6 +17,20 @@
             "preLaunchTask": "npm: watch"
         },
         {
+            "name": "Extension<Multi-Module>",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "${workspaceFolder}/test/projects/multi-module",
+                "--extensionDevelopmentPath=${workspaceFolder}",
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "preLaunchTask": "npm: watch"
+        },
+        {
             "name": "Extension Tests - Maven Project",
             "type": "extensionHost",
             "request": "launch",

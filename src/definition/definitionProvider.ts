@@ -25,8 +25,8 @@ class DefinitionProvider implements vscode.DefinitionProvider {
       case XmlTagName.Version: {
         const targetNode = tagNode.parent;
         const selectionRange: vscode.Range = new vscode.Range(
-          targetNode && targetNode.startIndex !== null ?document.positionAt(targetNode?.startIndex) : position,
-          targetNode && targetNode.endIndex !== null ?document.positionAt(targetNode?.endIndex) : position,
+          targetNode && targetNode.startIndex !== null ? document.positionAt(targetNode?.startIndex) : position,
+          targetNode && targetNode.endIndex !== null ? document.positionAt(targetNode?.endIndex) : position,
         );
 
         const siblingNodes: Node[] = tagNode.parent?.children ?? [];
@@ -50,6 +50,20 @@ class DefinitionProvider implements vscode.DefinitionProvider {
             return [definitionLink];
           }
         }
+      }
+      case XmlTagName.Module: {
+        const moduleName = getTextFromNode(tagNode.firstChild);
+        const targetUri = vscode.Uri.joinPath(document.uri, "..", moduleName, "pom.xml");
+        const selectionRange: vscode.Range = new vscode.Range(
+          tagNode && tagNode.startIndex !== null ? document.positionAt(tagNode.startIndex) : position,
+          tagNode && tagNode.endIndex !== null ? document.positionAt(tagNode.endIndex) : position,
+        );
+        const definitionLink: vscode.LocationLink = {
+          targetRange: new vscode.Range(0, 0, 0, 0),
+          targetUri,
+          originSelectionRange: selectionRange
+        };
+        return [definitionLink];
       }
       default:
         return undefined;
