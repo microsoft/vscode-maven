@@ -204,9 +204,18 @@ export class MavenProject implements ITreeItem {
     }
 
     public getDependencyVersion(gid: string, aid: string): string | undefined {
+        // from effective POM
         const deps: any[] | undefined = this.dependencies;
         const targetDep: any = deps?.find(elem => _.get(elem, "groupId[0]") === gid && _.get(elem, "artifactId[0]") === aid);
-        return targetDep?.version?.[0];
+        if (targetDep?.version?.[0] !== undefined) {
+            return targetDep.version[0];
+        }
+        // from dependency plugin
+        const targetNode = this.dependencyNodes?.find(n => n.groupId === gid && n.artifactId === aid);
+        if (targetNode?.version) {
+            return targetNode.version;
+        }
+        return undefined;
     }
 
     private async _refreshPom(): Promise<void> {
