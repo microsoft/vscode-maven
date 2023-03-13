@@ -6,7 +6,7 @@ import { existsSync } from "fs";
 import * as vscode from "vscode";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { MavenProjectManager } from "../project/MavenProjectManager";
-import { localPomPath } from "../utils/contextUtils";
+import { localPomPath, possibleLocalPomPath } from "../utils/contextUtils";
 import { getCurrentNode, getEnclosingTag, getTextFromNode, XmlTagName } from "../utils/lexerUtils";
 
 class DefinitionProvider implements vscode.DefinitionProvider {
@@ -24,64 +24,27 @@ class DefinitionProvider implements vscode.DefinitionProvider {
       case XmlTagName.GroupId:
       case XmlTagName.ArtifactId:
       case XmlTagName.Version: {
-        const targetNode = tagNode.parent;
-        if (!targetNode || !isTag(targetNode)) {
+        const parentNode = tagNode.parent;
+        if (!parentNode || !isTag(parentNode)) {
           return undefined;
         }
-
-        if (targetNode.name === XmlTagName.Dependency || targetNode.name === XmlTagName.Plugin) {
-          // plugin/dependency -> artifacts
-          const selectionRange: vscode.Range = new vscode.Range(
-            targetNode.startIndex !== null ? document.positionAt(targetNode.startIndex) : position,
-            targetNode.endIndex !== null ? document.positionAt(targetNode.endIndex) : position,
-          );
-
-          const siblingNodes: Node[] = tagNode.parent?.children ?? [];
-          const artifactIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.ArtifactId) as Element | undefined;
-          const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;
-          const versionNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.Version) as Element | undefined;
-
-          const groupIdHint = getTextFromNode(groupIdNode?.firstChild);
-          const artifactIdHint = getTextFromNode(artifactIdNode?.firstChild);
-          const versionHint = getTextFromNode(versionNode?.firstChild);
-          if (groupIdHint && artifactIdHint) {
-            const mavenProject: MavenProject | undefined = MavenProjectManager.get(document.uri.fsPath);
-            const version: string | undefined = mavenProject?.getDependencyVersion(groupIdHint, artifactIdHint) || versionHint;
-            if (version !== undefined && version.match(/^\$\{.*\}$/) === null) { // skip for unresolved properties, e.g. ${azure.version}
-              const pomPath: string = localPomPath(groupIdHint, artifactIdHint, version);
-              if (!existsSync(pomPath)) {
-                return undefined;
-              }
-              const definitionLink: vscode.LocationLink = {
-                targetRange: new vscode.Range(0, 0, 0, 0),
-                targetUri: vscode.Uri.file(pomPath).with({ scheme: "vscode-maven", authority: "local-repository" }),
-                originSelectionRange: selectionRange
-              };
-              return [definitionLink];
-            }
-          }
-        } else if (targetNode.name === XmlTagName.Parent) {
-          // parent -> artifacts
-          return getParentDefinitionLink(targetNode, document, position);
+        if (parentNode.name === XmlTagName.Dependency || parentNode.name === XmlTagName.Plugin) { // plugin/dependency -> artifacts
+          return getDependencyDefinitionLink(parentNode, document, position);
+        } else if (parentNode.name === XmlTagName.Parent) { // parent -> artifact
+          return getParentDefinitionLink(parentNode, document, position);
+        } else {
+          return undefined;
         }
-        return undefined;
       }
       case XmlTagName.Module: {
-        const moduleName = getTextFromNode(tagNode.firstChild);
-        const targetUri = vscode.Uri.joinPath(document.uri, "..", moduleName, "pom.xml");
-        const selectionRange: vscode.Range = new vscode.Range(
-          tagNode && tagNode.startIndex !== null ? document.positionAt(tagNode.startIndex) : position,
-          tagNode && tagNode.endIndex !== null ? document.positionAt(tagNode.endIndex) : position,
-        );
-        const definitionLink: vscode.LocationLink = {
-          targetRange: new vscode.Range(0, 0, 0, 0),
-          targetUri,
-          originSelectionRange: selectionRange
-        };
-        return [definitionLink];
+        return getModuleDefinitionLink(tagNode, document, position);
       }
       case XmlTagName.Parent: {
         return getParentDefinitionLink(tagNode, document, position);
+      }
+      case XmlTagName.Dependency:
+      case XmlTagName.Plugin: {
+        return getDependencyDefinitionLink(tagNode, document, position);
       }
       default:
         return undefined;
@@ -110,4 +73,65 @@ function getParentDefinitionLink(parentNode: Element, document: vscode.TextDocum
     return [definitionLink];
   }
   return undefined;
+}
+
+function getDependencyDefinitionLink(dependencyOrPluginNode: Element, document: vscode.TextDocument, position: vscode.Position) {
+  const selectionRange: vscode.Range = new vscode.Range(
+    dependencyOrPluginNode.startIndex !== null ? document.positionAt(dependencyOrPluginNode.startIndex) : position,
+    dependencyOrPluginNode.endIndex !== null ? document.positionAt(dependencyOrPluginNode.endIndex) : position,
+  );
+
+  const siblingNodes: Node[] = dependencyOrPluginNode.children ?? [];
+  const artifactIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.ArtifactId) as Element | undefined;
+  const groupIdNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.GroupId) as Element | undefined;
+  const versionNode: Element | undefined = siblingNodes.find(elem => isTag(elem) && elem.tagName === XmlTagName.Version) as Element | undefined;
+
+  const groupIdHint = getTextFromNode(groupIdNode?.firstChild);
+  const artifactIdHint = getTextFromNode(artifactIdNode?.firstChild);
+  const versionHint = getTextFromNode(versionNode?.firstChild);
+  if (groupIdHint && artifactIdHint) {
+    const mavenProject: MavenProject | undefined = MavenProjectManager.get(document.uri.fsPath);
+    const version: string | undefined = mavenProject?.getDependencyVersion(groupIdHint, artifactIdHint) || versionHint;
+    if (version !== undefined) {
+      const pomPath: string = localPomPath(groupIdHint, artifactIdHint, version);
+      if (existsSync(pomPath)) {
+        const definitionLink: vscode.LocationLink = {
+          targetRange: new vscode.Range(0, 0, 0, 0),
+          targetUri: vscode.Uri.file(pomPath).with({ scheme: "vscode-maven", authority: "local-repository" }),
+          originSelectionRange: selectionRange
+        };
+        return [definitionLink];
+      } else {
+        // provide all local version under gid:aid
+        const links: vscode.DefinitionLink[] = [];
+        const pomPaths = possibleLocalPomPath(groupIdHint, artifactIdHint);
+        for (const p of pomPaths) {
+          if (existsSync(p)) {
+            links.push({
+              targetRange: new vscode.Range(0, 0, 0, 0),
+              targetUri: vscode.Uri.file(p).with({ scheme: "vscode-maven", authority: "local-repository" }),
+              originSelectionRange: selectionRange
+            });
+          }
+        }
+        return links;
+      }
+    }
+  }
+  return undefined;
+}
+
+function getModuleDefinitionLink(moduleNode: Element, document: vscode.TextDocument, position: vscode.Position) {
+  const moduleName = getTextFromNode(moduleNode.firstChild);
+  const targetUri = vscode.Uri.joinPath(document.uri, "..", moduleName, "pom.xml");
+  const selectionRange: vscode.Range = new vscode.Range(
+    moduleNode && moduleNode.startIndex !== null ? document.positionAt(moduleNode.startIndex) : position,
+    moduleNode && moduleNode.endIndex !== null ? document.positionAt(moduleNode.endIndex) : position,
+  );
+  const definitionLink: vscode.LocationLink = {
+    targetRange: new vscode.Range(0, 0, 0, 0),
+    targetUri,
+    originSelectionRange: selectionRange
+  };
+  return [definitionLink];
 }

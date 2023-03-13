@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import { readdirSync } from "fs";
 import * as fse from "fs-extra";
 import * as _ from "lodash";
 import * as os from "os";
@@ -99,4 +100,10 @@ export function getPathToWorkspaceStorage(...args: string[]): string | undefined
 
 export function localPomPath(gid: string, aid: string, version: string): string {
     return path.join(getMavenLocalRepository(), ...gid.split("."), aid, version, `${aid}-${version}.pom`);
+}
+
+export function possibleLocalPomPath(gid: string, aid: string): string[] {
+    const artifactFolder = path.join(getMavenLocalRepository(), ...gid.split("."), aid);
+    const versions = readdirSync(artifactFolder);
+    return versions.map(v => path.join(artifactFolder, v, `${aid}-${v}.pom`));
 }
