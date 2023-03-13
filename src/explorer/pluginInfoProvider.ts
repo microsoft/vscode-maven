@@ -10,7 +10,7 @@ import { readContentFromJar } from "../utils/jarUtils";
 import { fetchPluginMetadataXml } from "../utils/requestUtils";
 import { Utils } from "../utils/Utils";
 
-const KEY_PLUGINS: string = "plugins";
+const KEY_PLUGINS = "plugins";
 
 interface IPluginCache {
     [groupId: string]: {
@@ -114,14 +114,14 @@ class PluginInfoProvider {
         const goals: string[] = [];
         const textOutput: string = await Utils.getPluginDescription(this.getPluginId(gid, aid, version), projectBasePath);
 
-        const versionRegExp: RegExp = /^Version: (.*)/m;
+        const versionRegExp = /^Version: (.*)/m;
         const versionMatch: string[] | null = textOutput.match(versionRegExp);
         if (versionMatch !== null && versionMatch.length === 2) {
             version = versionMatch[1];
         }
 
         // find prefix
-        const prefixRegExp: RegExp = /^Goal Prefix: (.*)/m;
+        const prefixRegExp = /^Goal Prefix: (.*)/m;
         const prefixMatch: string[] | null = textOutput.match(prefixRegExp);
         if (prefixMatch !== null && prefixMatch.length === 2) {
             prefix = prefixMatch[1];
@@ -129,7 +129,7 @@ class PluginInfoProvider {
 
         // find goals
         if (version && prefix !== undefined) {
-            const goalRegExp: RegExp = new RegExp(`^${prefix}:(.*)`, "gm");
+            const goalRegExp = new RegExp(`^${prefix}:(.*)`, "gm");
             const goalsMatch: string[] | null = textOutput.match(goalRegExp);
             if (goalsMatch !== null) {
                 // prefix:goal matched, remove "prefix:" part

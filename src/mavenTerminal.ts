@@ -67,7 +67,7 @@ class MavenTerminal implements vscode.Disposable {
                     // See: https://github.com/microsoft/vscode-maven/issues/489#issuecomment-917613597
                     const possibleExts = ["cmd", "bat"];
                     for (const ext of possibleExts) {
-                        const amended: string = `${filepath}.${ext}`;
+                        const amended = `${filepath}.${ext}`;
                         if (await fse.pathExists(amended)) {
                             return amended;
                         }

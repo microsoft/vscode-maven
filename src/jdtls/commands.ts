@@ -4,8 +4,8 @@
 import * as vscode from "vscode";
 import { JavaExtensionNotActivatedError } from "../utils/errorUtils";
 
-const JAVA_EXTENSION_ID: string = "redhat.java";
-const JAVA_EXECUTE_WORKSPACE_COMMAND: string = "java.execute.workspaceCommand";
+const JAVA_EXTENSION_ID = "redhat.java";
+const JAVA_EXECUTE_WORKSPACE_COMMAND = "java.execute.workspaceCommand";
 
 // tslint:disable-next-line:export-name
 export function executeJavaLanguageServerCommand(...rest: any[]): any {

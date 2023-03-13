@@ -10,7 +10,7 @@ import { FromIndex } from "./artifact/FromIndex";
 import { FromLocal } from "./artifact/FromLocal";
 import { IXmlCompletionProvider } from "./IXmlCompletionProvider";
 
-const DEFAULT_GROUP_ID: string = "org.apache.maven.plugins";
+const DEFAULT_GROUP_ID = "org.apache.maven.plugins";
 
 export class ArtifactProvider implements IXmlCompletionProvider {
     private centralProvider;
@@ -68,7 +68,7 @@ export class ArtifactProvider implements IXmlCompletionProvider {
                 const localItems: vscode.CompletionItem[] = await this.localProvider.getArtifactIdCandidates(groupIdHint);
                 let mergedItems: vscode.CompletionItem[] = [];
 
-                const ID_SEPARATOR: string = ":";
+                const ID_SEPARATOR = ":";
                 mergedItems = _.unionBy(centralItems, indexItems, localItems, (item) => _.get(item, "data.groupId") + ID_SEPARATOR + item.insertText);
                 mergedItems = dedupItemsWithGroupId(mergedItems, groupIdHint);
 

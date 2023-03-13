@@ -9,7 +9,7 @@ import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 
-const CONTEXT_VALUE: string = "maven:workspaceFolder";
+const CONTEXT_VALUE = "maven:workspaceFolder";
 
 export class WorkspaceFolder implements ITreeItem {
     constructor(

@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 
-const CONTEXT_VALUE: string = "maven:menu";
+const CONTEXT_VALUE = "maven:menu";
 
 export abstract class Menu implements ITreeItem {
     protected name: string;

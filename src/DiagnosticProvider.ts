@@ -72,7 +72,7 @@ class DiagnosticProvider {
             return undefined;
         }
 
-        const message: string = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus?.effectiveVersion}`;
+        const message = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus?.effectiveVersion}`;
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
         diagnostic.code = MAVEN_DEPENDENCY_CONFLICT;
         return diagnostic;
@@ -80,15 +80,15 @@ class DiagnosticProvider {
 
     public async findConflictRange(pomPath: string, gid: string, aid: string): Promise<vscode.Range | undefined> {
         const dependencyNode = await getDependencyNode(pomPath, gid, aid);
-        if (dependencyNode === undefined) {
+        if (dependencyNode === undefined || !dependencyNode.startIndex || !dependencyNode.endIndex) {
             console.warn(`Failed to find dependency node ${gid}:${aid} in ${pomPath}.`);
             return undefined;
         }
 
         const currentDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(pomPath);
         return new vscode.Range(
-            currentDocument.positionAt(dependencyNode.startIndex!),
-            currentDocument.positionAt(dependencyNode.endIndex!)
+            currentDocument.positionAt(dependencyNode.startIndex),
+            currentDocument.positionAt(dependencyNode.endIndex)
         );
     }
 }

@@ -14,7 +14,7 @@ import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
 import { runSteps, selectArchetypeStep, specifyArchetypeVersionStep, specifyArtifactIdStep, specifyGroupIdStep, specifyTargetFolderStep } from "./createProject";
 import { IProjectCreationMetadata, IProjectCreationStep } from "./createProject/types";
-const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
+const REMOTE_ARCHETYPE_CATALOG_URL = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
 
 export namespace ArchetypeModule {
 
@@ -120,7 +120,7 @@ export namespace ArchetypeModule {
                 const description: string = archetype.description && archetype.description[0];
                 const version: string = archetype.version && archetype.version[0];
                 const repository: string = archetype.repository && archetype.repository[0];
-                const identifier: string = `${groupId}:${artifactId}`;
+                const identifier = `${groupId}:${artifactId}`;
 
                 if (dict[identifier] === undefined) {
                     dict[identifier] = new Archetype(artifactId, groupId, repository, description);

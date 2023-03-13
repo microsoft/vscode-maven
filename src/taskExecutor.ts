@@ -21,7 +21,7 @@ export class Queue<T> {
 
 class TaskExecutor implements Disposable {
     private _tasks: Queue<any> = new Queue();
-    private _isExecuting: boolean = false;
+    private _isExecuting = false;
 
     public execute(task: any): void {
         this._tasks.push(task);

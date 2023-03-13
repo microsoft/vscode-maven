@@ -28,8 +28,8 @@ const OPTIONS_DEPENDENCY_GRAPH = "-DgraphFormat=text -DshowDuplicates -DshowConf
  */
 export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: boolean}): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
-    const epomPath: string = `${outputPath}.epom`;
-    const mtimePath: string = `${outputPath}.mtime`;
+    const epomPath = `${outputPath}.epom`;
+    const mtimePath = `${outputPath}.mtime`;
     const cachedMTimeMs: string | undefined = await readFileIfExists(mtimePath);
     const stat: fse.Stats = await fse.stat(pomPath);
     const mtimeMs: string = stat.mtimeMs.toString();
@@ -45,7 +45,7 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
 
 export async function rawDependencyTree(pomPath: string): Promise<any> {
     const outputPath: string = getTempFolder(pomPath);
-    const dependencyGraphPath: string = `${outputPath}.deps.txt`;
+    const dependencyGraphPath = `${outputPath}.deps.txt`;
     const outputDirectory: string = path.dirname(dependencyGraphPath);
     const outputFileName: string = path.basename(dependencyGraphPath);
     await executeInBackground(`-B -N ${OPTIONS_DEPENDENCY_GRAPH} -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}" ${GOAL_DEPENDENCY_GRAPH}`, pomPath);
@@ -223,10 +223,10 @@ function getTempFolder(identifier: string): string {
 }
 
 export async function promptToSettingMavenExecutable(): Promise<void> {
-    const SETTING_MAVEN_EXECUTABLE_PATH: string = "maven.executable.path";
-    const MESSAGE: string = `Maven executable not found in PATH. Please specify "${SETTING_MAVEN_EXECUTABLE_PATH}".`;
-    const BUTTON_GOTO_SETTINGS: string = "Open Settings";
-    const BUTTON_BROWSE_FOR_MAVEN: string = "Browse...";
+    const SETTING_MAVEN_EXECUTABLE_PATH = "maven.executable.path";
+    const MESSAGE = `Maven executable not found in PATH. Please specify "${SETTING_MAVEN_EXECUTABLE_PATH}".`;
+    const BUTTON_GOTO_SETTINGS = "Open Settings";
+    const BUTTON_BROWSE_FOR_MAVEN = "Browse...";
 
     const choice: string | undefined = await vscode.window.showInformationMessage(MESSAGE, BUTTON_GOTO_SETTINGS, BUTTON_BROWSE_FOR_MAVEN);
     switch (choice) {

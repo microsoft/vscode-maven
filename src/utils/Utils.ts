@@ -233,8 +233,8 @@ export namespace Utils {
 
         // select a command if not provided
         if (!selectedCommand) {
-            const LABEL_CUSTOM: string = "Custom ...";
-            const LABEL_FAVORITES: string = "Favorites ...";
+            const LABEL_CUSTOM = "Custom ...";
+            const LABEL_FAVORITES = "Favorites ...";
             selectedCommand = await window.showQuickPick(
                 [LABEL_FAVORITES, LABEL_CUSTOM, ...DEFAULT_MAVEN_LIFECYCLES],
                 { placeHolder: "Select the goal to execute ...", ignoreFocusOut: true }

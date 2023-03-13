@@ -8,15 +8,15 @@ import { registerCommand } from "../utils/uiUtils";
 import { executeJavaLanguageServerCommand, getJavaExtension, isJavaExtActivated } from "./commands";
 
 // Please refer to https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Fconstant-values.html
-const UNDEFINED_TYPE: string = "16777218"; // e.g. Unknown var;
-const UNDEFINED_NAME: string = "570425394"; // e.g. Unknown.foo();
+const UNDEFINED_TYPE = "16777218"; // e.g. Unknown var;
+const UNDEFINED_NAME = "570425394"; // e.g. Unknown.foo();
 
-const COMMAND_SEARCH_ARTIFACT: string = "maven.artifactSearch";
-const TITLE_RESOLVE_UNKNOWN_TYPE: string = "Resolve unknown type";
+const COMMAND_SEARCH_ARTIFACT = "maven.artifactSearch";
+const TITLE_RESOLVE_UNKNOWN_TYPE = "Resolve unknown type";
 
 export function registerArtifactSearcher(context: vscode.ExtensionContext): void {
     const javaExt: vscode.Extension<any> | undefined = getJavaExtension();
-    if (!!javaExt) {
+    if (javaExt) {
         const resolver: TypeResolver = new TypeResolver(path.join(context.extensionPath, "resources", "IndexData"));
 
         registerCommand(context, COMMAND_SEARCH_ARTIFACT, async (param: any) => await resolver.pickAndAddDependency(param));
@@ -37,7 +37,7 @@ export function registerArtifactSearcher(context: vscode.ExtensionContext): void
 
 class TypeResolver {
     private dataPath: string;
-    private initialized: boolean = false;
+    private initialized = false;
 
     constructor(dataPath: string) {
         this.dataPath = dataPath;
@@ -83,7 +83,7 @@ class TypeResolver {
                 length
             };
             const commandName: string = TITLE_RESOLVE_UNKNOWN_TYPE;
-            const message: string = `\uD83D\uDC49 [${commandName}](command:${COMMAND_SEARCH_ARTIFACT}?${encodeURIComponent(JSON.stringify(param))} "${commandName}")`;
+            const message = `\uD83D\uDC49 [${commandName}](command:${COMMAND_SEARCH_ARTIFACT}?${encodeURIComponent(JSON.stringify(param))} "${commandName}")`;
             const hoverMessage: vscode.MarkdownString = new vscode.MarkdownString(message);
             hoverMessage.isTrusted = true;
             return new vscode.Hover(hoverMessage);
@@ -161,7 +161,7 @@ async function getArtifactsPickItems(className: string): Promise<vscode.QuickPic
     };
     const response: IArtifactSearchResult[] = await executeJavaLanguageServerCommand("java.maven.searchArtifact", searchParam);
     const picks: vscode.QuickPickItem[] = [];
-    for (let i: number = 0; i < Math.min(Math.round(response.length / 5), 5); i += 1) {
+    for (let i = 0; i < Math.min(Math.round(response.length / 5), 5); i += 1) {
         const arr: string[] = [response[i].groupId, " : ", response[i].artifactId, " : ", response[i].version];
         picks.push(
             {
@@ -201,7 +201,7 @@ async function applyEdits(uri: vscode.Uri, edits: any): Promise<void> {
         await applyWorkspaceEdit(edits[2]);
         document = await vscode.workspace.openTextDocument(vscode.Uri.parse(Object.keys(edits[2].changes)[0]));
         document.save();
-        const LINE_OFFSET: number = 1;
+        const LINE_OFFSET = 1;
         // tslint:disable-next-line: restrict-plus-operands
         const startLine: number = edits[2].changes[Object.keys(edits[2].changes)[0]][0].range.start.line + LINE_OFFSET; // skip blank line
         const lineNumber: number = edits[2].changes[Object.keys(edits[2].changes)[0]][0].newText.indexOf("<dependencies>") === -1 ? 5 : 7;

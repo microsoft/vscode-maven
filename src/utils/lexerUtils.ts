@@ -54,7 +54,7 @@ export function getNodePath(node: Node) {
     return parents.join(".");
 }
 
-export function getTextFromNode(node: Node | undefined | null, fallbackValue: string = "") {
+export function getTextFromNode(node: Node | undefined | null, fallbackValue = "") {
     return node && isText(node) ? node.data : fallbackValue;
 }
 

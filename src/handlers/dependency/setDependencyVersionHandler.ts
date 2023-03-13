@@ -34,7 +34,7 @@ export async function setDependencyVersionHandler(selectedItem?: any): Promise<v
     const gid: string = selectedItem.groupId;
     const aid: string = selectedItem.artifactId;
     const versions: string[] = getAllVersionsInTree(pomPath, gid, aid);
-    const OPTION_SEARCH_MAVEN_CENTRAL: string = "Search Maven Central Repository...";
+    const OPTION_SEARCH_MAVEN_CENTRAL = "Search Maven Central Repository...";
     versions.push(OPTION_SEARCH_MAVEN_CENTRAL);
 
     let selectedVersion: string | undefined = await vscode.window.showQuickPick(
@@ -121,7 +121,7 @@ async function insertDependencyManagement(pomPath: string, targetNode: Element, 
                     id.firstChild && isText(id.firstChild) && id.firstChild.data === aid
                 )
             ) as Element | undefined;
-            const newIndent: string = `${baseIndent}${indent}`;
+            const newIndent = `${baseIndent}${indent}`;
             targetText = constructDependencyNode({ gid, aid, version, baseIndent: newIndent, indent, eol });
         } else {
             insertPosition = currentDocument.positionAt(getInnerStartIndex(targetNode));

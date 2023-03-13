@@ -7,9 +7,9 @@ import * as _ from "lodash";
 import * as path from "path";
 import * as url from "url";
 
-const URL_MAVEN_SEARCH_API: string = "https://search.maven.org/solrsearch/select";
-const URL_MAVEN_CENTRAL_REPO: string = "https://repo1.maven.org/maven2/";
-const MAVEN_METADATA_FILENAME: string = "maven-metadata.xml";
+const URL_MAVEN_SEARCH_API = "https://search.maven.org/solrsearch/select";
+const URL_MAVEN_CENTRAL_REPO = "https://repo1.maven.org/maven2/";
+const MAVEN_METADATA_FILENAME = "maven-metadata.xml";
 
 export interface IArtifactMetadata {
     id: string;
@@ -82,7 +82,7 @@ export async function getLatestVersion(gid: string, aid: string): Promise<string
 
 async function httpsGet(urlString: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        let result: string = "";
+        let result = "";
         const options: any = url.parse(urlString);
         options.headers = {
             'User-Agent': 'vscode-maven/0.1'

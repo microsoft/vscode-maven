@@ -11,7 +11,7 @@ import { mavenOutputChannel } from "../mavenOutputChannel";
 import { MavenProjectManager } from "../project/MavenProjectManager";
 import { generalErrorHandler } from "./errorUtils";
 
-const TROUBLESHOOTING_LINK: string = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
+const TROUBLESHOOTING_LINK = "https://github.com/Microsoft/vscode-maven/blob/master/Troubleshooting.md";
 
 // file chooser dialog
 export async function openDialogForFolder(customOptions: OpenDialogOptions): Promise<Uri | undefined> {
@@ -51,8 +51,8 @@ export async function openFileIfExists(filepath: string): Promise<void> {
 
 // Troubleshooting
 export async function showTroubleshootingDialog(errorMessage: string): Promise<void> {
-    const OPTION_SHOW_OUTPUT: string = "Show Output";
-    const OPTION_LEARN_MORE: string = "Learn More";
+    const OPTION_SHOW_OUTPUT = "Show Output";
+    const OPTION_LEARN_MORE = "Learn More";
     const choiceForDetails: string | undefined = await window.showErrorMessage(errorMessage, OPTION_SHOW_OUTPUT, OPTION_LEARN_MORE);
     if (choiceForDetails === OPTION_LEARN_MORE) {
         // open FAQs

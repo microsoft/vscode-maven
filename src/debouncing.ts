@@ -9,8 +9,8 @@ export const lruCache: LRUCache<vscode.Uri, MovingAverage> = new LRUCache<vscode
 // See: https://github.com/microsoft/vscode/blob/94c9ea46838a9a619aeafb7e8afd1170c967bb55/src/vs/base/common/numbers.ts
 export class MovingAverage {
 
-    private _n: number = 1;
-    private _val: number = 0;
+    private _n = 1;
+    private _val = 0;
 
     public update(value: number): this {
         this._val = this._val + (value - this._val) / this._n;
