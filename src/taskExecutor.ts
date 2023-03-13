@@ -20,10 +20,10 @@ export class Queue<T> {
 }
 
 class TaskExecutor implements Disposable {
-    private _tasks: Queue<any> = new Queue();
-    private _isExecuting: boolean = false;
+    private _tasks: Queue<CallableFunction> = new Queue();
+    private _isExecuting = false;
 
-    public execute(task: any): void {
+    public execute(task: CallableFunction): void {
         this._tasks.push(task);
         this._pickAndRun().catch(console.error);
     }
@@ -37,7 +37,7 @@ class TaskExecutor implements Disposable {
             return;
         }
         this._isExecuting = true;
-        const currentTask: any = this._tasks.pop();
+        const currentTask: CallableFunction | undefined = this._tasks.pop();
         if (!currentTask) {
             this._isExecuting = false;
             return;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
@@ -14,11 +15,11 @@ import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
 import { runSteps, selectArchetypeStep, specifyArchetypeVersionStep, specifyArtifactIdStep, specifyGroupIdStep, specifyTargetFolderStep } from "./createProject";
 import { IProjectCreationMetadata, IProjectCreationStep } from "./createProject/types";
-const REMOTE_ARCHETYPE_CATALOG_URL: string = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
+const REMOTE_ARCHETYPE_CATALOG_URL = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
 
-export namespace ArchetypeModule {
+export class ArchetypeModule {
 
-    export async function createMavenProject(entry: Uri | IProjectCreationMetadata | undefined, _operationId: string): Promise<void> {
+    public static async createMavenProject(entry: Uri | IProjectCreationMetadata | undefined): Promise<void> {
         const metadata: IProjectCreationMetadata = {
             targetFolderHint: workspace.workspaceFolders?.[0]?.uri.fsPath
         };
@@ -48,67 +49,15 @@ export namespace ArchetypeModule {
         }
     }
 
-    export async function updateArchetypeCatalog(): Promise<void> {
+    public static async updateArchetypeCatalog(): Promise<void> {
         const xml: string = await Utils.downloadFile(REMOTE_ARCHETYPE_CATALOG_URL, true);
-        const archetypes: Archetype[] = await listArchetypeFromXml(xml);
+        const archetypes: Archetype[] = await ArchetypeModule.listArchetypeFromXml(xml);
         const targetFilePath: string = path.join(getPathToExtensionRoot(), "resources", "archetypes.json");
         await fse.ensureFile(targetFilePath);
         await fse.writeJSON(targetFilePath, archetypes);
     }
 
-    async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Promise<void> {
-        const {
-            archetypeArtifactId,
-            archetypeGroupId,
-            archetypeVersion,
-            groupId,
-            artifactId,
-            targetFolder
-        } = metadata;
-        if (archetypeArtifactId === undefined || archetypeGroupId === undefined || archetypeVersion === undefined) {
-            throw new Error("Archetype information is incomplete.");
-        }
-        sendInfo("", { archetypeArtifactId, archetypeGroupId, archetypeVersion });
-        const cmdArgs: string[] = [
-            // explicitly using 3.1.2 as maven-archetype-plugin:3.0.1 ignores -DoutputDirectory
-            // see https://github.com/microsoft/vscode-maven/issues/478
-            "org.apache.maven.plugins:maven-archetype-plugin:3.1.2:generate",
-            `-DarchetypeArtifactId="${archetypeArtifactId}"`,
-            `-DarchetypeGroupId="${archetypeGroupId}"`,
-            `-DarchetypeVersion="${archetypeVersion}"`,
-            `-DgroupId="${groupId}"`,
-            `-DartifactId="${artifactId}"`
-        ];
-        let cwd: string | undefined = targetFolder;
-        let mvnPath: string | undefined = await getMaven();
-        if (mvnPath === undefined) {
-            cmdArgs.push(`-DoutputDirectory="${targetFolder}"`);
-            mvnPath = getEmbeddedMavenWrapper();
-            cwd = path.dirname(mvnPath);
-        }
-
-        if (mvnPath === undefined) { return; }
-        const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvnPath));
-
-        const defaultArgs: string | undefined = Settings.Executable.options(metadata.targetFolder);
-        const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
-        const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"` : undefined;
-        let commandLine: string = [mvnString, ...cmdArgs, defaultArgs, mvnSettingsArg].filter(Boolean).join(" ");
-        const options: vscode.ShellExecutionOptions = { cwd };
-        if (vscode.env.remoteName === undefined && process.platform === "win32") { // VS Code launched in Windows Desktop.
-            options.shellQuoting = shellQuotes.cmd;
-            options.executable = "cmd.exe";
-            options.shellArgs = ["/c"];
-            commandLine = `"${commandLine}"`; // wrap full command with quotation marks, cmd /c "<fullcommand>", see https://stackoverflow.com/a/6378038
-        } else {
-            options.shellQuoting = shellQuotes.bash;
-        }
-        const execution = new vscode.ShellExecution(commandLine, options);
-        const createProjectTask = new vscode.Task({ type: "maven", targetFolder, artifactId }, vscode.TaskScope.Global, "createProject", "maven", execution);
-        vscode.tasks.executeTask(createProjectTask);
-    }
-
-    export async function listArchetypeFromXml(xmlString: string): Promise<Archetype[]> {
+    public static async listArchetypeFromXml(xmlString: string): Promise<Archetype[]> {
         try {
             const xmlObject: any = await Utils.parseXmlContent(xmlString);
             const catalog: any = xmlObject && xmlObject["archetype-catalog"];
@@ -120,7 +69,7 @@ export namespace ArchetypeModule {
                 const description: string = archetype.description && archetype.description[0];
                 const version: string = archetype.version && archetype.version[0];
                 const repository: string = archetype.repository && archetype.repository[0];
-                const identifier: string = `${groupId}:${artifactId}`;
+                const identifier = `${groupId}:${artifactId}`;
 
                 if (dict[identifier] === undefined) {
                     dict[identifier] = new Archetype(artifactId, groupId, repository, description);
@@ -137,6 +86,60 @@ export namespace ArchetypeModule {
         return [];
     }
 }
+
+
+async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Promise<void> {
+    const {
+        archetypeArtifactId,
+        archetypeGroupId,
+        archetypeVersion,
+        groupId,
+        artifactId,
+        targetFolder
+    } = metadata;
+    if (archetypeArtifactId === undefined || archetypeGroupId === undefined || archetypeVersion === undefined) {
+        throw new Error("Archetype information is incomplete.");
+    }
+    sendInfo("", { archetypeArtifactId, archetypeGroupId, archetypeVersion });
+    const cmdArgs: string[] = [
+        // explicitly using 3.1.2 as maven-archetype-plugin:3.0.1 ignores -DoutputDirectory
+        // see https://github.com/microsoft/vscode-maven/issues/478
+        "org.apache.maven.plugins:maven-archetype-plugin:3.1.2:generate",
+        `-DarchetypeArtifactId="${archetypeArtifactId}"`,
+        `-DarchetypeGroupId="${archetypeGroupId}"`,
+        `-DarchetypeVersion="${archetypeVersion}"`,
+        `-DgroupId="${groupId}"`,
+        `-DartifactId="${artifactId}"`
+    ];
+    let cwd: string | undefined = targetFolder;
+    let mvnPath: string | undefined = await getMaven();
+    if (mvnPath === undefined) {
+        cmdArgs.push(`-DoutputDirectory="${targetFolder}"`);
+        mvnPath = getEmbeddedMavenWrapper();
+        cwd = path.dirname(mvnPath);
+    }
+
+    if (mvnPath === undefined) { return; }
+    const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvnPath));
+
+    const defaultArgs: string | undefined = Settings.Executable.options(metadata.targetFolder);
+    const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
+    const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"` : undefined;
+    let commandLine: string = [mvnString, ...cmdArgs, defaultArgs, mvnSettingsArg].filter(Boolean).join(" ");
+    const options: vscode.ShellExecutionOptions = { cwd };
+    if (vscode.env.remoteName === undefined && process.platform === "win32") { // VS Code launched in Windows Desktop.
+        options.shellQuoting = shellQuotes.cmd;
+        options.executable = "cmd.exe";
+        options.shellArgs = ["/c"];
+        commandLine = `"${commandLine}"`; // wrap full command with quotation marks, cmd /c "<fullcommand>", see https://stackoverflow.com/a/6378038
+    } else {
+        options.shellQuoting = shellQuotes.bash;
+    }
+    const execution = new vscode.ShellExecution(commandLine, options);
+    const createProjectTask = new vscode.Task({ type: "maven", targetFolder, artifactId }, vscode.TaskScope.Global, "createProject", "maven", execution);
+    vscode.tasks.executeTask(createProjectTask);
+}
+
 
 export class ArchetypeMetadata {
     public groupId: string;

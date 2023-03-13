@@ -3,8 +3,8 @@
 
 import * as _ from "lodash";
 
-const VERSION_VALUE_MAX: number = 999;
-const VERSION_VALUE_DIGITS: number = 3;
+const VERSION_VALUE_MAX = 999;
+const VERSION_VALUE_DIGITS = 3;
 // tslint:disable-next-line:export-name
 export function getSortText(version: string): string {
     const segments: string[] = version.split(/\.|-/);

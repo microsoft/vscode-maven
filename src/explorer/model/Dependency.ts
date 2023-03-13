@@ -8,7 +8,7 @@ import { ITreeNode } from "./ITreeNode";
 import { IOmittedStatus } from "./OmittedStatus";
 
 export class Dependency implements ITreeItem, ITreeNode {
-    public fullArtifactName: string = ""; // groupId:artifactId:version:scope
+    public fullArtifactName = ""; // groupId:artifactId:version:scope
     public projectPomPath: string;
     public groupId: string;
     public artifactId: string;
@@ -36,7 +36,7 @@ export class Dependency implements ITreeItem, ITreeNode {
 
     public getContextValue(): string {
         const root = this.root;
-        let contextValue: string = "maven:dependency";
+        let contextValue = "maven:dependency";
         if (root.fullArtifactName === this.fullArtifactName) {
             contextValue = `${contextValue}+root`;
         }
@@ -65,13 +65,13 @@ export class Dependency implements ITreeItem, ITreeNode {
         if (this.omittedStatus === undefined) {
             treeItem.iconPath = new vscode.ThemeIcon("library");
         } else if (this.omittedStatus.status === "duplicate") {
-            const iconFile: string = "LibraryDuplicate.svg";
+            const iconFile = "LibraryDuplicate.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)
             };
         } else if (this.omittedStatus.status === "conflict") {
-            const iconFile: string = "LibraryConflict.svg";
+            const iconFile = "LibraryConflict.svg";
             treeItem.iconPath = {
                 light: getPathToExtensionRoot("resources", "icons", "light", iconFile),
                 dark: getPathToExtensionRoot("resources", "icons", "dark", iconFile)

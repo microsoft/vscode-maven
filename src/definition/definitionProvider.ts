@@ -64,7 +64,7 @@ class DefinitionProvider implements vscode.DefinitionProvider {
           // parent -> artifacts
           return getParentDefinitionLink(targetNode, document, position);
         }
-
+        return undefined;
       }
       case XmlTagName.Module: {
         const moduleName = getTextFromNode(tagNode.firstChild);

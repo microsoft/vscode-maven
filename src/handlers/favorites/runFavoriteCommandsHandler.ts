@@ -20,7 +20,7 @@ export async function runFavoriteCommandsHandler(project: MavenProject | undefin
     }
     const favorites: FavoriteCommand[] | undefined = Settings.Terminal.favorites(selectedProject);
     if (!favorites || _.isEmpty(favorites)) {
-        const BUTTON_OPEN_SETTINGS: string = "Open Settings";
+        const BUTTON_OPEN_SETTINGS = "Open Settings";
         const choice: string | undefined = await vscode.window.showInformationMessage("Found no favorite commands. You can specify `maven.terminal.favorites` in Settings.", BUTTON_OPEN_SETTINGS);
         if (choice === BUTTON_OPEN_SETTINGS) {
             await vscode.commands.executeCommand("workbench.action.openSettings", "maven.terminal.favorites");

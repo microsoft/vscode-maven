@@ -9,7 +9,7 @@ import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
 import { PluginGoal } from "./PluginGoal";
 
-const CONTEXT_VALUE: string = "maven:plugin";
+const CONTEXT_VALUE = "maven:plugin";
 
 export class MavenPlugin implements ITreeItem {
     public project: MavenProject;
@@ -29,7 +29,7 @@ export class MavenPlugin implements ITreeItem {
     }
 
     private get pluginId(): string {
-        let pluginId: string = `${this.groupId}:${this.artifactId}`;
+        let pluginId = `${this.groupId}:${this.artifactId}`;
         if (this.version !== undefined) {
             pluginId += `:${this.version}`;
         }

@@ -79,7 +79,7 @@ function isJavaDebuggerEnabled(): boolean {
 }
 
 async function guideToInstallJavaDebugger(): Promise<void> {
-    const BUTTON_CONFIRM: string = "View Details";
+    const BUTTON_CONFIRM = "View Details";
     const choice: string | undefined = await vscode.window.showInformationMessage("Debugger for Java is required for debugging, please install and enable it.", BUTTON_CONFIRM);
     if (choice === BUTTON_CONFIRM) {
         vscode.commands.executeCommand("vscode.open", vscode.Uri.parse("vscode:extension/vscjava.vscode-java-debug"));

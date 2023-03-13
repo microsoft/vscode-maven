@@ -8,8 +8,8 @@ import { MavenProject } from "../explorer/model/MavenProject";
 import { IOmittedStatus } from "../explorer/model/OmittedStatus";
 import { getDependencyTree } from "./dependency/showDependenciesHandler";
 
-const DUPLICATE_INDICATOR: string = "omitted for duplicate";
-const CONFLICT_INDICATOR: string = "omitted for conflict";
+const DUPLICATE_INDICATOR = "omitted for duplicate";
+const CONFLICT_INDICATOR = "omitted for conflict";
 
 export async function parseRawDependencyDataHandler(project: MavenProject): Promise<Dependency[]> {
     const dependencyTree: string | undefined = await getDependencyTree(project.pomPath);
@@ -27,9 +27,9 @@ export async function parseRawDependencyDataHandler(project: MavenProject): Prom
     treeContent = treeContent.replace(re, "$1$4$3 with $2)");
     project.fullText = treeContent;
 
-    const indent: string = "   "; // three spaces
-    const eol: string = "\r\n";
-    const prefix: string = "+- ";
+    const indent = "   "; // three spaces
+    const eol = "\r\n";
+    const prefix = "+- ";
     const [treeNodes, conflictNodes] = await parseTreeNodes(treeContent, eol, indent, prefix, project.pomPath);
     project.conflictNodes = conflictNodes;
     project.dependencyNodes = treeNodes;
@@ -50,7 +50,7 @@ async function parseTreeNodes(treecontent: string, eol: string, indent: string, 
         const toDependency = (line: string): Dependency => {
             let name: string = line.slice(curIndentCnt + prefix.length);
             const indexCut: number = name.indexOf("(");
-            let supplement: string = "";
+            let supplement = "";
             if (indexCut !== -1) {
                 supplement = name.substr(indexCut);
                 name = name.substr(0, indexCut - 1);

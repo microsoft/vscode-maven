@@ -67,7 +67,7 @@ class MavenTerminal implements vscode.Disposable {
                     // See: https://github.com/microsoft/vscode-maven/issues/489#issuecomment-917613597
                     const possibleExts = ["cmd", "bat"];
                     for (const ext of possibleExts) {
-                        const amended: string = `${filepath}.${ext}`;
+                        const amended = `${filepath}.${ext}`;
                         if (await fse.pathExists(amended)) {
                             return amended;
                         }
@@ -115,11 +115,12 @@ async function getCDCommand(cwd: string): Promise<string> {
         switch (currentWindowsShell()) {
             case ShellType.GIT_BASH:
                 return `cd "${cwd.replace(/\\+$/, "")}"`; // Git Bash: remove trailing '\'
-            case ShellType.POWERSHELL:
+            case ShellType.POWERSHELL: {
                 // Escape '[' and ']' in PowerShell
                 // See: https://github.com/microsoft/vscode-maven/issues/324
-                const escaped: string = cwd.replace(/([\[\]])/g, "``$1");
+                const escaped: string = cwd.replace(/([[\]])/g, "``$1");
                 return `cd "${escaped}"`; // PowerShell
+            }
             case ShellType.CMD:
                 return `cd /d "${cwd}"`; // CMD
             case ShellType.WSL:

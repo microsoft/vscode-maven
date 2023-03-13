@@ -27,7 +27,7 @@ export class JavaExtensionNotActivatedError extends Error {
   }
 }
 
-export async function generalErrorHandler(commandName: string, error: any): Promise<void> {
+export async function generalErrorHandler(commandName: string, error: Error): Promise<void> {
   if (error instanceof OperationCanceledError) {
     // swallow
   } else if (error instanceof MavenNotFoundError) {
