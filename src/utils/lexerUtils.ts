@@ -12,10 +12,12 @@ export enum XmlTagName {
     DependencyManagement = "dependencyManagement",
     Exclusions = "exclusions",
     Plugins = "plugins",
+    Plugin = "plugin",
     Project = "project",
     Dependency = "dependency",
     Properties = "properties",
-    Module = "module"
+    Module = "module",
+    Parent = "parent"
 }
 
 export function getNodesByTag(text: string, tag: string): Element[] {
