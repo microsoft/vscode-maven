@@ -27,8 +27,6 @@ export abstract class Menu implements ITreeItem {
 }
 
 export abstract class ProjectMenu extends Menu {
-    protected name: string;
-
     constructor(
         public project: MavenProject,
     ) {
