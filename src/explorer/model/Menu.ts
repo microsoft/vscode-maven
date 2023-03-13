@@ -10,9 +10,6 @@ const CONTEXT_VALUE: string = "maven:menu";
 export abstract class Menu implements ITreeItem {
     protected name: string;
 
-    constructor(
-    ) { }
-
     public abstract getChildren(): ITreeItem[] | undefined | Promise<ITreeItem[] | undefined>;
 
     public getContextValue(): string {
