@@ -129,9 +129,21 @@ export class MavenProject implements ITreeItem {
     /**
      * Absolute path of parent POM, inferred from `parent.relativePath`.
      */
-    public get parentPomPath(): string {
-        const relativePath: string = this._pom?.project?.parent?.[0]?.relativePath?.[0] ?? "../pom.xml";
-        return path.join(path.dirname(this.pomPath), relativePath);
+    public get parentPomPath(): string | undefined {
+        const parentNode = this._pom?.project?.parent?.[0];
+        if (parentNode) {
+            const relativePath: string = parentNode.relativePath?.[0];
+            if (relativePath === undefined) {
+                // default
+                return path.join(path.dirname(this.pomPath), "..", "pom.xml");
+            } else if (relativePath === "") {
+                // disabled explicitly
+                return undefined;
+            } else {
+                return path.join(path.dirname(this.pomPath), relativePath);
+            }
+        }
+        return undefined;
     }
 
     public get conflictNodes(): Dependency[] {
@@ -271,14 +283,13 @@ export class MavenProject implements ITreeItem {
             return this.properties.get(key);
         }
 
-        let cur: MavenProject | undefined = MavenProjectManager.get(this.parentPomPath) ?? this.parent;
+        let cur: MavenProject | undefined = (this.parentPomPath ? MavenProjectManager.get(this.parentPomPath) : undefined) ?? this.parent;
         while (cur !== undefined) {
             if (cur.properties.has(key)) {
                 return cur.properties.get(key);
             }
-            cur = MavenProjectManager.get(cur.parentPomPath) ?? cur.parent;
+            cur = (cur.parentPomPath ? MavenProjectManager.get(cur.parentPomPath) : undefined) ?? cur.parent;
         }
-
         return undefined;
     }
 

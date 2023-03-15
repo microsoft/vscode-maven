@@ -17,7 +17,8 @@ export enum XmlTagName {
     Dependency = "dependency",
     Properties = "properties",
     Module = "module",
-    Parent = "parent"
+    Parent = "parent",
+    RelativePath = "relativePath"
 }
 
 export function getNodesByTag(text: string, tag: string): Element[] {

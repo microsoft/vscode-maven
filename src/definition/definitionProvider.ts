@@ -31,7 +31,13 @@ class DefinitionProvider implements vscode.DefinitionProvider {
         if (parentNode.name === XmlTagName.Dependency || parentNode.name === XmlTagName.Plugin) { // plugin/dependency -> artifacts
           return getDependencyDefinitionLink(parentNode, document, position);
         } else if (parentNode.name === XmlTagName.Parent) { // parent -> artifact
-          return getParentDefinitionLink(parentNode, document, position);
+          const relativePathNode: Element | undefined = parentNode.childNodes.find(ch => isTag(ch) && ch.name === XmlTagName.RelativePath) as Element | undefined;
+          if (relativePathNode && !relativePathNode.firstChild) {
+            // <relativePath/> to explicitly lookup parent from repository
+            return getDependencyDefinitionLink(parentNode, document, position);
+          } else {
+            return getParentDefinitionLink(parentNode, document, position);
+          }
         } else {
           return undefined;
         }
@@ -58,9 +64,15 @@ function getParentDefinitionLink(parentNode: Element, document: vscode.TextDocum
   const mavenProject: MavenProject | undefined = MavenProjectManager.get(document.uri.fsPath);
   if (mavenProject) {
     const parentPomPath = mavenProject.parentPomPath;
-    if (!existsSync(parentPomPath)) {
+    /**
+     * TODO:
+     * Here only file existence is verified.
+     * In fact, groupId, artifactId, version in parent POM should also match those in project.parent node.
+     */
+    if (!parentPomPath || !existsSync(parentPomPath)) {
       return undefined;
     }
+
     const originSelectionRange: vscode.Range = new vscode.Range(
       parentNode && parentNode.startIndex !== null ? document.positionAt(parentNode.startIndex) : position,
       parentNode && parentNode.endIndex !== null ? document.positionAt(parentNode.endIndex) : position,
