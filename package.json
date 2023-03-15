@@ -783,7 +783,7 @@
     "mocha": "^9.2.2",
     "ts-loader": "^9.4.1",
     "typescript": "^4.8.4",
-    "webpack": "^5.74.0",
+    "webpack": "^5.76.0",
     "eslint": "^8.32.0",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@typescript-eslint/parser": "^5.48.2",
