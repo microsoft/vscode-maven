@@ -556,27 +556,27 @@
         },
         {
           "command": "maven.goal.validate",
-          "group": "1-lifecycle@50"
+          "group": "3-lifecycle@50"
         },
         {
           "command": "maven.goal.verify",
-          "group": "1-lifecycle@60"
+          "group": "3-lifecycle@60"
         },
         {
           "command": "maven.goal.test",
-          "group": "1-lifecycle@70"
+          "group": "3-lifecycle@70"
         },
         {
           "command": "maven.goal.test-compile",
-          "group": "1-lifecycle@75"
+          "group": "3-lifecycle@75"
         },
         {
           "command": "maven.goal.site",
-          "group": "1-lifecycle@80"
+          "group": "4-lifecycle@80"
         },
         {
           "command": "maven.goal.deploy",
-          "group": "1-lifecycle@90"
+          "group": "4-lifecycle@90"
         }
       ]
     },
