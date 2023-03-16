@@ -20,6 +20,7 @@ import { decorationProvider } from "./explorer/decorationProvider";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { Dependency } from "./explorer/model/Dependency";
 import { ITreeItem } from "./explorer/model/ITreeItem";
+import { MavenProfile } from "./explorer/model/MavenProfile";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { PluginGoal } from "./explorer/model/PluginGoal";
 import { pluginInfoProvider } from "./explorer/pluginInfoProvider";
@@ -100,6 +101,16 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommandRequiringTrust(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.command, pomfile: pluginGoal.plugin.project.pomPath }));
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());
     registerCommand(context, "maven.view.hierarchical", () => Settings.changeToHierarchicalView());
+
+    // commands for (un)selecting profiles
+    registerCommand(context, "maven.profile.select", (p: MavenProfile) => {
+        p.selected = true;
+        MavenExplorerProvider.getInstance().refresh(p);
+    });
+    registerCommand(context, "maven.profile.deselect", (p: MavenProfile) => {
+        p.selected = false;
+        MavenExplorerProvider.getInstance().refresh(p);
+    });
 
     registerConfigChangeListener(context);
 
