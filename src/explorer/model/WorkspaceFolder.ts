@@ -8,7 +8,6 @@ import { Settings } from "../../Settings";
 import { HintNode } from "./HintNode";
 import { ITreeItem } from "./ITreeItem";
 import { MavenProject } from "./MavenProject";
-// import { ProfilesMenu } from "./ProfilesMenu";
 
 const CONTEXT_VALUE = "maven:workspaceFolder";
 
@@ -22,8 +21,7 @@ export class WorkspaceFolder implements ITreeItem {
     }
 
     public async getChildren(): Promise<ITreeItem[]> {
-        const ret: ITreeItem[] = []; // TODO: show profiles menu when available
-        // const ret: ITreeItem[] = [new ProfilesMenu()];
+        const ret: ITreeItem[] = [];
         const allProjects: MavenProject[] = await MavenProjectManager.loadProjects(this.workspaceFolder);
         if (allProjects.length === 0) {
             return [new HintNode("No Maven project found.")];

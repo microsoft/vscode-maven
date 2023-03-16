@@ -64,4 +64,12 @@
       </plugins>
     </pluginManagement>
   </build>
+  <profiles>
+    <profile>
+      <id>p-parent</id>
+      <activation>
+        <jdk>11</jdk>
+      </activation>
+    </profile>
+  </profiles>
 </project>

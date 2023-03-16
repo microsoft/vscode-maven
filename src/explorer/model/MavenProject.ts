@@ -8,17 +8,20 @@ import * as vscode from "vscode";
 import { MavenProjectManager } from "../../project/MavenProjectManager";
 import { Settings } from "../../Settings";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
+import { rawProfileList } from "../../utils/mavenUtils";
 import { Utils } from "../../utils/Utils";
 import { EffectivePomProvider } from "../EffectivePomProvider";
 import { MavenExplorerProvider } from "../MavenExplorerProvider";
 import { DependenciesMenu } from "./DependenciesMenu";
 import { Dependency } from "./Dependency";
+import { FavoritesMenu } from "./FavoritesMenu";
 import { IEffectivePom } from "./IEffectivePom";
 import { ITreeItem } from "./ITreeItem";
 import { LifecycleMenu } from "./LifecycleMenu";
 import { MavenPlugin } from "./MavenPlugin";
+import { MavenProfile } from "./MavenProfile";
 import { PluginsMenu } from "./PluginsMenu";
-import { FavoritesMenu } from "./FavoritesMenu";
+import { ProfilesMenu } from "./ProfilesMenu";
 
 const CONTEXT_VALUE = "maven:project";
 
@@ -32,6 +35,7 @@ export class MavenProject implements ITreeItem {
     private _ePom: any;
     private _pom: any;
     private properties: Map<string, string> = new Map();
+    public profiles: MavenProfile[];
 
     constructor(pomPath: string) {
         this.pomPath = pomPath;
@@ -179,6 +183,7 @@ export class MavenProject implements ITreeItem {
         ret.push(new PluginsMenu(this));
         ret.push(new DependenciesMenu(this));
         ret.push(new FavoritesMenu(this));
+        ret.push(new ProfilesMenu(this));
         if (this.moduleNames.length > 0 && Settings.viewType() === "hierarchical") {
             const projects: MavenProject[] = this.modules.map(m => MavenProjectManager.get(m)).filter(Boolean) as MavenProject[];
             ret.push(...projects);
@@ -302,6 +307,14 @@ export class MavenProject implements ITreeItem {
             return Object.keys(propertiesNode);
         } else {
             return undefined;
+        }
+    }
+
+    public async refreshProfiles() {
+        const output = await rawProfileList(this.pomPath);
+        if (output) {
+            const profiles = Utils.parseProfilesOutput(this, output);
+            this.profiles = profiles;
         }
     }
 }

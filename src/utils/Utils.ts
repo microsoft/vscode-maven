@@ -13,6 +13,7 @@ import * as xml2js from "xml2js";
 import { DEFAULT_MAVEN_LIFECYCLES } from "../completion/constants";
 import { FavoriteCommand } from "../explorer/model/FavoriteCommand";
 import { LifecyclePhase } from "../explorer/model/LifecyclePhase";
+import { MavenProfile } from "../explorer/model/MavenProfile";
 import { MavenProject } from "../explorer/model/MavenProject";
 import { runFavoriteCommandsHandler } from "../handlers/favorites/runFavoriteCommandsHandler";
 import { MavenProjectManager } from "../project/MavenProjectManager";
@@ -262,4 +263,22 @@ export class Utils {
         await commands.executeCommand(`maven.goal.${selectedCommand}`, selectedProject);
     }
 
+    public static parseProfilesOutput(project: MavenProject, output: string) : MavenProfile[] {
+        const profiles: MavenProfile[] = [];
+        const regexp = /Profile Id: (.*) \(Active: (true|false) , Source: (.*)\)/g;
+        let match: RegExpExecArray | null;
+        do {
+            match = regexp.exec(output);
+            if (match != null && match.length === 4) {
+                const id = match[1];
+                const active = match[2] === "true";
+                const source = match[3];
+                if (!profiles.find(p => p.id === id)) {
+                    const profile = new MavenProfile(project, id, active, source);
+                    profiles.push(profile);
+                }
+            }
+        } while (match !== null);
+        return profiles;
+    }
 }

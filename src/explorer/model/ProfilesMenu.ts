@@ -2,11 +2,13 @@
 // Licensed under the MIT license.
 
 import { ITreeItem } from "./ITreeItem";
-import { Menu } from "./Menu";
+import { MavenProfile } from "./MavenProfile";
+import { MavenProject } from "./MavenProject";
+import { ProjectMenu } from "./Menu";
 
-export class ProfilesMenu extends Menu implements ITreeItem {
-    constructor() {
-        super();
+export class ProfilesMenu extends ProjectMenu implements ITreeItem {
+    constructor(project: MavenProject) {
+        super(project);
         this.name = "Profiles";
     }
 
@@ -14,7 +16,14 @@ export class ProfilesMenu extends Menu implements ITreeItem {
         return "maven:profilesMenu";
     }
 
-    public getChildren() : any[] {
-        return [];
+    public async getChildren() : Promise<MavenProfile[]> {
+        if (this.project.profiles === undefined) {
+            await this.project.refreshProfiles();
+        }
+        return this.project.profiles;
+    }
+
+    public async refresh(): Promise<void> {
+        await this.project.refreshProfiles();
     }
 }

@@ -225,6 +225,18 @@
         "title": "%contributes.commands.maven.java.projectConfiguration.update%",
         "icon": "$(sync)",
         "category": "Maven"
+      },
+      {
+        "command": "maven.profile.select",
+        "title": "Select",
+        "icon": "$(add)",
+        "category": "Maven"
+      },
+      {
+        "command": "maven.profile.deselect",
+        "title": "Deselect",
+        "icon": "$(remove)",
+        "category": "Maven"
       }
     ],
     "views": {
@@ -367,6 +379,14 @@
         },
         {
           "command": "maven.java.projectConfiguration.update",
+          "when": "false"
+        },
+        {
+          "command": "maven.profile.select",
+          "when": "false"
+        },
+        {
+          "command": "maven.profile.deselect",
           "when": "false"
         }
       ],
@@ -513,6 +533,16 @@
           "command": "maven.goal.execute.fromFavoritesMenu",
           "when": "view == mavenProjects && viewItem == maven:favorites",
           "group": "1@1"
+        },
+        {
+          "command": "maven.profile.select",
+          "when": "view == mavenProjects && viewItem == maven:profile+unchecked",
+          "group": "inline"
+        },
+        {
+          "command": "maven.profile.deselect",
+          "when": "view == mavenProjects && viewItem == maven:profile+checked",
+          "group": "inline"
         }
       ],
       "javaProject.maven": [

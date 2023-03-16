@@ -10,6 +10,7 @@ import * as vscode from "vscode";
 import * as which from "which";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
+import { MavenProjectManager } from "../project/MavenProjectManager";
 import { Settings } from "../Settings";
 import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { MavenNotFoundError } from "./errorUtils";
@@ -57,6 +58,13 @@ export async function pluginDescription(pluginId: string, pomPath: string): Prom
     // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock
     await executeInBackground(`-B -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}" help:describe`, pomPath);
     return await readFileIfExists(outputPath);
+}
+
+export async function rawProfileList(pomPath: string): Promise<string | undefined> {
+    const outputPath: string = getTempFolder(pomPath);
+    const profileListPath = `${outputPath}.profiles.txt`;
+    await executeInBackground(`-B -Doutput="${profileListPath}" help:all-profiles`, pomPath);
+    return await readFileIfExists(profileListPath);
 }
 
 async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<unknown> {
@@ -130,11 +138,23 @@ export async function executeInTerminal(options: {
 
     const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvn));
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
+
+    // profiles
+    let profileOptions: string | undefined;
+    if (pomfile) {
+        const project = MavenProjectManager.get(pomfile);
+        const selectedIds = project?.profiles?.filter(p => p.selected === true)?.map(p => p.id) ?? [];
+        const unselectedIds = project?.profiles?.filter(p => p.selected === false)?.map(p => `!${p.id}`) ?? [];
+        if (selectedIds.length + unselectedIds.length > 0) {
+            profileOptions = "-P " + selectedIds.concat(unselectedIds).join(",");
+        }
+    }
     const fullCommand: string = [
         mvnString,
         mvnSettingsFile && `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"`,
         command.trim(),
         pomfile && `-f "${await mavenTerminal.formattedPathForTerminal(pomfile)}"`,
+        profileOptions,
         Settings.Executable.options(pomfile)
     ].filter(Boolean).join(" ");
     const name: string = terminalName || (workspaceFolder ? `Maven-${workspaceFolder.name}` : "Maven");
