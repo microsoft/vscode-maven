@@ -257,6 +257,12 @@
         "when": "!isWorkspaceTrusted"
       }
     ],
+    "submenus": [
+      {
+        "id": "maven/run",
+        "label": "Run Maven Commands..."
+      }
+    ],
     "menus": {
       "commandPalette": [
         {
@@ -425,69 +431,8 @@
       ],
       "view/item/context": [
         {
-          "command": "maven.goal.custom",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@5"
-        },
-        {
-          "command": "maven.favorites",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@3"
-        },
-        {
-          "command": "maven.history",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@0"
-        },
-        {
-          "command": "maven.goal.clean",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@10"
-        },
-        {
-          "command": "maven.goal.package",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@20"
-        },
-        {
-          "command": "maven.goal.install",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@30"
-        },
-        {
-          "command": "maven.goal.compile",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@40"
-        },
-        {
-          "command": "maven.goal.validate",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@50"
-        },
-        {
-          "command": "maven.goal.verify",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@60"
-        },
-        {
-          "command": "maven.goal.test",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@70"
-        },
-        {
-          "command": "maven.goal.test-compile",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@75"
-        },
-        {
-          "command": "maven.goal.site",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@80"
-        },
-        {
-          "command": "maven.goal.deploy",
-          "when": "view == mavenProjects && viewItem == maven:project",
-          "group": "1-lifecycle@90"
+          "submenu": "maven/run",
+          "when": "view == mavenProjects && viewItem == maven:project"
         },
         {
           "command": "maven.project.effectivePom",
@@ -608,6 +553,60 @@
         {
           "command": "maven.goal.execute.fromProjectManager",
           "group": "maven@30"
+        }
+      ],
+      "maven/run": [
+        {
+          "command": "maven.goal.custom",
+          "group": "5-custom@5"
+        },
+        {
+          "command": "maven.favorites",
+          "group": "5-custom@3"
+        },
+        {
+          "command": "maven.history",
+          "group": "5-custom@0"
+        },
+        {
+          "command": "maven.goal.clean",
+          "group": "1-lifecycle@10"
+        },
+        {
+          "command": "maven.goal.package",
+          "group": "1-lifecycle@20"
+        },
+        {
+          "command": "maven.goal.install",
+          "group": "1-lifecycle@30"
+        },
+        {
+          "command": "maven.goal.compile",
+          "group": "1-lifecycle@40"
+        },
+        {
+          "command": "maven.goal.validate",
+          "group": "3-lifecycle@50"
+        },
+        {
+          "command": "maven.goal.verify",
+          "group": "3-lifecycle@60"
+        },
+        {
+          "command": "maven.goal.test",
+          "group": "3-lifecycle@70"
+        },
+        {
+          "command": "maven.goal.test-compile",
+          "group": "3-lifecycle@75"
+        },
+        {
+          "command": "maven.goal.site",
+          "group": "4-lifecycle@80"
+        },
+        {
+          "command": "maven.goal.deploy",
+          "group": "4-lifecycle@90"
         }
       ]
     },
