@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.41.0
+### Added
+- Support to navigate to POM file of modules. [#949](https://github.com/microsoft/vscode-maven/pull/949)
+- Support to navigate to parent POM file. [#952](https://github.com/microsoft/vscode-maven/pull/952)
+- Add profile support in Maven explorer. [#956](https://github.com/microsoft/vscode-maven/pull/956)
+
+### Changed
+- Group common lifecycle phases into a submenu of the context menu. [#954](https://github.com/microsoft/vscode-maven/pull/954)
+
 ## 0.40.4
 ### Fixed
 - Missing "Resolve Unknow Type" feature when Language Support for Java was upgraded to v1.14.0. [#932](https://github.com/microsoft/vscode-maven/issues/932)
