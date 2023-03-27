@@ -31,13 +31,7 @@ class DefinitionProvider implements vscode.DefinitionProvider {
         if (parentNode.name === XmlTagName.Dependency || parentNode.name === XmlTagName.Plugin) { // plugin/dependency -> artifacts
           return getDependencyDefinitionLink(parentNode, document, position);
         } else if (parentNode.name === XmlTagName.Parent) { // parent -> artifact
-          const relativePathNode: Element | undefined = parentNode.childNodes.find(ch => isTag(ch) && ch.name === XmlTagName.RelativePath) as Element | undefined;
-          if (relativePathNode && !relativePathNode.firstChild) {
-            // <relativePath/> to explicitly lookup parent from repository
-            return getDependencyDefinitionLink(parentNode, document, position);
-          } else {
-            return getParentDefinitionLink(parentNode, document, position);
-          }
+          return getParentDefinitionLink(parentNode, document, position);
         } else {
           return undefined;
         }
@@ -60,7 +54,7 @@ class DefinitionProvider implements vscode.DefinitionProvider {
 
 export const definitionProvider: DefinitionProvider = new DefinitionProvider();
 
-function getParentDefinitionLink(parentNode: Element, document: vscode.TextDocument, position: vscode.Position) {
+function getParentDefinitionLinkFromRelativePath(parentNode: Element, document: vscode.TextDocument, position: vscode.Position) {
   const mavenProject: MavenProject | undefined = MavenProjectManager.get(document.uri.fsPath);
   if (mavenProject) {
     const parentPomPath = mavenProject.parentPomPath;
@@ -146,4 +140,19 @@ function getModuleDefinitionLink(moduleNode: Element, document: vscode.TextDocum
     originSelectionRange: selectionRange
   };
   return [definitionLink];
+}
+
+/**
+ * Definition of artifact specified in <parent> node.
+ * 0. By default, the search order is relativePath > local repository > remote repository.
+ * 1. if <relativePath> is explicitly empty, it's forbidden to search in relative path.
+ */
+function getParentDefinitionLink(parentNode: Element, document: vscode.TextDocument, position: vscode.Position) {
+  const relativePathNode: Element | undefined = parentNode.childNodes.find(ch => isTag(ch) && ch.name === XmlTagName.RelativePath) as Element | undefined;
+  if (relativePathNode && !relativePathNode.firstChild) { // <relativePath/> to explicitly lookup parent from repository
+    return getDependencyDefinitionLink(parentNode, document, position);
+  } else {
+    return getParentDefinitionLinkFromRelativePath(parentNode, document, position)
+      ?? getDependencyDefinitionLink(parentNode, document, position); // fallback to search local repository if not found in relative path.
+  }
 }
