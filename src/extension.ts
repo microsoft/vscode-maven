@@ -69,6 +69,16 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     const mavenExplorerProvider: MavenExplorerProvider = MavenExplorerProvider.getInstance();
     const view = vscode.window.createTreeView("mavenProjects", { treeDataProvider: mavenExplorerProvider, showCollapseAll: true });
     context.subscriptions.push(view);
+    context.subscriptions.push(view.onDidChangeCheckboxState(e => {
+        for(const item of e.items) {
+            console.log(item);
+            if (item[0] instanceof MavenProfile) {
+                const profile = item[0] as MavenProfile;
+                profile.selected = item[1] === vscode.TreeItemCheckboxState.Checked;
+                // MavenExplorerProvider.getInstance().refresh(profile);
+            }
+        }
+    }));
     registerCommand(context, "maven.dependency.goToEffective", (node?: Dependency) => goToEffectiveHandler(view, node));
     context.subscriptions.push(vscode.workspace.onDidGrantWorkspaceTrust(() => {
         MavenExplorerProvider.getInstance().refresh();

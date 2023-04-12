@@ -10,7 +10,9 @@
   "engines": {
     "vscode": "^1.75.0"
   },
-  "enabledApiProposals": [],
+  "enabledApiProposals": [
+    "treeItemCheckbox"
+  ],
   "capabilities": {
     "virtualWorkspaces": false,
     "untrustedWorkspaces": {

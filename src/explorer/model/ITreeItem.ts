@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 
 export interface ITreeItem {
     getContextValue(): string;
-    getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem>;
+    getTreeItem(): vscode.TreeItem2 | Thenable<vscode.TreeItem2>;
 
     /**
      * If implemented, it will be triggered to get children items.

@@ -23,11 +23,14 @@ export class MavenProfile implements ITreeItem {
         }
     }
 
-    public getTreeItem(): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        const treeItem: vscode.TreeItem = new vscode.TreeItem(this.id, vscode.TreeItemCollapsibleState.None);
+    public getTreeItem(): vscode.TreeItem2 | Thenable<vscode.TreeItem2> {
+        const treeItem: vscode.TreeItem2 = new vscode.TreeItem2(this.id, vscode.TreeItemCollapsibleState.None);
         if (this.checked()) {
-            treeItem.iconPath = new vscode.ThemeIcon("check");
-
+            treeItem.checkboxState = vscode.TreeItemCheckboxState.Checked;
+            // treeItem.iconPath = new vscode.ThemeIcon("check");
+        } else {
+            treeItem.checkboxState = vscode.TreeItemCheckboxState.Unchecked;
+            // no icon
         }
         return treeItem;
     }
