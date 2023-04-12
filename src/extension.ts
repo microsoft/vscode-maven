@@ -2,22 +2,23 @@
 // Licensed under the MIT license.
 
 "use strict";
-import * as assert from "assert";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Progress, Uri } from "vscode";
 import { dispose as disposeTelemetryWrapper, initialize, instrumentOperation, sendInfo } from "vscode-extension-telemetry-wrapper";
+import { diagnosticProvider } from "./DiagnosticProvider";
+import { Settings } from "./Settings";
 import { ArchetypeModule } from "./archetype/ArchetypeModule";
+import { registerProjectCreationEndListener } from "./archetype/utils";
 import { codeActionProvider } from "./codeAction/codeActionProvider";
 import { ConflictResolver, conflictResolver } from "./codeAction/conflictResolver";
-import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
 import { PomCompletionProvider } from "./completion/PomCompletionProvider";
+import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
 import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
-import { diagnosticProvider } from "./DiagnosticProvider";
 import { initExpService } from "./experimentationService";
-import { decorationProvider } from "./explorer/decorationProvider";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
+import { decorationProvider } from "./explorer/decorationProvider";
 import { Dependency } from "./explorer/model/Dependency";
 import { ITreeItem } from "./explorer/model/ITreeItem";
 import { MavenProfile } from "./explorer/model/MavenProfile";
@@ -40,12 +41,11 @@ import { mavenOutputChannel } from "./mavenOutputChannel";
 import { mavenTerminal } from "./mavenTerminal";
 import { init as initMavenXsd } from "./mavenXsd";
 import { MavenProjectManager } from "./project/MavenProjectManager";
-import { Settings } from "./Settings";
 import { taskExecutor } from "./taskExecutor";
+import { Utils } from "./utils/Utils";
 import { getAiKey, getExtensionId, getExtensionVersion, loadMavenSettingsFilePath, loadPackageInfo } from "./utils/contextUtils";
 import { executeInTerminal } from "./utils/mavenUtils";
 import { dependenciesContentUri, effectivePomContentUri, openFileIfExists, registerCommand, registerCommandRequiringTrust } from "./utils/uiUtils";
-import { Utils } from "./utils/Utils";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     await loadPackageInfo(context);
@@ -279,53 +279,4 @@ async function openPomHandler(node: MavenProject | { uri: string }): Promise<voi
             await openFileIfExists(pomPath);
         }
     }
-}
-
-function registerProjectCreationEndListener(context: vscode.ExtensionContext): void {
-    // corresponding to setting values
-    const OPEN_IN_NEW_WORKSPACE = "Open";
-    const OPEN_IN_CURRENT_WORKSPACE = "Add to Workspace";
-    const OPEN_INTERACTIVE = "Interactive";
-
-    const specifyOpenMethod = async (hasOpenFolder: boolean, projectName: string, projectLocation: string) => {
-        let openMethod = vscode.workspace.getConfiguration("maven").get<string>("projectOpenBehavior");
-        sendInfo("", {
-            name: "projectOpenBehavior(from setting)",
-            value: openMethod ?? "undefined"
-        }, {});
-        if (openMethod === OPEN_INTERACTIVE) {
-            const candidates: string[] = [
-                OPEN_IN_NEW_WORKSPACE,
-                hasOpenFolder ? OPEN_IN_CURRENT_WORKSPACE : undefined
-            ].filter(Boolean) as string[];
-            openMethod = await vscode.window.showInformationMessage(`Maven project [${projectName}] is created under: ${projectLocation}`, ...candidates);
-            sendInfo("", {
-                name: "projectOpenBehavior(from choice)",
-                value: openMethod ?? "cancelled"
-            }, {});
-        }
-        return openMethod;
-    };
-
-    context.subscriptions.push(vscode.tasks.onDidEndTaskProcess(async (e) => {
-        if (e.execution.task.name === "createProject" && e.execution.task.source === "maven") {
-            if (e.exitCode !== 0) {
-                vscode.window.showErrorMessage("Failed to create the project, check terminal output for more details.");
-                return;
-            }
-            const { targetFolder, artifactId } = e.execution.task.definition;
-            const projectFolder = path.join(targetFolder, artifactId);
-            // Open project either is the same workspace or new workspace
-            const hasOpenFolder = vscode.workspace.workspaceFolders !== undefined;
-            const choice = await specifyOpenMethod(hasOpenFolder, artifactId, targetFolder);
-            if (choice === OPEN_IN_NEW_WORKSPACE) {
-                vscode.commands.executeCommand("vscode.openFolder", vscode.Uri.file(projectFolder), hasOpenFolder);
-            } else if (choice === OPEN_IN_CURRENT_WORKSPACE) {
-                assert(vscode.workspace.workspaceFolders !== undefined);
-                if (!vscode.workspace.workspaceFolders?.find((workspaceFolder) => projectFolder.startsWith(workspaceFolder.uri?.fsPath))) {
-                    vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, null, { uri: vscode.Uri.file(projectFolder) });
-                }
-            }
-        }
-    }));
 }
