@@ -13,7 +13,7 @@ export class SpecifyArtifactIdStep implements IProjectCreationStep {
             const inputBox: InputBox = window.createInputBox();
             inputBox.title = "Create Maven Project";
             inputBox.placeholder = "e.g. demo";
-            inputBox.prompt = "Input artifact Id of your project.";
+            inputBox.prompt = "Input artifact Id (also as project name) of your project.";
             inputBox.value = metadata.artifactId ?? "demo";
             inputBox.ignoreFocusOut = true;
             if (this.previousStep) {

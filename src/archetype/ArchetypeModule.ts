@@ -15,6 +15,8 @@ import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
 import { runSteps, selectArchetypeStep, specifyArchetypeVersionStep, specifyArtifactIdStep, specifyGroupIdStep, specifyTargetFolderStep } from "./createProject";
 import { IProjectCreationMetadata, IProjectCreationStep } from "./createProject/types";
+import { promptOnDidProjectCreated } from "./utils";
+
 const REMOTE_ARCHETYPE_CATALOG_URL = "https://repo.maven.apache.org/maven2/archetype-catalog.xml";
 
 export class ArchetypeModule {
@@ -45,7 +47,11 @@ export class ArchetypeModule {
 
         const success: boolean = await runSteps(steps, metadata);
         if (success) {
-            await executeInTerminalHandler(metadata);
+            if (metadata.archetype) {
+                await executeInTerminalHandler(metadata);
+            } else {
+                await createBasicMavenProject(metadata);
+            }
         }
     }
 
@@ -140,6 +146,59 @@ async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Pro
     vscode.tasks.executeTask(createProjectTask);
 }
 
+async function createBasicMavenProject(metadata: IProjectCreationMetadata): Promise<void> {
+    const {
+        groupId,
+        artifactId,
+        targetFolder
+    } = metadata;
+    if (!groupId || !artifactId || !targetFolder) {
+        return;
+    }
+
+    const task = async (p: vscode.Progress<{ message?: string; increment?: number }>) => {
+        // copy from template
+        p.report({ message: "Generating project from template...", increment: 20 });
+        const templateUri = vscode.Uri.file(getPathToExtensionRoot("resources", "projectTemplate"));
+        const targetUri = vscode.Uri.joinPath(vscode.Uri.file(targetFolder), artifactId);
+        await workspace.fs.copy(templateUri, targetUri, { overwrite: true });
+
+        // update groupId/artifactId in pom.xml
+        p.report({ message: "Updating pom.xml file...", increment: 20 });
+        const pomUri = vscode.Uri.joinPath(targetUri, "pom.xml");
+        let pomContent = (await workspace.fs.readFile(pomUri)).toString();
+        pomContent = pomContent.replace("${groupId}", groupId);
+        pomContent = pomContent.replace("${artifactId}", artifactId);
+        await workspace.fs.writeFile(pomUri, Buffer.from(pomContent));
+
+        // create source files
+        p.report({ message: "Creating source files...", increment: 20 });
+        await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(targetUri, "src", "main", "java"));
+        await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(targetUri, "src", "main", "resources"));
+        await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(targetUri, "src", "test", "java"));
+        const packageUri = vscode.Uri.joinPath(targetUri, "src", "main", "java", ...groupId.split("."));
+        await vscode.workspace.fs.createDirectory(packageUri);
+        const mainUri = vscode.Uri.joinPath(packageUri, "Main.java");
+        const content: string = [
+            `package ${groupId};`,
+            "",
+            "public class Main {",
+            "    public static void main(String[] args) {",
+            "        System.out.println(\"Hello world!\");",
+            "    }",
+            "}"
+        ].join("\n");
+        await vscode.workspace.fs.writeFile(mainUri, Buffer.from(content));
+
+        // TODO: update modules of parent project, on demand
+    };
+
+    await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+    }, task);
+
+    await promptOnDidProjectCreated(artifactId, targetFolder);
+}
 
 export class ArchetypeMetadata {
     public groupId: string;

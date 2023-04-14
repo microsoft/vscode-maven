@@ -10,7 +10,12 @@ export class SpecifyArchetypeVersionStep implements IProjectCreationStep {
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
         const disposables: Disposable[] = [];
         const specifyAchetypeVersionPromise = new Promise<StepResult>((resolve, reject) => {
-            if (metadata.archetype?.versions === undefined) {
+            if (!metadata.archetype) {
+                // no archetype
+                resolve(StepResult.NEXT);
+                return;
+            }
+            if (metadata.archetype.versions === undefined) {
                 reject("Invalid archetype selected.");
                 return;
             }

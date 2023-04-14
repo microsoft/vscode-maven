@@ -3,7 +3,7 @@
 
 import * as fse from "fs-extra";
 import * as path from "path";
-import { Disposable, QuickInputButtons, QuickPick, QuickPickItem, window } from "vscode";
+import { Disposable, QuickInputButtons, QuickPick, QuickPickItem, QuickPickItemKind, window } from "vscode";
 import { getMavenLocalRepository, getPathToExtensionRoot } from "../../utils/contextUtils";
 import { Archetype } from "../Archetype";
 import { ArchetypeModule } from "../ArchetypeModule";
@@ -12,6 +12,9 @@ import { IProjectCreationMetadata, IProjectCreationStep, StepResult } from "./ty
 interface IArchetypePickItem extends QuickPickItem {
     archetype?: Archetype;
 }
+
+const LABEL_NO_ARCHETYPE = "No Archetype...";
+const LABEL_MORE = "More...";
 
 export class SelectArchetypeStep implements IProjectCreationStep {
     /**
@@ -37,8 +40,17 @@ export class SelectArchetypeStep implements IProjectCreationStep {
                 }),
                 pickBox.onDidAccept(async () => {
                     if (pickBox.selectedItems[0].archetype === undefined) {
-                        pickBox.items = await this.getArchetypePickItems(true);
-                        pickBox.buttons = [QuickInputButtons.Back];
+                        if (pickBox.selectedItems[0].label === LABEL_NO_ARCHETYPE) {
+                            // Basic project without archetype
+                            resolve(StepResult.NEXT);
+                        } else if (pickBox.selectedItems[0].label === LABEL_MORE) {
+                            // More archetypes...
+                            pickBox.items = await this.getArchetypePickItems(true);
+                            pickBox.buttons = [QuickInputButtons.Back];
+                        } else {
+                            // IMPOSSIBLE
+                            console.warn(pickBox.selectedItems[0], "unexpected archetype");
+                        }
                     } else {
                         metadata.archetypeArtifactId = pickBox.selectedItems[0].archetype.artifactId;
                         metadata.archetypeGroupId = pickBox.selectedItems[0].archetype.groupId;
@@ -62,31 +74,15 @@ export class SelectArchetypeStep implements IProjectCreationStep {
         }
     }
 
-    public async run_simple(metadata: IProjectCreationMetadata): Promise<StepResult> {
-        let choice = await window.showQuickPick(this.getArchetypePickItems(false), {
-            placeHolder: "Select an archetype ...",
-            ignoreFocusOut: true, matchOnDescription: true
-        });
-        if (choice === undefined) {
-            return StepResult.STOP;
-        }
-        if (choice.archetype === undefined) { // More...
-            choice = await window.showQuickPick(this.getArchetypePickItems(true), {
-                placeHolder: "Select an archetype ...",
-                ignoreFocusOut: true, matchOnDescription: true
-            });
-        }
-        if (choice?.archetype !== undefined) {
-            metadata.archetypeArtifactId = choice.archetype.artifactId;
-            metadata.archetypeGroupId = choice.archetype.groupId;
-            metadata.archetype = choice.archetype; // perserved for archetype version selection.
-        }
-        return StepResult.NEXT;
-    }
-
     private async getArchetypePickItems(all?: boolean): Promise<IArchetypePickItem[]> {
+        const noArchetypeButton: IArchetypePickItem = {
+            label: LABEL_NO_ARCHETYPE,
+            description: "",
+            detail: "Create a basic Maven project directly.",
+            alwaysShow: true
+        };
         const moreButton: IArchetypePickItem = {
-            label: "More...",
+            label: LABEL_MORE,
             description: "",
             detail: "Find more archetypes available in remote catalog.",
             alwaysShow: true
@@ -98,7 +94,11 @@ export class SelectArchetypeStep implements IProjectCreationStep {
             description: archetype.groupId ? `${archetype.groupId}` : "",
             detail: archetype.description
         }));
-        return all ? pickItems : [moreButton, ...pickItems];
+        const SEP_ARCHETYPE: IArchetypePickItem = {
+            label: "Popular Archetypes",
+            kind: QuickPickItemKind.Separator
+        };
+        return all ? pickItems : [noArchetypeButton, moreButton, SEP_ARCHETYPE, ...pickItems];
     }
 
     private async loadArchetypePickItems(all?: boolean): Promise<Archetype[]> {
