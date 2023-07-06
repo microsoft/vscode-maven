@@ -265,7 +265,7 @@ export class Utils {
 
     public static parseProfilesOutput(project: MavenProject, output: string) : MavenProfile[] {
         const profiles: MavenProfile[] = [];
-        const regexp = /Profile Id: (.*) \(Active: (true|false) , Source: (.*)\)/g;
+        const regexp = /Profile Id: (.*) \(Active: (true|false)\s?, Source: (.*)\)/g;
         let match: RegExpExecArray | null;
         do {
             match = regexp.exec(output);
