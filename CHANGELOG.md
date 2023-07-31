@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+### 0.42.0
+### Added
+- Add creating empty maven project without archetypes. [#869](https://github.com/microsoft/vscode-maven/issues/869)
+
+### Changed
+- Remove Marketplace preview flag. [#987](https://github.com/microsoft/vscode-maven/pull/987)
+
+### Fixed
+- Improve navigation of parent POM. [#959](https://github.com/microsoft/vscode-maven/pull/959)
+- Maven explorer failed to list profiles within maven-help-plugin@3.4.0. [#964](https://github.com/microsoft/vscode-maven/issues/964)
+
 ## 0.41.0
 ### Added
 - Support to navigate to POM file of modules. [#949](https://github.com/microsoft/vscode-maven/pull/949)
