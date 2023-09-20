@@ -160,14 +160,18 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             }
         }
     });
+
+    registerCommand(context, "maven.java.projectConfiguration.update", () => {
+        MavenExplorerProvider.getInstance().refresh();
+        if (isJavaExtEnabled()) {
+             // Reload All Maven Projects in JDTLS, impl in upstream
+            vscode.commands.executeCommand("java.projectConfiguration.update", MavenProjectManager.projects.map(n => Uri.file(n.pomPath)));
+        }
+    });
+
     // register artifact searcher if Java language server is activated
     if (isJavaExtEnabled()) {
         registerArtifactSearcher(context);
-
-        // Reload All Maven Projects in JDTLS, impl in upstream
-        registerCommand(context, "maven.java.projectConfiguration.update", () => {
-            vscode.commands.executeCommand("java.projectConfiguration.update", MavenProjectManager.projects.map(n => Uri.file(n.pomPath)));
-        })
     }
 
     // diagnostic
