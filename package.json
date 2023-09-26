@@ -422,11 +422,6 @@
           "command": "maven.archetype.generate",
           "when": "view == mavenProjects",
           "group": "navigation@1"
-        },
-        {
-          "command": "maven.explorer.refresh",
-          "when": "view == mavenProjects",
-          "group": "overflow@2"
         }
       ],
       "view/item/context": [
