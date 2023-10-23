@@ -47,7 +47,7 @@ export class ArchetypeModule {
 
         const success: boolean = await runSteps(steps, metadata);
         if (success) {
-            if (metadata.archetype) {
+            if (metadata.archetypeArtifactId && metadata.archetypeGroupId && metadata.archetypeVersion) {
                 await executeInTerminalHandler(metadata);
             } else {
                 await createBasicMavenProject(metadata);
