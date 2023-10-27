@@ -10,7 +10,7 @@
     <properties>
         <base.name>JDTLS Maven Extension</base.name>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tycho-version>2.7.3</tycho-version>
+        <tycho-version>4.0.3</tycho-version>
     </properties>
     <modules>
         <module>com.microsoft.java.maven.plugin</module>
