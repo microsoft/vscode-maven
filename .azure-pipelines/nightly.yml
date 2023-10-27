@@ -27,6 +27,12 @@ steps:
     command: custom
     verbose: false
     customCommand: 'run compile'
+- task: JavaToolInstaller@0
+  displayName: 'Use Java 17'
+  inputs:
+    versionSpec: 17
+    jdkArchitectureOption: x64
+    jdkSourceOption: PreInstalled
 - task: Npm@1
   displayName: 'npm run build-plugin'
   inputs:
