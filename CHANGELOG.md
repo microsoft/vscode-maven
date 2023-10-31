@@ -1,7 +1,14 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
-### 0.42.0
+## 0.43.0
+### Changed
+- Merge "Refresh" and "Reload All Maven Projects" menus into a single menu "Reload All Maven Projects". [#997](https://github.com/microsoft/vscode-maven/pull/997).
+
+### Fixed
+- Create Java Project -> JavaFX does not create a JavaFX project. [#1003](https://github.com/microsoft/vscode-maven/issues/1003).
+
+## 0.42.0
 ### Added
 - Add creating empty maven project without archetypes. [#869](https://github.com/microsoft/vscode-maven/issues/869)
 
