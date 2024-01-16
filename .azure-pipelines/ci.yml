@@ -1,90 +1,78 @@
+name: $(Date:yyyyMMdd).$(Rev:r)
+variables:
+  - name: Codeql.Enabled
+    value: true
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: refs/heads/main
+    - repository: 1esPipelines
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
 trigger:
-- main
-
-jobs:
-  - job: static_analysis
-    displayName: Static Code Analysis
+  branches:
+    include:
+      - main
+extends:
+  template: v1/1ES.Unofficial.PipelineTemplate.yml@1esPipelines
+  parameters:
     pool:
-      vmImage: 'windows-latest'
-    steps:
-    - task: JavaToolInstaller@0
-      displayName: 'Use Java 17'
-      inputs:
-        versionSpec: 17
-        jdkArchitectureOption: x64
-        jdkSourceOption: PreInstalled
-    - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
-      displayName: 'Run CredScan'
-      inputs:
-        toolMajorVersion: V2
-        verboseOutput: true
-        debugMode: false
-    # - task: Semmle@1
-    #   displayName: Code QL for TS/JS
-    #   inputs:
-    #     sourceCodeDirectory: '$(Build.SourcesDirectory)'
-    #     language: 'tsandjs'
-    #     includeNodeModules: false
-    #     querySuite: 'Recommended'
-    #     timeout: '1800'
-    #     ram: '16384'
-    #     addProjectDirToScanningExclusionList: true
-    # - task: Semmle@1
-    #   displayName: Code QL for Java
-    #   inputs:
-    #     sourceCodeDirectory: '$(Build.SourcesDirectory)/jdtls.ext'
-    #     language: 'java'
-    #     querySuite: 'Recommended'
-    #     timeout: '1800'
-    #     ram: '16384'
-    #     addProjectDirToScanningExclusionList: true
-    - task: PostAnalysis@1
-      displayName: 'Post Analysis'
-      inputs:
-        CredScan: true
-        # Semmle: true
-        # SemmleBreakOn: 'Error'
-        ToolLogsNotFoundAction: 'Standard'
-
-  - job: ci
-    displayName: VS Code Maven CI
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: Npm@1
-      displayName: 'npm install'
-      inputs:
-        verbose: false
-    - task: Npm@1
-      displayName: 'npm run tslint'
-      inputs:
-        command: custom
-        verbose: false
-        customCommand: 'run tslint'
-    - task: Npm@1
-      displayName: 'npm run compile'
-      inputs:
-        command: custom
-        verbose: false
-        customCommand: 'run compile'
-    - task: JavaToolInstaller@0
-      displayName: 'Use Java 17'
-      inputs:
-        versionSpec: 17
-        jdkArchitectureOption: x64
-        jdkSourceOption: PreInstalled
-    - task: Npm@1
-      displayName: 'npm run build-plugin'
-      inputs:
-        command: custom
-        verbose: false
-        customCommand: 'run build-plugin'
-    - script: 'npx @vscode/vsce@latest package'
-      displayName: 'package vsix'
-    - task: CopyFiles@2
-      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
-      inputs:
-        Contents: '*.vsix'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: drop'
+      os: linux
+      name: 1ES_JavaTooling_Pool
+      image: 1ES_JavaTooling_Ubuntu-2004
+    sdl:
+      sourceAnalysisPool:
+        name: 1ES_JavaTooling_Pool
+        image: 1ES_JavaTooling_Windows_2022
+        os: windows
+    stages:
+      - stage: Build
+        jobs:
+          - job: Job_1
+            displayName: VSCode-Maven-CI
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  artifactName: drop
+                  targetPath: $(Build.ArtifactStagingDirectory)
+                  displayName: "Publish Artifact: drop"
+            steps:
+              - checkout: self
+                fetchTags: false
+              - task: Npm@1
+                displayName: 'npm install'
+                inputs:
+                  verbose: false
+              - task: Npm@1
+                displayName: 'npm run tslint'
+                inputs:
+                  command: custom
+                  verbose: false
+                  customCommand: 'run tslint'
+              - task: Npm@1
+                displayName: 'npm run compile'
+                inputs:
+                  command: custom
+                  verbose: false
+                  customCommand: 'run compile'
+              - task: JavaToolInstaller@0
+                displayName: 'Use Java 17'
+                inputs:
+                  versionSpec: 17
+                  jdkArchitectureOption: x64
+                  jdkSourceOption: PreInstalled
+              - task: Npm@1
+                displayName: 'npm run build-plugin'
+                inputs:
+                  command: custom
+                  verbose: false
+                  customCommand: 'run build-plugin'
+              - script: 'npx @vscode/vsce@latest package'
+                displayName: 'package vsix'
+              - task: CopyFiles@2
+                displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+                inputs:
+                  Contents: '*.vsix'
+                  TargetFolder: '$(Build.ArtifactStagingDirectory)'
