@@ -14,6 +14,11 @@ export class SpecifyTargetFolderStep implements IProjectCreationStep {
             return StepResult.STOP;
         }
 
+        // if parent project is specified, use its folder as default target folder.
+        if (metadata.parentProject) {
+            metadata.targetFolder = path.join(metadata.parentProject.pomPath, "../");
+            return StepResult.NEXT;
+        }
         const LABEL_CHOOSE_FOLDER = "Select Destination Folder";
         const OPTION_CONTINUE = "Continue";
         const OPTION_CHOOSE_ANOTHER_FOLDER = "Choose another folder";

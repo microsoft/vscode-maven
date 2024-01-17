@@ -2,6 +2,7 @@ import assert = require("assert");
 import path = require("path");
 import * as vscode from "vscode";
 import { sendInfo } from "vscode-extension-telemetry-wrapper";
+import { isJavaLanguageServerStandard } from "../jdtls/commands";
 
 // corresponding to setting values
 const OPEN_IN_NEW_WORKSPACE = "Open";
@@ -17,6 +18,7 @@ export function registerProjectCreationEndListener(context: vscode.ExtensionCont
             }
             const { targetFolder, artifactId } = e.execution.task.definition;
             const projectFolder = path.join(targetFolder, artifactId);
+            importProjectOnDemand(projectFolder);
             await promptOnDidProjectCreated(artifactId, projectFolder);
         }
     }));
@@ -58,4 +60,29 @@ async function specifyOpenMethod(hasOpenFolder: boolean, projectName: string, pr
         }, {});
     }
     return openMethod;
+}
+
+export async function importProjectOnDemand(projectFolder: string) {
+    if (!isJavaLanguageServerStandard()) {
+        return;
+    }
+
+    let projectInCurrentWorkspace = false;
+    if(vscode.workspace.workspaceFolders?.find(wf => projectFolder.startsWith(wf.uri.fsPath))) {
+        projectInCurrentWorkspace = true;
+    }
+
+    if (!projectInCurrentWorkspace) {
+        return;
+    }
+
+    const projectImportStrategy = vscode.workspace.getConfiguration("java").get("import.projectSelection");
+    if (projectImportStrategy === "automatic") {
+        vscode.commands.executeCommand("java.project.import");
+    } else if (projectImportStrategy === "manual") {
+        vscode.commands.executeCommand<void>("java.project.changeImportedProjects",
+            [vscode.Uri.file(path.join(projectFolder, "pom.xml")).toString()],
+            [],
+            []);
+    }
 }

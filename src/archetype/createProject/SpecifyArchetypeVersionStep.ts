@@ -6,22 +6,32 @@ import { IProjectCreationMetadata, IProjectCreationStep, StepResult } from "./ty
 
 export class SpecifyArchetypeVersionStep implements IProjectCreationStep {
     public previousStep?: IProjectCreationStep;
+    public nextStep?: IProjectCreationStep;
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
         const disposables: Disposable[] = [];
         const specifyAchetypeVersionPromise = new Promise<StepResult>((resolve, reject) => {
             if (!metadata.archetype) {
+                // Create without archetype, skip this step and remap nextStep's previousStep to this step's previousStep
+                if (this.nextStep) {
+                    this.nextStep.previousStep = this.previousStep;
+                }
                 // no archetype
                 resolve(StepResult.NEXT);
                 return;
             }
+
+            if (this.nextStep) {
+                this.nextStep.previousStep = this;
+            }
+
             if (metadata.archetype.versions === undefined) {
                 reject("Invalid archetype selected.");
                 return;
             }
 
             const pickBox: QuickPick<QuickPickItem> = window.createQuickPick<QuickPickItem>();
-            pickBox.title = "Create Maven Project";
+            pickBox.title = metadata.title;
             pickBox.placeholder = `Select version of ${metadata.archetypeArtifactId}`;
             pickBox.items = metadata.archetype.versions.map(version => ({
                 label: version

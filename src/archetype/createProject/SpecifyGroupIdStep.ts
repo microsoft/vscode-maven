@@ -6,15 +6,29 @@ import { IProjectCreationMetadata, IProjectCreationStep, StepResult } from "./ty
 
 export class SpecifyGroupIdStep implements IProjectCreationStep {
     public previousStep?: IProjectCreationStep;
+    public nextStep?: IProjectCreationStep;
 
     public async run(metadata: IProjectCreationMetadata): Promise<StepResult> {
+        if (metadata.groupId) {
+            // groupId already specified, skip this step
+            // and remap nextStep's previousStep to this step's previousStep
+            if (this.nextStep) {
+                this.nextStep.previousStep = this.previousStep;
+            }
+            return StepResult.NEXT;
+        }
+
+        if (this.nextStep) {
+            this.nextStep.previousStep = this;
+        }
+
         const disposables: Disposable[] = [];
         const specifyGroupIdPromise = new Promise<StepResult>((resolve) => {
             const inputBox: InputBox = window.createInputBox();
-            inputBox.title = "Create Maven Project";
+            inputBox.title = metadata.title;
             inputBox.placeholder = "e.g. com.example";
             inputBox.prompt = "Input group Id of your project.";
-            inputBox.value = metadata.groupId ?? "com.example";
+            inputBox.value = metadata.groupId ?? (metadata.parentProject ? metadata.parentProject.groupId : "com.example");
             inputBox.ignoreFocusOut = true;
             if (this.previousStep) {
                 inputBox.buttons = [(QuickInputButtons.Back)];

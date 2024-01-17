@@ -30,8 +30,8 @@ export function getJavaExtension(): vscode.Extension<unknown> | undefined {
     return vscode.extensions.getExtension(JAVA_EXTENSION_ID);
 }
 
-export function  isJavaLangugageServerStarndard(): boolean {
+export function isJavaLanguageServerStandard(): boolean {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const javaExt: vscode.Extension<any> | undefined = getJavaExtension();
-    return javaExt?.exports?.api?.serverMode === "Standard";
+    return javaExt?.exports?.serverMode === "Standard";
 }

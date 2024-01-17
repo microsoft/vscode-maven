@@ -16,9 +16,66 @@ export enum XmlTagName {
     Project = "project",
     Dependency = "dependency",
     Properties = "properties",
+    Packaging = "packaging",
     Module = "module",
+    Modules = "modules",
     Parent = "parent",
     RelativePath = "relativePath"
+}
+
+export function parseDocument(text: string): Document {
+    return hp.parseDocument(text, {
+        withEndIndices: true,
+        withStartIndices: true,
+        lowerCaseTags: false,
+        xmlMode: true,
+    });
+}
+
+export function getChildrenByTags(parentElement: NodeWithChildren, tags: string[]): Element[] {
+    const ret: Element[] = [];
+    for (const child of parentElement.children) {
+        if (isTag(child) && tags.includes(child.tagName)) {
+            ret.push(child);
+        }
+    }
+    return ret;
+}
+
+/**
+ * This requires the document to be parsed with withStartIndices and withEndIndices options.
+ *
+ * @param xmlDocument the root document
+ * @param rawText the text of the document
+ * @returns the indent size and character
+ */
+export function detectDocumentIndent(xmlDocument: Document, rawText: string): any {
+    const projectNodes = getChildrenByTags(xmlDocument, [XmlTagName.Project]);
+    if (!projectNodes.length) {
+        return;
+    }
+
+    const firstChildElement = projectNodes[0].children.find((node) => isTag(node));
+    if (!firstChildElement || firstChildElement.startIndex === null) {
+        return;
+    }
+
+    let indent = 0;
+    let indentChar = ' ';
+    let startOffset = firstChildElement.startIndex;
+    while (--startOffset > 0 && rawText.charAt(startOffset) != '\n') {
+        if (rawText.charAt(startOffset) == '\t') {
+            indentChar = '\t';
+        } else {
+            indentChar = ' ';
+        }
+        indent++;
+    }
+
+    return {
+        indent,
+        indentChar
+    };
 }
 
 export function getNodesByTag(text: string, tag: string): Element[] {
