@@ -34,10 +34,6 @@ export class ArchetypeModule {
         }
 
         const steps: IProjectCreationStep[] = [];
-        if (!metadata.archetypeArtifactId || !metadata.archetypeGroupId || !metadata.archetypeVersion) {
-            steps.push(selectArchetypeStep, specifyArchetypeVersionStep);
-        }
-
         if (!metadata.parentProject) {
             steps.push(selectParentPomStep);
         }

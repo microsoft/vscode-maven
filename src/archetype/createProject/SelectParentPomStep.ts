@@ -25,7 +25,7 @@ export class SelectParentPom implements IProjectCreationStep {
                 items.push({
                     label: project.artifactId,
                     description: project.pomPath,
-                    parentProject: project
+                    parentProject: project,
                 });
             });
 
