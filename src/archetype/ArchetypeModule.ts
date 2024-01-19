@@ -212,16 +212,14 @@ async function createBasicMavenProject(metadata: IProjectCreationMetadata): Prom
         const pomUri = vscode.Uri.joinPath(targetUri, "pom.xml");
         let pomContent = (await workspace.fs.readFile(pomUri)).toString();
         let parentPom = "";
-        let compilerSource = "17";
-        let compilerTarget = "17";
+        const compilerSource = metadata.parentProject?.getProperty("maven.compiler.source") || "17";
+        const compilerTarget = metadata.parentProject?.getProperty("maven.compiler.target") || "17";
         if (metadata.parentProject) {
             parentPom = `    <parent>\n`
                 +       `          <groupId>${metadata.parentProject.groupId}</groupId>\n`
                 +       `          <artifactId>${metadata.parentProject.artifactId}</artifactId>\n`
                 +       `          <version>${metadata.parentProject.version}</version>\n`
                 +       `    </parent>\n`;
-            compilerSource = metadata.parentProject.getProperty("maven.compiler.source") || "17";
-            compilerTarget = metadata.parentProject.getProperty("maven.compiler.target") || "17";
         }
         pomContent = pomContent.replace("${parentPom}", parentPom);
         pomContent = pomContent.replace("${groupId}", groupId);
