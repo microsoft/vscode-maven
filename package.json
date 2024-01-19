@@ -237,6 +237,11 @@
         "title": "Deselect",
         "icon": "$(remove)",
         "category": "Maven"
+      },
+      {
+        "command": "maven.new.module",
+        "title": "%contributes.commands.maven.module.new%",
+        "category": "Maven"
       }
     ],
     "views": {
@@ -261,6 +266,10 @@
       {
         "id": "maven/run",
         "label": "Run Maven Commands..."
+      },
+      {
+        "id": "explorer/maven",
+        "label": "Maven"
       }
     ],
     "menus": {
@@ -392,14 +401,8 @@
       ],
       "explorer/context": [
         {
-          "command": "maven.archetype.generate",
-          "when": "config.maven.showInExplorerContextMenu && explorerResourceIsFolder",
-          "group": "maven@3"
-        },
-        {
-          "command": "maven.project.effectivePom",
-          "when": "resourceFilename == pom.xml",
-          "group": "maven@1"
+          "submenu": "explorer/maven",
+          "group": "1_javaactions@100"
         }
       ],
       "view/title": [
@@ -548,6 +551,22 @@
         {
           "command": "maven.goal.execute.fromProjectManager",
           "group": "maven@30"
+        }
+      ],
+      "explorer/maven": [
+        {
+          "command": "maven.archetype.generate",
+          "when": "config.maven.showInExplorerContextMenu && explorerResourceIsFolder",
+          "group": "maven@1"
+        },
+        {
+          "command": "maven.new.module",
+          "group": "maven@2"
+        },
+        {
+          "command": "maven.project.effectivePom",
+          "when": "resourceFilename == pom.xml",
+          "group": "maven@3"
         }
       ],
       "maven/run": [
@@ -802,15 +821,15 @@
     "@types/vscode": "1.75.0",
     "@types/which": "^1.3.2",
     "@types/xml2js": "^0.4.11",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "@typescript-eslint/parser": "^5.48.2",
     "@vscode/test-electron": "^2.3.8",
+    "eslint": "^8.32.0",
     "glob": "^7.2.3",
     "mocha": "^9.2.2",
     "ts-loader": "^9.4.1",
     "typescript": "^4.8.4",
     "webpack": "^5.76.0",
-    "eslint": "^8.32.0",
-    "@typescript-eslint/eslint-plugin": "^5.48.2",
-    "@typescript-eslint/parser": "^5.48.2",
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {

@@ -26,7 +26,7 @@ export class SelectArchetypeStep implements IProjectCreationStep {
         const disposables: Disposable[] = [];
         const specifyAchetypePromise = (items: IArchetypePickItem[]) => new Promise<StepResult>((resolve) => {
             const pickBox: QuickPick<IArchetypePickItem> = window.createQuickPick<IArchetypePickItem>();
-            pickBox.title = "Create Maven Project";
+            pickBox.title = metadata.title;
             pickBox.placeholder = "Select an archetype ...";
             pickBox.matchOnDescription = true;
             pickBox.ignoreFocusOut = true;

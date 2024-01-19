@@ -89,6 +89,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommand(context, "maven.project.openPom", openPomHandler);
     // create project from archetype
     registerCommand(context, "maven.archetype.generate", ArchetypeModule.createMavenProject);
+    registerCommand(context, "maven.new.module", ArchetypeModule.createMavenModule);
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
     registerProjectCreationEndListener(context);
 

@@ -283,7 +283,7 @@ export class MavenProject implements ITreeItem {
      * @param key property name
      * @returns value of property
      */
-    private getProperty(key: string): string | undefined {
+    public getProperty(key: string): string | undefined {
         if (this.properties.has(key)) {
             return this.properties.get(key);
         }

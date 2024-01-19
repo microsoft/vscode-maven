@@ -3,14 +3,14 @@
 
 import * as vscode from "vscode";
 import { IArtifactSearchResult, ISearchArtifactParam, SearchType } from "../../../jdtls/artifactSearcher";
-import { executeJavaLanguageServerCommand, isJavaLangugageServerStarndard } from "../../../jdtls/commands";
+import { executeJavaLanguageServerCommand, isJavaLanguageServerStandard } from "../../../jdtls/commands";
 import { COMMAND_COMPLETION_ITEM_SELECTED, INFO_COMPLETION_ITEM_SELECTED } from "../../constants";
 import { IArtifactCompletionProvider } from "./IArtifactProvider";
 import { getSortText } from "../../utils";
 
 export class FromIndex implements IArtifactCompletionProvider {
     public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
-        if (!isJavaLangugageServerStarndard()) {
+        if (!isJavaLanguageServerStandard()) {
             return [];
         }
         const searchParam: ISearchArtifactParam = {
@@ -34,7 +34,7 @@ export class FromIndex implements IArtifactCompletionProvider {
     }
 
     public async getArtifactIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
-        if (!isJavaLangugageServerStarndard()) {
+        if (!isJavaLanguageServerStandard()) {
             return [];
         }
         const searchParam: ISearchArtifactParam = {
@@ -66,7 +66,7 @@ export class FromIndex implements IArtifactCompletionProvider {
         if (!groupId && !artifactId) {
             return [];
         }
-        if (!isJavaLangugageServerStarndard()) {
+        if (!isJavaLanguageServerStandard()) {
             return [];
         }
         const searchParam: ISearchArtifactParam = {

@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import { SelectArchetypeStep } from "./SelectArchetypeStep";
+import { SelectParentPom } from "./SelectParentPomStep";
 import { SpecifyArchetypeVersionStep } from "./SpecifyArchetypeVersionStep";
 import { SpecifyArtifactIdStep } from "./SpecifyArtifactIdStep";
 import { SpecifyGroupIdStep } from "./SpecifyGroupIdStep";
@@ -10,6 +11,7 @@ import { IProjectCreationMetadata, IProjectCreationStep, StepResult } from "./ty
 
 export const selectArchetypeStep = new SelectArchetypeStep();
 export const specifyArchetypeVersionStep = new SpecifyArchetypeVersionStep();
+export const selectParentPomStep = new SelectParentPom();
 export const specifyGroupIdStep = new SpecifyGroupIdStep();
 export const specifyArtifactIdStep = new SpecifyArtifactIdStep();
 export const specifyTargetFolderStep = new SpecifyTargetFolderStep();
