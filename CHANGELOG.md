@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.44.0
+### Added
+- add new project as module of existing project via 'New Module...' command. [#849](https://github.com/microsoft/vscode-maven/issues/849).
+
 ## 0.43.0
 ### Changed
 - Merge "Refresh" and "Reload All Maven Projects" menus into a single menu "Reload All Maven Projects". [#997](https://github.com/microsoft/vscode-maven/pull/997).
