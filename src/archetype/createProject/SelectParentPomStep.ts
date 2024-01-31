@@ -19,7 +19,16 @@ export class SelectParentPom implements IProjectCreationStep {
             }
         ];
         MavenProjectManager.projects
-            .filter(project => project.artifactId && project.pomPath && pathExistsSync(project.pomPath))
+            .filter(project => project.pomPath && pathExistsSync(project.pomPath))
+            .map(project => {
+                if (!project.artifactId) {
+                    // reload pom contents
+                    project.parsePom();
+                }
+
+                return project;
+            })
+            .filter(project => project.artifactId && project.groupId)
             .sort((a, b) => a.pomPath.length - b.pomPath.length)
             .forEach(project => {
                 items.push({

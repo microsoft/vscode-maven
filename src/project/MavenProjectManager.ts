@@ -59,7 +59,9 @@ export class MavenProjectManager {
     }
 
     public static add(pomPath: string): void {
-        MavenProjectManager.getInstance()._projectMap.set(pomPath, new MavenProject(pomPath));
+        const newProject = new MavenProject(pomPath);
+        newProject.parsePom();
+        MavenProjectManager.getInstance()._projectMap.set(pomPath, newProject);
     }
 
     public static remove(pomPath: string): void {
