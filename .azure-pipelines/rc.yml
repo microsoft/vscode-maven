@@ -73,7 +73,7 @@ extends:
                   verbose: false
                   customCommand: 'run build-plugin'
               - bash: |
-                  npx json@latest -I -f package.json -e "this.aiKey=\"%AI_KEY%\""
+                  npx json@latest -I -f package.json -e "this.aiKey=\"$(AI_KEY)\""
                 displayName: Replace AI Key
               - script: 'npx @vscode/vsce@latest package'
                 displayName: 'package vsix'
