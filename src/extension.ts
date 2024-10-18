@@ -51,7 +51,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await loadPackageInfo(context);
     // Usage data statistics.
     if (getAiKey()) {
-        initialize(getExtensionId(), getExtensionVersion(), getAiKey(), { firstParty: true });
+        initialize(getExtensionId(), getExtensionVersion(), getAiKey());
     }
     await initExpService(context);
     await instrumentOperation("activation", doActivate)(context);
