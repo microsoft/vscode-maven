@@ -662,7 +662,17 @@
             "scope": "machine"
           },
           "maven.executable.options": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
             "default": "",
             "description": "%configuration.maven.executable.options%",
             "scope": "machine-overridable"

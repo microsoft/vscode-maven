@@ -137,7 +137,7 @@ The usage of Maven executable is:
 You can use `maven.executable.options` to specify default **options** for all your Maven commands executed in current project.
 ```json
 {
-    "maven.executable.options": "-o -s ./settings.xml"      // work offline, and use an alternative settings file
+    "maven.executable.options": "-o -s ./settings.xml"      // work offline and use an alternative settings file. Can also be defined as an array of strings, e.g. ["-o", "-s ./settings.xml"]
 }
 ```
 </details>
