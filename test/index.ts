@@ -14,7 +14,7 @@ async function main(): Promise<void> {
         cp.spawnSync(cli, [...args, '--install-extension', 'redhat.java'], {
             encoding: 'utf-8',
             stdio: 'inherit',
-            shell: true,
+            shell: process.platform === "win32",
         });
 
         // The folder containing the Extension Manifest package.json
