@@ -1,7 +1,43 @@
 // A launch configuration that compiles the extension and then opens it inside a new window
 {
     "version": "0.1.0",
-    "configurations": [
+    "configurations":curl -H "Authorization: Ghost $token" -H "Accept-Version: $version" https://{admin_domain}/ghost/api/admin/{resource}/
+# open code with current directory
+code .
+
+# open the current directory in the most recently used code window
+code -r .
+
+# create a new window
+code -n
+
+# change the language
+code --locale=es
+
+# open diff editor
+code --diff <file1> <file2>
+
+# open file at specific line and column <file:line[:character]>
+code --goto package.json:10:5
+
+# see help options
+code --help
+
+# disable all extensions
+code --disable-extensions ."meta": {
+    "pagination": {
+      "page": 1,
+      "limit": 2,
+      "pages": 1,
+      "total": 1,
+      "next": null,
+      "prev": null
+    }
+}
+"files.exclude": {
+    "somefolder/": true,
+    "somefile": true
+}code --goto package.json:10:5[
         {
             "name": "Extension",
             "type": "extensionHost",
