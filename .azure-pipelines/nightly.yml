@@ -86,15 +86,13 @@ extends:
                   verbose: false
                   customCommand: 'run build-plugin'
               - task: CmdLine@2
+                displayName: Update nightly vsix version
+                inputs:
+                  script: node scripts/prepare-nightly-build.js
+              - task: CmdLine@2
                 displayName: Replace AI key
                 inputs:
                   script: npx json@latest -I -f package.json -e "this.aiKey=\"%AI_KEY%\""
-              - task: CmdLine@2
-                displayName: Update patch version in package.json
-                inputs:
-                  scripts: |
-                    for /f "tokens=2 delims==" %A in ('wmic os get localdatetime /value') do set datetime=%A
-                    npx json@latest -I -f package.json -e "this.version=this.version.substring(0, this.version.lastIndexOf('.'))+'.'%datetime:~0,10%"
               - script: 'npx @vscode/vsce@latest package --pre-release -o extension.vsix'
                 displayName: 'package vsix'
               ### Copy files for APIScan
