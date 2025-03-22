@@ -15,3 +15,21 @@ pipelines:
           lastModifiedDate: 2024-11-12
         binskim:
           lastModifiedDate: 2024-11-12
+  13433:
+    retail:
+      source:
+        credscan:
+          lastModifiedDate: 2025-03-22
+        eslint:
+          lastModifiedDate: 2025-03-22
+        psscriptanalyzer:
+          lastModifiedDate: 2025-03-22
+        armory:
+          lastModifiedDate: 2025-03-22
+      binary:
+        credscan:
+          lastModifiedDate: 2025-03-22
+        binskim:
+          lastModifiedDate: 2025-03-22
+        spotbugs:
+          lastModifiedDate: 2025-03-22
