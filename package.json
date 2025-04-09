@@ -659,7 +659,7 @@
             "type": "string",
             "default": "",
             "description": "%configuration.maven.executable.path%",
-            "scope": "machine"
+            "scope": "machine-overridable"
           },
           "maven.executable.options": {
             "anyOf": [
