@@ -44,11 +44,13 @@ export class Settings {
     }
 
     public static getSettingsFilePath(): string | undefined {
-        return _getMavenSection<string>("settingsFile");
-    }
-
-    public static getWorkspaceSettingsPath(): string | undefined {
-        return workspace.getConfiguration().get("maven.settingsFile") ?? undefined;
+        const workspaceFolders = workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            return undefined;
+        }
+        const workspaceUri = workspaceFolders[0].uri;
+        const settingsFile = workspace.getConfiguration("maven", workspaceUri).get<string>("settingsFile");
+        return settingsFile ? settingsFile :_getMavenSection<string>("settingsFile");
     }
 
     public static External = class {
