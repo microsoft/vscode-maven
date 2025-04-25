@@ -40,8 +40,14 @@ export async function loadPackageInfo(context: ExtensionContext): Promise<void> 
 export async function loadMavenSettingsFilePath(): Promise<void> {
     // find Maven Local Repository
     try {
-        let userSettingsPath: string | undefined = Settings.getSettingsFilePath();
+        // First check project-specific settings
+        let userSettingsPath: string | undefined = Settings.getWorkspaceSettingsPath();
         if (!userSettingsPath) {
+            // Then check user settings
+            userSettingsPath = Settings.getSettingsFilePath();
+        }
+        if (!userSettingsPath) {
+            // Finally fallback to default user settings path
             userSettingsPath = path.join(os.homedir(), ".m2", "settings.xml");
         }
         const userSettings: unknown = await Utils.parseXmlFile(userSettingsPath);

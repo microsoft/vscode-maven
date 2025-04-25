@@ -47,6 +47,10 @@ export class Settings {
         return _getMavenSection<string>("settingsFile");
     }
 
+    public static getWorkspaceSettingsPath(): string | undefined {
+        return workspace.getConfiguration().get("maven.settingsFile") ?? undefined;
+    }
+
     public static External = class {
         public static javaHome(): string | undefined {
             return workspace.getConfiguration("java").get<string>("home");
