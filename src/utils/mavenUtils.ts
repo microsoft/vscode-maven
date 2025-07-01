@@ -92,7 +92,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
     };
     return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
         mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command, args })}`);
-        const proc: child_process.ChildProcess = child_process.spawn(command, args, spawnOptions);  // CodeQL [SM03609] justification
+        const proc: child_process.ChildProcess = child_process.spawn(command, args, spawnOptions);  // CodeQL [SM03609] safe here as args is assembled in the code and cannot be arbitrary string.
         proc.on("error", (err: Error) => {
             reject(new Error(`Error occurred in background process. ${err.message}`));
         });
