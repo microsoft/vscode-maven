@@ -15,7 +15,7 @@ export class MavenProblemMatcher {
         this.diagnosticCollection.clear();
         const diagnosticsMap = new Map<string, vscode.Diagnostic[]>();
 
-        const lines = output.split('\n');
+        const lines = output.split(/\r?\n/);
         for (const line of lines) {
             const diagnostic = this.parseErrorLine(line, workspaceRoot);
             if (diagnostic) {
@@ -34,7 +34,7 @@ export class MavenProblemMatcher {
 
     private parseErrorLine(line: string, workspaceRoot: string): { file: string; diagnostic: vscode.Diagnostic } | null {
         // Match Maven error format: [ERROR] /path/to/file.java:[line,column] message
-        const errorMatch = line.match(/^\[ERROR\]\s+(.+?):\[(\d+),(\d+)\]\s+(.+)$/);
+        const errorMatch = line.match(/^\[ERROR\]\s+(.+?):\[(\d+),(\d+)\]\s+(.+?)\r?$/);
         if (errorMatch) {
             const [, filePath, lineStr, columnStr, message] = errorMatch;
             const fullPath = path.isAbsolute(filePath) ? filePath : path.join(workspaceRoot, filePath);
@@ -51,7 +51,7 @@ export class MavenProblemMatcher {
         }
 
         // Match Maven warning - general build warnings without specific file location
-        const warningMatch = line.match(/^\[WARNING\]\s+(.+)$/);
+        const warningMatch = line.match(/^\[WARNING\]\s+(.+?)\r?$/);
         if (warningMatch && !warningMatch[1].includes('COMPILATION WARNING')) {
             const [, message] = warningMatch;
             
