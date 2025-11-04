@@ -13,6 +13,7 @@ import { mavenTerminal } from "../mavenTerminal";
 import { MavenProjectManager } from "../project/MavenProjectManager";
 import { Settings } from "../Settings";
 import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
+import { mavenProblemMatcher } from "../mavenProblemMatcher";
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
 
@@ -107,16 +108,26 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
                 reject(new Error(`Background process killed by signal ${signal}.`));
             }
         });
+        let outputBuffer = "";
         if (proc.stdout !== null) {
             proc.stdout.on("data", (chunk: Buffer) => {
-                mavenOutputChannel.append(chunk.toString());
+                const output = chunk.toString();
+                outputBuffer += output;
+                mavenOutputChannel.append(output);
             });
         }
         if (proc.stderr !== null) {
             proc.stderr.on("data", (chunk: Buffer) => {
-                mavenOutputChannel.append(chunk.toString());
+                const output = chunk.toString();
+                outputBuffer += output;
+                mavenOutputChannel.append(output);
             });
         }
+        proc.on("close", () => {
+            if (outputBuffer && pomfile) {
+                mavenProblemMatcher.parseMavenOutput(outputBuffer, path.dirname(pomfile));
+            }
+        });
     });
 }
 
@@ -161,6 +172,8 @@ export async function executeInTerminal(options: {
     const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, { name, cwd, env, workspaceFolder });
     if (pomfile) {
         await updateLRUCommands(command, pomfile);
+        // Also run in background to capture output for problem matching
+        executeInBackground(command, pomfile).catch(() => {/* ignore errors, just for problem matching */});
     }
     return terminal;
 }

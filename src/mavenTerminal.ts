@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
 import { executeCommand } from "./utils/cpUtils";
+import { mavenProblemMatcher } from "./mavenProblemMatcher";
 
 export interface ITerminalOptions {
     addNewLine?: boolean;
@@ -47,7 +48,23 @@ class MavenTerminal implements vscode.Disposable {
             this.terminals[name].sendText(await getCDCommand(cwd), true);
         }
         this.terminals[name].sendText(getCommand(command), addNewLine);
+        
+        // Capture Maven output for problem matching
+        this.captureMavenOutput(command, cwd || workspaceFolder?.uri.fsPath || vscode.workspace.rootPath || "");
+        
         return this.terminals[name];
+    }
+
+    private async captureMavenOutput(command: string, workingDir: string): Promise<void> {
+        try {
+            const result = await executeCommand(command, [], { cwd: workingDir });
+            mavenProblemMatcher.parseMavenOutput(result, workingDir);
+        } catch (error: any) {
+            // Maven commands often "fail" with compilation errors, but we still want to parse the output
+            if (error.stdout) {
+                mavenProblemMatcher.parseMavenOutput(error.stdout, workingDir);
+            }
+        }
     }
 
     // To Refactor: remove from here.
@@ -86,6 +103,7 @@ class MavenTerminal implements vscode.Disposable {
                 this.terminals[id].dispose();
                 delete this.terminals[id];
             });
+            mavenProblemMatcher.dispose();
         } else if (this.terminals[terminalName] !== undefined) {
             this.terminals[terminalName].dispose();
             delete this.terminals[terminalName];
