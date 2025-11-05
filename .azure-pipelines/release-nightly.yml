@@ -1,4 +1,4 @@
-# This pipeline is used to release the VS Code Java Debug extension from the nightly/stable build.
+# This pipeline is used to release the Maven for Java extension from the nightly/stable build.
 # It contains following steps:
 #   1. Download the plugin artifact from the nightly/stable build pipeline.
 #   2. Publish the plugin to the marketplace.
@@ -29,7 +29,7 @@ extends:
       - stage: Release
         jobs:
           - job: Job
-            displayName: Release VS Code Java Debug Extension
+            displayName: Release Maven for Java VS Code Extension
             templateContext:
               type: releaseJob
               isProduction: true
