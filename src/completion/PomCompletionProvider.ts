@@ -10,6 +10,7 @@ import { IXmlCompletionProvider } from "./providers/IXmlCompletionProvider";
 import { PropertiesProvider } from "./providers/PropertiesProvider";
 import { SchemaProvider } from "./providers/SchemaProvider";
 import { SnippetProvider } from "./providers/SnippetProvider";
+import { Settings } from "../Settings";
 
 export class PomCompletionProvider implements vscode.CompletionItemProvider {
 
@@ -18,9 +19,12 @@ export class PomCompletionProvider implements vscode.CompletionItemProvider {
     constructor() {
         const providers = [
             new SnippetProvider(),
-            new ArtifactProvider(),
             new PropertiesProvider(),
         ];
+
+        if (Settings.isGAVCompletionEnabled()) {
+            providers.push(new ArtifactProvider());
+        }
 
         if (!isXmlExtensionEnabled()) {
             providers.push(new SchemaProvider());

@@ -8,6 +8,9 @@ import { MavenProject } from "./explorer/model/MavenProject";
 
 type FavoriteFormat = { alias?: string; command: string; debug?: boolean }
 export class Settings {
+    public static isGAVCompletionEnabled(): boolean {
+        return !!_getMavenSection<boolean>("completion.gavEnabled");
+    }
     public static excludedFolders(resource: Uri): string[] {
         const ret: string[] | undefined = _getMavenSection<string[]>("excludedFolders", resource);
         return ret !== undefined ? ret : [];
