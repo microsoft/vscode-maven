@@ -8,7 +8,7 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 - maven.executable.options configuration as list of strings [#981](https://github.com/microsoft/vscode-maven/issues/981)
 
 ### Fixed
-- Fail to disable profile because shell interprets the '!' character [#956](https://github.com/microsoft/vscode-maven/issues/995)
+- Fail to disable profile because shell interprets the '!' character [#995](https://github.com/microsoft/vscode-maven/issues/995)
 
 ### Changed
 - Reload pom contents as needed before finding parent POMs [#956](https://github.com/microsoft/vscode-maven/pull/956)
