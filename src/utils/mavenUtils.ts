@@ -157,8 +157,9 @@ export async function executeInTerminal(options: {
         const project = MavenProjectManager.get(pomfile);
         const selectedIds = project?.profiles?.filter(p => p.selected === true)?.map(p => p.id) ?? [];
         const unselectedIds = project?.profiles?.filter(p => p.selected === false)?.map(p => `-${p.id}`) ?? [];
-        if (selectedIds.length + unselectedIds.length > 0) {
-            profileOptions = "-P=" + selectedIds.concat(unselectedIds).join(",");
+        const profileList = selectedIds.concat(unselectedIds).join(",");
+        if (profileList) {
+            profileOptions = `-P="${profileList}"`;
         }
     }
     const fullCommand: string = [
