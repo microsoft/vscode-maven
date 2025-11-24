@@ -628,6 +628,11 @@
       {
         "title": "Maven for Java",
         "properties": {
+          "maven.completion.gavEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable GAV (GroupId, ArtifactId, Version) completions in pom.xml"
+          },
           "maven.settingsFile": {
             "type": [
               "string",
