@@ -75,9 +75,8 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
     }
 
     const command: string = wrappedWithQuotes(mvn);
-    // TODO: re-visit cwd
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
+    const cwd: string | undefined = pomfile ? path.dirname(pomfile) : workspaceFolder?.uri.fsPath;
     const userArgs: string | undefined = Settings.Executable.options(pomfile);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
     const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"` : undefined;
