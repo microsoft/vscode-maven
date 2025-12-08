@@ -138,9 +138,8 @@ export async function executeInTerminal(options: {
     cwd?: string;
     env?: { [key: string]: string };
     terminalName?: string;
-    skipProblemMatching?: boolean;
 }): Promise<vscode.Terminal | undefined> {
-    const { command, mvnPath, pomfile, cwd, env, terminalName, skipProblemMatching } = options;
+    const { command, mvnPath, pomfile, cwd, env, terminalName } = options;
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const mvn: string | undefined = mvnPath ? mvnPath : await getMaven(pomfile);
     if (mvn === undefined) {
@@ -174,10 +173,6 @@ export async function executeInTerminal(options: {
     const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, { name, cwd, env, workspaceFolder });
     if (pomfile) {
         await updateLRUCommands(command, pomfile);
-        if (!skipProblemMatching) {
-            // Also run in background to capture output for problem matching
-            executeInBackground(command, pomfile).catch(() => {/* ignore errors, just for problem matching */});
-        }
     }
     return terminal;
 }
