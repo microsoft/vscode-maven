@@ -6,7 +6,6 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
-import { executeCommand } from "./utils/cpUtils";
 import { mavenProblemMatcher } from "./mavenProblemMatcher";
 
 export interface ITerminalOptions {
@@ -49,22 +48,7 @@ class MavenTerminal implements vscode.Disposable {
         }
         this.terminals[name].sendText(getCommand(command), addNewLine);
         
-        // Capture Maven output for problem matching
-        this.captureMavenOutput(command, cwd || workspaceFolder?.uri.fsPath || vscode.workspace.rootPath || "");
-        
         return this.terminals[name];
-    }
-
-    private async captureMavenOutput(command: string, workingDir: string): Promise<void> {
-        try {
-            const result = await executeCommand(command, [], { cwd: workingDir });
-            mavenProblemMatcher.parseMavenOutput(result, workingDir);
-        } catch (error: any) {
-            // Maven commands often "fail" with compilation errors, but we still want to parse the output
-            if (error.stdout) {
-                mavenProblemMatcher.parseMavenOutput(error.stdout, workingDir);
-            }
-        }
     }
 
     // To Refactor: remove from here.

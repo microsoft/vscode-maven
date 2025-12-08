@@ -174,10 +174,6 @@ export async function executeInTerminal(options: {
     const terminal: vscode.Terminal = await mavenTerminal.runInTerminal(fullCommand, { name, cwd, env, workspaceFolder });
     if (pomfile) {
         await updateLRUCommands(command, pomfile);
-        if (!skipProblemMatching) {
-            // Also run in background to capture output for problem matching
-            executeInBackground(command, pomfile).catch(() => {/* ignore errors, just for problem matching */});
-        }
     }
     return terminal;
 }
