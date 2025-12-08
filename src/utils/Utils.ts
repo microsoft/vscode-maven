@@ -183,7 +183,7 @@ export class Utils {
         const inputGoals: string | undefined = goal || await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
         const trimmedGoals: string | undefined = inputGoals ? inputGoals.trim() : undefined;
         if (trimmedGoals) {
-            await executeInTerminal({ command: trimmedGoals, pomfile: pomPath, skipProblemMatching: true });
+            await executeInTerminal({ command: trimmedGoals, pomfile: pomPath });
         }
     }
 

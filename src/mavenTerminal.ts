@@ -6,6 +6,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
+import { executeCommand } from "./utils/cpUtils";
 import { mavenProblemMatcher } from "./mavenProblemMatcher";
 
 export interface ITerminalOptions {

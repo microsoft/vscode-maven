@@ -138,9 +138,8 @@ export async function executeInTerminal(options: {
     cwd?: string;
     env?: { [key: string]: string };
     terminalName?: string;
-    skipProblemMatching?: boolean;
 }): Promise<vscode.Terminal | undefined> {
-    const { command, mvnPath, pomfile, cwd, env, terminalName, skipProblemMatching } = options;
+    const { command, mvnPath, pomfile, cwd, env, terminalName } = options;
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const mvn: string | undefined = mvnPath ? mvnPath : await getMaven(pomfile);
     if (mvn === undefined) {
