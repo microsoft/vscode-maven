@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.45.1
+### Fixed
+- revert problem matchers to fix the execute in terminal file usage issue [#1119](https://github.com/microsoft/vscode-maven/issues/1119)
+
 ## 0.45.0
 ### Added
 - VS Code Extension contribute to ProblemMatcher [#1098](https://github.com/microsoft/vscode-maven/issues/1098)
