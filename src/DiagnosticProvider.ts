@@ -10,6 +10,7 @@ import { MavenProjectManager } from "./project/MavenProjectManager";
 import { Settings } from "./Settings";
 
 export const MAVEN_DEPENDENCY_CONFLICT = "Maven dependency conflict";
+export const MAVEN_DEPENDENCY_VERSION_MISMATCH = "Maven dependency version mismatch";
 
 class DiagnosticProvider {
     private _collection: vscode.DiagnosticCollection;
@@ -19,6 +20,12 @@ class DiagnosticProvider {
         const dependencyCollection = vscode.languages.createDiagnosticCollection("Dependency");
         this._collection = dependencyCollection;
         context.subscriptions.push(this._collection);
+        context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(
+        async e => {
+            if (e.fileName.endsWith("pom.xml")) {
+                await this.debouncedRefresh(e.uri);
+            }
+        }));
         context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(
         async e => {
             if (e.document.fileName.endsWith("pom.xml")) {
@@ -62,6 +69,18 @@ class DiagnosticProvider {
                 this.map.set(diagnostic, node);
             }
         }
+
+        if (project.parent && project.parent.dependencyNodes) {
+            for (const node of project.dependencyNodes) {
+                const parentNode = project.parent.dependencyNodes.find(d => d.groupId === node.groupId && d.artifactId === node.artifactId);
+                if (parentNode && parentNode.version !== node.version) {
+                    const diagnostic = await this.createVersionMismatchDiagnostic(node, parentNode);
+                    if (diagnostic) {
+                        diagnostics.push(diagnostic);
+                    }
+                }
+            }
+        }
         this._collection.set(uri, diagnostics);
     }
 
@@ -75,6 +94,18 @@ class DiagnosticProvider {
         const message = `Dependency conflict in ${root.artifactId}: ${node.groupId}:${node.artifactId}:${node.version} conflict with ${node.omittedStatus?.effectiveVersion}`;
         const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
         diagnostic.code = MAVEN_DEPENDENCY_CONFLICT;
+        return diagnostic;
+    }
+
+    public async createVersionMismatchDiagnostic(node: Dependency, parentNode: Dependency): Promise<vscode.Diagnostic | undefined> {
+        const range: vscode.Range | undefined = await this.findConflictRange(node.projectPomPath, node.groupId, node.artifactId);
+        if (!range) {
+            return undefined;
+        }
+
+        const message = `Dependency version mismatch: ${node.groupId}:${node.artifactId}:${node.version} (parent: ${parentNode.version})`;
+        const diagnostic: vscode.Diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Warning);
+        diagnostic.code = MAVEN_DEPENDENCY_VERSION_MISMATCH;
         return diagnostic;
     }
 
