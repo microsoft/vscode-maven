@@ -1,7 +1,34 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
-### 0.42.0
+## 0.45.1
+### Fixed
+- revert problem matchers to fix the execute in terminal file usage issue [#1119](https://github.com/microsoft/vscode-maven/issues/1119)
+
+## 0.45.0
+### Added
+- VS Code Extension contribute to ProblemMatcher [#1098](https://github.com/microsoft/vscode-maven/issues/1098)
+- Add optional goal parameter for maven.goal.custom command [#1108](https://github.com/microsoft/vscode-maven/pull/1108)
+- maven.executable.options configuration as list of strings [#981](https://github.com/microsoft/vscode-maven/issues/981)
+
+### Fixed
+- Fail to disable profile because shell interprets the '!' character [#995](https://github.com/microsoft/vscode-maven/issues/995)
+
+### Changed
+- Reload pom contents as needed before finding parent POMs [#956](https://github.com/microsoft/vscode-maven/pull/956)
+
+## 0.44.0
+### Added
+- add new project as module of existing project via 'New Module...' command. [#849](https://github.com/microsoft/vscode-maven/issues/849).
+
+## 0.43.0
+### Changed
+- Merge "Refresh" and "Reload All Maven Projects" menus into a single menu "Reload All Maven Projects". [#997](https://github.com/microsoft/vscode-maven/pull/997).
+
+### Fixed
+- Create Java Project -> JavaFX does not create a JavaFX project. [#1003](https://github.com/microsoft/vscode-maven/issues/1003).
+
+## 0.42.0
 ### Added
 - Add creating empty maven project without archetypes. [#869](https://github.com/microsoft/vscode-maven/issues/869)
 

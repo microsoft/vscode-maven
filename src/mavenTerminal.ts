@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { mavenOutputChannel } from "./mavenOutputChannel";
 import { Settings } from "./Settings";
 import { executeCommand } from "./utils/cpUtils";
+import { mavenProblemMatcher } from "./mavenProblemMatcher";
 
 export interface ITerminalOptions {
     addNewLine?: boolean;
@@ -47,6 +48,7 @@ class MavenTerminal implements vscode.Disposable {
             this.terminals[name].sendText(await getCDCommand(cwd), true);
         }
         this.terminals[name].sendText(getCommand(command), addNewLine);
+        
         return this.terminals[name];
     }
 
@@ -86,6 +88,7 @@ class MavenTerminal implements vscode.Disposable {
                 this.terminals[id].dispose();
                 delete this.terminals[id];
             });
+            mavenProblemMatcher.dispose();
         } else if (this.terminals[terminalName] !== undefined) {
             this.terminals[terminalName].dispose();
             delete this.terminals[terminalName];

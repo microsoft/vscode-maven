@@ -42,6 +42,7 @@ import { mavenTerminal } from "./mavenTerminal";
 import { init as initMavenXsd } from "./mavenXsd";
 import { MavenProjectManager } from "./project/MavenProjectManager";
 import { taskExecutor } from "./taskExecutor";
+import { mavenProblemMatcher } from "./mavenProblemMatcher";
 import { Utils } from "./utils/Utils";
 import { getAiKey, getExtensionId, getExtensionVersion, loadMavenSettingsFilePath, loadPackageInfo } from "./utils/contextUtils";
 import { executeInTerminal } from "./utils/mavenUtils";
@@ -51,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await loadPackageInfo(context);
     // Usage data statistics.
     if (getAiKey()) {
-        initialize(getExtensionId(), getExtensionVersion(), getAiKey(), { firstParty: true });
+        initialize(getExtensionId(), getExtensionVersion(), getAiKey());
     }
     await initExpService(context);
     await instrumentOperation("activation", doActivate)(context);
@@ -75,8 +76,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     }));
     // pom.xml listener to refresh tree view
     registerPomFileWatcher(context);
-    // register output, terminal, taskExecutor
-    context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor);
+    // register output, terminal, taskExecutor, problemMatcher
+    context.subscriptions.push(mavenOutputChannel, mavenTerminal, taskExecutor, mavenProblemMatcher);
     // register common goals
     DEFAULT_MAVEN_LIFECYCLES.forEach((goal: string) => {
         registerCommandRequiringTrust(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
@@ -85,10 +86,11 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         item?.refresh ? item.refresh() : MavenExplorerProvider.getInstance().refresh(item);
     });
     registerCommandRequiringTrust(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
-    registerCommandRequiringTrust(context, "maven.goal.custom", async (node: MavenProject) => await Utils.executeCustomGoal(node.pomPath));
+    registerCommandRequiringTrust(context, "maven.goal.custom", async (node: string | MavenProject, goal?: string) => await Utils.executeCustomGoal(node, goal));
     registerCommand(context, "maven.project.openPom", openPomHandler);
     // create project from archetype
     registerCommand(context, "maven.archetype.generate", ArchetypeModule.createMavenProject);
+    registerCommand(context, "maven.new.module", ArchetypeModule.createMavenModule);
     registerCommand(context, "maven.archetype.update", updateArchetypeCatalogHandler);
     registerProjectCreationEndListener(context);
 
@@ -160,14 +162,18 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
             }
         }
     });
+
+    registerCommand(context, "maven.java.projectConfiguration.update", () => {
+        MavenExplorerProvider.getInstance().refresh();
+        if (isJavaExtEnabled()) {
+             // Reload All Maven Projects in JDTLS, impl in upstream
+            vscode.commands.executeCommand("java.projectConfiguration.update", MavenProjectManager.projects.map(n => Uri.file(n.pomPath)));
+        }
+    });
+
     // register artifact searcher if Java language server is activated
     if (isJavaExtEnabled()) {
         registerArtifactSearcher(context);
-
-        // Reload All Maven Projects in JDTLS, impl in upstream
-        registerCommand(context, "maven.java.projectConfiguration.update", () => {
-            vscode.commands.executeCommand("java.projectConfiguration.update", MavenProjectManager.projects.map(n => Uri.file(n.pomPath)));
-        })
     }
 
     // diagnostic

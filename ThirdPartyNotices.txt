@@ -1681,7 +1681,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------
 
-org.slf4j/slf4j-api 2.0.7 - MIT
+org.slf4j/slf4j-api 2.0.9 - MIT
 
 
 
@@ -2354,7 +2354,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-vscode-tas-client 0.1.63 - MIT
+vscode-tas-client 0.1.75 - MIT
 
 
 Copyright (c) Microsoft Corporation

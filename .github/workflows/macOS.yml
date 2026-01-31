@@ -14,15 +14,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v1
       with:
-        java-version: '17'
+        java-version: '21'
 
     - name: Setup Node.js environment
       uses: actions/setup-node@v2
       with:
-        node-version: 16
+        node-version: 20
 
     - name: Install Node.js modules
       run: npm install

@@ -8,6 +8,9 @@ import { MavenProject } from "./explorer/model/MavenProject";
 
 type FavoriteFormat = { alias?: string; command: string; debug?: boolean }
 export class Settings {
+    public static isGAVCompletionEnabled(): boolean {
+        return !!_getMavenSection<boolean>("completion.gavEnabled");
+    }
     public static excludedFolders(resource: Uri): string[] {
         const ret: string[] | undefined = _getMavenSection<string[]>("excludedFolders", resource);
         return ret !== undefined ? ret : [];
@@ -79,7 +82,11 @@ export class Settings {
             return _getMavenSection("executable.path", resourceOrFilepath);
         }
         public static options(resourceOrFilepath?: Uri | string): string | undefined {
-            return _getMavenSection("executable.options", resourceOrFilepath);
+            const options: string | string[] | undefined = _getMavenSection("executable.options", resourceOrFilepath);
+            if (Array.isArray(options)) {
+                return options.join(' ');
+            }
+            return options;
         }
         public static preferMavenWrapper(resourceOrFilepath?: Uri | string): boolean {
             return !!_getMavenSection<boolean>("executable.preferMavenWrapper", resourceOrFilepath);
