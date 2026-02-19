@@ -858,7 +858,7 @@
     "lodash": "^4.17.23",
     "lru-cache": "^6.0.0",
     "md5": "^2.2.1",
-    "minimatch": "^3.1.2",
+    "minimatch": "^10.2.1",
     "semver": "^7.6.3",
     "vscode-extension-telemetry-wrapper": "^0.14.0",
     "vscode-languageclient": "^7.0.0",
