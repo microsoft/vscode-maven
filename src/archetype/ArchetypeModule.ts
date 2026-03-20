@@ -176,7 +176,7 @@ async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Pro
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
     const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"` : undefined;
     let commandLine: string = [mvnString, ...cmdArgs, defaultArgs, mvnSettingsArg].filter(Boolean).join(" ");
-    const options: vscode.ShellExecutionOptions = { cwd };
+    const options: vscode.ShellExecutionOptions = { cwd, env: Settings.getEnvironment(metadata.targetFolder) };
     if (vscode.env.remoteName === undefined && process.platform === "win32") { // VS Code launched in Windows Desktop.
         options.shellQuoting = shellQuotes.cmd;
         options.executable = "cmd.exe";
