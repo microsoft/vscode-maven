@@ -76,12 +76,12 @@
 						<artifactItem>
 							<groupId>com.squareup.okio</groupId>
 							<artifactId>okio</artifactId>
-							<version>1.15.0</version>
+							<version>1.17.6</version>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.apache.commons</groupId>
 							<artifactId>commons-text</artifactId>
-							<version>1.10.0</version>
+							<version>1.15.0</version>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.codehaus.plexus</groupId>
