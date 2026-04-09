@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.45.2
+### Fixed
+- Fix terminal handler to also setup custom environment variables before calling Maven [#1141](https://github.com/microsoft/vscode-maven/pull/1141)
+- Maven dependencies fail to generate dependency graph [#1131](https://github.com/microsoft/vscode-maven/pull/1131)
+
 ## 0.45.1
 ### Fixed
 - revert problem matchers to fix the execute in terminal file usage issue [#1119](https://github.com/microsoft/vscode-maven/issues/1119)
