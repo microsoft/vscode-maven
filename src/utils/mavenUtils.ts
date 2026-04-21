@@ -179,9 +179,14 @@ export async function executeInTerminal(options: {
 
 export async function getMaven(pomPath?: string): Promise<string | undefined> {
     const mvnPathFromSettings: string | undefined = Settings.Executable.path(pomPath);
-    if (mvnPathFromSettings) {
+    if (mvnPathFromSettings && vscode.workspace.isTrusted) {
         // expand tilde to deal with ~/path-to-mvn
-        return expandHome(mvnPathFromSettings);
+        const expandedPath: string = expandHome(mvnPathFromSettings);
+        if (await isExecutablePathSafe(expandedPath)) {
+            return expandedPath;
+        }
+        // Unsafe path (relative or inside workspace) — fall through to defaults
+        return await defaultMavenExecutable();
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
@@ -193,6 +198,58 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
     }
 
     return await defaultMavenExecutable();
+}
+
+// Set of executable paths the user has explicitly confirmed as safe during this session
+const confirmedExecutablePaths: Set<string> = new Set();
+
+/**
+ * Validates whether a configured Maven executable path is safe to use.
+ * Rejects relative paths and paths that resolve inside a workspace folder,
+ * as these could be attacker-controlled binaries placed in a malicious workspace.
+ * Prompts the user for confirmation and caches their decision for the session.
+ */
+async function isExecutablePathSafe(executablePath: string): Promise<boolean> {
+    if (confirmedExecutablePaths.has(executablePath)) {
+        return true;
+    }
+
+    // Relative paths are inherently suspicious — a real Maven installation
+    // always has an absolute path (e.g. /usr/local/bin/mvn, C:\maven\bin\mvn.cmd)
+    if (!path.isAbsolute(executablePath)) {
+        return await promptForExecutableConfirmation(executablePath);
+    }
+
+    // Absolute paths inside a workspace folder are also suspicious
+    const normalizedExecPath: string = path.normalize(executablePath);
+    const workspaceFolders: readonly vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders ?? [];
+    for (const folder of workspaceFolders) {
+        const folderPath: string = path.normalize(folder.uri.fsPath);
+        // Case-insensitive comparison on Windows
+        const execLower: string = normalizedExecPath.toLowerCase();
+        const folderLower: string = folderPath.toLowerCase();
+        if (execLower.startsWith(folderLower + path.sep) || execLower === folderLower) {
+            return await promptForExecutableConfirmation(executablePath);
+        }
+    }
+
+    return true;
+}
+
+async function promptForExecutableConfirmation(executablePath: string): Promise<boolean> {
+    const USE_IT = "Allow";
+    const USE_DEFAULT = "Use Default Maven";
+    const choice: string | undefined = await vscode.window.showWarningMessage(
+        `The configured Maven executable path "${executablePath}" points to a location inside the workspace or is a relative path. Using it could be a security risk. Do you want to proceed?`,
+        { modal: true },
+        USE_IT,
+        USE_DEFAULT
+    );
+    if (choice === USE_IT) {
+        confirmedExecutablePaths.add(executablePath);
+        return true;
+    }
+    return false;
 }
 
 export function getEmbeddedMavenWrapper(): string {

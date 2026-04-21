@@ -16,8 +16,12 @@
     "untrustedWorkspaces": {
       "supported": "limited",
       "restrictedConfigurations": [
+        "maven.executable.path",
         "maven.executable.options",
-        "maven.terminal.customEnv"
+        "maven.executable.preferMavenWrapper",
+        "maven.terminal.customEnv",
+        "maven.terminal.favorites",
+        "maven.pomfile.autoUpdateEffectivePOM"
       ]
     }
   },
