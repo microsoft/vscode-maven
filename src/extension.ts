@@ -197,7 +197,7 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
             contentProvider.invalidate(dependenciesContentUri(project.pomPath));
 
             await project.refresh();
-            if (Settings.Pomfile.autoUpdateEffectivePOM()) {
+            if (vscode.workspace.isTrusted && Settings.Pomfile.autoUpdateEffectivePOM()) {
                 taskExecutor.execute(async () => {
                     await project.refreshEffectivePom();
                     MavenExplorerProvider.getInstance().refresh(project);
