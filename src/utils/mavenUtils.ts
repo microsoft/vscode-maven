@@ -185,8 +185,7 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
         if (await isExecutablePathSafe(expandedPath)) {
             return expandedPath;
         }
-        // Unsafe path (relative or inside workspace) — fall through to defaults
-        return await defaultMavenExecutable();
+        // Unsafe path (relative or inside workspace) — fall through to wrapper/default fallback
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
@@ -221,16 +220,8 @@ async function isExecutablePathSafe(executablePath: string): Promise<boolean> {
     }
 
     // Absolute paths inside a workspace folder are also suspicious
-    const normalizedExecPath: string = path.normalize(executablePath);
-    const workspaceFolders: readonly vscode.WorkspaceFolder[] = vscode.workspace.workspaceFolders ?? [];
-    for (const folder of workspaceFolders) {
-        const folderPath: string = path.normalize(folder.uri.fsPath);
-        // Case-insensitive comparison on Windows
-        const execLower: string = normalizedExecPath.toLowerCase();
-        const folderLower: string = folderPath.toLowerCase();
-        if (execLower.startsWith(folderLower + path.sep) || execLower === folderLower) {
-            return await promptForExecutableConfirmation(executablePath);
-        }
+    if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(executablePath)) !== undefined) {
+        return await promptForExecutableConfirmation(executablePath);
     }
 
     return true;
