@@ -178,14 +178,17 @@ export async function executeInTerminal(options: {
 }
 
 export async function getMaven(pomPath?: string): Promise<string | undefined> {
-    const mvnPathFromSettings: string | undefined = Settings.Executable.path(pomPath);
-    if (mvnPathFromSettings && vscode.workspace.isTrusted) {
+    const mvnPathFromSettings: string | undefined = getEffectiveExecutablePath(pomPath);
+    if (mvnPathFromSettings) {
         // expand tilde to deal with ~/path-to-mvn
         const expandedPath: string = expandHome(mvnPathFromSettings);
         if (await isExecutablePathSafe(expandedPath)) {
             return expandedPath;
         }
-        // Unsafe path (relative or inside workspace) — fall through to wrapper/default fallback
+        // User declined the suspicious path — skip wrapper (also potentially attacker-controlled)
+        // and fall through directly to system-installed Maven
+        mavenOutputChannel.appendLine(`Configured Maven path "${expandedPath}" was declined. Falling back to system Maven.`);
+        return await defaultMavenExecutable();
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
@@ -201,6 +204,34 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
 
 // Set of executable paths the user has explicitly confirmed as safe during this session
 const confirmedExecutablePaths: Set<string> = new Set();
+
+/**
+ * Returns the effective maven.executable.path, filtering out workspace-level
+ * overrides when the workspace is not trusted. User/machine-level (global)
+ * settings are always honored regardless of trust state.
+ */
+function getEffectiveExecutablePath(resourceOrFilepath?: vscode.Uri | string): string | undefined {
+    let resource: vscode.Uri | undefined;
+    if (typeof resourceOrFilepath === "string") {
+        resource = vscode.Uri.file(resourceOrFilepath);
+    } else {
+        resource = resourceOrFilepath;
+    }
+    const config = vscode.workspace.getConfiguration("maven", resource);
+    const inspection = config.inspect<string>("executable.path");
+    if (!inspection) {
+        return undefined;
+    }
+
+    if (vscode.workspace.isTrusted) {
+        // Trusted workspace: return the fully resolved value (workspace overrides allowed)
+        return config.get<string>("executable.path") || undefined;
+    }
+
+    // Untrusted workspace: only honor user/machine-level (global) settings,
+    // ignore workspaceValue and workspaceFolderValue
+    return inspection.globalValue ?? inspection.defaultValue ?? undefined;
+}
 
 /**
  * Validates whether a configured Maven executable path is safe to use.
@@ -219,8 +250,17 @@ async function isExecutablePathSafe(executablePath: string): Promise<boolean> {
         return await promptForExecutableConfirmation(executablePath);
     }
 
+    // Canonicalize the path to resolve symlinks/junctions before checking containment
+    let canonicalPath: string;
+    try {
+        canonicalPath = await fse.realpath(executablePath);
+    } catch {
+        // If realpath fails (file doesn't exist yet), use the original path
+        canonicalPath = executablePath;
+    }
+
     // Absolute paths inside a workspace folder are also suspicious
-    if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(executablePath)) !== undefined) {
+    if (vscode.workspace.getWorkspaceFolder(vscode.Uri.file(canonicalPath)) !== undefined) {
         return await promptForExecutableConfirmation(executablePath);
     }
 
@@ -230,15 +270,20 @@ async function isExecutablePathSafe(executablePath: string): Promise<boolean> {
 async function promptForExecutableConfirmation(executablePath: string): Promise<boolean> {
     const USE_IT = "Allow";
     const USE_DEFAULT = "Use Default Maven";
+    const OPEN_SETTINGS = "Open Settings";
     const choice: string | undefined = await vscode.window.showWarningMessage(
         `The configured Maven executable path "${executablePath}" points to a location inside the workspace or is a relative path. Using it could be a security risk. Do you want to proceed?`,
         { modal: true },
         USE_IT,
-        USE_DEFAULT
+        USE_DEFAULT,
+        OPEN_SETTINGS
     );
     if (choice === USE_IT) {
         confirmedExecutablePaths.add(executablePath);
         return true;
+    }
+    if (choice === OPEN_SETTINGS) {
+        await vscode.commands.executeCommand("workbench.action.openSettings", "maven.executable.path");
     }
     return false;
 }
