@@ -1,0 +1,103 @@
+# Test Plan: vscode-maven — Executable Path Safety Branches
+#
+# Covers the two non-abort branches of PR #1152's promptForExecutableConfirmation:
+#
+#   1. "Use Default Maven"  → getMaven() falls through to defaultMavenExecutable()
+#                             and the Maven output channel logs
+#                             `Falling back to system Maven`.
+#      "use-default" is NOT cached, so a second invocation re-prompts.
+#
+#   2. "Allow"              → path is recorded in confirmedExecutablePaths for
+#                             the session. A subsequent invocation with the
+#                             same path must NOT re-prompt.
+#
+# Prerequisites:
+#   - vscode-maven built (dist/extension.js present)
+#   - JDK installed and system `mvn` on PATH (so the "Use Default" fallback
+#     doesn't error out before our log assertion runs)
+#
+# Usage: npx autotest run test-plans/maven-executable-safety-branches.yaml
+
+name: "vscode-maven — Executable Path Safety Branches"
+description: |
+  Trusted workspace + relative maven.executable.path: click "Use Default
+  Maven" on the first prompt and assert the fall-back log line, then click
+  "Allow" on the second prompt and assert the decision is cached (no dialog
+  on the third invocation).
+
+setup:
+  extension: "vscjava.vscode-maven"
+  extensions:
+    - "redhat.java"
+  extensionPath: "../../vscode-maven"
+  workspace: "../test/projects/maven"
+  vscodeVersion: "stable"
+  # Relative path → not absolute → path.isAbsolute() returns false →
+  # promptForExecutableConfirmation is shown on every getMaven() call until
+  # the user Allows (which caches the path for the session).
+  workspaceSettings:
+    maven.executable.path: "./fake-mvn"
+  timeout: 120
+
+steps:
+  - id: "wait-java-ls"
+    action: "waitForLanguageServer"
+    timeout: 120
+
+  # ──────────────────────────────────────────────────────────
+  # Branch 1: "Use Default Maven"
+  # ──────────────────────────────────────────────────────────
+  - id: "invoke-first"
+    action: "run command Maven: Execute Commands..."
+
+  - id: "pick-compile-first"
+    action: "select compile option"
+
+  - id: "click-use-default"
+    action: "clickDialogButton Use Default Maven"
+    verify: "Safety modal appeared and Use Default Maven was clicked"
+
+  - id: "wait-fallback-log"
+    action: "wait 6 seconds"
+    verify: "Maven output channel logged the fallback line"
+
+  - id: "assert-fallback-log"
+    action: "wait 1 second"
+    verify: "`Falling back to system Maven` was written to Maven for Java channel"
+    verifyOutputChannel:
+      channel: "Maven for Java"
+      contains: "Falling back to system Maven"
+
+  # ──────────────────────────────────────────────────────────
+  # Branch 2: "Allow" — must cache, so third invocation has no dialog
+  # ──────────────────────────────────────────────────────────
+  - id: "invoke-second"
+    action: "run command Maven: Execute Commands..."
+
+  - id: "pick-compile-second"
+    action: "select compile option"
+
+  - id: "click-allow"
+    action: "clickDialogButton Allow"
+    verify: "Safety modal re-appears (use-default not cached) and Allow clicked"
+
+  - id: "wait-after-allow"
+    action: "wait 3 seconds"
+
+  - id: "invoke-third"
+    action: "run command Maven: Execute Commands..."
+
+  - id: "pick-compile-third"
+    action: "select compile option"
+
+  - id: "settle-for-possible-dialog"
+    action: "wait 5 seconds"
+    verify: "Enough time has passed for a prompt to open if caching were broken"
+
+  # Third invocation: ./fake-mvn is in confirmedExecutablePaths → getMaven
+  # returns "safe" immediately → no showWarningMessage call → no modal.
+  - id: "assert-no-dialog-after-allow"
+    action: "wait 1 second"
+    verify: "No safety modal this time (Allow cached the path)"
+    verifyDialog:
+      visible: false
