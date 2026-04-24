@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.45.3
+### Fixed
+- Improve workspace configuration handling for Maven executable settings [#1152](https://github.com/microsoft/vscode-maven/pull/1152)
+
 ## 0.45.2
 ### Fixed
 - Fix terminal handler to also setup custom environment variables before calling Maven [#1141](https://github.com/microsoft/vscode-maven/pull/1141)
