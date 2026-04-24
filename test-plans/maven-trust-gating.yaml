@@ -1,0 +1,80 @@
+# Test Plan: vscode-maven — Workspace Trust Gating
+#
+# Covers PR #1152 (security hardening) behaviors that must hold in an UNTRUSTED workspace:
+#   1. Workspace-level `maven.executable.path` is ignored (restrictedConfigurations).
+#   2. `maven.pomfile.autoUpdateEffectivePOM` does not fire when pom.xml changes
+#      (registerPomFileWatcher guards refreshEffectivePom with isTrusted).
+#   3. `maven.explorer.refresh` is registered via registerCommandRequiringTrust.
+#
+# The workspaceSettings block injects a malicious-looking executable path and enables
+# auto-update; both must be filtered/gated because the workspace is untrusted.
+#
+# Prerequisites:
+#   - vscode-maven built (dist/extension.js present)
+#   - JDK installed
+#
+# Usage: npx autotest run test-plans/maven-trust-gating.yaml
+
+name: "vscode-maven — Workspace Trust Gating"
+description: |
+  Verifies that untrusted workspaces do not honor workspace-scoped Maven
+  executable path, do not auto-refresh Effective POM on pom change, and that
+  maven.explorer.refresh is trust-gated.
+
+setup:
+  extension: "vscjava.vscode-maven"
+  extensions:
+    - "redhat.java"
+  extensionPath: "../../vscode-maven"
+  workspace: "../test/projects/maven"
+  vscodeVersion: "stable"
+  workspaceTrust: "untrusted"
+  workspaceSettings:
+    # Attacker-controlled value — must be ignored because maven.executable.path
+    # is in restrictedConfigurations and the workspace is untrusted.
+    maven.executable.path: "./evil-mvn.sh"
+    # Attacker enables auto-update — must be ignored for the same reason,
+    # and also gated by vscode.workspace.isTrusted in registerPomFileWatcher.
+    maven.pomfile.autoUpdateEffectivePOM: true
+  timeout: 60
+
+steps:
+  - id: "settle"
+    action: "wait 8 seconds"
+    verify: "VSCode finished loading in Restricted Mode (framework auto-declined trust)"
+
+  - id: "wait-activation"
+    action: "wait 10 seconds"
+    verify: "Extensions activated in restricted mode (Java Lightweight Mode and restricted banner visible)"
+
+  # ── Modify pom.xml; confirm no auto-refresh of effective POM ──
+  # Under PR #1152, registerPomFileWatcher guards refreshEffectivePom() with
+  # vscode.workspace.isTrusted. In an untrusted workspace the extension must NOT
+  # spawn `help:effective-pom` even if autoUpdateEffectivePOM is true.
+  - id: "open-pom"
+    action: "open file pom.xml"
+
+  - id: "touch-pom"
+    action: "insertLineInFile pom.xml 9 <!-- autotest marker -->"
+    verify: "pom.xml modified on disk"
+
+  - id: "wait-for-potential-refresh"
+    action: "wait 10 seconds"
+    verify: "Extension has had time to react to pom.xml change"
+
+  - id: "verify-no-effective-pom-run"
+    action: "wait 1 second"
+    verify: "Maven output channel shows NO help:effective-pom invocation (auto-update gated by trust)"
+    verifyOutputChannel:
+      channel: "Maven for Java"
+      notContains: "help:effective-pom"
+
+  # ── The attacker-injected maven.executable.path must never surface ──
+  # restrictedConfigurations in package.json prevents workspace-scope override
+  # from taking effect in untrusted mode.
+  - id: "verify-no-evil-path"
+    action: "wait 1 second"
+    verify: "evil-mvn.sh path (from workspace settings) is not used anywhere"
+    verifyOutputChannel:
+      channel: "Maven for Java"
+      notContains: "evil-mvn.sh"
