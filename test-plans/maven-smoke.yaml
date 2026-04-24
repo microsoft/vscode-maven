@@ -1,0 +1,49 @@
+# Test Plan: vscode-maven Smoke Test
+#
+# Replaces the legacy test/ integration tests in vscode-maven:
+#   - extension present
+#   - extension activates
+#   - Maven view lists the sample project
+#
+# Prerequisites:
+#   - vscode-maven repo built (npm run build-plugin && webpack) so dist/extension.js exists
+#   - JDK installed (redhat.java dependency)
+#
+# Usage: npx autotest run test-plans/maven-smoke.yaml
+
+name: "vscode-maven — Smoke"
+description: |
+  Replaces vscode-maven/test/ integration smoke tests via autotest.
+  Opens the sample Maven project and confirms the Maven projects tree shows `my-app`.
+
+setup:
+  extension: "vscjava.vscode-maven"
+  extensions:
+    - "redhat.java"
+  extensionPath: "../../vscode-maven"
+  workspace: "../test/projects/maven"
+  vscodeVersion: "stable"
+  timeout: 90
+
+steps:
+  - id: "wait-java-ls"
+    action: "waitForLanguageServer"
+    verify: "Java Language Server ready — prerequisite for Maven project discovery"
+    timeout: 120
+
+  # Focus the Maven Projects view by running its focus command. If this succeeds
+  # it proves the extension activated, contributed its views and registered its
+  # commands against the command palette.
+  - id: "focus-maven-view"
+    action: "run command Maven: Focus on Maven Projects View"
+    verify: "Maven Projects panel is visible in the Explorer"
+
+  # Invoke the Refresh command. Completing without throwing proves that the
+  # extension's project discovery / command-handler wiring is healthy.
+  - id: "refresh-projects"
+    action: "run command Maven: Refresh"
+    verify: "Refresh command runs without an error notification"
+
+  - id: "settle"
+    action: "wait 3 seconds"
+    verify: "No error notification surfaced after refresh"

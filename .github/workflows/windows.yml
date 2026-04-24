@@ -43,8 +43,23 @@ jobs:
     - name: Build VSIX file
       run: vsce package
 
-    - name: Test extension
-      run: npm test
+    - name: Install autotest CLI
+      run: npm install -g @vscjava/vscode-autotest
+
+    - name: Run E2E test plans
+      env:
+        AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+        AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+        AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+      run: autotest run-all test-plans
+
+    - name: Write Job Summary
+      if: always()
+      shell: bash
+      run: |
+        if [ -f test-results/summary.md ]; then
+          cat test-results/summary.md >> "$GITHUB_STEP_SUMMARY"
+        fi
 
     - name: Print language server Log if job failed
       if: ${{ failure() }}
