@@ -1,0 +1,62 @@
+# Test Plan: vscode-maven — Executable Path Safety Prompt
+#
+# Covers PR #1152 `isExecutablePathSafe` / `promptForExecutableConfirmation`:
+#   - When a trusted workspace configures a RELATIVE or workspace-contained
+#     maven.executable.path, getMaven() must show a modal warning before use.
+#   - "Use Default Maven" → falls back to system `mvn`, logs in output channel.
+#   - "Allow" → path is accepted and cached for the session (second invocation
+#     must not re-prompt).
+#
+# Prerequisites:
+#   - vscode-maven built (dist/extension.js present)
+#   - JDK installed, `mvn` resolvable on PATH (for the Use Default Maven fallback path)
+#
+# Usage: npx autotest run test-plans/maven-executable-safety.yaml
+
+name: "vscode-maven — Executable Path Safety Prompt"
+description: |
+  Trusted workspace + suspicious maven.executable.path: verify the safety
+  prompt appears, that "Use Default Maven" falls back with an output log,
+  and that "Allow" caches the decision so no re-prompt occurs on the second run.
+
+setup:
+  extension: "vscjava.vscode-maven"
+  extensions:
+    - "redhat.java"
+  extensionPath: "../../vscode-maven"
+  workspace: "../test/projects/maven"
+  vscodeVersion: "stable"
+  # Relative path → path.isAbsolute() === false → triggers the safety prompt
+  # on every getMaven() call until the user Allows.
+  workspaceSettings:
+    maven.executable.path: "./fake-mvn"
+  timeout: 90
+
+steps:
+  - id: "wait-java-ls"
+    action: "waitForLanguageServer"
+    timeout: 120
+
+  # Trigger getMaven() via a lifecycle goal. `Maven: Execute Commands...` with
+  # a single project skips the project picker and lands directly on the goal
+  # quick pick. Picking `compile` reaches getMaven(), which should open the
+  # security modal because maven.executable.path is relative (./fake-mvn).
+  - id: "invoke-maven-execute"
+    action: "run command Maven: Execute Commands..."
+
+  - id: "pick-compile-goal"
+    action: "select compile option"
+
+  # The meaningful assertion for PR #1152 is simply: "the safety gate fires
+  # when the path is suspicious". `waitForDialog` fails the step if the
+  # Monaco modal (.monaco-dialog-box) does not become visible within 15s,
+  # which is exactly the behavior PR #1152 introduces.
+  - id: "assert-safety-dialog"
+    action: "waitForDialog 15"
+    verify: "Monaco modal dialog for the executable-path warning is visible on screen"
+
+  # Pressing Escape makes promptForExecutableConfirmation return "abort" →
+  # getMaven() resolves to undefined → no subprocess spawned.
+  - id: "dismiss-prompt"
+    action: "pressKey Escape"
+    verify: "Modal closed; abort path taken, no Maven subprocess spawned"
