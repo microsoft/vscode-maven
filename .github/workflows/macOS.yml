@@ -60,6 +60,15 @@ jobs:
           cat test-results/summary.md >> "$GITHUB_STEP_SUMMARY"
         fi
 
+    - name: Upload autotest results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: autotest-results-macos
+        path: test-results/
+        if-no-files-found: ignore
+        retention-days: 14
+
     - name: Print language server Log if job failed
       if: ${{ failure() }}
       run: find $HOME/Library/Application\ Support/Code/User/workspaceStorage/*/redhat.java/jdt_ws/.metadata/.log -print -exec cat '{}' \;;
