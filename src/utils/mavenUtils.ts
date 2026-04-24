@@ -259,7 +259,7 @@ async function canonicalizePath(filePath: string): Promise<string> {
  * @returns "safe" if the path is allowed, "use-default" if the user chose to fall back,
  *          "abort" if the user dismissed the dialog or chose to open settings.
  */
-async function checkExecutablePathSafety(executablePath: string): Promise<"safe" | "use-default" | "abort"> {
+export async function checkExecutablePathSafety(executablePath: string): Promise<"safe" | "use-default" | "abort"> {
     // Relative paths are inherently suspicious — a real Maven installation
     // always has an absolute path (e.g. /usr/local/bin/mvn, C:\maven\bin\mvn.cmd)
     if (!path.isAbsolute(executablePath)) {
