@@ -866,7 +866,7 @@
     "md5": "^2.2.1",
     "minimatch": "^3.1.5",
     "semver": "^7.6.3",
-    "vscode-extension-telemetry-wrapper": "^0.15.1",
+    "vscode-extension-telemetry-wrapper": "^0.15.2",
     "vscode-languageclient": "^7.0.0",
     "vscode-languageserver-protocol": "^3.17.5",
     "vscode-tas-client": "^0.1.84",
