@@ -41,6 +41,10 @@ extends:
             steps:
               - checkout: self
                 fetchTags: false
+              - task: NodeTool@0
+                displayName: 'Use Node.js 20.x'
+                inputs:
+                  versionSpec: '20.x'
               - task: Npm@1
                 displayName: 'npm install'
                 inputs:
