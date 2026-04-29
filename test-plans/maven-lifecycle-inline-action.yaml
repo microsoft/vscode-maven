@@ -1,0 +1,79 @@
+# Test Plan: Maven Explorer Lifecycle Inline Action
+#
+# Verifies that clicking the Maven Explorer Run action for a lifecycle phase
+# executes that exact phase directly.
+#
+# Usage: npx autotest run test-plans/maven-lifecycle-inline-action.yaml
+
+name: "vscode-maven — Lifecycle Inline Action"
+description: |
+  Opens a minimal Maven project, expands Maven Explorer lifecycle nodes, clicks
+  the Run inline action for `compile`, and verifies that Maven produced the
+  compiled class file.
+
+setup:
+  extension: "redhat.java"
+  extensionPath: "../../vscode-maven"
+  workspace: "../test/projects/lifecycle-compile"
+  vscodeVersion: "stable"
+  timeout: 120
+
+steps:
+  - id: "wait-java-ls"
+    action: "waitForLanguageServer"
+    verify: "Java Language Server ready — prerequisite for Maven project discovery"
+    timeout: 120
+
+  - id: "focus-maven-view"
+    action: "run command Maven: Focus on Maven Projects View"
+    verify: "Maven Projects panel is visible in the Explorer"
+    timeout: 10
+
+  - id: "collapse-workspace-root"
+    action: "collapseWorkspaceRoot"
+    verify: "Workspace root in File Explorer is collapsed to give Maven Projects more room"
+
+  - id: "collapse-outline"
+    action: "collapseSidebarSection OUTLINE"
+    verify: "Outline section is collapsed to give Maven Projects more room"
+
+  - id: "collapse-timeline"
+    action: "collapseSidebarSection TIMELINE"
+    verify: "Timeline section is collapsed to give Maven Projects more room"
+
+  - id: "collapse-java-projects"
+    action: "collapseSidebarSection JAVA PROJECTS"
+    verify: "Java Projects section is collapsed to give Maven Projects more room"
+
+  - id: "refresh-projects"
+    action: "run command Maven: Refresh"
+    verify: "Maven projects are refreshed"
+    timeout: 10
+
+  - id: "settle"
+    action: "wait 3 seconds"
+    verify: "Maven Projects view has settled"
+
+  - id: "expand-project"
+    action: "expandTreeItem lifecycle-compile"
+    verifyTreeItem:
+      name: "Lifecycle"
+      exact: true
+    timeout: 30
+
+  - id: "expand-lifecycle"
+    action: "expandTreeItem Lifecycle"
+    verifyTreeItem:
+      name: "compile"
+      exact: true
+    timeout: 15
+
+  - id: "run-compile-inline-action"
+    action: "clickTreeItemAction compile Run"
+    verify: "The compile lifecycle phase is invoked from the Maven Explorer inline Run action"
+    timeout: 30
+
+  - id: "verify-compile-output"
+    action: "wait 8 seconds"
+    verifyFile:
+      path: "~/target/classes/com/microsoft/vscode/maven/test/App.class"
