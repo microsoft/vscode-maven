@@ -34,6 +34,7 @@ import { setDependencyVersionHandler } from "./handlers/dependency/setDependency
 import { showDependenciesHandler } from "./handlers/dependency/showDependenciesHandler";
 import { addFavoriteHandler } from "./handlers/favorites/addFavoriteHandler";
 import { runFavoriteCommandsHandler } from "./handlers/favorites/runFavoriteCommandsHandler";
+import { executeLifecyclePhaseHandler } from "./handlers/lifecycle/executeLifecyclePhaseHandler";
 import { HoverProvider } from "./hover/hoverProvider";
 import { registerArtifactSearcher } from "./jdtls/artifactSearcher";
 import { isJavaExtEnabled } from "./jdtls/commands";
@@ -98,7 +99,8 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerCommandRequiringTrust(context, "maven.favorites", runFavoriteCommandsHandler);
     registerCommandRequiringTrust(context, "maven.goal.execute", Utils.executeMavenCommand);
     registerCommandRequiringTrust(context, "maven.goal.execute.fromProjectManager", Utils.executeMavenCommand);
-    registerCommandRequiringTrust(context, "maven.goal.execute.fromLifecycleMenu", Utils.executeMavenCommand);
+    registerCommandRequiringTrust(context, "maven.lifecycle.execute", executeLifecyclePhaseHandler);
+    registerCommandRequiringTrust(context, "maven.goal.execute.fromLifecycleMenu", executeLifecyclePhaseHandler);
     registerCommandRequiringTrust(context, "maven.goal.execute.fromFavoritesMenu", Utils.executeMavenCommand);
     registerCommandRequiringTrust(context, "maven.plugin.execute", async (pluginGoal: PluginGoal) => await executeInTerminal({ command: pluginGoal.command, pomfile: pluginGoal.plugin.project.pomPath }));
     registerCommand(context, "maven.view.flat", () => Settings.changeToFlatView());
