@@ -12,7 +12,9 @@ description: |
   compiled class file.
 
 setup:
-  extension: "redhat.java"
+  extension: "vscjava.vscode-maven"
+  extensions:
+    - "redhat.java"
   extensionPath: "../../vscode-maven"
   workspace: "../test/projects/lifecycle-compile"
   vscodeVersion: "stable"
