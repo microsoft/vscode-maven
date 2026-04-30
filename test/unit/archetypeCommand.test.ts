@@ -53,10 +53,17 @@ describe("splitMavenExecutableOptions", () => {
         );
     });
 
-    it("preserves backslashes in Windows paths", () => {
+    it("preserves backslashes in Windows and UNC paths", () => {
         assert.deepEqual(
-            splitMavenExecutableOptions("-Dmaven.repo.local=C:\\Users\\demo\\.m2\\repository"),
-            ["-Dmaven.repo.local=C:\\Users\\demo\\.m2\\repository"]
+            splitMavenExecutableOptions("-Dmaven.repo.local=C:\\Users\\demo\\.m2\\repository -Dshare=\\\\server\\share"),
+            ["-Dmaven.repo.local=C:\\Users\\demo\\.m2\\repository", "-Dshare=\\\\server\\share"]
+        );
+    });
+
+    it("preserves backslashes in quoted values", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions("\"-Dregex=\\\\d+\""),
+            ["-Dregex=\\\\d+"]
         );
     });
 });

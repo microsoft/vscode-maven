@@ -5,8 +5,8 @@ export interface ArchetypeGenerateMetadata {
     archetypeArtifactId: string;
     archetypeGroupId: string;
     archetypeVersion: string;
-    groupId: string | undefined;
-    artifactId: string | undefined;
+    groupId: string;
+    artifactId: string;
     outputDirectory?: string;
 }
 
@@ -35,14 +35,6 @@ export function splitMavenExecutableOptions(options: string | undefined): string
     const trimmed = options.trim();
     for (let i = 0; i < trimmed.length; i++) {
         const ch = trimmed[i];
-        if (ch === "\\" && i + 1 < trimmed.length) {
-            const next = trimmed[i + 1];
-            if (next === "\\" || next === quote || (!quote && (next === "\"" || next === "'"))) {
-                current += next;
-                i++;
-                continue;
-            }
-        }
 
         if (quote) {
             if (ch === quote) {

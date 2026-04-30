@@ -149,8 +149,9 @@ async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Pro
         artifactId,
         targetFolder
     } = metadata;
-    if (archetypeArtifactId === undefined || archetypeGroupId === undefined || archetypeVersion === undefined) {
-        throw new Error("Archetype information is incomplete.");
+    if (archetypeArtifactId === undefined || archetypeGroupId === undefined || archetypeVersion === undefined
+        || groupId === undefined || artifactId === undefined || targetFolder === undefined) {
+        throw new Error("Project creation information is incomplete.");
     }
     let cwd: string | undefined = targetFolder;
     let mvnPath: string | undefined = await getMaven();
@@ -172,12 +173,12 @@ async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Pro
     const useCmdOnWindows: boolean = vscode.env.remoteName === undefined && process.platform === "win32";
     const mvnCommand: string = useCmdOnWindows ? mvnPath : await mavenTerminal.formattedPathForTerminal(mvnPath);
 
-    const defaultArgs: string | undefined = Settings.Executable.options(metadata.targetFolder);
+    const defaultArgs: string | undefined = Settings.Executable.options(targetFolder);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
     const mvnSettingsPath: string | undefined = mvnSettingsFile && (useCmdOnWindows ? mvnSettingsFile : await mavenTerminal.formattedPathForTerminal(mvnSettingsFile));
     const mvnSettingsArgs: string[] = mvnSettingsPath ? ["-s", mvnSettingsPath] : [];
     const args: string[] = [...cmdArgs, ...splitMavenExecutableOptions(defaultArgs), ...mvnSettingsArgs];
-    const options: vscode.ShellExecutionOptions = { cwd, env: Settings.getEnvironment(metadata.targetFolder) };
+    const options: vscode.ShellExecutionOptions = { cwd, env: Settings.getEnvironment(targetFolder) };
     if (useCmdOnWindows) { // VS Code launched in Windows Desktop.
         options.shellQuoting = shellQuotes.cmd;
         options.executable = "cmd.exe";
