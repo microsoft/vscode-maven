@@ -1,8 +1,8 @@
 # Test Plan: Maven Archetype Create Project
 #
 # Covers the archetype project creation path used by issue #1088. The test is
-# intentionally platform-neutral: it uses autotest's workspace path placeholder
-# support to select the current workspace as the destination folder.
+# currently Windows-only because it depends on autotest CLI capabilities that
+# have not been published to the macOS/Linux CI jobs yet.
 #
 # Usage: npx autotest run test-plans/maven-archetype-create-project.yaml
 
@@ -11,6 +11,8 @@ description: |
   Drives the Maven quickstart archetype creation wizard through archetype,
   version, groupId, artifactId, and destination folder input, then verifies that
   Maven generates the project in the selected folder.
+platforms:
+  - win32
 
 setup:
   extension: "vscjava.vscode-maven"
