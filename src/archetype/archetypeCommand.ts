@@ -7,6 +7,7 @@ export interface ArchetypeGenerateMetadata {
     archetypeVersion: string;
     groupId: string | undefined;
     artifactId: string | undefined;
+    outputDirectory?: string;
 }
 
 export function buildArchetypeGenerateArgs(metadata: ArchetypeGenerateMetadata): string[] {
@@ -18,8 +19,9 @@ export function buildArchetypeGenerateArgs(metadata: ArchetypeGenerateMetadata):
         `-DarchetypeGroupId=${metadata.archetypeGroupId}`,
         `-DarchetypeVersion=${metadata.archetypeVersion}`,
         `-DgroupId=${metadata.groupId}`,
-        `-DartifactId=${metadata.artifactId}`
-    ];
+        `-DartifactId=${metadata.artifactId}`,
+        metadata.outputDirectory && `-DoutputDirectory=${metadata.outputDirectory}`
+    ].filter((arg): arg is string => !!arg);
 }
 
 export function splitMavenExecutableOptions(options: string | undefined): string[] {

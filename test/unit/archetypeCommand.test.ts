@@ -24,6 +24,20 @@ describe("buildArchetypeGenerateArgs", () => {
             ]
         );
     });
+
+    it("adds outputDirectory as a discrete argument for embedded Maven fallback", () => {
+        assert.deepEqual(
+            buildArchetypeGenerateArgs({
+                archetypeArtifactId: "maven-archetype-quickstart",
+                archetypeGroupId: "org.apache.maven.archetypes",
+                archetypeVersion: "1.4",
+                groupId: "com.example",
+                artifactId: "demo",
+                outputDirectory: "C:\\Users\\demo user\\projects"
+            }).slice(-1),
+            ["-DoutputDirectory=C:\\Users\\demo user\\projects"]
+        );
+    });
 });
 
 describe("splitMavenExecutableOptions", () => {

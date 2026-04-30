@@ -152,17 +152,18 @@ async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Pro
     if (archetypeArtifactId === undefined || archetypeGroupId === undefined || archetypeVersion === undefined) {
         throw new Error("Archetype information is incomplete.");
     }
+    let cwd: string | undefined = targetFolder;
+    let mvnPath: string | undefined = await getMaven();
+    const useEmbeddedMaven: boolean = mvnPath === undefined;
     const cmdArgs: string[] = buildArchetypeGenerateArgs({
         archetypeArtifactId,
         archetypeGroupId,
         archetypeVersion,
         groupId,
-        artifactId
+        artifactId,
+        outputDirectory: useEmbeddedMaven ? targetFolder : undefined
     });
-    let cwd: string | undefined = targetFolder;
-    let mvnPath: string | undefined = await getMaven();
     if (mvnPath === undefined) {
-        cmdArgs.push(`-DoutputDirectory=${targetFolder}`);
         mvnPath = getEmbeddedMavenWrapper();
         cwd = path.dirname(mvnPath);
     }
