@@ -147,6 +147,12 @@
         "category": "Maven"
       },
       {
+        "command": "maven.lifecycle.execute",
+        "title": "%contributes.commands.maven.plugin.execute%",
+        "category": "Maven",
+        "icon": "$(play)"
+      },
+      {
         "command": "maven.goal.execute.fromLifecycleMenu",
         "title": "%contributes.commands.maven.plugin.execute%",
         "category": "Maven",
@@ -339,6 +345,10 @@
           "when": "never"
         },
         {
+          "command": "maven.lifecycle.execute",
+          "when": "never"
+        },
+        {
           "command": "maven.goal.execute.fromLifecycleMenu",
           "when": "never"
         },
@@ -517,12 +527,12 @@
           "group": "inline@1"
         },
         {
-          "command": "maven.goal.execute.fromLifecycleMenu",
+          "command": "maven.lifecycle.execute",
           "when": "view == mavenProjects && viewItem == maven:lifecycle",
           "group": "inline"
         },
         {
-          "command": "maven.goal.execute.fromLifecycleMenu",
+          "command": "maven.lifecycle.execute",
           "when": "view == mavenProjects && viewItem == maven:lifecycle",
           "group": "1@1"
         },
