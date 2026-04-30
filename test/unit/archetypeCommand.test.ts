@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { strict as assert } from "assert";
-import { buildArchetypeGenerateArgs, splitMavenExecutableOptions } from "../../src/archetype/archetypeCommand";
+import { buildArchetypeGenerateArgs, getMavenExecutableOptionArgs, splitMavenExecutableOptions } from "../../src/archetype/archetypeCommand";
 
 describe("buildArchetypeGenerateArgs", () => {
     it("builds Maven archetype properties as discrete arguments without embedded quotes", () => {
@@ -64,6 +64,22 @@ describe("splitMavenExecutableOptions", () => {
         assert.deepEqual(
             splitMavenExecutableOptions("\"-Dregex=\\\\d+\""),
             ["-Dregex=\\\\d+"]
+        );
+    });
+});
+
+describe("getMavenExecutableOptionArgs", () => {
+    it("preserves array options as argv entries", () => {
+        assert.deepEqual(
+            getMavenExecutableOptionArgs(["-Dmessage=hello world", "-Dshare=\\\\server\\share"]),
+            ["-Dmessage=hello world", "-Dshare=\\\\server\\share"]
+        );
+    });
+
+    it("splits string options for backward compatibility", () => {
+        assert.deepEqual(
+            getMavenExecutableOptionArgs("-Dmessage=\"hello world\""),
+            ["-Dmessage=hello world"]
         );
     });
 });

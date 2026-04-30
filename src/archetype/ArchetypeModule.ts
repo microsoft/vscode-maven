@@ -13,7 +13,7 @@ import { getPathToExtensionRoot } from "../utils/contextUtils";
 import { getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
-import { buildArchetypeGenerateArgs, splitMavenExecutableOptions } from "./archetypeCommand";
+import { buildArchetypeGenerateArgs, getMavenExecutableOptionArgs } from "./archetypeCommand";
 import { runSteps, selectArchetypeStep, selectParentPomStep, specifyArchetypeVersionStep, specifyArtifactIdStep, specifyGroupIdStep, specifyTargetFolderStep } from "./createProject";
 import { IProjectCreationMetadata, IProjectCreationStep } from "./createProject/types";
 import { importProjectOnDemand, promptOnDidProjectCreated } from "./utils";
@@ -173,11 +173,11 @@ async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Pro
     const useCmdOnWindows: boolean = vscode.env.remoteName === undefined && process.platform === "win32";
     const mvnCommand: string = useCmdOnWindows ? mvnPath : await mavenTerminal.formattedPathForTerminal(mvnPath);
 
-    const defaultArgs: string | undefined = Settings.Executable.options(targetFolder);
+    const defaultArgs: string | string[] | undefined = Settings.Executable.optionsValue(targetFolder);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
     const mvnSettingsPath: string | undefined = mvnSettingsFile && (useCmdOnWindows ? mvnSettingsFile : await mavenTerminal.formattedPathForTerminal(mvnSettingsFile));
     const mvnSettingsArgs: string[] = mvnSettingsPath ? ["-s", mvnSettingsPath] : [];
-    const args: string[] = [...cmdArgs, ...splitMavenExecutableOptions(defaultArgs), ...mvnSettingsArgs];
+    const args: string[] = [...cmdArgs, ...getMavenExecutableOptionArgs(defaultArgs), ...mvnSettingsArgs];
     const options: vscode.ShellExecutionOptions = { cwd, env: Settings.getEnvironment(targetFolder) };
     if (useCmdOnWindows) { // VS Code launched in Windows Desktop.
         options.shellQuoting = shellQuotes.cmd;

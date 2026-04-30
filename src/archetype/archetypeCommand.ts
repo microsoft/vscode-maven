@@ -66,3 +66,7 @@ export function splitMavenExecutableOptions(options: string | undefined): string
     }
     return args;
 }
+
+export function getMavenExecutableOptionArgs(options: string | string[] | undefined): string[] {
+    return Array.isArray(options) ? options : splitMavenExecutableOptions(options);
+}
