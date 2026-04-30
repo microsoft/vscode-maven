@@ -58,7 +58,7 @@ jobs:
         AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
         AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
       run: |
-        xvfb-run -a autotest run-all test-plans
+        xvfb-run -a npm run test:autotest
 
     - name: Write Job Summary
       if: always()

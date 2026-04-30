@@ -832,6 +832,7 @@
     "compile": "tsc -p ./",
     "tslint": "eslint .",
     "test:unit": "mocha",
+    "test:autotest": "node scripts/run-autotest-plans.js test-plans",
     "watch": "webpack --mode development --watch --progress",
     "webpack": "webpack --mode development",
     "update-tpn": "node scripts/update-third-party-notice.js",

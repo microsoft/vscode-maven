@@ -13,6 +13,7 @@ import { getPathToExtensionRoot } from "../utils/contextUtils";
 import { getEmbeddedMavenWrapper, getMaven } from "../utils/mavenUtils";
 import { Utils } from "../utils/Utils";
 import { Archetype } from "./Archetype";
+import { buildArchetypeGenerateArgs, getMavenExecutableOptionArgs } from "./archetypeCommand";
 import { runSteps, selectArchetypeStep, selectParentPomStep, specifyArchetypeVersionStep, specifyArtifactIdStep, specifyGroupIdStep, specifyTargetFolderStep } from "./createProject";
 import { IProjectCreationMetadata, IProjectCreationStep } from "./createProject/types";
 import { importProjectOnDemand, promptOnDidProjectCreated } from "./utils";
@@ -148,44 +149,44 @@ async function executeInTerminalHandler(metadata: IProjectCreationMetadata): Pro
         artifactId,
         targetFolder
     } = metadata;
-    if (archetypeArtifactId === undefined || archetypeGroupId === undefined || archetypeVersion === undefined) {
-        throw new Error("Archetype information is incomplete.");
+    if (archetypeArtifactId === undefined || archetypeGroupId === undefined || archetypeVersion === undefined
+        || groupId === undefined || artifactId === undefined || targetFolder === undefined) {
+        throw new Error("Project creation information is incomplete.");
     }
-    const cmdArgs: string[] = [
-        // explicitly using 3.1.2 as maven-archetype-plugin:3.0.1 ignores -DoutputDirectory
-        // see https://github.com/microsoft/vscode-maven/issues/478
-        "org.apache.maven.plugins:maven-archetype-plugin:3.1.2:generate",
-        `-DarchetypeArtifactId="${archetypeArtifactId}"`,
-        `-DarchetypeGroupId="${archetypeGroupId}"`,
-        `-DarchetypeVersion="${archetypeVersion}"`,
-        `-DgroupId="${groupId}"`,
-        `-DartifactId="${artifactId}"`
-    ];
     let cwd: string | undefined = targetFolder;
     let mvnPath: string | undefined = await getMaven();
+    const useEmbeddedMaven: boolean = mvnPath === undefined;
+    const cmdArgs: string[] = buildArchetypeGenerateArgs({
+        archetypeArtifactId,
+        archetypeGroupId,
+        archetypeVersion,
+        groupId,
+        artifactId,
+        outputDirectory: useEmbeddedMaven ? targetFolder : undefined
+    });
     if (mvnPath === undefined) {
-        cmdArgs.push(`-DoutputDirectory="${targetFolder}"`);
         mvnPath = getEmbeddedMavenWrapper();
         cwd = path.dirname(mvnPath);
     }
 
     if (mvnPath === undefined) { return; }
-    const mvnString: string = wrappedWithQuotes(await mavenTerminal.formattedPathForTerminal(mvnPath));
+    const useCmdOnWindows: boolean = vscode.env.remoteName === undefined && process.platform === "win32";
+    const mvnCommand: string = useCmdOnWindows ? mvnPath : await mavenTerminal.formattedPathForTerminal(mvnPath);
 
-    const defaultArgs: string | undefined = Settings.Executable.options(metadata.targetFolder);
+    const defaultArgs: string | string[] | undefined = Settings.Executable.optionsValue(targetFolder);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
-    const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"` : undefined;
-    let commandLine: string = [mvnString, ...cmdArgs, defaultArgs, mvnSettingsArg].filter(Boolean).join(" ");
-    const options: vscode.ShellExecutionOptions = { cwd, env: Settings.getEnvironment(metadata.targetFolder) };
-    if (vscode.env.remoteName === undefined && process.platform === "win32") { // VS Code launched in Windows Desktop.
+    const mvnSettingsPath: string | undefined = mvnSettingsFile && (useCmdOnWindows ? mvnSettingsFile : await mavenTerminal.formattedPathForTerminal(mvnSettingsFile));
+    const mvnSettingsArgs: string[] = mvnSettingsPath ? ["-s", mvnSettingsPath] : [];
+    const args: string[] = [...cmdArgs, ...getMavenExecutableOptionArgs(defaultArgs), ...mvnSettingsArgs];
+    const options: vscode.ShellExecutionOptions = { cwd, env: Settings.getEnvironment(targetFolder) };
+    if (useCmdOnWindows) { // VS Code launched in Windows Desktop.
         options.shellQuoting = shellQuotes.cmd;
         options.executable = "cmd.exe";
         options.shellArgs = ["/c"];
-        commandLine = `"${commandLine}"`; // wrap full command with quotation marks, cmd /c "<fullcommand>", see https://stackoverflow.com/a/6378038
     } else {
         options.shellQuoting = shellQuotes.bash;
     }
-    const execution = new vscode.ShellExecution(commandLine, options);
+    const execution = new vscode.ShellExecution(mvnCommand, args, options);
     const createProjectTask = new vscode.Task({ type: "maven", targetFolder, artifactId }, vscode.TaskScope.Global, "createProject", "maven", execution);
     vscode.tasks.executeTask(createProjectTask);
 }
@@ -367,14 +368,6 @@ export class ArchetypeMetadata {
     public versions: string[];
     public version: string;
     public isLoadMore: boolean;
-}
-
-function wrappedWithQuotes(mvn: string): string {
-    if (mvn === "mvn") {
-        return mvn;
-    } else {
-        return `"${mvn}"`;
-    }
 }
 
 // see https://github.com/microsoft/vscode/blob/dddbfa61652de902c75436d250a50c71501da2d7/src/vs/workbench/contrib/tasks/browser/terminalTaskSystem.ts#L140

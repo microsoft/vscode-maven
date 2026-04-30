@@ -1,0 +1,109 @@
+# Test Plan: Maven Archetype Create Project
+#
+# Covers the archetype project creation path used by issue #1088. The test is
+# currently Windows-only because it depends on autotest CLI capabilities that
+# have not been published to the macOS/Linux CI jobs yet.
+#
+# Usage: npx autotest run test-plans/maven-archetype-create-project.yaml
+
+name: "vscode-maven — Archetype Create Project"
+description: |
+  Drives the Maven quickstart archetype creation wizard through archetype,
+  version, groupId, artifactId, and destination folder input, then verifies that
+  Maven generates the project in the selected folder.
+platforms:
+  - win32
+
+setup:
+  extension: "vscjava.vscode-maven"
+  extensions:
+    - "redhat.java"
+  extensionPath: "../../vscode-maven"
+  workspace: "../test/projects/lifecycle-compile"
+  vscodeVersion: "stable"
+  timeout: 180
+
+steps:
+  - id: "wait-java-ls"
+    action: "waitForLanguageServer"
+    verify: "Java Language Server ready — prerequisite for Maven extension activation"
+    timeout: 120
+
+  - id: "invoke-create-project"
+    action: "run command Maven: New Project..."
+    verify: "Maven archetype project creation quick pick is opened"
+    timeout: 30
+
+  - id: "select-quickstart-archetype"
+    action: "typeInQuickInput maven-archetype-quickstart"
+    verify: "Quickstart archetype is filtered"
+    timeout: 10
+
+  - id: "confirm-quickstart-archetype"
+    action: "confirmQuickInput"
+    verify: "Quickstart archetype is selected"
+    timeout: 10
+
+  - id: "select-quickstart-version"
+    action: "typeInQuickInput 1.4"
+    verify: "Quickstart archetype version 1.4 is filtered"
+    timeout: 10
+
+  - id: "confirm-quickstart-version"
+    action: "confirmQuickInput"
+    verify: "Quickstart archetype version 1.4 is selected"
+    timeout: 10
+
+  - id: "enter-group-id"
+    action: "typeInQuickInput com.microsoft.vscode.maven.autotest"
+    verify: "Group ID is entered"
+    timeout: 10
+
+  - id: "confirm-group-id"
+    action: "confirmQuickInput"
+
+  - id: "enter-artifact-id"
+    action: "typeInQuickInput autotest-archetype-demo"
+    verify: "Artifact ID is entered"
+    timeout: 10
+
+  - id: "confirm-artifact-id"
+    action: "confirmQuickInput"
+
+  - id: "enter-destination-folder"
+    action: "typeInQuickInput ${workspaceParent}"
+    verify: "Workspace parent folder is entered as the destination folder"
+    verifyQuickInput:
+      noError: true
+    timeout: 10
+
+  - id: "confirm-destination-folder"
+    action: "confirmQuickInput"
+    verify: "Destination folder is selected"
+    timeout: 10
+
+  - id: "wait-for-version-prompt"
+    action: "wait 10 seconds"
+    verify: "Maven archetype task terminal is focused and prompts for the default version"
+
+  - id: "accept-default-version"
+    action: "pressTerminalKey Enter"
+    verify: "Default Maven project version is accepted"
+
+  - id: "accept-default-package"
+    action: "pressTerminalKey Enter"
+    verify: "Default Java package is accepted"
+
+  - id: "confirm-archetype-generation"
+    action: "pressTerminalKey Enter"
+    verify: "Maven archetype generation is confirmed"
+
+  - id: "wait-for-generation"
+    action: "wait 120 seconds"
+    verify: "Maven archetype generation has time to finish"
+
+  - id: "verify-generated-pom"
+    action: "wait 1 second"
+    verifyFile:
+      path: "${workspaceParent}/autotest-archetype-demo/pom.xml"
+      contains: "<artifactId>autotest-archetype-demo</artifactId>"

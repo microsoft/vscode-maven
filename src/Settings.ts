@@ -88,6 +88,9 @@ export class Settings {
             }
             return options;
         }
+        public static optionsValue(resourceOrFilepath?: Uri | string): string | string[] | undefined {
+            return _getMavenSection("executable.options", resourceOrFilepath);
+        }
         public static preferMavenWrapper(resourceOrFilepath?: Uri | string): boolean {
             return !!_getMavenSection<boolean>("executable.preferMavenWrapper", resourceOrFilepath);
         }
