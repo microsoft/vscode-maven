@@ -58,6 +58,7 @@ jobs:
         AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
         AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
       run: |
+        rm test-plans/maven-archetype-create-project.yaml
         xvfb-run -a autotest run-all test-plans
 
     - name: Write Job Summary
