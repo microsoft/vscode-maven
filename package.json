@@ -700,6 +700,8 @@
             "type": "boolean",
             "default": false,
             "description": "%configuration.maven.terminal.useJavaHome%",
+            "deprecationMessage": "%configuration.maven.terminal.useJavaHome.deprecationMessage%",
+            "markdownDeprecationMessage": "%configuration.maven.terminal.useJavaHome.deprecationMessage%",
             "scope": "window"
           },
           "maven.terminal.customEnv": {

@@ -21,3 +21,5 @@ resources/IndexData/index/segments*
 *.jar
 *.tgz
 AGENTS.md
+
+test-results/
