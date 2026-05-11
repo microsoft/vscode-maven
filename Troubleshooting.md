@@ -35,10 +35,34 @@ Error message can be collected either **directly from the integrated terminal**,
     ```
     In this case, please follow the error message to reset a correct `M2_HOME`.
 
-* `JAVA_HOME` not correctly set.
+* `JAVA_HOME` not correctly set, or the wrong JDK is being used.
     ```
     The JAVA_HOME environment variable is not defined correctly
     This environment variable is needed to run this program
     NB: JAVA_HOME should point to a JDK not a JRE
     ```
     In this case, please specify a correct `JAVA_HOME` environment variable, or re-install JRE/JDK if necessary.
+
+    If `JAVA_HOME` is set on your system but Maven still picks up a different JDK than your project expects (for example, the system default JDK is used even though your project targets a different version), set the JDK explicitly for Maven via the `maven.terminal.customEnv` setting:
+
+    ```json
+    {
+        "maven.terminal.customEnv": [
+            {
+                "environmentVariable": "JAVA_HOME",
+                "value": "/path/to/your/jdk"
+            }
+        ]
+    }
+    ```
+
+    This value is applied to every Maven invocation this extension launches (both terminal commands and background commands such as effective-pom generation) and takes precedence over the process-level `JAVA_HOME`. After changing the setting, close any existing Maven terminal so the next command picks up the new value.
+
+    > **macOS / Linux note — shell profile may override the injected value.** For terminal commands, the integrated terminal injects `JAVA_HOME` *before* the shell starts. If your shell profile (`~/.zshrc`, `~/.bash_profile`, `~/.profile`, etc.) contains an unconditional `export JAVA_HOME=…`, it runs after the injection and silently overwrites the value, leaving you with the system JDK again. You can confirm by running `echo $JAVA_HOME` in the Maven terminal — if it doesn't match `maven.terminal.customEnv`, your profile is the culprit. Fix it by either removing the export from the profile, or guarding it so it only sets the variable when it is unset:
+    >
+    > ```bash
+    > # ~/.zshrc — only set JAVA_HOME if it isn't already set
+    > [ -z "$JAVA_HOME" ] && export JAVA_HOME="$(/usr/libexec/java_home)"
+    > ```
+    >
+    > Background commands (effective-pom generation and other spawned Maven processes) are not affected by this — they bypass the shell entirely.

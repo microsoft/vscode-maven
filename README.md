@@ -80,7 +80,7 @@ Command Palette -> select `Maven: Update Maven Archetype Catalog`.
 
 ## Additional Configurations
 
-<details>
+<details open>
 <summary>JAVA_HOME and Other Environment Variables</summary>
 
 This extension executes Maven by opening a terminal session and then calling Maven in that session.
@@ -100,6 +100,14 @@ Maven requires the JAVA_HOME environment variable to be set. Maven will also loo
     ]
 }
 ```
+
+> **Using a different JDK for Maven than your system default**
+>
+> If `mvn` is picking up the wrong JDK (e.g. the system default JDK 17 is used even though your project targets JDK 1.8), set the `JAVA_HOME` entry in `maven.terminal.customEnv` to the JDK installation you want Maven to use. This setting is honored by every command this extension runs &mdash; both Maven commands launched in the integrated terminal and background commands such as effective-pom generation.
+>
+> The setting is per-folder, so in a multi-root workspace you can configure a different JDK for each folder via the folder's `.vscode/settings.json`.
+>
+> Already-open Maven terminals keep their environment from the moment they were created. After changing this setting, close any existing Maven terminal (or reload the window) so the next command picks up the new value.
 </details>
 
 <details>

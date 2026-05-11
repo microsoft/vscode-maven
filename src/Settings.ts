@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { Uri, workspace } from "vscode";
 import { FavoriteCommand } from "./explorer/model/FavoriteCommand";
 import { MavenProject } from "./explorer/model/MavenProject";
+import { mavenOutputChannel } from "./mavenOutputChannel";
 
 type FavoriteFormat = { alias?: string; command: string; debug?: boolean }
 export class Settings {
@@ -121,6 +122,9 @@ export class Settings {
         if (environmentSettings) {
             environmentSettings.forEach((s: EnvironmentSetting) => {
                 customEnv[s.environmentVariable] = s.value;
+                if (s.environmentVariable === "JAVA_HOME") {
+                    mavenOutputChannel.appendLine(`Using JAVA_HOME=${s.value} (source: maven.terminal.customEnv)`);
+                }
             });
         }
         return customEnv;
@@ -166,6 +170,7 @@ function _getJavaHomeEnvIfAvailable(): { [key: string]: string } {
     const useJavaHome: boolean = Settings.Terminal.useJavaHome();
     const javaHome: string | undefined = Settings.External.javaHome();
     if (useJavaHome && javaHome) {
+        mavenOutputChannel.appendLine(`Using JAVA_HOME=${javaHome} (source: java.home via maven.terminal.useJavaHome)`);
         return { JAVA_HOME: javaHome };
     } else {
         return {};
