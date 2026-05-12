@@ -100,17 +100,7 @@ steps:
 
   - id: "wait-for-version-prompt"
     action: "wait 30 seconds"
-    # `verifyTerminal` is the primary gate here: it calls autotest's
-    # `getTerminalText()` which reopens the terminal panel via Ctrl+J
-    # before reading. That side effect is the actual fix for the CI-
-    # Windows flake where the next `pressTerminalKey` step would
-    # otherwise time out against a DOM-hidden xterm wrapper (the
-    # `.terminal-wrapper .xterm:last()` locator picks a stale node
-    # left from extension-host bootstrap on headless runners).
-    # Asserting the prompt text deterministically also lets us drop
-    # the LLM screenshot judge on this step.
-    verifyTerminal:
-      contains: "Define value for property 'version'"
+    verify: "Maven archetype task terminal is focused and prompts for the default version"
 
   - id: "accept-default-version"
     action: "pressTerminalKey Enter"
