@@ -59,11 +59,14 @@ steps:
 
   - id: "wait-fallback-log"
     action: "wait 6 seconds"
-    verify: "Maven output channel logged the fallback line"
+    # No `verify:` freeform — the fallback line is written to a hidden
+    # output channel; there is no expected on-screen change. The next
+    # step's `verifyOutputChannel.contains` is the source of truth.
 
   - id: "assert-fallback-log"
     action: "wait 1 second"
-    verify: "`Falling back to system Maven` was written to Maven for Java channel"
+    # No `verify:` freeform — only the deterministic output-channel
+    # assertion below decides pass/fail.
     verifyOutputChannel:
       channel: "Maven for Java"
       contains: "Falling back to system Maven"
@@ -79,7 +82,7 @@ steps:
 
   - id: "click-allow"
     action: "clickDialogButton Allow"
-    verify: "Safety modal re-appears (use-default not cached) and Allow clicked"
+    verify: "Safety modal is dismissed after clicking Allow — BEFORE shows the modal with the 'Allow' button visible; AFTER shows the modal gone."
 
   - id: "wait-after-allow"
     action: "wait 3 seconds"
@@ -92,12 +95,15 @@ steps:
 
   - id: "settle-for-possible-dialog"
     action: "wait 5 seconds"
-    verify: "Enough time has passed for a prompt to open if caching were broken"
+    # No `verify:` — negative-assertion preparatory wait. The decisive
+    # check is the next step's `verifyDialog.visible: false`.
 
   # Third invocation: ./fake-mvn is in confirmedExecutablePaths → getMaven
   # returns "safe" immediately → no showWarningMessage call → no modal.
   - id: "assert-no-dialog-after-allow"
     action: "wait 1 second"
-    verify: "No safety modal this time (Allow cached the path)"
+    # No `verify:` freeform — only `verifyDialog.visible:false` decides
+    # pass/fail. The third invocation should NOT re-prompt because Allow
+    # cached the path in `confirmedExecutablePaths`.
     verifyDialog:
       visible: false
