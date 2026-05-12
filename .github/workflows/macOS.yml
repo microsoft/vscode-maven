@@ -6,70 +6,132 @@ on:
   pull_request:
     branches: [ main ]
 
+# See .github/workflows/windows.yml for the architecture notes (build / list-plans / autotest).
 jobs:
-  darwin:
-    name: macOS
+  build:
+    name: Build (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node.js modules
+        run: npm install
+
+      - name: Install VSCE
+        run: npm install -g @vscode/vsce
+
+      - name: Linting
+        run: npm run tslint
+
+      - name: TSC Compile
+        run: npm run compile
+
+      - name: Build OSGi bundle
+        run: npm run build-plugin
+
+      - name: Build VSIX file
+        run: vsce package
+
+      - name: Archive workspace
+        run: tar --exclude='./.git' --exclude='./workspace.tar' -cf workspace.tar .
+
+      - name: Upload workspace artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-macos
+          path: workspace.tar
+          if-no-files-found: error
+          retention-days: 1
+
+  list-plans:
+    name: Discover plans (macOS)
+    runs-on: ubuntu-latest
+    outputs:
+      plans: ${{ steps.list.outputs.plans }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: list
+        env:
+          AUTOTEST_PLATFORM: darwin
+        run: |
+          PLANS=$(node scripts/list-autotest-plans.js)
+          echo "Discovered plans for darwin: $PLANS"
+          echo "plans=$PLANS" >> "$GITHUB_OUTPUT"
+
+  autotest:
+    name: Autotest (macOS) / ${{ matrix.plan }}
+    needs: [build, list-plans]
     runs-on: macos-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        plan: ${{ fromJSON(needs.list-plans.outputs.plans) }}
     steps:
-    - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'adopt'
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    - name: Setup Node.js environment
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
+      - name: Download workspace artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-macos
 
-    - name: Install Node.js modules
-      run: npm install
+      - name: Restore workspace
+        run: |
+          tar -xf workspace.tar
+          rm workspace.tar
 
-    - name: Install VSCE
-      run: npm install -g @vscode/vsce
+      - name: Install autotest CLI
+        run: npm install -g @vscjava/vscode-autotest
 
-    - name: Linting
-      run: npm run tslint
+      - name: Run plan ${{ matrix.plan }}
+        env:
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+        run: autotest run test-plans/${{ matrix.plan }}.yaml
 
-    - name: TSC Compile
-      run: npm run compile
+      - name: Write Job Summary
+        if: always()
+        run: |
+          if [ -f test-results/summary.md ]; then
+            cat test-results/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
-    - name: Build OSGi bundle
-      run: npm run build-plugin
+      - name: Upload autotest results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autotest-results-macos-${{ matrix.plan }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
 
-    - name: Build VSIX file
-      run: vsce package
-
-    - name: Install autotest CLI
-      run: npm install -g @vscjava/vscode-autotest
-
-    - name: Run E2E test plans
-      env:
-        AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-        AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
-        AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
-      run: npm run test:autotest
-
-    - name: Write Job Summary
-      if: always()
-      run: |
-        if [ -f test-results/summary.md ]; then
-          cat test-results/summary.md >> "$GITHUB_STEP_SUMMARY"
-        fi
-
-    - name: Upload autotest results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: autotest-results-macos
-        path: test-results/
-        if-no-files-found: ignore
-        retention-days: 14
-
-    - name: Print language server Log if job failed
-      if: ${{ failure() }}
-      run: find $HOME/Library/Application\ Support/Code/User/workspaceStorage/*/redhat.java/jdt_ws/.metadata/.log -print -exec cat '{}' \;;
-
+      - name: Print language server Log if job failed
+        if: ${{ failure() }}
+        run: find $HOME/Library/Application\ Support/Code/User/workspaceStorage/*/redhat.java/jdt_ws/.metadata/.log -print -exec cat '{}' \;;
