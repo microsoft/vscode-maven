@@ -23,3 +23,4 @@ resources/IndexData/index/segments*
 AGENTS.md
 
 test-results/
+.env

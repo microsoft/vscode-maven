@@ -28,20 +28,23 @@ setup:
 steps:
   - id: "wait-java-ls"
     action: "waitForLanguageServer"
-    verify: "Java Language Server ready — prerequisite for Maven project discovery"
+    # No `verify:` — `waitForLanguageServer` is self-asserting; see
+    # archetype plan for rationale.
     timeout: 120
 
   # Focus the Maven Projects view by running its focus command. If this succeeds
   # it proves the extension activated, contributed its views and registered its
   # commands against the command palette.
   - id: "focus-maven-view"
-    action: "run command Maven: Focus on Maven Projects View"
+    action: "executeVSCodeCommand mavenProjects.focus"
     verify: "Maven Projects panel is visible in the Explorer"
 
-  # Invoke the Refresh command. Completing without throwing proves that the
-  # extension's project discovery / command-handler wiring is healthy.
+  # Invoke the Refresh command. The command is registered with
+  # registerCommandRequiringTrust and hidden from the palette
+  # (`commandPalette` `when: never`), so we dispatch it by id rather
+  # than typing it into the palette.
   - id: "refresh-projects"
-    action: "run command Maven: Refresh"
+    action: "executeVSCodeCommand maven.explorer.refresh"
     verify: "Refresh command runs without an error notification"
 
   - id: "settle"

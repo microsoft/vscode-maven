@@ -23,38 +23,44 @@ setup:
 steps:
   - id: "wait-java-ls"
     action: "waitForLanguageServer"
-    verify: "Java Language Server ready — prerequisite for Maven project discovery"
+    # No `verify:` — `waitForLanguageServer` is self-asserting; see
+    # archetype plan for rationale.
     timeout: 120
 
   - id: "focus-maven-view"
-    action: "run command Maven: Focus on Maven Projects View"
+    action: "executeVSCodeCommand mavenProjects.focus"
     verify: "Maven Projects panel is visible in the Explorer"
     timeout: 10
 
   - id: "collapse-workspace-root"
     action: "collapseWorkspaceRoot"
-    verify: "Workspace root in File Explorer is collapsed to give Maven Projects more room"
+    # No `verify:` — cosmetic UI prep. The section may already be
+    # collapsed (then the command is a no-op), so there is no reliable
+    # visual signal for the LLM to judge.
 
   - id: "collapse-outline"
     action: "collapseSidebarSection OUTLINE"
-    verify: "Outline section is collapsed to give Maven Projects more room"
+    # No `verify:` — same reason as above.
 
   - id: "collapse-timeline"
     action: "collapseSidebarSection TIMELINE"
-    verify: "Timeline section is collapsed to give Maven Projects more room"
+    # No `verify:` — same reason as above.
 
   - id: "collapse-java-projects"
     action: "collapseSidebarSection JAVA PROJECTS"
-    verify: "Java Projects section is collapsed to give Maven Projects more room"
+    # No `verify:` — same reason as above.
 
   - id: "refresh-projects"
-    action: "run command Maven: Refresh"
-    verify: "Maven projects are refreshed"
+    action: "executeVSCodeCommand maven.explorer.refresh"
+    # No `verify:` — refreshing an unchanged tree produces no visible
+    # delta (the spinner is faster than the screenshot). The Maven tree
+    # is sanity-checked by the subsequent `expandTreeItem` steps which
+    # would fail with `verifyTreeItem` if the refresh broke the tree.
     timeout: 10
 
   - id: "settle"
     action: "wait 3 seconds"
-    verify: "Maven Projects view has settled"
+    # No `verify:` — passive settle; no visible change expected.
 
   - id: "expand-project"
     action: "expandTreeItem lifecycle-compile"
@@ -72,7 +78,7 @@ steps:
 
   - id: "run-compile-inline-action"
     action: "clickTreeItemAction compile Run"
-    verify: "The compile lifecycle phase is invoked from the Maven Explorer inline Run action"
+    verify: "Clicking the inline Run icon opens a Terminal panel at the bottom — the panel may still be loading mvn (mvn output arrives asynchronously and is asserted in the next step by file-existence)."
     timeout: 30
 
   - id: "verify-compile-output"

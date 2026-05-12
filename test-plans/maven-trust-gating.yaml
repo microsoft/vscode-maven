@@ -60,11 +60,16 @@ steps:
 
   - id: "wait-for-potential-refresh"
     action: "wait 10 seconds"
-    verify: "Extension has had time to react to pom.xml change"
+    # No `verify:` freeform — this is a negative-assertion passive wait.
+    # There is intentionally NO visual signal (the trust guard blocks the
+    # refresh silently). The next step's `verifyOutputChannel.notContains`
+    # is the deterministic source of truth.
 
   - id: "verify-no-effective-pom-run"
     action: "wait 1 second"
-    verify: "Maven output channel shows NO help:effective-pom invocation (auto-update gated by trust)"
+    # No `verify:` — only the deterministic notContains check below
+    # decides pass/fail. (Negative-assertion: nothing visible should
+    # change because the trust guard blocked the refresh.)
     verifyOutputChannel:
       channel: "Maven for Java"
       notContains: "help:effective-pom"
@@ -74,7 +79,8 @@ steps:
   # from taking effect in untrusted mode.
   - id: "verify-no-evil-path"
     action: "wait 1 second"
-    verify: "evil-mvn.sh path (from workspace settings) is not used anywhere"
+    # No `verify:` — only the deterministic notContains check below
+    # decides pass/fail.
     verifyOutputChannel:
       channel: "Maven for Java"
       notContains: "evil-mvn.sh"

@@ -1,0 +1,202 @@
+name: UI test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Minimal GITHUB_TOKEN scope: CI only needs to read source and write artifacts.
+# Artifact upload uses the upload-artifact action's own scope; no extra
+# permission is needed beyond contents: read.
+permissions:
+  contents: read
+
+# Three stages:
+#   build       - one matrix job per OS does lint / compile / build-plugin /
+#                 vsce package, then uploads a tarball of the built workspace
+#                 (incl. node_modules + .vsix) so autotest jobs do not rebuild.
+#   list-plans  - a single Linux job runs scripts/list-autotest-plans.js
+#                 --matrix to emit the (os x plan) cartesian, honoring each
+#                 plan's platforms / skipPlatforms filter, and exposes it as
+#                 a matrix output.
+#   autotest    - one matrix job per (os, plan) entry, fail-fast: false.
+#                 Hydrates the workspace tarball produced by `build`, installs
+#                 the autotest CLI, runs strictly that one plan, and uploads a
+#                 per-(os, plan) artifact named
+#                 autotest-results-<os-name>-<plan>.
+jobs:
+  build:
+    name: Build (${{ matrix.os-name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            os-name: linux
+            artifact: build-linux
+          - os: macos-latest
+            os-name: macos
+            artifact: build-macos
+          - os: windows-latest
+            os-name: windows
+            artifact: build-windows
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Build Environment (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbfile-dev pkg-config libsecret-1-dev libxss1 dbus xvfb libgtk-3-0 libgbm1
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node.js modules
+        run: npm install
+
+      - name: Install VSCE
+        run: npm install -g @vscode/vsce
+
+      - name: Linting
+        run: npm run tslint
+
+      - name: TSC Compile
+        run: npm run compile
+
+      - name: Build OSGi bundle
+        run: npm run build-plugin
+
+      - name: Build VSIX file
+        run: vsce package
+
+      - name: Archive workspace
+        shell: bash
+        run: tar --exclude='./.git' --exclude='./workspace.tar' -cf workspace.tar .
+
+      - name: Upload workspace artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: workspace.tar
+          if-no-files-found: error
+          retention-days: 1
+
+  list-plans:
+    name: Discover plans
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: list
+        run: |
+          MATRIX=$(node scripts/list-autotest-plans.js --matrix)
+          echo "Discovered $(echo "$MATRIX" | python3 -c 'import json,sys;print(len(json.load(sys.stdin)))') matrix entries"
+          echo "$MATRIX" | python3 -m json.tool
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  autotest:
+    name: Autotest (${{ matrix.os-name }}) / ${{ matrix.plan }}
+    needs: [build, list-plans]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.list-plans.outputs.matrix) }}
+    steps:
+      - name: Setup Runtime Environment (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbfile-dev pkg-config libsecret-1-dev libxss1 dbus xvfb libgtk-3-0 libgbm1
+          sudo /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          sleep 3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Download workspace artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+
+      - name: Restore workspace
+        shell: bash
+        run: |
+          tar -xf workspace.tar
+          rm workspace.tar
+
+      - name: Install autotest CLI
+        run: npm install -g @vscjava/vscode-autotest
+
+      - name: Run plan ${{ matrix.plan }} (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+        run: xvfb-run -a autotest run test-plans/${{ matrix.plan }}.yaml
+
+      - name: Run plan ${{ matrix.plan }} (macOS / Windows)
+        if: matrix.os != 'ubuntu-latest'
+        env:
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+        run: autotest run test-plans/${{ matrix.plan }}.yaml
+
+      - name: Write Job Summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f test-results/summary.md ]; then
+            cat test-results/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload autotest results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autotest-results-${{ matrix.os-name }}-${{ matrix.plan }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Print language server log (Linux)
+        if: failure() && matrix.os == 'ubuntu-latest'
+        run: find $HOME/.config/Code/User/workspaceStorage/*/redhat.java/jdt_ws/.metadata/.log -print -exec cat '{}' \;;
+
+      - name: Print language server log (macOS)
+        if: failure() && matrix.os == 'macos-latest'
+        run: find $HOME/Library/Application\ Support/Code/User/workspaceStorage/*/redhat.java/jdt_ws/.metadata/.log -print -exec cat '{}' \;;
+
+      - name: Print language server log (Windows)
+        if: failure() && matrix.os == 'windows-latest'
+        shell: pwsh
+        run: Get-ChildItem -Path $env:APPDATA/Code/User/workspaceStorage/*/redhat.java/jdt_ws/.metadata/.log | cat
