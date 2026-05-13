@@ -29,8 +29,6 @@
     "configuration.maven.pomfile.autoUpdateEffectivePOM": "指定是否自動更新 Effective POM。",
     "configuration.maven.pomfile.globPattern": "指定用於尋找 POM 文件的 glob 模式。",
     "configuration.maven.pomfile.prefetchEffectivePom": "指定是否在啟動時預先載入 Effective POM。",
-    "configuration.maven.terminal.useJavaHome": "如果此值為 true，並且設定項 java.home 具有值，則在建立新的終端機視窗時，將環境變數 JAVA_HOME 設定為 java.home 的值。",
-    "configuration.maven.terminal.useJavaHome.deprecationMessage": "已淘汰。此設定讀取的 `java.home` 已被 Red Hat Java 擴充功能淘汰。請改用 `maven.terminal.customEnv` 為 Maven 設定 `JAVA_HOME`。詳見 https://github.com/microsoft/vscode-maven/issues/1041。",
     "configuration.maven.terminal.customEnv": "自定義環境變數。在首次執行 Maven 之前，這些環境變數值將被新增到終端工作階段中。",
     "configuration.maven.terminal.customEnv.environmentVariable": "要設定的環境變數的名稱。",
     "configuration.maven.terminal.customEnv.value": "要設定的環境變數的值。",

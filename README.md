@@ -113,26 +113,7 @@ Maven requires the JAVA_HOME environment variable to be set. Maven will also loo
 <details>
 <summary>Special Handling for JAVA_HOME</summary>
 
-If you have Red Hat's Java Language Support extension installed, then you can specify JAVA_HOME in settings for that extension:
-
-```json
-{
-    "java.home": "C:\\Program Files\\Java\\jdk-9.0.4"      // Red Hat Java Language Support Setting
-}
-```
-
-This extension (Maven for Java) can reuse that setting if you desire:
-
-```json
-{
-    "maven.terminal.useJavaHome": true      // Use the Red Hat Java Language Support Setting for JAVA_HOME
-}
-```
-
-With this support, you can specify JAVA_HOME in one place and you do not need to use the `maven.terminal.customEnv` setting unless
-you have other environment variables to set.
-
-If you have JAVA_HOME configured through the `maven.terminal.customEnv` setting, and also specify to reuse the Red Hat setting, then the value from `maven.terminal.customEnv` will take precedence.
+To run Maven with a specific JDK, set `JAVA_HOME` via `maven.terminal.customEnv` (see the section above). This value is applied to both terminal commands and background commands launched by this extension.
 
 </details>
 
@@ -200,7 +181,6 @@ Now right-click on an project item, and then click `Favorite ...`. The option `f
 | `maven.pomfile.autoUpdateEffectivePOM` | Specifies whether to update effective-pom automatically whenever changes detected. | `false` |
 | `maven.pomfile.globPattern` | Specifies the glob pattern used to look for pom.xml files. | `**/pom.xml` |
 | `maven.pomfile.prefetchEffectivePom` | Specifies whether to prefetch effective pom on startup. | `false` |
-| `maven.terminal.useJavaHome` | If this value is true, and if the setting java.home has a value, then the environment variable JAVA_HOME will be set to the value of java.home when a new terminal window is created. | `false` |
 | `maven.terminal.customEnv` | Specifies an array of environment variable names and values. These environment variable values will be added before Maven is executed. <br /> `environmentVariable`: Name of the environment variable to set. <br /> `value`: Value of the environment variable to set. | `[]` |
 | `maven.terminal.favorites` | Specify pre-defined favorite commands to execute. <br /> `alias`: A short name for the command. <br /> `command`: Content of the favorite command. | `[]` |
 | `maven.view` | Specifies the way of viewing Maven projects. Possible values: `flat`, `hierarchical`. | `flat` |

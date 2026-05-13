@@ -214,10 +214,7 @@ function registerPomFileWatcher(context: vscode.ExtensionContext): void {
 function registerConfigChangeListener(context: vscode.ExtensionContext): void {
     const configChangeListener: vscode.Disposable = vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
         // close all terminals with outdated JAVA related environment variables
-        if (e.affectsConfiguration("maven.terminal.useJavaHome")
-            || e.affectsConfiguration("maven.terminal.customEnv")
-            || e.affectsConfiguration("java.home") && Settings.Terminal.useJavaHome()
-        ) {
+        if (e.affectsConfiguration("maven.terminal.customEnv")) {
             mavenTerminal.dispose();
         }
         if (e.affectsConfiguration("maven.view")
