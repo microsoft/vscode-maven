@@ -13,6 +13,23 @@ const URL_MAVEN_CENTRAL_REPO = "https://repo1.maven.org/maven2/";
 const MAVEN_METADATA_FILENAME = "maven-metadata.xml";
 const HTTPS_GET_TIMEOUT_MS = 10_000;
 
+/**
+ * Error thrown when an httpsGet call is aborted because its CancellationToken
+ * was cancelled (e.g. the user kept typing, so VS Code superseded the previous
+ * completion request). Callers should swallow this silently — it is not a
+ * real failure.
+ */
+class CancellationError extends Error {
+    constructor() {
+        super("Cancelled");
+        this.name = "CancellationError";
+    }
+}
+
+function isCancellation(error: unknown): boolean {
+    return error instanceof CancellationError;
+}
+
 export interface IArtifactMetadata {
     id: string;
     g: string;
@@ -46,7 +63,9 @@ export async function getArtifacts(keywords: string[], token?: vscode.Cancellati
         const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`, token);
         return _.get(JSON.parse(raw), "response.docs", []);
     } catch (error) {
-        console.error(error);
+        if (!isCancellation(error)) {
+            console.error(error);
+        }
         return [];
     }
 }
@@ -62,7 +81,9 @@ export async function getVersions(gid: string, aid: string, token?: vscode.Cance
         const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`, token);
         return _.get(JSON.parse(raw), "response.docs", []);
     } catch (error) {
-        console.error(error);
+        if (!isCancellation(error)) {
+            console.error(error);
+        }
         return [];
     }
 }
@@ -85,7 +106,7 @@ export async function getLatestVersion(gid: string, aid: string): Promise<string
 async function httpsGet(urlString: string, token?: vscode.CancellationToken): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         if (token?.isCancellationRequested) {
-            reject(new Error("Cancelled"));
+            reject(new CancellationError());
             return;
         }
 
@@ -129,8 +150,15 @@ async function httpsGet(urlString: string, token?: vscode.CancellationToken): Pr
 
         if (token) {
             cancelSub = token.onCancellationRequested(() => {
-                req.destroy(new Error("Cancelled"));
+                req.destroy(new CancellationError());
             });
+            // Defensive: if the request errored synchronously before we got
+            // here, `settled` is already true and the listener above would
+            // never be disposed. Drop it now in that case.
+            if (settled) {
+                cancelSub.dispose();
+                cancelSub = undefined;
+            }
         }
     });
 }
