@@ -5,5 +5,5 @@ import { Node } from "domhandler";
 import * as vscode from "vscode";
 
 export interface IXmlCompletionProvider {
-    provide(document: vscode.TextDocument, position: vscode.Position, currentNode: Node): Promise<vscode.CompletionItem[]>;
+    provide(document: vscode.TextDocument, position: vscode.Position, currentNode: Node, token?: vscode.CancellationToken): Promise<vscode.CompletionItem[]>;
 }

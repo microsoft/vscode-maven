@@ -6,10 +6,12 @@ import * as https from "https";
 import * as _ from "lodash";
 import * as path from "path";
 import * as url from "url";
+import * as vscode from "vscode";
 
 const URL_MAVEN_SEARCH_API = "https://search.maven.org/solrsearch/select";
 const URL_MAVEN_CENTRAL_REPO = "https://repo1.maven.org/maven2/";
 const MAVEN_METADATA_FILENAME = "maven-metadata.xml";
+const HTTPS_GET_TIMEOUT_MS = 10_000;
 
 export interface IArtifactMetadata {
     id: string;
@@ -28,7 +30,7 @@ export interface IVersionMetadata {
     timestamp: number;
 }
 
-export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadata[]> {
+export async function getArtifacts(keywords: string[], token?: vscode.CancellationToken): Promise<IArtifactMetadata[]> {
     // Remove short keywords
     const validKeywords: string[] = keywords.filter(keyword => keyword.length >= 3);
     if (validKeywords.length === 0) {
@@ -40,8 +42,8 @@ export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadat
         rows: 50,
         wt: "json"
     };
-    const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`);
     try {
+        const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`, token);
         return _.get(JSON.parse(raw), "response.docs", []);
     } catch (error) {
         console.error(error);
@@ -49,15 +51,15 @@ export async function getArtifacts(keywords: string[]): Promise<IArtifactMetadat
     }
 }
 
-export async function getVersions(gid: string, aid: string): Promise<IVersionMetadata[]> {
+export async function getVersions(gid: string, aid: string, token?: vscode.CancellationToken): Promise<IVersionMetadata[]> {
     const params = {
         q: `g:"${gid}" AND a:"${aid}"`,
         core: "gav",
         rows: 50,
         wt: "json"
     };
-    const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`);
     try {
+        const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`, token);
         return _.get(JSON.parse(raw), "response.docs", []);
     } catch (error) {
         console.error(error);
@@ -80,25 +82,56 @@ export async function getLatestVersion(gid: string, aid: string): Promise<string
     }
 }
 
-async function httpsGet(urlString: string): Promise<string> {
+async function httpsGet(urlString: string, token?: vscode.CancellationToken): Promise<string> {
     return new Promise<string>((resolve, reject) => {
+        if (token?.isCancellationRequested) {
+            reject(new Error("Cancelled"));
+            return;
+        }
+
         let result = "";
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const options: any = url.parse(urlString);
         options.headers = {
             'User-Agent': 'vscode-maven/0.1'
-        }
-        https.get(options, (res: http.IncomingMessage) => {
+        };
+        options.timeout = HTTPS_GET_TIMEOUT_MS;
+
+        let settled = false;
+        let cancelSub: vscode.Disposable | undefined;
+        const settle = (fn: () => void) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            cancelSub?.dispose();
+            fn();
+        };
+
+        const req = https.get(options, (res: http.IncomingMessage) => {
             res.on("data", chunk => {
                 result = result.concat(chunk.toString());
             });
             res.on("end", () => {
-                resolve(result);
+                settle(() => resolve(result));
             });
             res.on("error", err => {
-                reject(err);
+                settle(() => reject(err));
             });
         });
+
+        req.on("timeout", () => {
+            req.destroy(new Error(`HTTPS request to ${urlString} timed out after ${HTTPS_GET_TIMEOUT_MS}ms`));
+        });
+        req.on("error", err => {
+            settle(() => reject(err));
+        });
+
+        if (token) {
+            cancelSub = token.onCancellationRequested(() => {
+                req.destroy(new Error("Cancelled"));
+            });
+        }
     });
 }
 
