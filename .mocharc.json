@@ -3,6 +3,5 @@
   "spec": "test/unit/**/*.test.ts",
   "extension": ["ts"],
   "timeout": 15000,
-  "reporter": "spec",
-  "node-option": ["no-experimental-strip-types"]
+  "reporter": "spec"
 }
