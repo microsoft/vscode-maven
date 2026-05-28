@@ -825,7 +825,7 @@
     "build-plugin": "node scripts/build-jdtls-ext.js",
     "compile": "tsc -p ./",
     "tslint": "eslint .",
-    "test:unit": "mocha",
+    "test:unit": "node scripts/run-unit-tests.js",
     "test:autotest": "node scripts/run-autotest-plans.js test-plans",
     "watch": "webpack --mode development --watch --progress",
     "webpack": "webpack --mode development",

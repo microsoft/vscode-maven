@@ -34,7 +34,10 @@ export class PomCompletionProvider implements vscode.CompletionItemProvider {
 
     }
 
-    async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | undefined> {
+    async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, _context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | undefined> {
+        if (token.isCancellationRequested) {
+            return undefined;
+        }
         const documentText: string = document.getText();
         const cursorOffset: number = document.offsetAt(position);
         const currentNode: Node | undefined = getCurrentNode(documentText, cursorOffset);
@@ -42,10 +45,17 @@ export class PomCompletionProvider implements vscode.CompletionItemProvider {
             return undefined;
         }
 
-        const ret = [];
-        for (const provider of this.providers) {
-            ret.push(...await provider.provide(document, position, currentNode));
+        const results = await Promise.all(
+            this.providers.map(provider =>
+                provider.provide(document, position, currentNode, token).catch(err => {
+                    console.error(err);
+                    return [] as vscode.CompletionItem[];
+                })
+            )
+        );
+        if (token.isCancellationRequested) {
+            return undefined;
         }
-        return ret;
+        return ([] as vscode.CompletionItem[]).concat(...results);
     }
 }

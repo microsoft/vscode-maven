@@ -8,9 +8,9 @@ import { IArtifactCompletionProvider } from "./IArtifactProvider";
 import { getSortText } from "../../utils";
 
 export class FromCentral implements IArtifactCompletionProvider {
-    public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
+    public async getGroupIdCandidates(groupIdHint: string, artifactIdHint: string, token?: vscode.CancellationToken): Promise<vscode.CompletionItem[]> {
         const keywords: string[] = [...groupIdHint.split("."), ...artifactIdHint.split("-")];
-        const docs: IArtifactMetadata[] = await getArtifacts(keywords);
+        const docs: IArtifactMetadata[] = await getArtifacts(keywords, token);
         const groupIds: string[] = Array.from(new Set(docs.map(doc => doc.g)).values());
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
@@ -25,9 +25,9 @@ export class FromCentral implements IArtifactCompletionProvider {
         });
     }
 
-    public async getArtifactIdCandidates(groupIdHint: string, artifactIdHint: string): Promise<vscode.CompletionItem[]> {
+    public async getArtifactIdCandidates(groupIdHint: string, artifactIdHint: string, token?: vscode.CancellationToken): Promise<vscode.CompletionItem[]> {
         const keywords: string[] = [...groupIdHint.split("."), ...artifactIdHint.split("-")];
-        const docs: IArtifactMetadata[] = await getArtifacts(keywords);
+        const docs: IArtifactMetadata[] = await getArtifacts(keywords, token);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "artifactId", source: "maven-central" }]
@@ -45,12 +45,12 @@ export class FromCentral implements IArtifactCompletionProvider {
         });
     }
 
-    public async getVersionCandidates(groupId: string, artifactId: string): Promise<vscode.CompletionItem[]> {
+    public async getVersionCandidates(groupId: string, artifactId: string, _versionHint?: string, token?: vscode.CancellationToken): Promise<vscode.CompletionItem[]> {
         if (!groupId && !artifactId) {
             return [];
         }
 
-        const docs: IVersionMetadata[] = await getVersions(groupId, artifactId);
+        const docs: IVersionMetadata[] = await getVersions(groupId, artifactId, token);
         const commandOnSelection: vscode.Command = {
             title: "selected", command: COMMAND_COMPLETION_ITEM_SELECTED,
             arguments: [{ infoName: INFO_COMPLETION_ITEM_SELECTED, completeFor: "version", source: "maven-central" }]

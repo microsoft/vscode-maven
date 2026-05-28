@@ -22,7 +22,7 @@ export class ArtifactProvider implements IXmlCompletionProvider {
         this.localProvider = new FromLocal();
     }
 
-    async provide(document: vscode.TextDocument, position: vscode.Position, currentNode: Node): Promise<vscode.CompletionItem[]> {
+    async provide(document: vscode.TextDocument, position: vscode.Position, currentNode: Node, token?: vscode.CancellationToken): Promise<vscode.CompletionItem[]> {
         let tagNode: Element | undefined;
         if (isTag(currentNode)) {
             tagNode = currentNode;
@@ -48,9 +48,11 @@ export class ArtifactProvider implements IXmlCompletionProvider {
                 const groupIdHint: string = getTextFromNode(groupIdTextNode);
                 const artifactIdHint: string = getTextFromNode(artifactIdTextNode);
 
-                const centralItems: vscode.CompletionItem[] = await this.centralProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = await this.indexProvider.getGroupIdCandidates(groupIdHint, artifactIdHint);
-                const localItems: vscode.CompletionItem[] = await this.localProvider.getGroupIdCandidates(groupIdHint);
+                const [centralItems, indexItems, localItems] = await settledAll([
+                    this.centralProvider.getGroupIdCandidates(groupIdHint, artifactIdHint, token),
+                    this.indexProvider.getGroupIdCandidates(groupIdHint, artifactIdHint),
+                    this.localProvider.getGroupIdCandidates(groupIdHint),
+                ]);
                 const mergedItems: vscode.CompletionItem[] = _.unionBy(centralItems, indexItems, localItems, (item) => item.insertText);
                 mergedItems.forEach(item => item.range = targetRange);
                 return mergedItems;
@@ -69,9 +71,11 @@ export class ArtifactProvider implements IXmlCompletionProvider {
                 const groupIdHint: string = getTextFromNode(groupIdTextNode);
                 const artifactIdHint: string = getTextFromNode(artifactIdTextNode);
 
-                const centralItems: vscode.CompletionItem[] = await this.centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = await this.indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint);
-                const localItems: vscode.CompletionItem[] = await this.localProvider.getArtifactIdCandidates(groupIdHint);
+                const [centralItems, indexItems, localItems] = await settledAll([
+                    this.centralProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint, token),
+                    this.indexProvider.getArtifactIdCandidates(groupIdHint, artifactIdHint),
+                    this.localProvider.getArtifactIdCandidates(groupIdHint),
+                ]);
                 let mergedItems: vscode.CompletionItem[] = [];
 
                 const ID_SEPARATOR = ":";
@@ -110,9 +114,11 @@ export class ArtifactProvider implements IXmlCompletionProvider {
                     return [];
                 }
 
-                const centralItems: vscode.CompletionItem[] = await this.centralProvider.getVersionCandidates(groupIdHint, artifactIdHint);
-                const indexItems: vscode.CompletionItem[] = await this.indexProvider.getVersionCandidates(groupIdHint, artifactIdHint);
-                const localItems: vscode.CompletionItem[] = await this.localProvider.getVersionCandidates(groupIdHint, artifactIdHint);
+                const [centralItems, indexItems, localItems] = await settledAll([
+                    this.centralProvider.getVersionCandidates(groupIdHint, artifactIdHint, undefined, token),
+                    this.indexProvider.getVersionCandidates(groupIdHint, artifactIdHint),
+                    this.localProvider.getVersionCandidates(groupIdHint, artifactIdHint),
+                ]);
                 const mergedItems: vscode.CompletionItem[] = _.unionBy(centralItems, indexItems, localItems, (item) => item.insertText);
                 mergedItems.forEach(item => item.range = targetRange);
                 return mergedItems;
@@ -120,6 +126,17 @@ export class ArtifactProvider implements IXmlCompletionProvider {
         }
         return [];
     }
+}
+
+async function settledAll(promises: Promise<vscode.CompletionItem[]>[]): Promise<vscode.CompletionItem[][]> {
+    const results = await Promise.allSettled(promises);
+    return results.map(r => {
+        if (r.status === "fulfilled") {
+            return r.value;
+        }
+        console.error(r.reason);
+        return [];
+    });
 }
 
 function getRange(node: Node | null, document: vscode.TextDocument, fallbackPosition?: vscode.Position) {
