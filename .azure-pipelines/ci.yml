@@ -2,6 +2,7 @@ name: $(Date:yyyyMMdd).$(Rev:r)
 variables:
   - name: Codeql.Enabled
     value: true
+  - template: /.azure-pipelines/npm-cfs-variables.yml@self
 resources:
   repositories:
     - repository: self
@@ -12,6 +13,16 @@ resources:
       name: 1ESPipelineTemplates/1ESPipelineTemplates
       ref: refs/tags/release
 trigger:
+  branches:
+    include:
+      - main
+# Declared explicitly so the ADO definition picks up a pullRequest trigger and the
+# Azure Pipelines GitHub app reports a check on pull requests. Without this the
+# definition carries a continuousIntegration trigger only, which is why PRs to this
+# repository never showed an ADO check. This has no effect while the definition
+# overrides the YAML pull request trigger, so PR validation must also be enabled on
+# the definition itself (Triggers -> Pull request validation).
+pr:
   branches:
     include:
       - main
@@ -45,10 +56,11 @@ extends:
                 displayName: 'Use Node.js 20.x'
                 inputs:
                   versionSpec: '20.x'
-              - task: Npm@1
+              - template: /.azure-pipelines/npm-cfs.yml@self
+              - task: CmdLine@2
                 displayName: 'npm install'
                 inputs:
-                  verbose: false
+                  script: npm install
               - task: Npm@1
                 displayName: 'npm run tslint'
                 inputs:
