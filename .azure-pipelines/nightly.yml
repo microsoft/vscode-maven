@@ -60,18 +60,10 @@ extends:
                 displayName: 'npm install'
                 inputs:
                   script: npm install
-              - task: Npm@1
+              - script: npm run tslint
                 displayName: 'npm run tslint'
-                inputs:
-                  command: custom
-                  verbose: false
-                  customCommand: 'run tslint'
-              - task: Npm@1
+              - script: npm run compile
                 displayName: 'npm run compile'
-                inputs:
-                  command: custom
-                  verbose: false
-                  customCommand: 'run compile'
               - task: JavaToolInstaller@0
                 displayName: 'Use Java 21'
                 inputs:
@@ -82,12 +74,8 @@ extends:
                   jdkDestinationDirectory: $(Agent.ToolsDirectory)/ms-jdk21
               - script: java --version
                 displayName: 'Check Java installation'
-              - task: Npm@1
+              - script: npm run build-plugin
                 displayName: 'npm run build-plugin'
-                inputs:
-                  command: custom
-                  verbose: false
-                  customCommand: 'run build-plugin'
               - task: CmdLine@2
                 displayName: Update nightly vsix version
                 inputs:
