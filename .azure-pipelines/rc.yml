@@ -2,6 +2,8 @@ name: $(Date:yyyyMMdd).$(Rev:r)
 variables:
   - name: Codeql.Enabled
     value: true
+  - name: npm_config_userconfig
+    value: $(Agent.TempDirectory)/.npmrc
 schedules:
   - cron: 0 3 * * *
     branches:
@@ -47,6 +49,7 @@ extends:
                 displayName: Use Node 20.x
                 inputs:
                   versionSpec: 20.x
+              - template: /.azure-pipelines/npm-cfs.yml@self
               - task: PowerShell@2
                 displayName: Download JDK 21
                 inputs:
@@ -54,10 +57,10 @@ extends:
                   script: |-
                     New-Item -ItemType Directory -Path "$env:AGENT_TEMPDIRECTORY\downloadjdk"
                     Invoke-WebRequest -Uri "https://aka.ms/download-jdk/microsoft-jdk-21-windows-x64.zip" -OutFile "$env:AGENT_TEMPDIRECTORY\downloadjdk\microsoft-jdk-21-windows-x64.zip"
-              - task: Npm@1
+              - task: CmdLine@2
                 displayName: 'npm install'
                 inputs:
-                  verbose: false
+                  script: npm install
               - task: Npm@1
                 displayName: 'npm run tslint'
                 inputs:
