@@ -17,6 +17,16 @@ trigger:
   branches:
     include:
       - main
+# Declared explicitly so the ADO definition picks up a pullRequest trigger and the
+# Azure Pipelines GitHub app reports a check on pull requests. Without this the
+# definition carries a continuousIntegration trigger only, which is why PRs to this
+# repository never showed an ADO check. This has no effect while the definition
+# overrides the YAML pull request trigger, so PR validation must also be enabled on
+# the definition itself (Triggers -> Pull request validation).
+pr:
+  branches:
+    include:
+      - main
 extends:
   template: v1/1ES.Unofficial.PipelineTemplate.yml@1esPipelines
   parameters:
