@@ -87,7 +87,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         item?.refresh ? item.refresh() : MavenExplorerProvider.getInstance().refresh(item);
     });
     registerCommandRequiringTrust(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
-    registerCommandRequiringTrust(context, "maven.goal.custom", async (node: string | MavenProject, goal?: string) => await Utils.executeCustomGoal(node, goal));
+    registerCommandRequiringTrust(context, "maven.goal.custom", async (node: string | MavenProject, goal?: string, env?: { [key: string]: string }) => await Utils.executeCustomGoal(node, goal, env));
     registerCommand(context, "maven.project.openPom", openPomHandler);
     // create project from archetype
     registerCommand(context, "maven.archetype.generate", ArchetypeModule.createMavenProject);

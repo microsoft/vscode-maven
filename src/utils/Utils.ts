@@ -169,7 +169,7 @@ export class Utils {
         return await window.withProgress({ location: ProgressLocation.Window }, task);
     }
 
-    public static async executeCustomGoal(pomOrProject: string | MavenProject, goal?: string): Promise<void> {
+    public static async executeCustomGoal(pomOrProject: string | MavenProject, goal?: string, env?: { [key: string]: string }): Promise<void> {
         let pomPath: string | undefined;
         if (typeof pomOrProject === "string") {
             pomPath = pomOrProject;
@@ -183,7 +183,7 @@ export class Utils {
         const inputGoals: string | undefined = goal || await window.showInputBox({ placeHolder: "e.g. clean package -DskipTests", ignoreFocusOut: true });
         const trimmedGoals: string | undefined = inputGoals ? inputGoals.trim() : undefined;
         if (trimmedGoals) {
-            await executeInTerminal({ command: trimmedGoals, pomfile: pomPath });
+            await executeInTerminal({ command: trimmedGoals, pomfile: pomPath, env });
         }
     }
 
