@@ -22,6 +22,7 @@ enum ShellType {
     POWERSHELL = "PowerShell",
     GIT_BASH = "Git Bash",
     WSL = "WSL Bash",
+    FISH = "Fish",
     OTHERS = "Others"
 }
 
@@ -162,6 +163,8 @@ function currentWindowsShell(): ShellType {
         case 'opensuse-42.exe':
         case 'sles-12.exe':
             return ShellType.WSL;
+        case "fish":
+            return ShellType.FISH;
         default:
             return ShellType.OTHERS;
     }
@@ -197,20 +200,52 @@ export async function toWinPath(filepath: string): Promise<string> {
 
 export const mavenTerminal: MavenTerminal = new MavenTerminal();
 
+// Only well-formed identifiers can be exported safely across every shell we support;
+// anything else can't be made safe by escaping (e.g. it could inject a second statement).
+const ENV_VAR_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+function escapeForPosixShell(value: string): string {
+    // Single quotes are literal in POSIX shells except for the quote character itself,
+    // so this is safe against $(), backticks, "$VAR", and other expansions.
+    return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function escapeForPowerShell(value: string): string {
+    // PowerShell single-quoted strings are literal; only the quote itself needs doubling.
+    return `'${value.replace(/'/g, "''")}'`;
+}
+
+function escapeForFishShell(value: string): string {
+    // Fish single-quoted strings only treat backslash and the quote itself as special,
+    // and both are escaped with a backslash (not doubled, unlike POSIX sh/PowerShell).
+    return `'${value.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+}
+
 function setupEnvForShell(terminal: vscode.Terminal, env: { [envKey: string]: string }): void {
     const shellType: ShellType = currentWindowsShell();
     Object.keys(env).forEach(key => {
+        if (!ENV_VAR_NAME_PATTERN.test(key)) {
+            mavenOutputChannel.appendLine(`Skipping environment variable with unsupported name: ${key}`);
+            return;
+        }
         const value: string = env[key];
         switch (shellType) {
             case ShellType.POWERSHELL:
-                terminal.sendText(`$env:${key}="${value}"`, true);
+                terminal.sendText(`$env:${key}=${escapeForPowerShell(value)}`, true);
                 break;
             case ShellType.CMD:
-                terminal.sendText(`set ${key}=${value}`, true);
+                // cmd.exe has no real quoting mechanism; wrapping the whole assignment in
+                // quotes protects spaces and operators (&, |, <, >, ^), but %VAR% references
+                // inside the value are still expanded by cmd itself and can't be escaped.
+                terminal.sendText(`set "${key}=${value}"`, true);
+                break;
+            case ShellType.FISH:
+                // fish doesn't support bash-style `export KEY=value`; it errors on the `=`.
+                terminal.sendText(`set -x ${key} ${escapeForFishShell(value)}`, true);
                 break;
             default:
                 // bash/zsh/Git Bash/WSL and anything else that understands POSIX export syntax.
-                terminal.sendText(`export ${key}="${value}"`, true);
+                terminal.sendText(`export ${key}=${escapeForPosixShell(value)}`, true);
                 break;
         }
     });
