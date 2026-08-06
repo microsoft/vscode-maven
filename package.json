@@ -863,7 +863,7 @@
     "expand-home-dir": "0.0.3",
     "fast-glob": "^3.3.2",
     "fs-extra": "^4.0.3",
-    "get-port": "^4.2.0",
+    "get-port": "^7.2.0",
     "htmlparser2": "^8.0.1",
     "jszip": "^3.10.1",
     "lodash": "^4.18.1",
