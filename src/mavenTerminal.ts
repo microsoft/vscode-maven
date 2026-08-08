@@ -22,6 +22,7 @@ enum ShellType {
     POWERSHELL = "PowerShell",
     GIT_BASH = "Git Bash",
     WSL = "WSL Bash",
+    FISH = "Fish",
     OTHERS = "Others"
 }
 
@@ -31,24 +32,27 @@ class MavenTerminal implements vscode.Disposable {
     public async runInTerminal(command: string, options: ITerminalOptions): Promise<vscode.Terminal> {
         const defaultOptions: ITerminalOptions = { addNewLine: true, name: "Maven" };
         const { addNewLine, name, cwd, workspaceFolder } = Object.assign(defaultOptions, options);
+        const terminalCwd: vscode.Uri | undefined = workspaceFolder ? workspaceFolder.uri : undefined;
+        const env: { [envKey: string]: string } = { ...Settings.getEnvironment(terminalCwd), ...options.env };
         if (this.terminals[name] === undefined) {
             // Open terminal in workspaceFolder if provided
             // See: https://github.com/microsoft/vscode-maven/issues/467#issuecomment-584544090
-            const terminalCwd: vscode.Uri | undefined = workspaceFolder ? workspaceFolder.uri : undefined;
-            const env: { [envKey: string]: string } = { ...Settings.getEnvironment(terminalCwd), ...options.env };
             this.terminals[name] = vscode.window.createTerminal({ name, env, cwd: terminalCwd });
-            // Workaround for WSL custom envs.
-            // See: https://github.com/Microsoft/vscode/issues/71267
-            if (currentWindowsShell() === ShellType.WSL) {
-                setupEnvForWSL(this.terminals[name], env);
-            }
         }
         this.terminals[name].show();
+        // Shell startup files (e.g. .zshrc/.zprofile) can re-export the same variables and
+        // silently override the env passed to createTerminal, so (re-)export explicitly here.
+        // Also needed because terminals are reused across invocations, and createTerminal's
+        // env is only applied once, at creation time.
+        // See: https://github.com/microsoft/vscode/issues/205102, https://github.com/microsoft/vscode/issues/188235
+        if (Object.keys(env).length > 0) {
+            setupEnvForShell(this.terminals[name], env);
+        }
         if (cwd) {
             this.terminals[name].sendText(await getCDCommand(cwd), true);
         }
         this.terminals[name].sendText(getCommand(command), addNewLine);
-        
+
         return this.terminals[name];
     }
 
@@ -159,6 +163,8 @@ function currentWindowsShell(): ShellType {
         case 'opensuse-42.exe':
         case 'sles-12.exe':
             return ShellType.WSL;
+        case "fish":
+            return ShellType.FISH;
         default:
             return ShellType.OTHERS;
     }
@@ -194,10 +200,53 @@ export async function toWinPath(filepath: string): Promise<string> {
 
 export const mavenTerminal: MavenTerminal = new MavenTerminal();
 
-function setupEnvForWSL(terminal: vscode.Terminal, env: { [envKey: string]: string }): void {
-    if (terminal !== undefined) {
-        Object.keys(env).forEach(key => {
-            terminal.sendText(`export ${key}="${env[key]}"`, true);
-        });
-    }
+// Only well-formed identifiers can be exported safely across every shell we support;
+// anything else can't be made safe by escaping (e.g. it could inject a second statement).
+const ENV_VAR_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+function escapeForPosixShell(value: string): string {
+    // Single quotes are literal in POSIX shells except for the quote character itself,
+    // so this is safe against $(), backticks, "$VAR", and other expansions.
+    return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function escapeForPowerShell(value: string): string {
+    // PowerShell single-quoted strings are literal; only the quote itself needs doubling.
+    return `'${value.replace(/'/g, "''")}'`;
+}
+
+function escapeForFishShell(value: string): string {
+    // Fish single-quoted strings only treat backslash and the quote itself as special,
+    // and both are escaped with a backslash (not doubled, unlike POSIX sh/PowerShell).
+    return `'${value.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+}
+
+function setupEnvForShell(terminal: vscode.Terminal, env: { [envKey: string]: string }): void {
+    const shellType: ShellType = currentWindowsShell();
+    Object.keys(env).forEach(key => {
+        if (!ENV_VAR_NAME_PATTERN.test(key)) {
+            mavenOutputChannel.appendLine(`Skipping environment variable with unsupported name: ${key}`);
+            return;
+        }
+        const value: string = env[key];
+        switch (shellType) {
+            case ShellType.POWERSHELL:
+                terminal.sendText(`$env:${key}=${escapeForPowerShell(value)}`, true);
+                break;
+            case ShellType.CMD:
+                // cmd.exe has no real quoting mechanism; wrapping the whole assignment in
+                // quotes protects spaces and operators (&, |, <, >, ^), but %VAR% references
+                // inside the value are still expanded by cmd itself and can't be escaped.
+                terminal.sendText(`set "${key}=${value}"`, true);
+                break;
+            case ShellType.FISH:
+                // fish doesn't support bash-style `export KEY=value`; it errors on the `=`.
+                terminal.sendText(`set -x ${key} ${escapeForFishShell(value)}`, true);
+                break;
+            default:
+                // bash/zsh/Git Bash/WSL and anything else that understands POSIX export syntax.
+                terminal.sendText(`export ${key}=${escapeForPosixShell(value)}`, true);
+                break;
+        }
+    });
 }
