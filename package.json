@@ -861,7 +861,7 @@
   "dependencies": {
     "domhandler": "^5.0.3",
     "expand-home-dir": "0.0.3",
-    "fast-glob": "^3.3.2",
+    "fast-glob": "^3.3.3",
     "fs-extra": "^4.0.3",
     "get-port": "^4.2.0",
     "htmlparser2": "^8.0.1",
