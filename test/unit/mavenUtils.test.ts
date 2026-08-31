@@ -25,34 +25,52 @@ const proxyquire: {
 type SafetyResult = "safe" | "use-default" | "abort";
 type MavenUtilsModule = {
     checkExecutablePathSafety: (p: string) => Promise<SafetyResult>;
+    formatWindowsBatchCommand: (command: string, args: string[]) => string[];
+    getMaven: (pomPath?: string) => Promise<string | undefined>;
 };
 
 // Load `mavenUtils` with all heavy imports stubbed. `noCallThru` keeps
 // proxyquire from ever touching the real modules (critical for `vscode`
 // which doesn't resolve at all outside the extension host). `@noCallThru`
 // is applied per-stub so the real modules are never hit.
-function loadMavenUtils(): MavenUtilsModule {
+function loadMavenUtils(options?: { whichPath?: string }): MavenUtilsModule {
     // proxyquire caches per (filename, stubs) — reset the whole cache so
     // each test gets a fresh module-scoped `confirmedExecutablePaths` Set.
     const pq = proxyquire.noPreserveCache();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stub = (obj: Record<string, any>): Record<string, any> => ({ ...obj, "@noCallThru": true });
+    const whichStub = Object.assign(
+        (_command: string, callback: (err: Error | undefined, filepath: string | undefined) => void): void => callback(undefined, options?.whichPath),
+        { "@noCallThru": true }
+    );
 
     return pq("../../src/utils/mavenUtils", {
         "vscode": stub(vscodeMock),
         "../mavenOutputChannel": stub({ mavenOutputChannel: { appendLine: () => undefined, show: () => undefined } }),
         "../mavenTerminal": stub({ mavenTerminal: { runInTerminal: async () => undefined } }),
         "../project/MavenProjectManager": stub({ MavenProjectManager: { get: () => undefined, projects: [] } }),
-        "../Settings": stub({ Settings: { Executable: { path: () => undefined, options: () => "" } } }),
+        "../Settings": stub({
+            Settings: {
+                Executable: {
+                    path: () => undefined,
+                    options: () => "",
+                    optionsValue: () => undefined,
+                    preferMavenWrapper: () => false
+                },
+                getEnvironment: () => ({}),
+                getSettingsFilePath: () => undefined
+            }
+        }),
         "./contextUtils": stub({
             getPathToExtensionRoot: () => "/tmp/ext",
             getPathToTempFolder: () => "/tmp",
             getPathToWorkspaceStorage: () => "/tmp/ws"
         }),
-        "../mavenProblemMatcher": stub({ mavenProblemMatcher: { dispose: () => undefined } }),
+        "../mavenProblemMatcher": stub({ mavenProblemMatcher: { dispose: () => undefined, parseMavenOutput: () => undefined } }),
         "./errorUtils": stub({ MavenNotFoundError: class MavenNotFoundError extends Error {} }),
-        "./historyUtils": stub({ updateLRUCommands: async () => undefined })
+        "./historyUtils": stub({ updateLRUCommands: async () => undefined }),
+        "which": whichStub
     }) as MavenUtilsModule;
 }
 
@@ -60,6 +78,36 @@ describe("checkExecutablePathSafety — PR #1152", () => {
 
     beforeEach(() => {
         resetStubs();
+    });
+
+    describe("background Maven execution helpers", () => {
+
+        beforeEach(() => {
+            resetStubs();
+        });
+
+        it("escapes quotes and CMD metacharacters for Windows batch files", () => {
+            const { formatWindowsBatchCommand } = loadMavenUtils();
+
+            const formatted = formatWindowsBatchCommand("C:\\tools\\apache maven\\bin\\mvn.cmd", [
+                "-Dvalue=x\" & calc.exe & rem \"",
+                "-Dliteral=%PATH%^<ok>|done"
+            ]);
+
+            assert.deepEqual(formatted, [
+                "/d",
+                "/s",
+                "/c",
+                "^\"C:\\tools\\apache maven\\bin\\mvn.cmd^\" ^\"-Dvalue=x\\^\" ^& calc.exe ^& rem \\^\"^\" ^\"-Dliteral=^%PATH^%^^^<ok^>^|done^\""
+            ]);
+        });
+
+        it("uses the Maven executable path resolved from PATH", async () => {
+            const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
+            const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
+
+            assert.equal(await getMaven(), mvnPath);
+        });
     });
 
     describe("relative paths (always suspicious)", () => {

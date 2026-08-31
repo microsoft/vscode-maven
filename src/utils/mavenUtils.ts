@@ -95,7 +95,7 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
         env: Object.assign({}, process.env, Settings.getEnvironment(pomfile))
     };
     const isBatchFile: boolean = isWin() && /\.(cmd|bat)$/i.test(command);
-    const spawnArgs: string[] = isBatchFile ? formatWindowsBatchCommand(command, args, spawnOptions.env) : args;
+    const spawnArgs: string[] = isBatchFile ? formatWindowsBatchCommand(command, args) : args;
     if (isBatchFile) {
         command = process.env.ComSpec || "cmd.exe";
     }
@@ -139,15 +139,12 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
     });
 }
 
-function formatWindowsBatchCommand(command: string, args: string[], env: NodeJS.ProcessEnv | undefined): string[] {
-    const commandVariable = "VSCODE_MAVEN_COMMAND";
-    if (env) {
-        env[commandVariable] = command;
-        args.forEach((arg: string, index: number): void => {
-            env[`VSCODE_MAVEN_ARG_${index}`] = arg;
-        });
-    }
-    return ["/d", "/s", "/c", `"%${commandVariable}%"`, ...args.map((_arg: string, index: number): string => `"%VSCODE_MAVEN_ARG_${index}%"`)];
+export function formatWindowsBatchCommand(command: string, args: string[]): string[] {
+    return ["/d", "/s", "/c", [command, ...args].map(escapeWindowsCommandArgument).join(" ")];
+}
+
+function escapeWindowsCommandArgument(arg: string): string {
+    return `"${arg.replace(/(\\*)"/g, "$1$1\\\"").replace(/(\\*)$/g, "$1$1")}"`.replace(/([()%!^"<>&|])/g, "^$1");
 }
 
 export async function executeInTerminal(options: {
@@ -366,7 +363,7 @@ async function defaultMavenExecutable(): Promise<string | undefined> {
     return new Promise<string | undefined>((resolve) => {
         which("mvn", (_err, filepath) => {
             if (filepath) {
-                resolve("mvn");
+                resolve(filepath);
             } else {
                 mavenOutputChannel.appendLine("Maven executable not found in PATH.");
                 resolve(undefined);
