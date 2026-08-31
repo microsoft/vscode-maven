@@ -74,26 +74,28 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
         throw new MavenNotFoundError();
     }
 
-    const command: string = wrappedWithQuotes(mvn);
+    const command: string = mvn;
     // TODO: re-visit cwd
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
     const userArgs: string | undefined = Settings.Executable.options(pomfile);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
-    const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"` : undefined;
-    const matched: RegExpMatchArray | null = [mvnSettingsArg, mvnArgs, userArgs].filter(Boolean).join(" ").match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
-    const args: string[] = matched !== null ? matched : [];
+    const args: string[] = [];
+    if (mvnSettingsFile) {
+        args.push("-s", await mavenTerminal.formattedPathForTerminal(mvnSettingsFile));
+    }
+    args.push(...parseCommandArgs(mvnArgs));
+    args.push(...parseCommandArgs(userArgs));
     if (pomfile) {
-        args.push("-f", `"${pomfile}"`);
+        args.push("-f", pomfile);
     }
     const spawnOptions: child_process.SpawnOptions = {
         cwd,
-        env: Object.assign({}, process.env, Settings.getEnvironment(pomfile)),
-        shell: true
+        env: Object.assign({}, process.env, Settings.getEnvironment(pomfile))
     };
     return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
         mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command, args })}`);
-        const proc: child_process.ChildProcess = child_process.spawn(command, args, spawnOptions);  // CodeQL [SM03609] safe here as args is assembled in the code and cannot be arbitrary string.
+        const proc: child_process.ChildProcess = child_process.spawn(command, args, spawnOptions);
         proc.on("error", (err: Error) => {
             reject(new Error(`Error occurred in background process. ${err.message}`));
         });
@@ -129,6 +131,14 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
             }
         });
     });
+}
+
+function parseCommandArgs(raw?: string): string[] {
+    if (!raw) {
+        return [];
+    }
+    const matched: RegExpMatchArray | null = raw.match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
+    return (matched ?? []).map(arg => arg.replace(/^"([^"]*)"$/, "$1"));
 }
 
 export async function executeInTerminal(options: {
