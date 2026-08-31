@@ -8,6 +8,7 @@ import * as md5 from "md5";
 import * as path from "path";
 import * as vscode from "vscode";
 import * as which from "which";
+import { getMavenExecutableOptionArgs, splitMavenExecutableOptions } from "../archetype/archetypeCommand";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
 import { MavenProjectManager } from "../project/MavenProjectManager";
@@ -74,18 +75,18 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
         throw new MavenNotFoundError();
     }
 
-    const command: string = mvn;
+    let command: string = mvn;
     // TODO: re-visit cwd
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
-    const userArgs: string | undefined = Settings.Executable.options(pomfile);
+    const userArgs: string | string[] | undefined = Settings.Executable.optionsValue(pomfile);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
     const args: string[] = [];
     if (mvnSettingsFile) {
-        args.push("-s", await mavenTerminal.formattedPathForTerminal(mvnSettingsFile));
+        args.push("-s", mvnSettingsFile);
     }
-    args.push(...parseCommandArgs(mvnArgs));
-    args.push(...parseCommandArgs(userArgs));
+    args.push(...splitMavenExecutableOptions(mvnArgs));
+    args.push(...getMavenExecutableOptionArgs(userArgs));
     if (pomfile) {
         args.push("-f", pomfile);
     }
@@ -93,9 +94,14 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
         cwd,
         env: Object.assign({}, process.env, Settings.getEnvironment(pomfile))
     };
+    const isBatchFile: boolean = isWin() && /\.(cmd|bat)$/i.test(command);
+    const spawnArgs: string[] = isBatchFile ? formatWindowsBatchCommand(command, args, spawnOptions.env) : args;
+    if (isBatchFile) {
+        command = process.env.ComSpec || "cmd.exe";
+    }
     return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
         mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command, args })}`);
-        const proc: child_process.ChildProcess = child_process.spawn(command, args, spawnOptions);
+        const proc: child_process.ChildProcess = child_process.spawn(command, spawnArgs, spawnOptions);
         proc.on("error", (err: Error) => {
             reject(new Error(`Error occurred in background process. ${err.message}`));
         });
@@ -133,12 +139,15 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
     });
 }
 
-function parseCommandArgs(raw?: string): string[] {
-    if (!raw) {
-        return [];
+function formatWindowsBatchCommand(command: string, args: string[], env: NodeJS.ProcessEnv | undefined): string[] {
+    const commandVariable = "VSCODE_MAVEN_COMMAND";
+    if (env) {
+        env[commandVariable] = command;
+        args.forEach((arg: string, index: number): void => {
+            env[`VSCODE_MAVEN_ARG_${index}`] = arg;
+        });
     }
-    const matched: RegExpMatchArray | null = raw.match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
-    return (matched ?? []).map(arg => arg.replace(/^"([^"]*)"$/, "$1"));
+    return ["/d", "/s", "/c", `"%${commandVariable}%"`, ...args.map((_arg: string, index: number): string => `"%VSCODE_MAVEN_ARG_${index}%"`)];
 }
 
 export async function executeInTerminal(options: {
