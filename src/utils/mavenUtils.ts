@@ -144,7 +144,30 @@ export function formatWindowsBatchCommand(command: string, args: string[]): stri
 }
 
 function escapeWindowsCommandArgument(arg: string): string {
-    return `"${arg.replace(/(\\*)"/g, "$1$1\\\"").replace(/(\\*)$/g, "$1$1")}"`.replace(/([()%!^"<>&|])/g, "^$1");
+    let quoted = "\"";
+    let backslashCount = 0;
+    for (const ch of arg) {
+        if (ch === "\\") {
+            backslashCount++;
+            continue;
+        }
+        if (ch === "\"") {
+            quoted += "\\".repeat(backslashCount * 2 + 1) + ch;
+        } else {
+            quoted += "\\".repeat(backslashCount) + ch;
+        }
+        backslashCount = 0;
+    }
+    quoted += "\\".repeat(backslashCount * 2) + "\"";
+
+    let escaped = "";
+    for (const ch of quoted) {
+        if ("()%!^\"<>&|".includes(ch)) {
+            escaped += "^";
+        }
+        escaped += ch;
+    }
+    return escaped;
 }
 
 export async function executeInTerminal(options: {
