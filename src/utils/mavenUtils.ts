@@ -8,7 +8,7 @@ import * as md5 from "md5";
 import * as path from "path";
 import * as vscode from "vscode";
 import * as which from "which";
-import { getMavenExecutableOptionArgs, splitMavenExecutableOptions } from "../archetype/archetypeCommand";
+import { getMavenExecutableOptionArgs } from "../archetype/archetypeCommand";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
 import { MavenProjectManager } from "../project/MavenProjectManager";
@@ -17,10 +17,11 @@ import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage 
 import { mavenProblemMatcher } from "../mavenProblemMatcher";
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
+import { spawnExecutable } from "./spawnExecutable";
 
 // calculate dependency graph
 const GOAL_DEPENDENCY_GRAPH = "com.github.ferstl:depgraph-maven-plugin:4.0.3:graph";
-const OPTIONS_DEPENDENCY_GRAPH = "-DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds";
+const OPTIONS_DEPENDENCY_GRAPH = ["-DgraphFormat=text", "-DshowDuplicates", "-DshowConflicts", "-DshowVersions", "-DshowGroupIds"];
 
 /**
  * Get effective pom of a Maven project.
@@ -41,7 +42,7 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
         return await readFileIfExists(epomPath);
     }
 
-    await executeInBackground(`-B -Doutput="${epomPath}" help:effective-pom`, pomPath);
+    await executeInBackground(["-B", `-Doutput=${epomPath}`, "help:effective-pom"], pomPath);
     await fse.writeFile(mtimePath, mtimeMs);
     return await readFileIfExists(epomPath);
 }
@@ -51,41 +52,46 @@ export async function rawDependencyTree(pomPath: string): Promise<string | undef
     const dependencyGraphPath = `${outputPath}.deps.txt`;
     const outputDirectory: string = path.dirname(dependencyGraphPath);
     const outputFileName: string = path.basename(dependencyGraphPath);
-    await executeInBackground(`-B -N ${OPTIONS_DEPENDENCY_GRAPH} -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}" ${GOAL_DEPENDENCY_GRAPH}`, pomPath);
+    await executeInBackground([
+        "-B",
+        "-N",
+        ...OPTIONS_DEPENDENCY_GRAPH,
+        `-DoutputDirectory=${outputDirectory}`,
+        `-DoutputFileName=${outputFileName}`,
+        GOAL_DEPENDENCY_GRAPH
+    ], pomPath);
     return await readFileIfExists(path.join(outputDirectory, outputFileName));
 }
 
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pluginId);
     // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock
-    await executeInBackground(`-B -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}" help:describe`, pomPath);
+    await executeInBackground(["-B", "-Dapple.awt.UIElement=true", `-Dplugin=${pluginId}`, `-Doutput=${outputPath}`, "help:describe"], pomPath);
     return await readFileIfExists(outputPath);
 }
 
 export async function rawProfileList(pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
     const profileListPath = `${outputPath}.profiles.txt`;
-    await executeInBackground(`-B -Doutput="${profileListPath}" help:all-profiles`, pomPath);
+    await executeInBackground(["-B", `-Doutput=${profileListPath}`, "help:all-profiles"], pomPath);
     return await readFileIfExists(profileListPath);
 }
 
-async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<unknown> {
+async function executeInBackground(mvnArgs: readonly string[], pomfile?: string): Promise<unknown> {
     const mvn: string | undefined = await getMaven(pomfile);
     if (mvn === undefined) {
         throw new MavenNotFoundError();
     }
 
-    let command: string = mvn;
-    // TODO: re-visit cwd
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
+    const cwd: string | undefined = workspaceFolder?.uri.fsPath ?? (pomfile ? path.dirname(pomfile) : undefined);
     const userArgs: string | string[] | undefined = Settings.Executable.optionsValue(pomfile);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
     const args: string[] = [];
     if (mvnSettingsFile) {
         args.push("-s", mvnSettingsFile);
     }
-    args.push(...splitMavenExecutableOptions(mvnArgs));
+    args.push(...mvnArgs);
     args.push(...getMavenExecutableOptionArgs(userArgs));
     if (pomfile) {
         args.push("-f", pomfile);
@@ -94,14 +100,9 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
         cwd,
         env: Object.assign({}, process.env, Settings.getEnvironment(pomfile))
     };
-    const isBatchFile: boolean = isWin() && /\.(cmd|bat)$/i.test(command);
-    const spawnArgs: string[] = isBatchFile ? formatWindowsBatchCommand(command, args) : args;
-    if (isBatchFile) {
-        command = process.env.ComSpec || "cmd.exe";
-    }
     return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
-        mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command, args })}`);
-        const proc: child_process.ChildProcess = child_process.spawn(command, spawnArgs, spawnOptions);
+        mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command: mvn, args })}`);
+        const proc: child_process.ChildProcess = spawnExecutable(mvn, args, spawnOptions);
         proc.on("error", (err: Error) => {
             reject(new Error(`Error occurred in background process. ${err.message}`));
         });
@@ -137,37 +138,6 @@ async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<u
             }
         });
     });
-}
-
-export function formatWindowsBatchCommand(command: string, args: string[]): string[] {
-    return ["/d", "/s", "/c", [command, ...args].map(escapeWindowsCommandArgument).join(" ")];
-}
-
-function escapeWindowsCommandArgument(arg: string): string {
-    let quoted = "\"";
-    let backslashCount = 0;
-    for (const ch of arg) {
-        if (ch === "\\") {
-            backslashCount++;
-            continue;
-        }
-        if (ch === "\"") {
-            quoted += "\\".repeat(backslashCount * 2 + 1) + ch;
-        } else {
-            quoted += "\\".repeat(backslashCount) + ch;
-        }
-        backslashCount = 0;
-    }
-    quoted += "\\".repeat(backslashCount * 2) + "\"";
-
-    let escaped = "";
-    for (const ch of quoted) {
-        if ("()%!^\"<>&|".includes(ch)) {
-            escaped += "^";
-        }
-        escaped += ch;
-    }
-    return escaped;
 }
 
 export async function executeInTerminal(options: {

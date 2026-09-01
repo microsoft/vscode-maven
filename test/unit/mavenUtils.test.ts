@@ -25,7 +25,6 @@ const proxyquire: {
 type SafetyResult = "safe" | "use-default" | "abort";
 type MavenUtilsModule = {
     checkExecutablePathSafety: (p: string) => Promise<SafetyResult>;
-    formatWindowsBatchCommand: (command: string, args: string[]) => string[];
     getMaven: (pomPath?: string) => Promise<string | undefined>;
 };
 
@@ -80,34 +79,11 @@ describe("checkExecutablePathSafety — PR #1152", () => {
         resetStubs();
     });
 
-    describe("background Maven execution helpers", () => {
+    it("uses the Maven executable path resolved from PATH", async () => {
+        const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
+        const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
 
-        beforeEach(() => {
-            resetStubs();
-        });
-
-        it("escapes quotes and CMD metacharacters for Windows batch files", () => {
-            const { formatWindowsBatchCommand } = loadMavenUtils();
-
-            const formatted = formatWindowsBatchCommand("C:\\tools\\apache maven\\bin\\mvn.cmd", [
-                "-Dvalue=x\" & calc.exe & rem \"",
-                "-Dliteral=%PATH%^<ok>|done"
-            ]);
-
-            assert.deepEqual(formatted, [
-                "/d",
-                "/s",
-                "/c",
-                "^\"C:\\tools\\apache maven\\bin\\mvn.cmd^\" ^\"-Dvalue=x\\^\" ^& calc.exe ^& rem \\^\"^\" ^\"-Dliteral=^%PATH^%^^^<ok^>^|done^\""
-            ]);
-        });
-
-        it("uses the Maven executable path resolved from PATH", async () => {
-            const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
-            const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
-
-            assert.equal(await getMaven(), mvnPath);
-        });
+        assert.equal(await getMaven(), mvnPath);
     });
 
     describe("relative paths (always suspicious)", () => {
