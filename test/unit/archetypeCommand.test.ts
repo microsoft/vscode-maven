@@ -66,6 +66,13 @@ describe("splitMavenExecutableOptions", () => {
             ["-Dregex=\\\\d+"]
         );
     });
+
+    it("preserves escaped literal quotes inside quoted values", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions("-DargLine=\"-Dmessage=\\\"hello world\\\"\""),
+            ["-DargLine=-Dmessage=\"hello world\""]
+        );
+    });
 });
 
 describe("getMavenExecutableOptionArgs", () => {

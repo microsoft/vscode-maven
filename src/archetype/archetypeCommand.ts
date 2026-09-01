@@ -32,9 +32,34 @@ export function splitMavenExecutableOptions(options: string | undefined): string
     const args: string[] = [];
     let current = "";
     let quote: string | undefined;
+    let tokenStarted = false;
     const trimmed = options.trim();
     for (let i = 0; i < trimmed.length; i++) {
         const ch = trimmed[i];
+
+        if (ch === "\\") {
+            let backslashEnd = i;
+            while (trimmed[backslashEnd] === "\\") {
+                backslashEnd++;
+            }
+            const backslashCount = backslashEnd - i;
+            const next = trimmed[backslashEnd];
+            if ((next === "\"" || next === "'") && (!quote || next === quote)) {
+                current += "\\".repeat(Math.floor(backslashCount / 2));
+                tokenStarted = true;
+                if (backslashCount % 2 === 1) {
+                    current += next;
+                    i = backslashEnd;
+                } else {
+                    i = backslashEnd - 1;
+                }
+            } else {
+                current += "\\".repeat(backslashCount);
+                tokenStarted = true;
+                i = backslashEnd - 1;
+            }
+            continue;
+        }
 
         if (quote) {
             if (ch === quote) {
@@ -47,21 +72,24 @@ export function splitMavenExecutableOptions(options: string | undefined): string
 
         if (ch === "\"" || ch === "'") {
             quote = ch;
+            tokenStarted = true;
             continue;
         }
 
         if (/\s/.test(ch)) {
-            if (current) {
+            if (tokenStarted) {
                 args.push(current);
                 current = "";
+                tokenStarted = false;
             }
             continue;
         }
 
         current += ch;
+        tokenStarted = true;
     }
 
-    if (current) {
+    if (tokenStarted) {
         args.push(current);
     }
     return args;
