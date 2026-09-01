@@ -50,15 +50,46 @@ describe("spawnExecutable", () => {
         }
     });
 
-    it("rejects line breaks before launching Windows batch files", function() {
+    it("rejects unsafe characters before launching Windows batch files", function() {
         if (process.platform !== "win32") {
             this.skip();
         }
 
-        assert.throws(
-            () => spawnExecutable("mvn.cmd", ["validate\r\n& calc.exe"], {}),
-            /Windows batch arguments cannot contain line breaks/
-        );
+        for (const argument of ["null\0character", "carriage\rreturn", "line\nfeed"]) {
+            assert.throws(
+                () => spawnExecutable("mvn.cmd", [argument], {}),
+                /Invalid character in argument/
+            );
+        }
+    });
+
+    it("supports uppercase Windows batch file extensions", async function() {
+        if (process.platform !== "win32") {
+            this.skip();
+        }
+
+        const tempDirectory = await fse.mkdtemp(path.join(os.tmpdir(), "vscode-maven-uppercase-spawn-"));
+        try {
+            const captureScript = path.join(tempDirectory, "capture.js");
+            const batchFile = path.join(tempDirectory, "capture.CMD");
+            const outputFile = path.join(tempDirectory, "arguments.json");
+            await fse.writeFile(captureScript, "require(\"fs\").writeFileSync(process.env.CAPTURE_OUTPUT, JSON.stringify(process.argv.slice(2)));");
+            await fse.writeFile(batchFile, "@echo off\r\n\"%NODE_EXE%\" \"%CAPTURE_SCRIPT%\" %*\r\n");
+
+            const proc = spawnExecutable(batchFile, ["argument"], {
+                env: {
+                    ...process.env,
+                    CAPTURE_OUTPUT: outputFile,
+                    CAPTURE_SCRIPT: captureScript,
+                    NODE_EXE: process.execPath
+                }
+            });
+
+            assert.equal(await waitForExit(proc), 0);
+            assert.deepEqual(JSON.parse(await fse.readFile(outputFile, "utf8")), ["argument"]);
+        } finally {
+            await fse.remove(tempDirectory);
+        }
     });
 });
 
