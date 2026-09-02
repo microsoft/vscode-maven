@@ -73,13 +73,27 @@ describe("splitMavenExecutableOptions", () => {
             ["-DargLine=-Dmessage=\"hello world\""]
         );
     });
+
+    it("preserves a trailing backslash in a quoted Windows path", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" -X`),
+            ["-Dpath=C:\\work dir\\", "-X"]
+        );
+    });
+
+    it("does not use quotes from later arguments to close a Windows path", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" "-Dmessage=hello world"`),
+            ["-Dpath=C:\\work dir\\", "-Dmessage=hello world"]
+        );
+    });
 });
 
 describe("getMavenExecutableOptionArgs", () => {
-    it("preserves array options as argv entries", () => {
+    it("splits each array option fragment independently", () => {
         assert.deepEqual(
-            getMavenExecutableOptionArgs(["-Dmessage=hello world", "-Dshare=\\\\server\\share"]),
-            ["-Dmessage=hello world", "-Dshare=\\\\server\\share"]
+            getMavenExecutableOptionArgs(["-o", "-s ./settings.xml", "-Dmessage=\"hello world\""]),
+            ["-o", "-s", "./settings.xml", "-Dmessage=hello world"]
         );
     });
 

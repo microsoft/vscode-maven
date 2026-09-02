@@ -24,6 +24,25 @@ export function buildArchetypeGenerateArgs(metadata: ArchetypeGenerateMetadata):
     ].filter((arg): arg is string => !!arg);
 }
 
+function hasUnpairedUnescapedQuote(value: string, start: number, quote: string): boolean {
+    let unpaired = false;
+    for (let i = start; i < value.length; i++) {
+        if (value[i] !== quote) {
+            continue;
+        }
+
+        let precedingBackslashes = 0;
+        for (let j = i - 1; j >= 0 && value[j] === "\\"; j--) {
+            precedingBackslashes++;
+        }
+        if (precedingBackslashes % 2 === 0) {
+            unpaired = !unpaired;
+        }
+    }
+    // Balanced quote pairs belong to later arguments and cannot close the current segment.
+    return unpaired;
+}
+
 export function splitMavenExecutableOptions(options: string | undefined): string[] {
     if (!options) {
         return [];
@@ -45,19 +64,20 @@ export function splitMavenExecutableOptions(options: string | undefined): string
             const backslashCount = backslashEnd - i;
             const next = trimmed[backslashEnd];
             if ((next === "\"" || next === "'") && (!quote || next === quote)) {
-                current += "\\".repeat(Math.floor(backslashCount / 2));
-                tokenStarted = true;
-                if (backslashCount % 2 === 1) {
+                const hasClosingQuote = quote !== undefined && hasUnpairedUnescapedQuote(trimmed, backslashEnd + 1, quote);
+                if (backslashCount % 2 === 1 && (!quote || hasClosingQuote)) {
+                    current += "\\".repeat(backslashCount - 1);
                     current += next;
                     i = backslashEnd;
                 } else {
+                    current += "\\".repeat(backslashCount);
                     i = backslashEnd - 1;
                 }
             } else {
                 current += "\\".repeat(backslashCount);
-                tokenStarted = true;
                 i = backslashEnd - 1;
             }
+            tokenStarted = true;
             continue;
         }
 
@@ -96,5 +116,13 @@ export function splitMavenExecutableOptions(options: string | undefined): string
 }
 
 export function getMavenExecutableOptionArgs(options: string | string[] | undefined): string[] {
-    return Array.isArray(options) ? options : splitMavenExecutableOptions(options);
+    if (!Array.isArray(options)) {
+        return splitMavenExecutableOptions(options);
+    }
+
+    const args: string[] = [];
+    for (const option of options) {
+        args.push(...splitMavenExecutableOptions(option));
+    }
+    return args;
 }
