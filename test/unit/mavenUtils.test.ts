@@ -10,7 +10,7 @@
  */
 
 import { strict as assert } from "assert";
-import { vscodeMock, showWarningMessageStub, getWorkspaceFolderStub, resetStubs } from "./vscode-mock";
+import { vscodeMock, showWarningMessageStub, getWorkspaceFolderStub, getConfigurationStub, resetStubs } from "./vscode-mock";
 
 // proxyquire's default export is a callable function with helper methods —
 // the default namespace import shape doesn't match, so require() it directly.
@@ -81,6 +81,18 @@ describe("checkExecutablePathSafety — PR #1152", () => {
 
     it("uses the Maven executable path resolved from PATH", async () => {
         const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
+        const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
+
+        assert.equal(await getMaven(), mvnPath);
+    });
+
+    it("resolves an allowed extensionless configured Maven command", async () => {
+        const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
+        getConfigurationStub.impl = () => ({
+            get: () => undefined,
+            inspect: () => ({ globalValue: "mvn" })
+        });
+        showWarningMessageStub.impl = async () => "Allow";
         const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
 
         assert.equal(await getMaven(), mvnPath);

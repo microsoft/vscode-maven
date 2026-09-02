@@ -94,6 +94,13 @@ describe("splitMavenExecutableOptions", () => {
             ["-Dpath=C:\\work dir\\", "-Dmessage=hello \"world"]
         );
     });
+
+    it("preserves apostrophes inside a double-quoted value", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dmessage="say \"Bob's hello\"" -X`),
+            ["-Dmessage=say \"Bob's hello\"", "-X"]
+        );
+    });
 });
 
 describe("getMavenExecutableOptionArgs", () => {

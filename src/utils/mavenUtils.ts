@@ -193,7 +193,7 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
         const expandedPath: string = expandHome(mvnPathFromSettings);
         const safetyResult: "safe" | "use-default" | "abort" = await checkExecutablePathSafety(expandedPath);
         if (safetyResult === "safe") {
-            return expandedPath;
+            return await resolveConfiguredMavenExecutable(expandedPath);
         }
         if (safetyResult === "abort") {
             // User chose Open Settings or dismissed — abort the operation
@@ -214,6 +214,14 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
     }
 
     return await defaultMavenExecutable();
+}
+
+async function resolveConfiguredMavenExecutable(executable: string): Promise<string> {
+    return new Promise<string>((resolve) => {
+        which(executable, (_err, filepath) => {
+            resolve(filepath || executable);
+        });
+    });
 }
 
 // Set of canonical executable paths the user has explicitly confirmed as safe during this session
