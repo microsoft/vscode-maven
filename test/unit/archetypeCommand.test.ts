@@ -101,6 +101,13 @@ describe("splitMavenExecutableOptions", () => {
             ["-Dmessage=say \"Bob's hello\"", "-X"]
         );
     });
+
+    it("does not use an escaped quote from a later argument to close a Windows path", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" -Dmessage=hello\"world`),
+            ["-Dpath=C:\\work dir\\", "-Dmessage=hello\"world"]
+        );
+    });
 });
 
 describe("getMavenExecutableOptionArgs", () => {

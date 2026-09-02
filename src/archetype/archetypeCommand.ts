@@ -24,22 +24,9 @@ export function buildArchetypeGenerateArgs(metadata: ArchetypeGenerateMetadata):
     ].filter((arg): arg is string => !!arg);
 }
 
-// A backslash before the active quote can be either an escaped quote or a trailing path separator.
-// Explore both meanings in the remainder so later arguments cannot accidentally close the current value.
-function canBalanceQuotes(value: string, start: number, initialQuote: string | undefined): boolean {
-    const memo = new Map<string, boolean>();
-
-    function visit(index: number, quote: string | undefined): boolean {
-        const key = `${index}:${quote || ""}`;
-        const cached = memo.get(key);
-        if (cached !== undefined) {
-            return cached;
-        }
-
-        if (index >= value.length) {
-            return quote === undefined;
-        }
-
+function hasBalancedQuoteContinuation(value: string, start: number, initialQuote: string): boolean {
+    let quote: string | undefined = initialQuote;
+    for (let index = start; index < value.length; index++) {
         const ch = value[index];
         if (ch === "\\") {
             let backslashEnd = index;
@@ -49,36 +36,22 @@ function canBalanceQuotes(value: string, start: number, initialQuote: string | u
             const backslashCount = backslashEnd - index;
             const next = value[backslashEnd];
             if ((next === "\"" || next === "'") && (!quote || next === quote) && backslashCount % 2 === 1) {
-                const afterQuote = backslashEnd + 1;
-                if (quote) {
-                    const result = visit(afterQuote, quote) || visit(afterQuote, undefined);
-                    memo.set(key, result);
-                    return result;
-                }
-                const result = visit(afterQuote, undefined);
-                memo.set(key, result);
-                return result;
+                index = backslashEnd;
+                continue;
             }
-
-            const result = visit(backslashEnd, quote);
-            memo.set(key, result);
-            return result;
+            index = backslashEnd - 1;
+            continue;
         }
 
-        let nextQuote = quote;
         if (ch === "\"" || ch === "'") {
             if (!quote) {
-                nextQuote = ch;
+                quote = ch;
             } else if (ch === quote) {
-                nextQuote = undefined;
+                quote = undefined;
             }
         }
-        const result = visit(index + 1, nextQuote);
-        memo.set(key, result);
-        return result;
     }
-
-    return visit(start, initialQuote);
+    return quote === undefined;
 }
 
 export function splitMavenExecutableOptions(options: string | undefined): string[] {
@@ -103,7 +76,7 @@ export function splitMavenExecutableOptions(options: string | undefined): string
             const next = trimmed[backslashEnd];
             if ((next === "\"" || next === "'") && (!quote || next === quote)) {
                 const escapedQuote = backslashCount % 2 === 1;
-                const canEscapeQuote = escapedQuote && quote !== undefined && canBalanceQuotes(trimmed, backslashEnd + 1, quote);
+                const canEscapeQuote = escapedQuote && quote !== undefined && hasBalancedQuoteContinuation(trimmed, backslashEnd + 1, quote);
                 if (escapedQuote && (!quote || canEscapeQuote)) {
                     current += "\\".repeat(backslashCount - 1);
                     current += next;

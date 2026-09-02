@@ -78,7 +78,7 @@ export async function rawProfileList(pomPath: string): Promise<string | undefine
 }
 
 async function executeInBackground(mvnArgs: readonly string[], pomfile?: string): Promise<unknown> {
-    const mvn: string | undefined = await getMaven(pomfile);
+    const mvn: string | undefined = await getMaven(pomfile, { resolveExecutable: true });
     if (mvn === undefined) {
         throw new MavenNotFoundError();
     }
@@ -186,14 +186,15 @@ export async function executeInTerminal(options: {
     return terminal;
 }
 
-export async function getMaven(pomPath?: string): Promise<string | undefined> {
+export async function getMaven(pomPath?: string, options?: { resolveExecutable?: boolean }): Promise<string | undefined> {
+    const resolveExecutable = options?.resolveExecutable === true;
     const mvnPathFromSettings: string | undefined = getEffectiveExecutablePath(pomPath);
     if (mvnPathFromSettings) {
         // expand tilde to deal with ~/path-to-mvn
         const expandedPath: string = expandHome(mvnPathFromSettings);
         const safetyResult: "safe" | "use-default" | "abort" = await checkExecutablePathSafety(expandedPath);
         if (safetyResult === "safe") {
-            return await resolveConfiguredMavenExecutable(expandedPath);
+            return resolveExecutable ? await resolveMavenExecutable(expandedPath) : expandedPath;
         }
         if (safetyResult === "abort") {
             // User chose Open Settings or dismissed — abort the operation
@@ -202,7 +203,7 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
         // "use-default": User explicitly chose to use default Maven — skip wrapper
         // (also potentially attacker-controlled) and fall through to system Maven
         mavenOutputChannel.appendLine(`Configured Maven path "${expandedPath}" was declined. Falling back to system Maven.`);
-        return await defaultMavenExecutable();
+        return await defaultMavenExecutable(resolveExecutable);
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
@@ -213,10 +214,10 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
         }
     }
 
-    return await defaultMavenExecutable();
+    return await defaultMavenExecutable(resolveExecutable);
 }
 
-async function resolveConfiguredMavenExecutable(executable: string): Promise<string> {
+async function resolveMavenExecutable(executable: string): Promise<string> {
     return new Promise<string>((resolve) => {
         which(executable, (_err, filepath) => {
             resolve(filepath || executable);
@@ -360,11 +361,11 @@ async function getLocalMavenWrapper(projectFolder: string): Promise<string | und
     return undefined;
 }
 
-async function defaultMavenExecutable(): Promise<string | undefined> {
+async function defaultMavenExecutable(resolveExecutable = false): Promise<string | undefined> {
     return new Promise<string | undefined>((resolve) => {
         which("mvn", (_err, filepath) => {
             if (filepath) {
-                resolve(filepath);
+                resolve(resolveExecutable ? filepath : "mvn");
             } else {
                 mavenOutputChannel.appendLine("Maven executable not found in PATH.");
                 resolve(undefined);

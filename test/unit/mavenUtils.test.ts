@@ -25,7 +25,7 @@ const proxyquire: {
 type SafetyResult = "safe" | "use-default" | "abort";
 type MavenUtilsModule = {
     checkExecutablePathSafety: (p: string) => Promise<SafetyResult>;
-    getMaven: (pomPath?: string) => Promise<string | undefined>;
+    getMaven: (pomPath?: string, options?: { resolveExecutable?: boolean }) => Promise<string | undefined>;
 };
 
 // Load `mavenUtils` with all heavy imports stubbed. `noCallThru` keeps
@@ -79,14 +79,33 @@ describe("checkExecutablePathSafety — PR #1152", () => {
         resetStubs();
     });
 
-    it("uses the Maven executable path resolved from PATH", async () => {
+    it("keeps PATH lookup in the target shell for terminal execution", async () => {
         const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
         const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
 
-        assert.equal(await getMaven(), mvnPath);
+        assert.equal(await getMaven(), "mvn");
     });
 
-    it("resolves an allowed extensionless configured Maven command", async () => {
+    it("uses the Maven executable path resolved from PATH for direct spawning", async () => {
+        const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
+        const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
+
+        assert.equal(await getMaven(undefined, { resolveExecutable: true }), mvnPath);
+    });
+
+    it("keeps an allowed extensionless configured Maven command for terminal execution", async () => {
+        getConfigurationStub.impl = () => ({
+            get: () => undefined,
+            inspect: () => ({ globalValue: "mvn" })
+        });
+        showWarningMessageStub.impl = async () => "Allow";
+        const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
+        const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
+
+        assert.equal(await getMaven(), "mvn");
+    });
+
+    it("resolves an allowed extensionless configured Maven command for direct spawning", async () => {
         const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
         getConfigurationStub.impl = () => ({
             get: () => undefined,
@@ -95,7 +114,7 @@ describe("checkExecutablePathSafety — PR #1152", () => {
         showWarningMessageStub.impl = async () => "Allow";
         const { getMaven } = loadMavenUtils({ whichPath: mvnPath });
 
-        assert.equal(await getMaven(), mvnPath);
+        assert.equal(await getMaven(undefined, { resolveExecutable: true }), mvnPath);
     });
 
     describe("relative paths (always suspicious)", () => {
