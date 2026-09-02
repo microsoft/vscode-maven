@@ -87,6 +87,13 @@ describe("splitMavenExecutableOptions", () => {
             ["-Dpath=C:\\work dir\\", "-Dmessage=hello world"]
         );
     });
+
+    it("ignores opposite-style quotes when finding a closing quote", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" '-Dmessage=hello "world'`),
+            ["-Dpath=C:\\work dir\\", "-Dmessage=hello \"world"]
+        );
+    });
 });
 
 describe("getMavenExecutableOptionArgs", () => {

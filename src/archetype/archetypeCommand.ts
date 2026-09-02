@@ -25,9 +25,11 @@ export function buildArchetypeGenerateArgs(metadata: ArchetypeGenerateMetadata):
 }
 
 function hasUnpairedUnescapedQuote(value: string, start: number, quote: string): boolean {
-    let unpaired = false;
+    let targetQuoteOpen = false;
+    let oppositeQuote: string | undefined;
     for (let i = start; i < value.length; i++) {
-        if (value[i] !== quote) {
+        const ch = value[i];
+        if (ch !== "\"" && ch !== "'") {
             continue;
         }
 
@@ -35,12 +37,22 @@ function hasUnpairedUnescapedQuote(value: string, start: number, quote: string):
         for (let j = i - 1; j >= 0 && value[j] === "\\"; j--) {
             precedingBackslashes++;
         }
-        if (precedingBackslashes % 2 === 0) {
-            unpaired = !unpaired;
+        if (precedingBackslashes % 2 === 1) {
+            continue;
+        }
+
+        if (oppositeQuote) {
+            if (ch === oppositeQuote) {
+                oppositeQuote = undefined;
+            }
+        } else if (ch === quote) {
+            targetQuoteOpen = !targetQuoteOpen;
+        } else if (!targetQuoteOpen) {
+            oppositeQuote = ch;
         }
     }
     // Balanced quote pairs belong to later arguments and cannot close the current segment.
-    return unpaired;
+    return targetQuoteOpen;
 }
 
 export function splitMavenExecutableOptions(options: string | undefined): string[] {
