@@ -6,7 +6,7 @@ import * as child_process from "child_process";
 import * as fse from "fs-extra";
 import * as os from "os";
 import * as path from "path";
-import { spawnExecutable } from "../../src/utils/spawnExecutable";
+import { mergeEnvironment, resolveExecutablePath, spawnExecutable } from "../../src/utils/spawnExecutable";
 
 describe("spawnExecutable", () => {
     it("preserves Windows batch arguments without shell expansion", async function() {
@@ -50,16 +50,23 @@ describe("spawnExecutable", () => {
         }
     });
 
-    it("rejects unsafe characters before launching Windows batch files", function() {
+    it("rejects unsafe characters before launching Windows batch files", async function() {
         if (process.platform !== "win32") {
             this.skip();
         }
 
-        for (const argument of ["null\0character", "carriage\rreturn", "line\nfeed"]) {
-            assert.throws(
-                () => spawnExecutable("mvn.cmd", [argument], {}),
-                /Invalid character in argument/
-            );
+        const tempDirectory = await fse.mkdtemp(path.join(os.tmpdir(), "vscode-maven-invalid-args-"));
+        try {
+            const batchFile = path.join(tempDirectory, "mvn.cmd");
+            await fse.writeFile(batchFile, "@exit /b 0\r\n");
+            for (const argument of ["null\0character", "carriage\rreturn", "line\nfeed"]) {
+                assert.throws(
+                    () => spawnExecutable(batchFile, [argument], {}),
+                    /Invalid character in argument/
+                );
+            }
+        } finally {
+            await fse.remove(tempDirectory);
         }
     });
 
@@ -77,16 +84,132 @@ describe("spawnExecutable", () => {
             await fse.writeFile(batchFile, "@echo off\r\n\"%NODE_EXE%\" \"%CAPTURE_SCRIPT%\" %*\r\n");
 
             const proc = spawnExecutable(batchFile, ["argument"], {
-                env: {
-                    ...process.env,
+                env: mergeEnvironment(process.env, {
                     CAPTURE_OUTPUT: outputFile,
                     CAPTURE_SCRIPT: captureScript,
-                    NODE_EXE: process.execPath
-                }
+                    NODE_EXE: process.execPath,
+                    PATH: tempDirectory,
+                    PATHEXT: ".EXE"
+                })
             });
 
             assert.equal(await waitForExit(proc), 0);
             assert.deepEqual(JSON.parse(await fse.readFile(outputFile, "utf8")), ["argument"]);
+        } finally {
+            await fse.remove(tempDirectory);
+        }
+    });
+
+    it("resolves extensionless commands using the child environment PATH", async function() {
+        if (process.platform !== "win32") {
+            this.skip();
+        }
+
+        const tempDirectory = await fse.mkdtemp(path.join(os.tmpdir(), "vscode-maven-child-path-"));
+        const hostBin = path.join(tempDirectory, "host");
+        const childBin = path.join(tempDirectory, "child");
+        const pathKey = Object.keys(process.env).find(key => key.toUpperCase() === "PATH") ?? "PATH";
+        const originalPath: string | undefined = process.env[pathKey];
+        try {
+            await fse.ensureDir(hostBin);
+            await fse.ensureDir(childBin);
+            await fse.writeFile(path.join(hostBin, "mvn.cmd"), "@echo host\r\n");
+            await fse.writeFile(path.join(childBin, "mvn.cmd"), "@echo child\r\n");
+            process.env[pathKey] = [hostBin, originalPath].filter((value): value is string => !!value).join(path.delimiter);
+
+            const childPath = [childBin, hostBin, originalPath].filter((value): value is string => !!value).join(path.delimiter);
+            const childEnvironment = mergeEnvironment(process.env, {
+                PATH: childPath,
+                PATHEXT: ".CMD"
+            });
+            const proc = spawnExecutable("mvn", [], { env: childEnvironment });
+            let stdout = "";
+            proc.stdout?.on("data", (chunk: Buffer) => {
+                stdout += chunk.toString();
+            });
+
+            assert.equal(await waitForExit(proc), 0);
+            assert.equal(stdout.trim(), "child");
+        } finally {
+            if (originalPath === undefined) {
+                delete process.env[pathKey];
+            } else {
+                process.env[pathKey] = originalPath;
+            }
+            await fse.remove(tempDirectory);
+        }
+    });
+
+    it("does not fall back to the host PATHEXT when the child value is empty", async function() {
+        if (process.platform !== "win32") {
+            this.skip();
+        }
+
+        const tempDirectory = await fse.mkdtemp(path.join(os.tmpdir(), "vscode-maven-empty-pathext-"));
+        try {
+            await fse.writeFile(path.join(tempDirectory, "mvn.cmd"), "@exit /b 0\r\n");
+            const childEnvironment = mergeEnvironment(process.env, {
+                PATH: tempDirectory,
+                PATHEXT: ""
+            });
+
+            assert.equal(resolveExecutablePath("mvn", { env: childEnvironment }), undefined);
+        } finally {
+            await fse.remove(tempDirectory);
+        }
+    });
+
+    it("resolves native Windows executables independently of PATHEXT", function() {
+        if (process.platform !== "win32") {
+            this.skip();
+        }
+
+        const childEnvironment = mergeEnvironment(process.env, {
+            PATH: path.dirname(process.execPath),
+            PATHEXT: ""
+        });
+        assert.equal(
+            resolveExecutablePath(path.basename(process.execPath, ".exe"), { env: childEnvironment })?.toLowerCase(),
+            process.execPath.toLowerCase()
+        );
+    });
+
+    it("applies PATHEXT to dotted Windows command names", async function() {
+        if (process.platform !== "win32") {
+            this.skip();
+        }
+
+        const tempDirectory = await fse.mkdtemp(path.join(os.tmpdir(), "vscode-maven-dotted-command-"));
+        try {
+            const command = path.join(tempDirectory, "mvn.3.cmd");
+            await fse.writeFile(command, "@exit /b 0\r\n");
+            const childEnvironment = mergeEnvironment(process.env, {
+                PATH: tempDirectory,
+                PATHEXT: ".CMD"
+            });
+
+            assert.equal(resolveExecutablePath("mvn.3", { env: childEnvironment })?.toLowerCase(), command.toLowerCase());
+        } finally {
+            await fse.remove(tempDirectory);
+        }
+    });
+
+    it("does not resolve Windows commands through an empty PATH entry", async function() {
+        if (process.platform !== "win32") {
+            this.skip();
+        }
+
+        const tempDirectory = await fse.mkdtemp(path.join(os.tmpdir(), "vscode-maven-empty-path-entry-"));
+        try {
+            await fse.writeFile(path.join(tempDirectory, "mvn.cmd"), "@exit /b 0\r\n");
+            const missingDirectory = path.join(tempDirectory, "missing");
+            const childEnvironment = mergeEnvironment(process.env, {
+                PATH: `${missingDirectory}${path.delimiter}${path.delimiter}${missingDirectory}`,
+                PATHEXT: ".CMD",
+                NoDefaultCurrentDirectoryInExePath: "1"
+            });
+
+            assert.equal(resolveExecutablePath("mvn", { cwd: tempDirectory, env: childEnvironment }), undefined);
         } finally {
             await fse.remove(tempDirectory);
         }

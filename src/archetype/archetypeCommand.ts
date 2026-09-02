@@ -24,34 +24,62 @@ export function buildArchetypeGenerateArgs(metadata: ArchetypeGenerateMetadata):
     ].filter((arg): arg is string => !!arg);
 }
 
-function hasBalancedQuoteContinuation(value: string, start: number, initialQuote: string): boolean {
-    let quote: string | undefined = initialQuote;
-    for (let index = start; index < value.length; index++) {
-        const ch = value[index];
-        if (ch === "\\") {
-            let backslashEnd = index;
-            while (value[backslashEnd] === "\\") {
-                backslashEnd++;
-            }
-            const backslashCount = backslashEnd - index;
-            const next = value[backslashEnd];
-            if ((next === "\"" || next === "'") && (!quote || next === quote) && backslashCount % 2 === 1) {
-                index = backslashEnd;
-                continue;
-            }
-            index = backslashEnd - 1;
-            continue;
-        }
+function quoteBalanceLookup(value: string): (index: number, quote: string | undefined, escapedQuoteOpen: boolean) => boolean {
+    const quoteStates: Array<string | undefined> = [undefined, "\"", "'"];
+    const backslashEnds: number[] = new Array(value.length);
+    for (let index = value.length - 1; index >= 0; index--) {
+        backslashEnds[index] = value[index] === "\\"
+            ? (value[index + 1] === "\\" ? backslashEnds[index + 1] : index + 1)
+            : index;
+    }
 
-        if (ch === "\"" || ch === "'") {
-            if (!quote) {
-                quote = ch;
-            } else if (ch === quote) {
-                quote = undefined;
+    const stateKey = (index: number, quote: string | undefined, escapedQuoteOpen: boolean): string =>
+        `${index}:${quote ?? ""}:${escapedQuoteOpen}`;
+    const balanced = new Map<string, boolean>();
+    for (const quote of quoteStates) {
+        for (const escapedQuoteOpen of [false, true]) {
+            balanced.set(stateKey(value.length, quote, escapedQuoteOpen), quote === undefined);
+        }
+    }
+
+    const get = (index: number, quote: string | undefined, escapedQuoteOpen: boolean): boolean =>
+        balanced.get(stateKey(index, quote, escapedQuoteOpen)) === true;
+    for (let index = value.length - 1; index >= 0; index--) {
+        for (const quote of quoteStates) {
+            for (const escapedQuoteOpen of [false, true]) {
+                const ch = value[index];
+                let result: boolean;
+                if (ch === "\\") {
+                    const backslashEnd = backslashEnds[index];
+                    const next = value[backslashEnd];
+                    const escapedQuote = (next === "\"" || next === "'")
+                        && (!quote || next === quote)
+                        && (backslashEnd - index) % 2 === 1;
+                    if (!escapedQuote) {
+                        result = get(backslashEnd, quote, escapedQuoteOpen);
+                    } else if (!quote) {
+                        result = get(backslashEnd + 1, undefined, false);
+                    } else if (escapedQuoteOpen) {
+                        result = get(backslashEnd + 1, quote, false)
+                            || get(backslashEnd + 1, undefined, false);
+                    } else {
+                        result = get(backslashEnd + 1, quote, true)
+                            || get(backslashEnd + 1, undefined, false);
+                    }
+                } else if (quote) {
+                    result = ch === quote
+                        ? get(index + 1, undefined, false)
+                        : get(index + 1, quote, escapedQuoteOpen);
+                } else if (ch === "\"" || ch === "'") {
+                    result = get(index + 1, ch, false);
+                } else {
+                    result = get(index + 1, undefined, false);
+                }
+                balanced.set(stateKey(index, quote, escapedQuoteOpen), result);
             }
         }
     }
-    return quote === undefined;
+    return get;
 }
 
 export function splitMavenExecutableOptions(options: string | undefined): string[] {
@@ -62,8 +90,10 @@ export function splitMavenExecutableOptions(options: string | undefined): string
     const args: string[] = [];
     let current = "";
     let quote: string | undefined;
+    let escapedQuoteOpen = false;
     let tokenStarted = false;
     const trimmed = options.trim();
+    const quotesCanBalance = quoteBalanceLookup(trimmed);
     for (let i = 0; i < trimmed.length; i++) {
         const ch = trimmed[i];
 
@@ -74,13 +104,36 @@ export function splitMavenExecutableOptions(options: string | undefined): string
             }
             const backslashCount = backslashEnd - i;
             const next = trimmed[backslashEnd];
+            if (!quote && next !== undefined && /\s/.test(next) && backslashCount % 2 === 1) {
+                current += "\\".repeat(Math.floor(backslashCount / 2));
+                current += next;
+                i = backslashEnd;
+                tokenStarted = true;
+                continue;
+            }
             if ((next === "\"" || next === "'") && (!quote || next === quote)) {
                 const escapedQuote = backslashCount % 2 === 1;
-                const canEscapeQuote = escapedQuote && quote !== undefined && hasBalancedQuoteContinuation(trimmed, backslashEnd + 1, quote);
-                if (escapedQuote && (!quote || canEscapeQuote)) {
-                    current += "\\".repeat(backslashCount - 1);
+                const escapedContinuationBalances = quote !== undefined
+                    && quotesCanBalance(backslashEnd + 1, quote, true);
+                const closingContinuationBalances = quote !== undefined
+                    && quotesCanBalance(backslashEnd + 1, undefined, false);
+                const continuationLooksLikeOption = /^\s+["']?-/.test(trimmed.slice(backslashEnd + 1));
+                const opensEscapedQuote = quote !== undefined
+                    && !escapedQuoteOpen
+                    && escapedContinuationBalances
+                    && (!closingContinuationBalances || !continuationLooksLikeOption);
+                const continuesEscapedQuote = quote !== undefined
+                    && escapedQuoteOpen
+                    && escapedContinuationBalances
+                    && !closingContinuationBalances;
+                const canEscapeQuote = !quote || opensEscapedQuote || continuesEscapedQuote;
+                if (escapedQuote && canEscapeQuote) {
+                    current += "\\".repeat(Math.floor(backslashCount / 2));
                     current += next;
                     i = backslashEnd;
+                    if (quote) {
+                        escapedQuoteOpen = !escapedQuoteOpen;
+                    }
                 } else {
                     current += "\\".repeat(backslashCount);
                     i = backslashEnd - 1;
@@ -96,6 +149,7 @@ export function splitMavenExecutableOptions(options: string | undefined): string
         if (quote) {
             if (ch === quote) {
                 quote = undefined;
+                escapedQuoteOpen = false;
             } else {
                 current += ch;
             }
@@ -104,6 +158,7 @@ export function splitMavenExecutableOptions(options: string | undefined): string
 
         if (ch === "\"" || ch === "'") {
             quote = ch;
+            escapedQuoteOpen = false;
             tokenStarted = true;
             continue;
         }
@@ -131,10 +186,5 @@ export function getMavenExecutableOptionArgs(options: string | string[] | undefi
     if (!Array.isArray(options)) {
         return splitMavenExecutableOptions(options);
     }
-
-    const args: string[] = [];
-    for (const option of options) {
-        args.push(...splitMavenExecutableOptions(option));
-    }
-    return args;
+    return options.flatMap(option => splitMavenExecutableOptions(option));
 }

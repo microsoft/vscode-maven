@@ -7,7 +7,6 @@ import * as fse from "fs-extra";
 import * as md5 from "md5";
 import * as path from "path";
 import * as vscode from "vscode";
-import * as which from "which";
 import { getMavenExecutableOptionArgs } from "../archetype/archetypeCommand";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
@@ -17,7 +16,7 @@ import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage 
 import { mavenProblemMatcher } from "../mavenProblemMatcher";
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
-import { spawnExecutable } from "./spawnExecutable";
+import { mergeEnvironment, resolveExecutablePath, spawnExecutable } from "./spawnExecutable";
 
 // calculate dependency graph
 const GOAL_DEPENDENCY_GRAPH = "com.github.ferstl:depgraph-maven-plugin:4.0.3:graph";
@@ -78,13 +77,17 @@ export async function rawProfileList(pomPath: string): Promise<string | undefine
 }
 
 async function executeInBackground(mvnArgs: readonly string[], pomfile?: string): Promise<unknown> {
-    const mvn: string | undefined = await getMaven(pomfile, { resolveExecutable: true });
+    const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
+    const cwd: string | undefined = workspaceFolder?.uri.fsPath ?? (pomfile ? path.dirname(pomfile) : undefined);
+    const spawnOptions: child_process.SpawnOptions = {
+        cwd,
+        env: mergeEnvironment(process.env, Settings.getEnvironment(pomfile))
+    };
+    const mvn: string | undefined = await getMaven(pomfile, spawnOptions);
     if (mvn === undefined) {
         throw new MavenNotFoundError();
     }
 
-    const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const cwd: string | undefined = workspaceFolder?.uri.fsPath ?? (pomfile ? path.dirname(pomfile) : undefined);
     const userArgs: string | string[] | undefined = Settings.Executable.optionsValue(pomfile);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
     const args: string[] = [];
@@ -96,10 +99,6 @@ async function executeInBackground(mvnArgs: readonly string[], pomfile?: string)
     if (pomfile) {
         args.push("-f", pomfile);
     }
-    const spawnOptions: child_process.SpawnOptions = {
-        cwd,
-        env: Object.assign({}, process.env, Settings.getEnvironment(pomfile))
-    };
     return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
         mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command: mvn, args })}`);
         const proc: child_process.ChildProcess = spawnExecutable(mvn, args, spawnOptions);
@@ -186,15 +185,17 @@ export async function executeInTerminal(options: {
     return terminal;
 }
 
-export async function getMaven(pomPath?: string, options?: { resolveExecutable?: boolean }): Promise<string | undefined> {
-    const resolveExecutable = options?.resolveExecutable === true;
+export async function getMaven(
+    pomPath?: string,
+    executableOptions: Pick<child_process.SpawnOptions, "cwd" | "env"> = {}
+): Promise<string | undefined> {
     const mvnPathFromSettings: string | undefined = getEffectiveExecutablePath(pomPath);
     if (mvnPathFromSettings) {
         // expand tilde to deal with ~/path-to-mvn
         const expandedPath: string = expandHome(mvnPathFromSettings);
         const safetyResult: "safe" | "use-default" | "abort" = await checkExecutablePathSafety(expandedPath);
         if (safetyResult === "safe") {
-            return resolveExecutable ? await resolveMavenExecutable(expandedPath) : expandedPath;
+            return expandedPath;
         }
         if (safetyResult === "abort") {
             // User chose Open Settings or dismissed — abort the operation
@@ -203,7 +204,7 @@ export async function getMaven(pomPath?: string, options?: { resolveExecutable?:
         // "use-default": User explicitly chose to use default Maven — skip wrapper
         // (also potentially attacker-controlled) and fall through to system Maven
         mavenOutputChannel.appendLine(`Configured Maven path "${expandedPath}" was declined. Falling back to system Maven.`);
-        return await defaultMavenExecutable(resolveExecutable);
+        return await defaultMavenExecutable(executableOptions);
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
@@ -214,15 +215,7 @@ export async function getMaven(pomPath?: string, options?: { resolveExecutable?:
         }
     }
 
-    return await defaultMavenExecutable(resolveExecutable);
-}
-
-async function resolveMavenExecutable(executable: string): Promise<string> {
-    return new Promise<string>((resolve) => {
-        which(executable, (_err, filepath) => {
-            resolve(filepath || executable);
-        });
-    });
+    return await defaultMavenExecutable(executableOptions);
 }
 
 // Set of canonical executable paths the user has explicitly confirmed as safe during this session
@@ -361,17 +354,14 @@ async function getLocalMavenWrapper(projectFolder: string): Promise<string | und
     return undefined;
 }
 
-async function defaultMavenExecutable(resolveExecutable = false): Promise<string | undefined> {
-    return new Promise<string | undefined>((resolve) => {
-        which("mvn", (_err, filepath) => {
-            if (filepath) {
-                resolve(resolveExecutable ? filepath : "mvn");
-            } else {
-                mavenOutputChannel.appendLine("Maven executable not found in PATH.");
-                resolve(undefined);
-            }
-        });
-    });
+async function defaultMavenExecutable(
+    executableOptions: Pick<child_process.SpawnOptions, "cwd" | "env">
+): Promise<string | undefined> {
+    if (resolveExecutablePath("mvn", executableOptions)) {
+        return "mvn";
+    }
+    mavenOutputChannel.appendLine("Maven executable not found in PATH.");
+    return undefined;
 }
 
 function wrappedWithQuotes(mvn: string): string {

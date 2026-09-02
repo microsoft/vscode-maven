@@ -60,6 +60,13 @@ describe("splitMavenExecutableOptions", () => {
         );
     });
 
+    it("preserves backslash-escaped whitespace outside quotes", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath=/opt/Maven\ Home/conf -o`),
+            ["-Dpath=/opt/Maven Home/conf", "-o"]
+        );
+    });
+
     it("preserves backslashes in quoted values", () => {
         assert.deepEqual(
             splitMavenExecutableOptions("\"-Dregex=\\\\d+\""),
@@ -74,10 +81,52 @@ describe("splitMavenExecutableOptions", () => {
         );
     });
 
+    it("reduces paired backslashes before escaped literal quotes", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-DargLine="-Dmessage=\\\"hello\\\""`),
+            ["-DargLine=-Dmessage=\\\"hello\\\""]
+        );
+    });
+
+    it("preserves paired escaped quotes before whitespace inside a quoted value", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-DargLine="-Dfoo=\"hello\" -Xmx1g" -DskipTests`),
+            ["-DargLine=-Dfoo=\"hello\" -Xmx1g", "-DskipTests"]
+        );
+    });
+
+    it("preserves an escaped quote followed by whitespace inside a quoted value", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dmessage="foo\" bar" -X`),
+            ["-Dmessage=foo\" bar", "-X"]
+        );
+    });
+
+    it("preserves an adjacent suffix after a quoted value containing an escaped quote", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dmessage="foo\" bar"suffix -X`),
+            ["-Dmessage=foo\" barsuffix", "-X"]
+        );
+    });
+
     it("preserves a trailing backslash in a quoted Windows path", () => {
         assert.deepEqual(
             splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" -X`),
             ["-Dpath=C:\\work dir\\", "-X"]
+        );
+    });
+
+    it("preserves a suffix after a quoted Windows path ending in a backslash", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\"suffix -X`),
+            ["-Dpath=C:\\work dir\\suffix", "-X"]
+        );
+    });
+
+    it("combines a literal quote with a trailing Windows path separator", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions("-Dmessage=\"a\\\" C:\\x\\\" -X"),
+            ["-Dmessage=a\" C:\\x\\", "-X"]
         );
     });
 
@@ -106,6 +155,21 @@ describe("splitMavenExecutableOptions", () => {
         assert.deepEqual(
             splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" -Dmessage=hello\"world`),
             ["-Dpath=C:\\work dir\\", "-Dmessage=hello\"world"]
+        );
+    });
+
+    it("does not use a later escaped-quote pair to extend a Windows path", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" -Dmessage=hello\"world\" "-Danother=two words"`),
+            ["-Dpath=C:\\work dir\\", "-Dmessage=hello\"world\"", "-Danother=two words"]
+        );
+    });
+
+    it("handles long quoted options without recursive parsing", () => {
+        const value = "x".repeat(5_000);
+        assert.deepEqual(
+            splitMavenExecutableOptions(`-Dmessage="start \\\"${value}\\\" end" -X`),
+            [`-Dmessage=start "${value}" end`, "-X"]
         );
     });
 });
