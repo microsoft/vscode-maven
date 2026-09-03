@@ -84,7 +84,11 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
         registerCommandRequiringTrust(context, `maven.goal.${goal}`, async (node: MavenProject) => executeInTerminal({ command: goal, pomfile: node.pomPath }));
     });
     registerCommand(context, "maven.explorer.refresh", async (item: ITreeItem) => {
-        item?.refresh ? item.refresh() : MavenExplorerProvider.getInstance().refresh(item);
+        if (item?.refresh) {
+            item.refresh();
+        } else {
+            MavenExplorerProvider.getInstance().refresh(item);
+        }
     });
     registerCommandRequiringTrust(context, "maven.project.effectivePom", async (projectOrUri: Uri | MavenProject) => await Utils.showEffectivePom(projectOrUri));
     registerCommandRequiringTrust(context, "maven.goal.custom", async (node: string | MavenProject, goal?: string, env?: { [key: string]: string }) => await Utils.executeCustomGoal(node, goal, env));
