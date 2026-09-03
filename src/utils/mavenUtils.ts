@@ -7,7 +7,7 @@ import * as fse from "fs-extra";
 import * as md5 from "md5";
 import * as path from "path";
 import * as vscode from "vscode";
-import * as which from "which";
+import { getMavenExecutableOptionArgs } from "../archetype/archetypeCommand";
 import { mavenOutputChannel } from "../mavenOutputChannel";
 import { mavenTerminal } from "../mavenTerminal";
 import { MavenProjectManager } from "../project/MavenProjectManager";
@@ -16,10 +16,11 @@ import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage 
 import { mavenProblemMatcher } from "../mavenProblemMatcher";
 import { MavenNotFoundError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
+import { mergeEnvironment, resolveExecutablePath, spawnExecutable } from "./spawnExecutable";
 
 // calculate dependency graph
 const GOAL_DEPENDENCY_GRAPH = "com.github.ferstl:depgraph-maven-plugin:4.0.3:graph";
-const OPTIONS_DEPENDENCY_GRAPH = "-DgraphFormat=text -DshowDuplicates -DshowConflicts -DshowVersions -DshowGroupIds";
+const OPTIONS_DEPENDENCY_GRAPH = ["-DgraphFormat=text", "-DshowDuplicates", "-DshowConflicts", "-DshowVersions", "-DshowGroupIds"];
 
 /**
  * Get effective pom of a Maven project.
@@ -40,7 +41,7 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
         return await readFileIfExists(epomPath);
     }
 
-    await executeInBackground(`-B -Doutput="${epomPath}" help:effective-pom`, pomPath);
+    await executeInBackground(["-B", `-Doutput=${epomPath}`, "help:effective-pom"], pomPath);
     await fse.writeFile(mtimePath, mtimeMs);
     return await readFileIfExists(epomPath);
 }
@@ -50,50 +51,57 @@ export async function rawDependencyTree(pomPath: string): Promise<string | undef
     const dependencyGraphPath = `${outputPath}.deps.txt`;
     const outputDirectory: string = path.dirname(dependencyGraphPath);
     const outputFileName: string = path.basename(dependencyGraphPath);
-    await executeInBackground(`-B -N ${OPTIONS_DEPENDENCY_GRAPH} -DoutputDirectory="${outputDirectory}" -DoutputFileName="${outputFileName}" ${GOAL_DEPENDENCY_GRAPH}`, pomPath);
+    await executeInBackground([
+        "-B",
+        "-N",
+        ...OPTIONS_DEPENDENCY_GRAPH,
+        `-DoutputDirectory=${outputDirectory}`,
+        `-DoutputFileName=${outputFileName}`,
+        GOAL_DEPENDENCY_GRAPH
+    ], pomPath);
     return await readFileIfExists(path.join(outputDirectory, outputFileName));
 }
 
 export async function pluginDescription(pluginId: string, pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pluginId);
     // For MacOSX, add "-Dapple.awt.UIElement=true" to prevent showing icons in dock
-    await executeInBackground(`-B -Dapple.awt.UIElement=true -Dplugin=${pluginId} -Doutput="${outputPath}" help:describe`, pomPath);
+    await executeInBackground(["-B", "-Dapple.awt.UIElement=true", `-Dplugin=${pluginId}`, `-Doutput=${outputPath}`, "help:describe"], pomPath);
     return await readFileIfExists(outputPath);
 }
 
 export async function rawProfileList(pomPath: string): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
     const profileListPath = `${outputPath}.profiles.txt`;
-    await executeInBackground(`-B -Doutput="${profileListPath}" help:all-profiles`, pomPath);
+    await executeInBackground(["-B", `-Doutput=${profileListPath}`, "help:all-profiles"], pomPath);
     return await readFileIfExists(profileListPath);
 }
 
-async function executeInBackground(mvnArgs: string, pomfile?: string): Promise<unknown> {
-    const mvn: string | undefined = await getMaven(pomfile);
+async function executeInBackground(mvnArgs: readonly string[], pomfile?: string): Promise<unknown> {
+    const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
+    const cwd: string | undefined = workspaceFolder?.uri.fsPath ?? (pomfile ? path.dirname(pomfile) : undefined);
+    const spawnOptions: child_process.SpawnOptions = {
+        cwd,
+        env: mergeEnvironment(process.env, Settings.getEnvironment(pomfile))
+    };
+    const mvn: string | undefined = await getMaven(pomfile, spawnOptions);
     if (mvn === undefined) {
         throw new MavenNotFoundError();
     }
 
-    const command: string = wrappedWithQuotes(mvn);
-    // TODO: re-visit cwd
-    const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
-    const cwd: string | undefined = workspaceFolder ? path.resolve(workspaceFolder.uri.fsPath, mvn, "..") : undefined;
-    const userArgs: string | undefined = Settings.Executable.options(pomfile);
+    const userArgs: string | string[] | undefined = Settings.Executable.optionsValue(pomfile);
     const mvnSettingsFile: string | undefined = Settings.getSettingsFilePath();
-    const mvnSettingsArg: string | undefined = mvnSettingsFile ? `-s "${await mavenTerminal.formattedPathForTerminal(mvnSettingsFile)}"` : undefined;
-    const matched: RegExpMatchArray | null = [mvnSettingsArg, mvnArgs, userArgs].filter(Boolean).join(" ").match(/(?:[^\s"]+|"[^"]*")+/g); // Split by space, but ignore spaces in quotes
-    const args: string[] = matched !== null ? matched : [];
-    if (pomfile) {
-        args.push("-f", `"${pomfile}"`);
+    const args: string[] = [];
+    if (mvnSettingsFile) {
+        args.push("-s", mvnSettingsFile);
     }
-    const spawnOptions: child_process.SpawnOptions = {
-        cwd,
-        env: Object.assign({}, process.env, Settings.getEnvironment(pomfile)),
-        shell: true
-    };
+    args.push(...mvnArgs);
+    args.push(...getMavenExecutableOptionArgs(userArgs));
+    if (pomfile) {
+        args.push("-f", pomfile);
+    }
     return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
-        mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command, args })}`);
-        const proc: child_process.ChildProcess = child_process.spawn(command, args, spawnOptions);  // CodeQL [SM03609] safe here as args is assembled in the code and cannot be arbitrary string.
+        mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command: mvn, args })}`);
+        const proc: child_process.ChildProcess = spawnExecutable(mvn, args, spawnOptions);
         proc.on("error", (err: Error) => {
             reject(new Error(`Error occurred in background process. ${err.message}`));
         });
@@ -177,7 +185,10 @@ export async function executeInTerminal(options: {
     return terminal;
 }
 
-export async function getMaven(pomPath?: string): Promise<string | undefined> {
+export async function getMaven(
+    pomPath?: string,
+    executableOptions: Pick<child_process.SpawnOptions, "cwd" | "env"> = {}
+): Promise<string | undefined> {
     const mvnPathFromSettings: string | undefined = getEffectiveExecutablePath(pomPath);
     if (mvnPathFromSettings) {
         // expand tilde to deal with ~/path-to-mvn
@@ -193,7 +204,7 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
         // "use-default": User explicitly chose to use default Maven — skip wrapper
         // (also potentially attacker-controlled) and fall through to system Maven
         mavenOutputChannel.appendLine(`Configured Maven path "${expandedPath}" was declined. Falling back to system Maven.`);
-        return await defaultMavenExecutable();
+        return await defaultMavenExecutable(executableOptions);
     }
 
     const preferMavenWrapper: boolean = Settings.Executable.preferMavenWrapper(pomPath);
@@ -204,7 +215,7 @@ export async function getMaven(pomPath?: string): Promise<string | undefined> {
         }
     }
 
-    return await defaultMavenExecutable();
+    return await defaultMavenExecutable(executableOptions);
 }
 
 // Set of canonical executable paths the user has explicitly confirmed as safe during this session
@@ -343,17 +354,14 @@ async function getLocalMavenWrapper(projectFolder: string): Promise<string | und
     return undefined;
 }
 
-async function defaultMavenExecutable(): Promise<string | undefined> {
-    return new Promise<string | undefined>((resolve) => {
-        which("mvn", (_err, filepath) => {
-            if (filepath) {
-                resolve("mvn");
-            } else {
-                mavenOutputChannel.appendLine("Maven executable not found in PATH.");
-                resolve(undefined);
-            }
-        });
-    });
+async function defaultMavenExecutable(
+    executableOptions: Pick<child_process.SpawnOptions, "cwd" | "env">
+): Promise<string | undefined> {
+    if (resolveExecutablePath("mvn", executableOptions)) {
+        return "mvn";
+    }
+    mavenOutputChannel.appendLine("Maven executable not found in PATH.");
+    return undefined;
 }
 
 function wrappedWithQuotes(mvn: string): string {

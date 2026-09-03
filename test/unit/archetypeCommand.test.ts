@@ -60,19 +60,125 @@ describe("splitMavenExecutableOptions", () => {
         );
     });
 
+    it("preserves backslash-escaped whitespace outside quotes", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath=/opt/Maven\ Home/conf -o`),
+            ["-Dpath=/opt/Maven Home/conf", "-o"]
+        );
+    });
+
     it("preserves backslashes in quoted values", () => {
         assert.deepEqual(
             splitMavenExecutableOptions("\"-Dregex=\\\\d+\""),
             ["-Dregex=\\\\d+"]
         );
     });
+
+    it("preserves escaped literal quotes inside quoted values", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions("-DargLine=\"-Dmessage=\\\"hello world\\\"\""),
+            ["-DargLine=-Dmessage=\"hello world\""]
+        );
+    });
+
+    it("reduces paired backslashes before escaped literal quotes", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-DargLine="-Dmessage=\\\"hello\\\""`),
+            ["-DargLine=-Dmessage=\\\"hello\\\""]
+        );
+    });
+
+    it("preserves paired escaped quotes before whitespace inside a quoted value", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-DargLine="-Dfoo=\"hello\" -Xmx1g" -DskipTests`),
+            ["-DargLine=-Dfoo=\"hello\" -Xmx1g", "-DskipTests"]
+        );
+    });
+
+    it("preserves an escaped quote followed by whitespace inside a quoted value", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dmessage="foo\" bar" -X`),
+            ["-Dmessage=foo\" bar", "-X"]
+        );
+    });
+
+    it("preserves an adjacent suffix after a quoted value containing an escaped quote", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dmessage="foo\" bar"suffix -X`),
+            ["-Dmessage=foo\" barsuffix", "-X"]
+        );
+    });
+
+    it("preserves a trailing backslash in a quoted Windows path", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" -X`),
+            ["-Dpath=C:\\work dir\\", "-X"]
+        );
+    });
+
+    it("preserves a suffix after a quoted Windows path ending in a backslash", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\"suffix -X`),
+            ["-Dpath=C:\\work dir\\suffix", "-X"]
+        );
+    });
+
+    it("combines a literal quote with a trailing Windows path separator", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions("-Dmessage=\"a\\\" C:\\x\\\" -X"),
+            ["-Dmessage=a\" C:\\x\\", "-X"]
+        );
+    });
+
+    it("does not use quotes from later arguments to close a Windows path", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" "-Dmessage=hello world"`),
+            ["-Dpath=C:\\work dir\\", "-Dmessage=hello world"]
+        );
+    });
+
+    it("ignores opposite-style quotes when finding a closing quote", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" '-Dmessage=hello "world'`),
+            ["-Dpath=C:\\work dir\\", "-Dmessage=hello \"world"]
+        );
+    });
+
+    it("preserves apostrophes inside a double-quoted value", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dmessage="say \"Bob's hello\"" -X`),
+            ["-Dmessage=say \"Bob's hello\"", "-X"]
+        );
+    });
+
+    it("does not use an escaped quote from a later argument to close a Windows path", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" -Dmessage=hello\"world`),
+            ["-Dpath=C:\\work dir\\", "-Dmessage=hello\"world"]
+        );
+    });
+
+    it("does not use a later escaped-quote pair to extend a Windows path", () => {
+        assert.deepEqual(
+            splitMavenExecutableOptions(String.raw`-Dpath="C:\work dir\" -Dmessage=hello\"world\" "-Danother=two words"`),
+            ["-Dpath=C:\\work dir\\", "-Dmessage=hello\"world\"", "-Danother=two words"]
+        );
+    });
+
+    it("handles long quoted options without recursive parsing", () => {
+        const value = "x".repeat(5_000);
+        assert.deepEqual(
+            splitMavenExecutableOptions(`-Dmessage="start \\\"${value}\\\" end" -X`),
+            [`-Dmessage=start "${value}" end`, "-X"]
+        );
+    });
 });
 
 describe("getMavenExecutableOptionArgs", () => {
-    it("preserves array options as argv entries", () => {
+    it("splits each array option fragment independently", () => {
         assert.deepEqual(
-            getMavenExecutableOptionArgs(["-Dmessage=hello world", "-Dshare=\\\\server\\share"]),
-            ["-Dmessage=hello world", "-Dshare=\\\\server\\share"]
+            getMavenExecutableOptionArgs(["-o", "-s ./settings.xml", "-Dmessage=\"hello world\""]),
+            ["-o", "-s", "./settings.xml", "-Dmessage=hello world"]
         );
     });
 
