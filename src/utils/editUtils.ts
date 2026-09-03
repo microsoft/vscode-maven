@@ -1,13 +1,58 @@
 import * as vscode from "vscode";
-import { commands, Position, Selection, TextEdit, TextEditor, window, workspace, WorkspaceEdit } from "vscode";
-import * as protocolConverter from "vscode-languageclient/lib/common/protocolConverter";
-import * as ls from "vscode-languageserver-protocol";
+import { commands, Position, Range, Selection, TextEdit, TextEditor, Uri, window, workspace, WorkspaceEdit, WorkspaceEditEntryMetadata } from "vscode";
+import type * as ls from "vscode-languageserver-protocol/lib/common/api";
 
-const p2c: protocolConverter.Converter = protocolConverter.createConverter(undefined, undefined);
+export function convertWorkspaceEdit(edit: ls.WorkspaceEdit): WorkspaceEdit {
+    const result = new WorkspaceEdit();
+    const asMetadata = (annotationId: ls.ChangeAnnotationIdentifier | undefined): WorkspaceEditEntryMetadata | undefined => {
+        const annotation: ls.ChangeAnnotation | undefined = annotationId === undefined ? undefined : edit.changeAnnotations?.[annotationId];
+        return annotation === undefined ? undefined : {
+            label: annotation.label,
+            needsConfirmation: !!annotation.needsConfirmation,
+            description: annotation.description
+        };
+    };
+    const asRange = (range: ls.Range): Range => new Range(
+        range.start.line,
+        range.start.character,
+        range.end.line,
+        range.end.character
+    );
+
+    if (edit.documentChanges) {
+        for (const change of edit.documentChanges) {
+            if ("kind" in change && change.kind === "create") {
+                result.createFile(Uri.parse(change.uri), change.options, asMetadata(change.annotationId));
+            } else if ("kind" in change && change.kind === "rename") {
+                result.renameFile(Uri.parse(change.oldUri), Uri.parse(change.newUri), change.options, asMetadata(change.annotationId));
+            } else if ("kind" in change && change.kind === "delete") {
+                result.deleteFile(Uri.parse(change.uri), change.options, asMetadata(change.annotationId));
+            } else if ("textDocument" in change) {
+                const edits: [TextEdit, WorkspaceEditEntryMetadata | undefined][] = change.edits.map(protocolEdit => {
+                    if ("snippet" in protocolEdit) {
+                        throw new Error("Snippet text edits are not supported by Maven for Java workspace edits.");
+                    }
+                    const metadata: WorkspaceEditEntryMetadata | undefined = "annotationId" in protocolEdit
+                        ? asMetadata(protocolEdit.annotationId)
+                        : undefined;
+                    return [new TextEdit(asRange(protocolEdit.range), protocolEdit.newText), metadata];
+                });
+                result.set(Uri.parse(change.textDocument.uri), edits);
+            } else {
+                throw new Error(`Unknown workspace edit change received: ${JSON.stringify(change)}`);
+            }
+        }
+    } else if (edit.changes) {
+        for (const [uri, edits] of Object.entries(edit.changes)) {
+            result.set(Uri.parse(uri), edits.map(protocolEdit => new TextEdit(asRange(protocolEdit.range), protocolEdit.newText)));
+        }
+    }
+    return result;
+}
 
 // tslint:disable-next-line: export-name
 export async function applyWorkspaceEdit(edit: ls.WorkspaceEdit): Promise<void> {
-    const workspaceEdit: WorkspaceEdit = p2c.asWorkspaceEdit(edit);
+    const workspaceEdit: WorkspaceEdit = convertWorkspaceEdit(edit);
     if (workspaceEdit !== undefined) {
         await workspace.applyEdit(workspaceEdit);
         // By executing the range formatting command to correct the indention according to the VS Code editor settings.
