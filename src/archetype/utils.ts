@@ -1,5 +1,5 @@
-import assert = require("assert");
-import path = require("path");
+import * as assert from "assert";
+import * as path from "path";
 import * as vscode from "vscode";
 import { sendInfo } from "vscode-extension-telemetry-wrapper";
 import { isJavaLanguageServerStandard } from "../jdtls/commands";
