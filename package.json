@@ -833,7 +833,7 @@
     "update-xsd": "tsc scripts/generate-maven-xsd.ts && node scripts/generate-maven-xsd.js"
   },
   "devDependencies": {
-    "@types/fs-extra": "^4.0.15",
+    "@types/fs-extra": "^11.0.4",
     "@types/glob": "^7.2.0",
     "@types/lodash": "^4.17.25",
     "@types/lru-cache": "^5.1.0",
@@ -862,7 +862,7 @@
     "domhandler": "^5.0.3",
     "expand-home-dir": "0.0.3",
     "fast-glob": "^3.3.3",
-    "fs-extra": "^4.0.3",
+    "fs-extra": "^11.4.0",
     "get-port": "^7.2.0",
     "htmlparser2": "^8.0.1",
     "jszip": "^3.10.1",
