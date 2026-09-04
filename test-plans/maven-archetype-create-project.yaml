@@ -21,6 +21,8 @@ setup:
   extensionPath: "../../vscode-maven"
   workspace: "../test/projects/lifecycle-compile"
   vscodeVersion: "stable"
+  settings:
+    maven.executable.options: "-DinteractiveMode=false"
   timeout: 180
 
 steps:
