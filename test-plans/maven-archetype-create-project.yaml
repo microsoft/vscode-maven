@@ -102,16 +102,19 @@ steps:
     verifyTerminal:
       contains: "BUILD SUCCESS"
       notContains: "BUILD FAILURE"
+    skipLlmVerify: true
     timeout: 120
 
   - id: "verify-generated-pom"
     action: "wait 1 second"
     verifyFile:
       path: "${workspaceParent}/autotest-archetype-demo/pom.xml"
-      matches: "(?s)<groupId>com\\.microsoft\\.vscode\\.maven\\.autotest</groupId>.*<artifactId>autotest-archetype-demo</artifactId>.*<version>1\\.0-SNAPSHOT</version>"
+      matches: "<groupId>com\\.microsoft\\.vscode\\.maven\\.autotest</groupId>[\\s\\S]*<artifactId>autotest-archetype-demo</artifactId>[\\s\\S]*<version>1\\.0-SNAPSHOT</version>"
+    skipLlmVerify: true
 
   - id: "verify-generated-source"
     action: "wait 1 second"
     verifyFile:
       path: "${workspaceParent}/autotest-archetype-demo/src/main/java/com/microsoft/vscode/maven/autotest/App.java"
       contains: "package com.microsoft.vscode.maven.autotest;"
+    skipLlmVerify: true
