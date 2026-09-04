@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { commands, Position, Range, Selection, TextEdit, TextEditor, Uri, window, workspace, WorkspaceEdit, WorkspaceEditEntryMetadata } from "vscode";
-import type * as ls from "vscode-languageserver-protocol/lib/common/api";
+import type * as ls from "vscode-languageserver-protocol";
 
 export function convertWorkspaceEdit(edit: ls.WorkspaceEdit): WorkspaceEdit {
     const result = new WorkspaceEdit();
@@ -28,16 +28,16 @@ export function convertWorkspaceEdit(edit: ls.WorkspaceEdit): WorkspaceEdit {
             } else if ("kind" in change && change.kind === "delete") {
                 result.deleteFile(Uri.parse(change.uri), change.options, asMetadata(change.annotationId));
             } else if ("textDocument" in change) {
-                const edits: [TextEdit, WorkspaceEditEntryMetadata | undefined][] = change.edits.map(protocolEdit => {
+                const uri = Uri.parse(change.textDocument.uri);
+                for (const protocolEdit of change.edits) {
                     if ("snippet" in protocolEdit) {
                         throw new Error("Snippet text edits are not supported by Maven for Java workspace edits.");
                     }
                     const metadata: WorkspaceEditEntryMetadata | undefined = "annotationId" in protocolEdit
                         ? asMetadata(protocolEdit.annotationId)
                         : undefined;
-                    return [new TextEdit(asRange(protocolEdit.range), protocolEdit.newText), metadata];
-                });
-                result.set(Uri.parse(change.textDocument.uri), edits);
+                    result.replace(uri, asRange(protocolEdit.range), protocolEdit.newText, metadata);
+                }
             } else {
                 throw new Error(`Unknown workspace edit change received: ${JSON.stringify(change)}`);
             }

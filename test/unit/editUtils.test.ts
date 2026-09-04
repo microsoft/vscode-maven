@@ -42,6 +42,10 @@ class FakeWorkspaceEdit {
         this.operations.push({ kind: "set", args });
     }
 
+    public replace(...args: unknown[]): void {
+        this.operations.push({ kind: "replace", args });
+    }
+
     public createFile(...args: unknown[]): void {
         this.operations.push({ kind: "create", args });
     }
@@ -107,10 +111,12 @@ describe("convertWorkspaceEdit", () => {
             ]
         });
 
-        assert.deepEqual(converted.operations.map(operation => operation.kind), ["create", "set", "rename", "delete"]);
+        assert.deepEqual(converted.operations.map(operation => operation.kind), ["create", "replace", "rename", "delete"]);
         assert.deepEqual(converted.operations[0].args[2], { label: "Migration", needsConfirmation: true, description: undefined });
-        const annotatedEdits = converted.operations[1].args[1] as Array<[FakeTextEdit, { label: string }]>;
-        assert.equal(annotatedEdits[0][1].label, "Migration");
+        assert.equal((converted.operations[1].args[0] as FakeUri).value, "file:///new.xml");
+        assert.deepEqual(converted.operations[1].args[1], new FakeRange(0, 0, 0, 0));
+        assert.equal(converted.operations[1].args[2], "content");
+        assert.deepEqual(converted.operations[1].args[3], { label: "Migration", needsConfirmation: true, description: undefined });
     });
 
     it("rejects unsupported snippet edits explicitly", () => {
