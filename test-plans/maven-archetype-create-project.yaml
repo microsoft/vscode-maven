@@ -10,7 +10,7 @@ name: "vscode-maven — Archetype Create Project"
 description: |
   Drives the Maven quickstart archetype creation wizard through archetype,
   version, groupId, artifactId, and destination folder input, then verifies that
-  Maven generates the project in the selected folder.
+  Maven completes successfully and generates the expected project.
 platforms:
   - win32
 
@@ -21,6 +21,8 @@ setup:
   extensionPath: "../../vscode-maven"
   workspace: "../test/projects/lifecycle-compile"
   vscodeVersion: "stable"
+  settings:
+    maven.executable.options: "-DinteractiveMode=false"
   timeout: 180
 
 steps:
@@ -93,53 +95,28 @@ steps:
     action: "confirmQuickInput"
     # No `verify:` — mirrors `confirm-group-id` / `confirm-artifact-id` above.
     # Pressing Enter closes the quick-pick; the archetype wizard then opens a
-    # terminal asynchronously for the remaining prompts. The immediately-next
-    # `wait-for-version-prompt` step is what asserts the terminal actually
-    # opened and reached the version prompt.
+    # terminal asynchronously. The next step polls the terminal for Maven's
+    # deterministic build result.
     timeout: 10
 
-  - id: "wait-for-version-prompt"
-    action: "wait 30 seconds"
-    verify: "Maven archetype task terminal is focused and prompts for the default version"
-
-  - id: "accept-default-version"
-    action: "pressTerminalKey Enter"
-    verify: "Default Maven project version is accepted"
-
-  - id: "accept-default-package"
-    action: "pressTerminalKey Enter"
-    verify: "Default Java package is accepted"
-
-  - id: "confirm-archetype-generation"
-    action: "pressTerminalKey Enter"
-    # No freeform `verify:`. Under maven-archetype-plugin 3.1.2 with
-    # all required params supplied via -D and `package` auto-derived
-    # from groupId, Maven only prompts twice — for `version` and for
-    # `Confirm properties configuration: Y:`. Those are answered by
-    # `accept-default-version` and (despite its name) `accept-default-
-    # package`. By the time this step runs, Maven has already
-    # generated the project and the terminal is at "Press any key to
-    # close". This Enter just closes the terminal — there is no
-    # stable visual state to verify and the terminal scrollback is
-    # disposed afterwards. Silent-pass for the whole generation chain
-    # is guarded deterministically by `verify-generated-pom` below
-    # (verifyFile checks both path and content); any earlier
-    # Enter-not-delivered failure would leave Maven stuck at its
-    # prompt and pom.xml uncreated, which that step catches.
-
   - id: "wait-for-generation"
-    action: "wait 120 seconds"
-    # Passive wait — kept as a safety buffer in case a slower runner
-    # has not yet finished generation by the time we reach this step
-    # (the terminal-close Enter above is best-effort and timing-
-    # dependent). No verifyTerminal here because the terminal panel
-    # is typically disposed by Maven's task auto-close after the
-    # `Press any key to close` Enter, so getTerminalText() would
-    # return empty. The next step's `verifyFile` is the deterministic
-    # source of truth.
+    action: "wait 1 second"
+    verifyTerminal:
+      contains: "BUILD SUCCESS"
+      notContains: "BUILD FAILURE"
+    skipLlmVerify: true
+    timeout: 120
 
   - id: "verify-generated-pom"
     action: "wait 1 second"
     verifyFile:
       path: "${workspaceParent}/autotest-archetype-demo/pom.xml"
-      contains: "<artifactId>autotest-archetype-demo</artifactId>"
+      matches: "<groupId>com\\.microsoft\\.vscode\\.maven\\.autotest</groupId>[\\s\\S]*<artifactId>autotest-archetype-demo</artifactId>[\\s\\S]*<version>1\\.0-SNAPSHOT</version>"
+    skipLlmVerify: true
+
+  - id: "verify-generated-source"
+    action: "wait 1 second"
+    verifyFile:
+      path: "${workspaceParent}/autotest-archetype-demo/src/main/java/com/microsoft/vscode/maven/autotest/App.java"
+      contains: "package com.microsoft.vscode.maven.autotest;"
+    skipLlmVerify: true
