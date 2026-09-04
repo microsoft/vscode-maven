@@ -93,22 +93,25 @@ steps:
     action: "confirmQuickInput"
     # No `verify:` — mirrors `confirm-group-id` / `confirm-artifact-id` above.
     # Pressing Enter closes the quick-pick; the archetype wizard then opens a
-    # terminal asynchronously for the remaining prompts. The immediately-next
-    # `wait-for-version-prompt` step is what asserts the terminal actually
-    # opened and reached the version prompt.
+    # terminal asynchronously. The terminal may still be prompting or may have
+    # completed generation by the time a screenshot is captured, so the final
+    # `verify-generated-pom` step is the deterministic assertion.
     timeout: 10
 
   - id: "wait-for-version-prompt"
     action: "wait 30 seconds"
-    verify: "Maven archetype task terminal is focused and prompts for the default version"
+    # No freeform `verify:`. Depending on runner timing, Maven may still be at
+    # an interactive prompt or may already show a successful build.
 
   - id: "accept-default-version"
     action: "pressTerminalKey Enter"
-    verify: "Default Maven project version is accepted"
+    # No freeform `verify:`. Terminal output after Enter is timing-dependent;
+    # successful generation is verified from the generated pom.xml below.
 
   - id: "accept-default-package"
     action: "pressTerminalKey Enter"
-    verify: "Default Java package is accepted"
+    # No freeform `verify:`. This key accepts the next prompt when present, but
+    # may close or reopen the terminal if generation has already completed.
 
   - id: "confirm-archetype-generation"
     action: "pressTerminalKey Enter"
