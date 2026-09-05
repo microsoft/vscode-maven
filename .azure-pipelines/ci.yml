@@ -54,9 +54,9 @@ extends:
               - checkout: self
                 fetchTags: false
               - task: NodeTool@0
-                displayName: 'Use Node.js 20.x'
+                displayName: 'Use Node.js 20.19.0'
                 inputs:
-                  versionSpec: '20.x'
+                  versionSpec: '20.19.0'
               - template: /.azure-pipelines/npm-cfs.yml@self
               - task: CmdLine@2
                 displayName: 'npm install'
