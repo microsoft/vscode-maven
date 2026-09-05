@@ -16,7 +16,6 @@ import { PomCompletionProvider } from "./completion/PomCompletionProvider";
 import { DEFAULT_MAVEN_LIFECYCLES } from "./completion/constants";
 import { contentProvider } from "./contentProvider";
 import { definitionProvider } from "./definition/definitionProvider";
-import { initExpService } from "./experimentationService";
 import { MavenExplorerProvider } from "./explorer/MavenExplorerProvider";
 import { decorationProvider } from "./explorer/decorationProvider";
 import { Dependency } from "./explorer/model/Dependency";
@@ -55,7 +54,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     if (getAiKey()) {
         initialize(getExtensionId(), getExtensionVersion(), getAiKey());
     }
-    await initExpService(context);
     await instrumentOperation("activation", doActivate)(context);
 }
 
