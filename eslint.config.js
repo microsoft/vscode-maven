@@ -1,5 +1,6 @@
 const eslint = require("@eslint/js");
 const typescriptEslint = require("@typescript-eslint/eslint-plugin");
+const typescriptParser = require("@typescript-eslint/parser");
 
 const typescriptFiles = ["**/*.ts"];
 
@@ -22,13 +23,17 @@ module.exports = [
         },
     },
     eslint.configs.recommended,
-    ...typescriptEslint.configs["flat/recommended"].map(config => ({
-        ...config,
-        files: typescriptFiles,
-    })),
     {
         files: typescriptFiles,
+        languageOptions: {
+            parser: typescriptParser,
+        },
+        plugins: {
+            "@typescript-eslint": typescriptEslint,
+        },
         rules: {
+            ...typescriptEslint.configs["eslint-recommended"].overrides[0].rules,
+            ...typescriptEslint.configs.recommended.rules,
             "@typescript-eslint/no-explicit-any": "off",
             "@typescript-eslint/no-require-imports": "off",
             "@typescript-eslint/no-unused-expressions": "off",
