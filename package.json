@@ -851,7 +851,7 @@
     "glob": "^13.0.6",
     "mocha": "^11.8.0",
     "proxyquire": "^2.1.3",
-    "ts-loader": "^9.5.1",
+    "ts-loader": "^9.6.2",
     "ts-node": "^10.9.2",
     "typescript": "^4.8.4",
     "webpack": "^5.109.2",
