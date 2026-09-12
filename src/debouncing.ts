@@ -9,7 +9,7 @@ export class LruCache<K, V extends object> {
 
     constructor(private readonly maxSize: number) {
         if (!Number.isInteger(maxSize) || maxSize < 1) {
-            throw new Error("maxSize must be greater than zero");
+            throw new Error("maxSize must be a positive integer");
         }
     }
 
