@@ -8,7 +8,7 @@ export class LruCache<K, V extends object> {
     private readonly values = new Map<K, V>();
 
     constructor(private readonly maxSize: number) {
-        if (maxSize < 1) {
+        if (!Number.isInteger(maxSize) || maxSize < 1) {
             throw new Error("maxSize must be greater than zero");
         }
     }

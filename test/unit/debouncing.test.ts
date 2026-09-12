@@ -21,4 +21,10 @@ describe("LruCache", () => {
         assert.equal(cache.get("second"), undefined);
         assert.equal(cache.get("third"), third);
     });
+
+    it("rejects invalid capacities", () => {
+        assert.throws(() => new LruCache<string, object>(0));
+        assert.throws(() => new LruCache<string, object>(1.5));
+        assert.throws(() => new LruCache<string, object>(Number.NaN));
+    });
 });
