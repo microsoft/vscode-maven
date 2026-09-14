@@ -20,6 +20,13 @@ export const getWorkspaceFolderStub: { impl: AnyFn } = {
     impl: () => undefined
 };
 
+export const getConfigurationStub: { impl: AnyFn } = {
+    impl: () => ({
+        get: () => undefined,
+        inspect: () => undefined
+    })
+};
+
 export const executeCommandStub: { impl: AnyFn } = {
     impl: async () => undefined
 };
@@ -27,6 +34,10 @@ export const executeCommandStub: { impl: AnyFn } = {
 export function resetStubs(): void {
     showWarningMessageStub.impl = async () => undefined;
     getWorkspaceFolderStub.impl = () => undefined;
+    getConfigurationStub.impl = () => ({
+        get: () => undefined,
+        inspect: () => undefined
+    });
     executeCommandStub.impl = async () => undefined;
 }
 
@@ -38,7 +49,9 @@ export const vscodeMock: Record<string, any> = {
     },
     workspace: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        getWorkspaceFolder: (...args: any[]) => getWorkspaceFolderStub.impl(...args)
+        getWorkspaceFolder: (...args: any[]) => getWorkspaceFolderStub.impl(...args),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        getConfiguration: (...args: any[]) => getConfigurationStub.impl(...args)
     },
     commands: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

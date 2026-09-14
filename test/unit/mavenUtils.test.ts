@@ -10,7 +10,7 @@
  */
 
 import { strict as assert } from "assert";
-import { vscodeMock, showWarningMessageStub, getWorkspaceFolderStub, resetStubs } from "./vscode-mock";
+import { vscodeMock, showWarningMessageStub, getWorkspaceFolderStub, getConfigurationStub, resetStubs } from "./vscode-mock";
 
 // proxyquire's default export is a callable function with helper methods —
 // the default namespace import shape doesn't match, so require() it directly.
@@ -25,34 +25,59 @@ const proxyquire: {
 type SafetyResult = "safe" | "use-default" | "abort";
 type MavenUtilsModule = {
     checkExecutablePathSafety: (p: string) => Promise<SafetyResult>;
+    getMaven: (
+        pomPath?: string,
+        options?: { cwd?: string; env?: NodeJS.ProcessEnv }
+    ) => Promise<string | undefined>;
 };
 
 // Load `mavenUtils` with all heavy imports stubbed. `noCallThru` keeps
 // proxyquire from ever touching the real modules (critical for `vscode`
 // which doesn't resolve at all outside the extension host). `@noCallThru`
 // is applied per-stub so the real modules are never hit.
-function loadMavenUtils(): MavenUtilsModule {
+function loadMavenUtils(options?: {
+    resolvedPath?: string;
+    onResolve?: (command: string, spawnOptions: { cwd?: string; env?: NodeJS.ProcessEnv }) => void;
+}): MavenUtilsModule {
     // proxyquire caches per (filename, stubs) — reset the whole cache so
     // each test gets a fresh module-scoped `confirmedExecutablePaths` Set.
     const pq = proxyquire.noPreserveCache();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stub = (obj: Record<string, any>): Record<string, any> => ({ ...obj, "@noCallThru": true });
-
     return pq("../../src/utils/mavenUtils", {
         "vscode": stub(vscodeMock),
         "../mavenOutputChannel": stub({ mavenOutputChannel: { appendLine: () => undefined, show: () => undefined } }),
         "../mavenTerminal": stub({ mavenTerminal: { runInTerminal: async () => undefined } }),
         "../project/MavenProjectManager": stub({ MavenProjectManager: { get: () => undefined, projects: [] } }),
-        "../Settings": stub({ Settings: { Executable: { path: () => undefined, options: () => "" } } }),
+        "../Settings": stub({
+            Settings: {
+                Executable: {
+                    path: () => undefined,
+                    options: () => "",
+                    optionsValue: () => undefined,
+                    preferMavenWrapper: () => false
+                },
+                getEnvironment: () => ({}),
+                getSettingsFilePath: () => undefined
+            }
+        }),
         "./contextUtils": stub({
             getPathToExtensionRoot: () => "/tmp/ext",
             getPathToTempFolder: () => "/tmp",
             getPathToWorkspaceStorage: () => "/tmp/ws"
         }),
-        "../mavenProblemMatcher": stub({ mavenProblemMatcher: { dispose: () => undefined } }),
+        "../mavenProblemMatcher": stub({ mavenProblemMatcher: { dispose: () => undefined, parseMavenOutput: () => undefined } }),
         "./errorUtils": stub({ MavenNotFoundError: class MavenNotFoundError extends Error {} }),
-        "./historyUtils": stub({ updateLRUCommands: async () => undefined })
+        "./historyUtils": stub({ updateLRUCommands: async () => undefined }),
+        "./spawnExecutable": stub({
+            mergeEnvironment: () => ({}),
+            resolveExecutablePath: (command: string, spawnOptions: { cwd?: string; env?: NodeJS.ProcessEnv }): string | undefined => {
+                options?.onResolve?.(command, spawnOptions);
+                return options?.resolvedPath;
+            },
+            spawnExecutable: () => undefined
+        })
     }) as MavenUtilsModule;
 }
 
@@ -60,6 +85,45 @@ describe("checkExecutablePathSafety — PR #1152", () => {
 
     beforeEach(() => {
         resetStubs();
+    });
+
+    it("keeps PATH lookup in the target shell for terminal execution", async () => {
+        const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
+        const { getMaven } = loadMavenUtils({ resolvedPath: mvnPath });
+
+        assert.equal(await getMaven(), "mvn");
+    });
+
+    it("checks default Maven availability against the supplied execution environment", async () => {
+        const mvnPath = process.platform === "win32" ? "C:\\maven\\bin\\mvn.cmd" : "/usr/bin/mvn";
+        const executionOptions = {
+            cwd: process.platform === "win32" ? "C:\\workspace" : "/workspace",
+            env: { PATH: process.platform === "win32" ? "C:\\custom-maven\\bin" : "/custom-maven/bin" }
+        };
+        let actualCommand: string | undefined;
+        let actualOptions: { cwd?: string; env?: NodeJS.ProcessEnv } | undefined;
+        const { getMaven } = loadMavenUtils({
+            resolvedPath: mvnPath,
+            onResolve: (command, spawnOptions) => {
+                actualCommand = command;
+                actualOptions = spawnOptions;
+            }
+        });
+
+        assert.equal(await getMaven(undefined, executionOptions), "mvn");
+        assert.equal(actualCommand, "mvn");
+        assert.equal(actualOptions, executionOptions);
+    });
+
+    it("keeps an allowed extensionless configured Maven command for execution-time resolution", async () => {
+        getConfigurationStub.impl = () => ({
+            get: () => undefined,
+            inspect: () => ({ globalValue: "mvn" })
+        });
+        showWarningMessageStub.impl = async () => "Allow";
+        const { getMaven } = loadMavenUtils();
+
+        assert.equal(await getMaven(), "mvn");
     });
 
     describe("relative paths (always suspicious)", () => {
