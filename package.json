@@ -851,7 +851,7 @@
     "glob": "^13.0.6",
     "mocha": "^11.8.0",
     "proxyquire": "^2.1.3",
-    "ts-loader": "^9.5.1",
+    "ts-loader": "^9.6.2",
     "ts-node": "^10.9.2",
     "typescript": "^4.8.4",
     "webpack": "^5.109.2",
@@ -872,7 +872,6 @@
     "semver": "^7.6.3",
     "vscode-extension-telemetry-wrapper": "^0.15.2",
     "vscode-languageserver-protocol": "^3.17.5",
-    "vscode-tas-client": "^0.1.84",
     "which": "^1.3.1",
     "xml2js": "^0.6.2"
   },
