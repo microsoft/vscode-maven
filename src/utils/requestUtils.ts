@@ -9,6 +9,7 @@ import * as url from "url";
 import * as vscode from "vscode";
 
 const URL_MAVEN_SEARCH_API = "https://search.maven.org/solrsearch/select";
+const URL_MAVEN_CSC_SEARCH_API = "https://central.sonatype.com/solrsearch/select";
 const URL_MAVEN_CENTRAL_REPO = "https://repo1.maven.org/maven2/";
 const MAVEN_METADATA_FILENAME = "maven-metadata.xml";
 const HTTPS_GET_TIMEOUT_MS = 10_000;
@@ -72,13 +73,14 @@ export async function getArtifacts(keywords: string[], token?: vscode.Cancellati
 
 export async function getVersions(gid: string, aid: string, token?: vscode.CancellationToken): Promise<IVersionMetadata[]> {
     const params = {
-        q: `g:"${gid}" AND a:"${aid}"`,
+        q: `g:${gid} AND a:${aid}`,
         core: "gav",
         rows: 50,
-        wt: "json"
+        wt: "json",
+        sort: "v desc"
     };
     try {
-        const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`, token);
+        const raw: string = await httpsGet(`${URL_MAVEN_CSC_SEARCH_API}?${toQueryString(params)}`, token);
         return _.get(JSON.parse(raw), "response.docs", []);
     } catch (error) {
         if (!isCancellation(error)) {
@@ -91,11 +93,12 @@ export async function getVersions(gid: string, aid: string, token?: vscode.Cance
 export async function getLatestVersion(gid: string, aid: string): Promise<string | undefined> {
     try {
         const params = {
-            q: `g:"${gid}" AND a:"${aid}"`,
+            q: `g:${gid} AND a:${aid}`,
             rows: 1,
-            wt: "json"
+            wt: "json",
+            sort: "v desc"
         };
-        const raw: string = await httpsGet(`${URL_MAVEN_SEARCH_API}?${toQueryString(params)}`);
+        const raw: string = await httpsGet(`${URL_MAVEN_CSC_SEARCH_API}?${toQueryString(params)}`);
         return _.get(JSON.parse(raw), "response.docs[0].latestVersion");
     } catch (error) {
         console.error(error);
