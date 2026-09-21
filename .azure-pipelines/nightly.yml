@@ -51,12 +51,12 @@ extends:
                   versionSpec: 20.x
               - template: /.azure-pipelines/npm-cfs.yml@self
               - task: PowerShell@2
-                displayName: Download JDK 21
+                displayName: Download JDK 25
                 inputs:
                   targetType: 'inline'
                   script: |-
                     New-Item -ItemType Directory -Path "$env:AGENT_TEMPDIRECTORY\downloadjdk"
-                    Invoke-WebRequest -Uri "https://aka.ms/download-jdk/microsoft-jdk-21-windows-x64.zip" -OutFile "$env:AGENT_TEMPDIRECTORY\downloadjdk\microsoft-jdk-21-windows-x64.zip"
+                    Invoke-WebRequest -Uri "https://aka.ms/download-jdk/microsoft-jdk-25-windows-x64.zip" -OutFile "$env:AGENT_TEMPDIRECTORY\downloadjdk\microsoft-jdk-25-windows-x64.zip"
               - task: CmdLine@2
                 displayName: 'npm install'
                 inputs:
@@ -66,13 +66,13 @@ extends:
               - script: npm run compile
                 displayName: 'npm run compile'
               - task: JavaToolInstaller@0
-                displayName: 'Use Java 21'
+                displayName: 'Use Java 25'
                 inputs:
-                  versionSpec: 21
+                  versionSpec: 25
                   jdkArchitectureOption: x64
                   jdkSourceOption: LocalDirectory
-                  jdkFile: $(Agent.TempDirectory)/downloadjdk/microsoft-jdk-21-windows-x64.zip
-                  jdkDestinationDirectory: $(Agent.ToolsDirectory)/ms-jdk21
+                  jdkFile: $(Agent.TempDirectory)/downloadjdk/microsoft-jdk-25-windows-x64.zip
+                  jdkDestinationDirectory: $(Agent.ToolsDirectory)/ms-jdk25
               - script: java --version
                 displayName: 'Check Java installation'
               - script: npm run build-plugin
