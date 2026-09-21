@@ -62,12 +62,20 @@ extends:
             steps:
               - checkout: self
                 fetchTags: false
+              - bash: |
+                  mkdir -p "$(Agent.TempDirectory)/downloadjdk"
+                  curl --fail --location --silent --show-error \
+                    "https://aka.ms/download-jdk/microsoft-jdk-25-linux-x64.tar.gz" \
+                    --output "$(Agent.TempDirectory)/downloadjdk/microsoft-jdk-25-linux-x64.tar.gz"
+                displayName: Download JDK 25
               - task: JavaToolInstaller@0
-                displayName: Use Java 21
+                displayName: Use Java 25
                 inputs:
-                  versionSpec: "21"
+                  versionSpec: "25"
                   jdkArchitectureOption: x64
-                  jdkSourceOption: PreInstalled
+                  jdkSourceOption: LocalDirectory
+                  jdkFile: $(Agent.TempDirectory)/downloadjdk/microsoft-jdk-25-linux-x64.tar.gz
+                  jdkDestinationDirectory: $(Agent.ToolsDirectory)/ms-jdk25
               - task: NodeTool@0
                 displayName: 'Use Node.js 20.x'
                 inputs:
@@ -106,12 +114,20 @@ extends:
                 displayName: 'npm run tslint'
               - script: npm run compile
                 displayName: 'npm run compile'
+              - bash: |
+                  mkdir -p "$(Agent.TempDirectory)/downloadjdk"
+                  curl --fail --location --silent --show-error \
+                    "https://aka.ms/download-jdk/microsoft-jdk-25-linux-x64.tar.gz" \
+                    --output "$(Agent.TempDirectory)/downloadjdk/microsoft-jdk-25-linux-x64.tar.gz"
+                displayName: Download JDK 25
               - task: JavaToolInstaller@0
-                displayName: Use Java 21
+                displayName: Use Java 25
                 inputs:
-                  versionSpec: "21"
+                  versionSpec: "25"
                   jdkArchitectureOption: x64
-                  jdkSourceOption: PreInstalled
+                  jdkSourceOption: LocalDirectory
+                  jdkFile: $(Agent.TempDirectory)/downloadjdk/microsoft-jdk-25-linux-x64.tar.gz
+                  jdkDestinationDirectory: $(Agent.ToolsDirectory)/ms-jdk25
               - script: npm run build-plugin
                 displayName: 'npm run build-plugin'
                 # System.AccessToken is a secret, and Azure Pipelines does not export secret
