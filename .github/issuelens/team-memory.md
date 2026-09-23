@@ -224,7 +224,7 @@ retrieval or separately authorized direct maintenance.
 
 Preserve paired `expected_wiki_repository` and full-SHA `expected_base` from a
 fresh, verified wiki snapshot on every update. Retain atomic Git compare-and-swap
-(CAS); source workflow concurrency is per repository and issue/PR, not a
+(CAS); source workflow concurrency is per repository and issue/push/PR, not a
 cross-repository wiki lock. Other Java tooling repositories can update the same
 shared wiki. On a destination/base mismatch or conflict, stop the prepared write,
 perform a bounded re-read, and recompute only still-authorized changes against
