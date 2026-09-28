@@ -21,6 +21,12 @@ Maven extension for VS Code. It provides a project explorer and shortcuts to exe
 
 For troubleshooting, please refer to the page [HERE](Troubleshooting.md).
 
+## Workspace Trust
+
+Generating dependency trees, effective POMs, and other background Maven data requires a trusted workspace. Use **Manage Workspace Trust** in VS Code to enable these features only for projects you trust. Dependency and effective-POM document links must reference existing files inside the workspace, including after resolving symlinks or junctions. Read-only local repository documents remain available in Restricted Mode.
+
+Before launching Maven for a dependency or effective-POM document, the extension rechecks the POM and workspace paths against their initially resolved locations. Maven still receives the original POM path to preserve linked projects' relative paths and workspace settings. This recheck narrows, but does not eliminate, filesystem races: it cannot atomically bind Maven's later file opens or protect mutable ancestors, wrappers, settings, or other build inputs.
+
 ## Basic Usage
 <details open>
 <summary>Maven Explorer</summary>

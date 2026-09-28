@@ -4,7 +4,7 @@
 import * as vscode from "vscode";
 import { setUserError } from "vscode-extension-telemetry-wrapper";
 import { MavenProject } from "../../explorer/model/MavenProject";
-import { rawDependencyTree } from "../../utils/mavenUtils";
+import { MavenExecutionGuard, rawDependencyTree } from "../../utils/mavenUtils";
 import { dependenciesContentUri } from "../../utils/uiUtils";
 
 export async function showDependenciesHandler(project: MavenProject): Promise<void> {
@@ -12,7 +12,7 @@ export async function showDependenciesHandler(project: MavenProject): Promise<vo
     await vscode.window.showTextDocument(uri);
 }
 
-export async function getDependencyTree(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
+export async function getDependencyTree(pomPathOrMavenProject: string | MavenProject, beforeExecute?: MavenExecutionGuard): Promise<string | undefined> {
     let pomPath: string;
     let name: string;
     if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
@@ -29,7 +29,7 @@ export async function getDependencyTree(pomPathOrMavenProject: string | MavenPro
     const task = async (p: vscode.Progress<{ message?: string }>) => {
         p.report({ message: `Generating Dependency Tree: ${name}` });
         try {
-            const rawData = await rawDependencyTree(pomPath);
+            const rawData = await rawDependencyTree(pomPath, beforeExecute);
             return (rawData);
         } catch (error) {
             setUserError(error);

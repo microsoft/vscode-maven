@@ -8,7 +8,8 @@ import * as vscode from "vscode";
 import { MavenProjectManager } from "../../project/MavenProjectManager";
 import { Settings } from "../../Settings";
 import { getPathToExtensionRoot } from "../../utils/contextUtils";
-import { rawProfileList } from "../../utils/mavenUtils";
+import { UserError } from "../../utils/errorUtils";
+import { EffectivePomOptions, rawProfileList } from "../../utils/mavenUtils";
 import { Utils } from "../../utils/Utils";
 import { EffectivePomProvider } from "../EffectivePomProvider";
 import { MavenExplorerProvider } from "../MavenExplorerProvider";
@@ -195,12 +196,15 @@ export class MavenProject implements ITreeItem {
         await this.ePomProvider.calculateEffectivePom();
     }
 
-    public async getEffectivePom(options?: { cacheOnly?: boolean }): Promise<IEffectivePom> {
-        let res: IEffectivePom = { pomPath: this.pomPath };
+    public async getEffectivePom(options?: EffectivePomOptions): Promise<IEffectivePom | undefined> {
+        let res: IEffectivePom | undefined;
         try {
             res = await this.ePomProvider.getEffectivePom(options);
             this._ePom = res?.ePom;
         } catch (error) {
+            if (error instanceof UserError) {
+                throw error;
+            }
             console.error(error);
             throw new Error("Failed to calculate Effective POM. Please check output window 'Maven for Java' for more details.");
         }

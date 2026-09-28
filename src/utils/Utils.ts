@@ -20,7 +20,7 @@ import { MavenProjectManager } from "../project/MavenProjectManager";
 import { getExtensionVersion, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { MavenNotFoundError } from "./errorUtils";
 import { getLRUCommands, ICommandHistoryEntry } from "./historyUtils";
-import { executeInTerminal, getMaven, pluginDescription, rawEffectivePom } from "./mavenUtils";
+import { executeInTerminal, getMaven, MavenExecutionGuard, pluginDescription, rawEffectivePom } from "./mavenUtils";
 import { effectivePomContentUri, selectProjectIfNecessary } from "./uiUtils";
 
 export class Utils {
@@ -129,7 +129,7 @@ export class Utils {
         await window.showTextDocument(uri);
     }
 
-    public static async getEffectivePom(pomPathOrMavenProject: string | MavenProject): Promise<string | undefined> {
+    public static async getEffectivePom(pomPathOrMavenProject: string | MavenProject, beforeExecute?: MavenExecutionGuard): Promise<string | undefined> {
         let pomPath: string;
         let name: string;
         if (typeof pomPathOrMavenProject === "object" && pomPathOrMavenProject instanceof MavenProject) {
@@ -145,7 +145,7 @@ export class Utils {
         const task = async (p: Progress<{ message?: string }>) => {
             p.report({ message: `Generating Effective POM: ${name}` });
             try {
-                const ret: string | undefined = await rawEffectivePom(pomPath);
+                const ret: string | undefined = await rawEffectivePom(pomPath, { beforeExecute });
                 return (ret ? ret : "");
             } catch (error) {
                 setUserError(error);
