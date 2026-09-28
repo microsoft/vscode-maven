@@ -14,7 +14,7 @@ import { MavenProjectManager } from "../project/MavenProjectManager";
 import { Settings } from "../Settings";
 import { getPathToExtensionRoot, getPathToTempFolder, getPathToWorkspaceStorage } from "./contextUtils";
 import { mavenProblemMatcher } from "../mavenProblemMatcher";
-import { MavenNotFoundError } from "./errorUtils";
+import { MavenNotFoundError, UserError } from "./errorUtils";
 import { updateLRUCommands } from "./historyUtils";
 import { mergeEnvironment, resolveExecutablePath, spawnExecutable } from "./spawnExecutable";
 
@@ -76,7 +76,14 @@ export async function rawProfileList(pomPath: string): Promise<string | undefine
     return await readFileIfExists(profileListPath);
 }
 
+export function ensureWorkspaceTrusted(): void {
+    if (!vscode.workspace.isTrusted) {
+        throw new UserError("Maven execution requires a trusted workspace. Use Manage Workspace Trust to enable this feature.");
+    }
+}
+
 async function executeInBackground(mvnArgs: readonly string[], pomfile?: string): Promise<unknown> {
+    ensureWorkspaceTrusted();
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const cwd: string | undefined = workspaceFolder?.uri.fsPath ?? (pomfile ? path.dirname(pomfile) : undefined);
     const spawnOptions: child_process.SpawnOptions = {
@@ -99,6 +106,7 @@ async function executeInBackground(mvnArgs: readonly string[], pomfile?: string)
     if (pomfile) {
         args.push("-f", pomfile);
     }
+    ensureWorkspaceTrusted();
     return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
         mavenOutputChannel.appendLine(`Spawn ${JSON.stringify({ command: mvn, args })}`);
         const proc: child_process.ChildProcess = spawnExecutable(mvn, args, spawnOptions);

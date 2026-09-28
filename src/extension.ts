@@ -141,7 +141,7 @@ async function doActivate(_operationId: string, context: vscode.ExtensionContext
     registerPomFileAuthoringHelpers(context);
     // dependency
     registerCommand(context, "maven.project.addDependency", addDependencyHandler);
-    registerCommand(context, "maven.project.showDependencies", showDependenciesHandler);
+    registerCommandRequiringTrust(context, "maven.project.showDependencies", showDependenciesHandler);
     registerCommand(context, "maven.project.excludeDependency", excludeDependencyHandler);
     registerCommand(context, "maven.project.setDependencyVersion", setDependencyVersionHandler);
     registerCommand(context, "maven.project.goToDefinition", jumpToDefinitionHandler);

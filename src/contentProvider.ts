@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+import * as fs from "fs-extra";
+import * as path from "path";
 import * as vscode from "vscode";
 import { IEffectivePom } from "./explorer/model/IEffectivePom";
 import { MavenProject } from "./explorer/model/MavenProject";
 import { getDependencyTree } from "./handlers/dependency/showDependenciesHandler";
 import { MavenProjectManager } from "./project/MavenProjectManager";
+import { UserError } from "./utils/errorUtils";
+import { ensureWorkspaceTrusted } from "./utils/mavenUtils";
 import { Utils } from "./utils/Utils";
 
 /**
@@ -34,6 +38,9 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
         }
 
         const pomPath = uri.query;
+        if (uri.authority === "dependencies" || uri.authority === "effective-pom") {
+            await this.validatePomPath(pomPath);
+        }
         switch (uri.authority) {
             case "dependencies":
                 return getDependencyTree(pomPath);
@@ -53,6 +60,27 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
             default:
         }
         return undefined;
+    }
+
+    private async validatePomPath(pomPath: string): Promise<void> {
+        ensureWorkspaceTrusted();
+        const folder = path.isAbsolute(pomPath) ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomPath)) : undefined;
+        if (!folder) {
+            throw new UserError("Maven content requires an absolute POM path inside the current workspace.");
+        }
+
+        const [canonicalPomPath, canonicalFolderPath] = await Promise.all([
+            fs.realpath(pomPath),
+            fs.realpath(folder.uri.fsPath)
+        ]);
+        const relativePath = path.relative(canonicalFolderPath, canonicalPomPath);
+        if (relativePath === ".." || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath)) {
+            throw new UserError("The requested POM resolves outside its workspace folder.");
+        }
+        if (!(await fs.stat(canonicalPomPath)).isFile()) {
+            throw new UserError("The requested POM is not a file.");
+        }
+        ensureWorkspaceTrusted();
     }
 }
 
