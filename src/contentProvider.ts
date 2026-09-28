@@ -9,7 +9,7 @@ import { MavenProject } from "./explorer/model/MavenProject";
 import { getDependencyTree } from "./handlers/dependency/showDependenciesHandler";
 import { MavenProjectManager } from "./project/MavenProjectManager";
 import { UserError } from "./utils/errorUtils";
-import { ensureWorkspaceTrusted } from "./utils/mavenUtils";
+import { ensureWorkspaceTrusted, MavenExecutionGuard } from "./utils/mavenUtils";
 import { Utils } from "./utils/Utils";
 
 /**
@@ -38,19 +38,19 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
         }
 
         const pomPath = uri.query;
-        if (uri.authority === "dependencies" || uri.authority === "effective-pom") {
-            await this.validatePomPath(pomPath);
-        }
+        const beforeExecute = uri.authority === "dependencies" || uri.authority === "effective-pom"
+            ? await this.validatePomPath(pomPath)
+            : undefined;
         switch (uri.authority) {
             case "dependencies":
-                return getDependencyTree(pomPath);
+                return getDependencyTree(pomPath, beforeExecute);
             case "effective-pom": {
                 const project: MavenProject | undefined = MavenProjectManager.get(pomPath);
                 if (project) {
-                    const effectivePom: IEffectivePom = await project.getEffectivePom();
-                    return effectivePom.ePomString;
+                    const effectivePom: IEffectivePom | undefined = await project.getEffectivePom({ beforeExecute });
+                    return effectivePom?.ePomString;
                 } else {
-                    return Utils.getEffectivePom(pomPath);
+                    return Utils.getEffectivePom(pomPath, beforeExecute);
                 }
             }
             case "local-repository":{
@@ -62,25 +62,37 @@ class MavenContentProvider implements vscode.TextDocumentContentProvider {
         return undefined;
     }
 
-    private async validatePomPath(pomPath: string): Promise<void> {
-        ensureWorkspaceTrusted();
-        const folder = path.isAbsolute(pomPath) ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomPath)) : undefined;
-        if (!folder) {
-            throw new UserError("Maven content requires an absolute POM path inside the current workspace.");
-        }
+    private async validatePomPath(pomPath: string): Promise<MavenExecutionGuard> {
+        const resolvePomPath = async () => {
+            ensureWorkspaceTrusted();
+            const folder = path.isAbsolute(pomPath) ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomPath)) : undefined;
+            if (!folder) {
+                throw new UserError("Maven content requires an absolute POM path inside the current workspace.");
+            }
 
-        const [canonicalPomPath, canonicalFolderPath] = await Promise.all([
-            fs.realpath(pomPath),
-            fs.realpath(folder.uri.fsPath)
-        ]);
-        const relativePath = path.relative(canonicalFolderPath, canonicalPomPath);
-        if (relativePath === ".." || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath)) {
-            throw new UserError("The requested POM resolves outside its workspace folder.");
-        }
-        if (!(await fs.stat(canonicalPomPath)).isFile()) {
-            throw new UserError("The requested POM is not a file.");
-        }
-        ensureWorkspaceTrusted();
+            const [canonicalPomPath, canonicalFolderPath] = await Promise.all([
+                fs.realpath(pomPath),
+                fs.realpath(folder.uri.fsPath)
+            ]);
+            const relativePath = path.relative(canonicalFolderPath, canonicalPomPath);
+            if (relativePath === ".." || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath)) {
+                throw new UserError("The requested POM resolves outside its workspace folder.");
+            }
+            if (!(await fs.stat(canonicalPomPath)).isFile()) {
+                throw new UserError("The requested POM is not a file.");
+            }
+            ensureWorkspaceTrusted();
+            return { canonicalPomPath, canonicalFolderPath };
+        };
+
+        const initial = await resolvePomPath();
+        return async () => {
+            const current = await resolvePomPath();
+            if (path.relative(initial.canonicalPomPath, current.canonicalPomPath) !== ""
+                || path.relative(initial.canonicalFolderPath, current.canonicalFolderPath) !== "") {
+                throw new UserError("The requested POM or its workspace folder changed. Reopen the Maven document to try again.");
+            }
+        };
     }
 }
 

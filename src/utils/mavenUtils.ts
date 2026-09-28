@@ -22,6 +22,13 @@ import { mergeEnvironment, resolveExecutablePath, spawnExecutable } from "./spaw
 const GOAL_DEPENDENCY_GRAPH = "com.github.ferstl:depgraph-maven-plugin:4.0.3:graph";
 const OPTIONS_DEPENDENCY_GRAPH = ["-DgraphFormat=text", "-DshowDuplicates", "-DshowConflicts", "-DshowVersions", "-DshowGroupIds"];
 
+export type MavenExecutionGuard = () => Promise<void>;
+
+export interface EffectivePomOptions {
+    cacheOnly?: boolean;
+    beforeExecute?: MavenExecutionGuard;
+}
+
 /**
  * Get effective pom of a Maven project.
  *
@@ -29,7 +36,7 @@ const OPTIONS_DEPENDENCY_GRAPH = ["-DgraphFormat=text", "-DshowDuplicates", "-Ds
  * @param options specify the way you want to get effective pom. By default it 1) reads from cache if exists 2) calculate if not.
  * @returns full content of effective pom
  */
-export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: boolean}): Promise<string | undefined> {
+export async function rawEffectivePom(pomPath: string, options?: EffectivePomOptions): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
     const epomPath = `${outputPath}.epom`;
     const mtimePath = `${outputPath}.mtime`;
@@ -41,12 +48,12 @@ export async function rawEffectivePom(pomPath: string, options?: {cacheOnly?: bo
         return await readFileIfExists(epomPath);
     }
 
-    await executeInBackground(["-B", `-Doutput=${epomPath}`, "help:effective-pom"], pomPath);
+    await executeInBackground(["-B", `-Doutput=${epomPath}`, "help:effective-pom"], pomPath, options?.beforeExecute);
     await fse.writeFile(mtimePath, mtimeMs);
     return await readFileIfExists(epomPath);
 }
 
-export async function rawDependencyTree(pomPath: string): Promise<string | undefined> {
+export async function rawDependencyTree(pomPath: string, beforeExecute?: MavenExecutionGuard): Promise<string | undefined> {
     const outputPath: string = getTempFolder(pomPath);
     const dependencyGraphPath = `${outputPath}.deps.txt`;
     const outputDirectory: string = path.dirname(dependencyGraphPath);
@@ -58,7 +65,7 @@ export async function rawDependencyTree(pomPath: string): Promise<string | undef
         `-DoutputDirectory=${outputDirectory}`,
         `-DoutputFileName=${outputFileName}`,
         GOAL_DEPENDENCY_GRAPH
-    ], pomPath);
+    ], pomPath, beforeExecute);
     return await readFileIfExists(path.join(outputDirectory, outputFileName));
 }
 
@@ -82,7 +89,7 @@ export function ensureWorkspaceTrusted(): void {
     }
 }
 
-async function executeInBackground(mvnArgs: readonly string[], pomfile?: string): Promise<unknown> {
+async function executeInBackground(mvnArgs: readonly string[], pomfile?: string, beforeExecute?: MavenExecutionGuard): Promise<unknown> {
     ensureWorkspaceTrusted();
     const workspaceFolder: vscode.WorkspaceFolder | undefined = pomfile ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(pomfile)) : undefined;
     const cwd: string | undefined = workspaceFolder?.uri.fsPath ?? (pomfile ? path.dirname(pomfile) : undefined);
@@ -105,6 +112,9 @@ async function executeInBackground(mvnArgs: readonly string[], pomfile?: string)
     args.push(...getMavenExecutableOptionArgs(userArgs));
     if (pomfile) {
         args.push("-f", pomfile);
+    }
+    if (beforeExecute) {
+        await beforeExecute();
     }
     ensureWorkspaceTrusted();
     return new Promise<unknown>((resolve: (value: unknown) => void, reject: (e: Error) => void): void => {
