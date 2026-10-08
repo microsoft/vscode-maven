@@ -1,6 +1,20 @@
 # Change Log
 All notable changes to the "vscode-maven" extension will be documented in this file.
 
+## 0.46.0
+### Added
+- Support per-command environment variables when invoking `maven.goal.custom`. [#1179](https://github.com/microsoft/vscode-maven/pull/1179)
+
+### Fixed
+- Apply custom environment variables before each Maven terminal command, including when terminals are reused or shell startup files override the initial environment. [#1179](https://github.com/microsoft/vscode-maven/pull/1179)
+- Handle Maven paths and quoted options correctly in archetype generation and background commands. [#1164](https://github.com/microsoft/vscode-maven/pull/1164) [#1201](https://github.com/microsoft/vscode-maven/pull/1201)
+- Avoid stalled POM completion by timing out Maven Central requests and cancelling superseded lookups. [#1170](https://github.com/microsoft/vscode-maven/pull/1170)
+- Require workspace trust for background Maven execution and validate dependency and effective-POM document paths; preserve read-only local-repository access in Restricted Mode. [#1221](https://github.com/microsoft/vscode-maven/pull/1221)
+
+### Changed
+- Run lifecycle phases directly from Maven Explorer actions without opening the generic goal picker. [#1162](https://github.com/microsoft/vscode-maven/pull/1162)
+- Remove the deprecated `maven.terminal.useJavaHome` setting and `java.home` fallback; configure `JAVA_HOME` through `maven.terminal.customEnv`. [#1165](https://github.com/microsoft/vscode-maven/pull/1165) [#1167](https://github.com/microsoft/vscode-maven/pull/1167)
+
 ## 0.45.3
 ### Fixed
 - Improve workspace configuration handling for Maven executable settings [#1152](https://github.com/microsoft/vscode-maven/pull/1152)
