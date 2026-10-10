@@ -19,8 +19,8 @@ with the operation-scoped permissions needed for source reads and the requested
 wiki operation. The same installation may cover both repositories, but access to
 one does not establish access to the other. Destination Contents access (read for
 retrieval, write for separately authorized maintenance) is separate from
-source-user authorization and the coordinator's operation-scoped source-read
-and `id-token: write` permissions.
+source-user authorization and the source workflow token's `contents: read`,
+`pull-requests: read`, and `id-token: write` permissions.
 
 The App's `Contents: write` is a **broad repository-content write capability**,
 not intrinsically wiki-only. The IssueLens wiki tool surface and this job's
@@ -35,50 +35,6 @@ maintenance. Never copy private/internal-source information into the public
 shared wiki. Unknown visibility or authorization is a limitation, not permission.
 Broader App access, related search results, or existing wiki citations do not
 authorize private-source retrieval or disclosure.
-
-## Queued post-merge setup
-
-The [source workflow](../workflows/team-memory-post-merge.yml) only dispatches to
-`microsoft/vscode-java-pack`'s `team-memory-coordinator.yml` on target ref `main`,
-independent of the source ref. Keep this source workflow path: central preflight
-validates it. Eligible runs are non-created, non-deleted, non-forced pushes to
-Maven's default branch in the actual `microsoft/vscode-maven` repository, with
-matching workflow/head SHAs. The existing source variable
-`ISSUELENS_TEAM_MEMORY_ENABLED` must equal `true`; central variables do not
-enable a source.
-
-Before merging while that opt-in is `true`, configure the new caller variable
-`ISSUELENS_DISPATCH_APP_CLIENT_ID` and secret
-`ISSUELENS_DISPATCH_APP_PRIVATE_KEY` for a dedicated dispatch App installed only
-on `microsoft/vscode-java-pack`, with Contents read and Actions write. The pinned
-`actions/create-github-app-token` v3 action mints a token restricted to that
-repository and those permissions. Maven's `GITHUB_TOKEN` cannot dispatch across
-repositories; this job grants it no permissions. Do not reuse the hosted
-IssueLens App key or central source-read App credentials for dispatch.
-
-Separately, Java Pack needs `ISSUELENS_SOURCE_READ_APP_CLIENT_ID` and
-`ISSUELENS_SOURCE_READ_APP_PRIVATE_KEY` secrets for its source-read App, installed
-on the selected source repositories including `microsoft/vscode-maven`, with
-Actions, Contents, and Pull requests read. Both caller and central credential
-sets are rollout prerequisites. A successful own-repository coordinator run
-skips external-source authentication and does not prove this setup is ready.
-Merging with the source opt-in already `true` switches eligible pushes to
-queue-only dispatch; missing credentials fail without a direct-invocation
-fallback. This migration does not change live variables, secrets, or issue
-triage.
-
-The standalone dispatcher sends only five string inputs: `source_repository`,
-`source_run_id`, `source_run_attempt`, `push_before`, and `push_after`. Central
-validation verifies the source run/head and authorizes ancestor reconciliation;
-`push_before` is not attested original-event provenance. The coordinator owns
-the shared queue, source/range validation, agent invocation, and final wiki
-receipts. Dispatch acceptance does not confirm queue admission or maintenance
-completion. There is no automatic dispatch retry; if the POST outcome is
-unknown, inspect central runs before retrying.
-
-For manual merged-PR maintenance, use **Run workflow** on Java Pack's coordinator
-with `source_repository: microsoft/vscode-maven` and `pull_request_number`.
-The source workflow has no manual trigger or local maintenance path.
 
 ## Architecture basis
 
@@ -268,12 +224,11 @@ retrieval or separately authorized direct maintenance.
 
 Preserve paired `expected_wiki_repository` and full-SHA `expected_base` from a
 fresh, verified wiki snapshot on every update. Retain atomic Git compare-and-swap
-(CAS); Java Pack's coordinator serializes queued post-merge maintenance across
-sources, but is not a lock for writers outside that queue. Other Java tooling
-repositories can update the same shared wiki. On a destination/base mismatch or
-conflict, stop the prepared write, perform a bounded re-read, and recompute only
-still-authorized changes against the verified snapshot. If authorization,
-destination, or provenance cannot be
+(CAS); source workflow concurrency is per repository and issue/push/PR, not a
+cross-repository wiki lock. Other Java tooling repositories can update the same
+shared wiki. On a destination/base mismatch or conflict, stop the prepared write,
+perform a bounded re-read, and recompute only still-authorized changes against
+the verified snapshot. If authorization, destination, or provenance cannot be
 re-established, report failure. Never force a write, drop the expected base,
 silently fall back to another destination, or carry stale prepared edits across
 snapshots. A changed or inaccessible mapping must not become a successful update.
