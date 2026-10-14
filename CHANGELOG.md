@@ -7,13 +7,17 @@ All notable changes to the "vscode-maven" extension will be documented in this f
 
 ### Fixed
 - Apply custom environment variables before each Maven terminal command, including when terminals are reused or shell startup files override the initial environment. [#1179](https://github.com/microsoft/vscode-maven/pull/1179)
-- Handle Maven paths and quoted options correctly in archetype generation and background commands. [#1164](https://github.com/microsoft/vscode-maven/pull/1164) [#1201](https://github.com/microsoft/vscode-maven/pull/1201)
+- Handle Maven paths and quoted options correctly when generating projects from archetypes. [#1164](https://github.com/microsoft/vscode-maven/pull/1164)
+- Execute background Maven commands with explicit arguments instead of shell interpretation, improving safety and handling of paths with spaces and quoted options. [#1201](https://github.com/microsoft/vscode-maven/pull/1201)
 - Avoid stalled POM completion by timing out Maven Central requests and cancelling superseded lookups. [#1170](https://github.com/microsoft/vscode-maven/pull/1170)
 - Require workspace trust for background Maven execution and validate dependency and effective-POM document paths; preserve read-only local-repository access in Restricted Mode. [#1221](https://github.com/microsoft/vscode-maven/pull/1221)
+- Update the telemetry wrapper to remove its vulnerable `uuid` dependency. [#1158](https://github.com/microsoft/vscode-maven/pull/1158)
 
 ### Changed
 - Run lifecycle phases directly from Maven Explorer actions without opening the generic goal picker. [#1162](https://github.com/microsoft/vscode-maven/pull/1162)
-- Remove the deprecated `maven.terminal.useJavaHome` setting and `java.home` fallback; configure `JAVA_HOME` through `maven.terminal.customEnv`. [#1165](https://github.com/microsoft/vscode-maven/pull/1165) [#1167](https://github.com/microsoft/vscode-maven/pull/1167)
+- Document how to select a JDK for Maven through `maven.terminal.customEnv` and log the configured `JAVA_HOME` source in the Maven for Java output channel. [#1165](https://github.com/microsoft/vscode-maven/pull/1165)
+- **Configuration migration:** Remove the deprecated `maven.terminal.useJavaHome` setting and `java.home` fallback. Users relying on these settings must add a `JAVA_HOME` entry to `maven.terminal.customEnv` to keep selecting their preferred JDK for Maven. [#1167](https://github.com/microsoft/vscode-maven/pull/1167)
+- Replace the `lru-cache` dependency while preserving bounded cache behavior and compatibility with the minimum supported VS Code runtime. [#1212](https://github.com/microsoft/vscode-maven/pull/1212)
 
 ## 0.45.3
 ### Fixed
