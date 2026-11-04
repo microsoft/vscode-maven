@@ -875,6 +875,6 @@
     "xml2js": "^0.6.2"
   },
   "overrides": {
-    "serialize-javascript": ">=7.0.5"
+    "serialize-javascript": ">=7.1.4"
   }
 }
